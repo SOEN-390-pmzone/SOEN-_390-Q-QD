@@ -1,3 +1,4 @@
+
 import React from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { StyleSheet,View ,Text,Image} from 'react-native';
@@ -32,4 +33,3 @@ const styles=StyleSheet.create({
     }
 });
 export default Footer
-

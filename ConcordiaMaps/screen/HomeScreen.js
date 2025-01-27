@@ -1,40 +1,33 @@
 import React from 'react';
-import { StyleSheet,View ,Text,Image} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, StyleSheet } from 'react-native';
 import MapView from 'react-native-maps';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
-
+import NavBar from '../components/NavBar'; 
+import Header from '../components/Header'; 
+import Footer from '../components/Footer'; +
 
 function HomeScreen() {
-    return (
-        <View style={styles.container}>
-        <SafeAreaView >   
-        <Header/>
- 
-        {/* <MapView/> */}
-        <View style={styles.map}></View>
-        <Footer></Footer>
+  return (
+    <View style={styles.container}>
+      {/* Add Header and NavBar in the HomeScreen */}
+      <Header />
+      <NavBar />  {/* This is the navigation bar */}
 
-        </SafeAreaView>
+      {/* Map view */}
+      <MapView style={styles.map} />
 
-        </View>
-
-        
-    );
+      
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-    container:{  
-    width: "100%",
-    backgroundColor: '#912338',
-    
+  container: {
+    flex: 1,
+    backgroundColor: '#912338', 
   },
-    map:{
-        backgroundColor:"black",
-        height:"100%"
-    }
-})
-  
-export default HomeScreen;
+  map: {
+    flex: 1,  
+  },
+});
 
+export default HomeScreen;
