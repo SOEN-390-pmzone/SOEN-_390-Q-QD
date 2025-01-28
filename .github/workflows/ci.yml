@@ -1,24 +1,22 @@
 name: ci
-on : 
-    push : 
-        branches: ["*"]
-    pull_request:
-        branches: ["*"]
-
+on:
+  push:
+    branches: ["*"]
+  pull_request:
+    branches: ["*"]
 
 jobs:
-    build:
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v2
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-            - name: Install Dependencies
-              run: npm install
-            
-            - name: Lint Code
-              run: npm run lint
-            
-            - name: Format Code
-              run: npx prettier --check .
-            
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Lint Code
+        run: npm run lint
+
+      - name: Format Code
+        run: npx prettier --check .
