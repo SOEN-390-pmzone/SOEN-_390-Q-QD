@@ -1,7 +1,8 @@
 
 import React from 'react'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import { StyleSheet,View ,Text,Image} from 'react-native';
+// import { SafeAreaView } from 'react-native-safe-area-context'
+import { StyleSheet,View ,Text} from 'react-native';
+// import {Image} from 'react-native';
 
 function Footer() {
   return (
@@ -27,7 +28,7 @@ const styles=StyleSheet.create({
             fontFamily:"Times New Roman",
             justifyContent:"center",
             fontSize:25,
-            justifyContent:"center",
+
             
         
     }
