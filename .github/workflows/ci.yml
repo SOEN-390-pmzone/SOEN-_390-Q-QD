@@ -12,3 +12,13 @@ jobs:
         steps:
             - name: Checkout code
               uses: actions/checkout@v2
+
+            - name: Install Dependencies
+              run: npm install
+            
+            - name: Lint Code
+              run: npm run lint
+            
+            - name: Format Code
+              run: npx prettier --check .
+            
