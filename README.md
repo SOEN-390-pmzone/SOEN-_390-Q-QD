@@ -26,12 +26,20 @@ The app consists of 6 features, implemented throughout a 3-month semester, while
 The project uses React Native to create a cross-platform app and uses the Expo Go app to demonstrate complete mobile functionality via a QR code.
 
 ## Running the project
-- **For Android users**: install the Expo Go app on the Google Play Store
+- Install the Expo Go app on your mobile device
 - Create an Expo account or log in to your existing account
-- With this repository cloned, go to the project's directory in the terminal and run the following commands
+- With this repository cloned, go to the `ConcordiaMaps` directory of the project in the terminal and run the following commands
 ```
-npx expo start -c
+npm i expo-cli
 npx expo start
+```
+- If the terminal returns errors, run the following command in your general directory:
+```
+npm install --global @expo/ngrok@^4.1.0
+```
+Then, run the following command inside of the `ConcordiaMaps` directory:
+```
+npx expo start -c --tunnel
 ```
 - Scan the generated QR code in the terminal with the Expo Go app for Android or the Camera app for iOS
 
