@@ -25,7 +25,6 @@ const styles = StyleSheet.create({
     fontFamily: "Times New Roman",
     justifyContent: "center",
     fontSize: 10,
-    justifyContent: "center",
   },
   header: {
     marginTop: 40,
