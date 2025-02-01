@@ -12,17 +12,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Change Directory
-        run: cd ConcordiaMaps
-
-
       - name: Install Dependencies
+        working-directory: ./ConcordiaMaps
         run: npm install
 
       - name: Lint Code
+        working-directory: ./ConcordiaMaps
         run: npm run lint
 
       - name: Format Code
+        working-directory: ./ConcordiaMaps
         run: npx prettier --check .
 
   test:
@@ -30,17 +29,17 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-
-      - name: Change Directory
-        run: cd ConcordiaMaps
         
       - name: Install Dependencies
+        working-directory: ./ConcordiaMaps
         run: npm install
 
       - name: Lint Code
+        working-directory: ./ConcordiaMaps
         run: npm run lint
 
       - name: Format Code
+        working-directory: ./ConcordiaMaps
         run: npx prettier --check .
 
   deploy:
