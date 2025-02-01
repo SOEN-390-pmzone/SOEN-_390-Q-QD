@@ -5,6 +5,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import HomeScreen from "./screen/HomeScreen";
 import styles from "./styles";
 
+
 const Stack = createNativeStackNavigator();
 
 export default function App() {

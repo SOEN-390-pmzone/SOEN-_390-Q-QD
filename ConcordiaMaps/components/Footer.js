@@ -10,5 +10,4 @@ function Footer() {
     </View>
   );
 }
-
 export default Footer;

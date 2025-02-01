@@ -2,6 +2,7 @@ import React from "react";
 import { SafeAreaView, StyleSheet, View, Text, Image } from "react-native";
 import styles from "../styles";
 
+
 function Header() {
   return (
     <SafeAreaView>

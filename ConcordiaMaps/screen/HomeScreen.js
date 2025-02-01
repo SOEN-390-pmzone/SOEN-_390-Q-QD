@@ -6,6 +6,7 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import styles from "../styles";
 
+
 function HomeScreen() {
   return (
     <View style={styles.container}>
@@ -19,5 +20,4 @@ function HomeScreen() {
     </View>
   );
 }
-
 export default HomeScreen;
