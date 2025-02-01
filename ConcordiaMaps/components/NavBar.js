@@ -6,7 +6,6 @@ function NavBar() {
   const [isOpen, setIsOpen] = useState(false);
   const animation = useState(new Animated.Value(0))[0];
 
-
   const toggleMenu = () => {
     const toValue = isOpen ? 0 : 1;
 
