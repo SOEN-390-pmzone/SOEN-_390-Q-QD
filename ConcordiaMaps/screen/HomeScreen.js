@@ -1,8 +1,11 @@
 import React from "react";
-import { View, StyleSheet } from "react-native";
+import { View } from "react-native";
 import MapView from "react-native-maps";
 import NavBar from "../components/NavBar";
 import Header from "../components/Header";
+import Footer from "../components/Footer";
+import styles from "../styles";
+
 function HomeScreen() {
   return (
     <View style={styles.container}>
@@ -11,18 +14,9 @@ function HomeScreen() {
       <NavBar /> {/* This is the navigation bar */}
       {/* Map view */}
       <MapView style={styles.map} />
+      {/* Footer */}
+      <Footer />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#912338",
-  },
-  map: {
-    flex: 1,
-  },
-});
-
 export default HomeScreen;
