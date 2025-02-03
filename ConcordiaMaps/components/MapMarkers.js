@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 import React from "react";
 import { Marker, Callout } from "react-native-maps";
 import { Text, View, Image, StyleSheet } from "react-native";
@@ -50,3 +51,6 @@ const styles = StyleSheet.create({
 });
 
 export default MapMarkers;
+=======
+ConcordiaMaps/components/MapMarkers.js
+>>>>>>> Stashed changes
