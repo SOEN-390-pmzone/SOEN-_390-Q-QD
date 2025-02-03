@@ -252,8 +252,8 @@ export const Building = [
     {
       name: "Administration Building",
       coordinate: {
-        latitude: 45.458163,
-        longitude: -73.639977,
+        latitude: 45.457772,
+        longitude: -73.639901,
       },
     },
     {
@@ -263,6 +263,138 @@ export const Building = [
         longitude: -73.639339,
       },
     },
-
+    {
+      name: "BH Annex",
+      coordinate: {
+        latitude: 45.459729,
+        longitude: -73.639102,
+      },
+    },
+    {
+      name: "Central Building",
+      coordinate: {
+        latitude: 45.458271,
+        longitude: -73.64045,
+      },
+    },
+    {
+      name: "Communication Studies and Journalism Building",
+      coordinate: {
+        latitude: 45.457254,
+        longitude: -73.640404,
+      },
+    },
+    {
+      name: "Stinger Dome",
+      coordinate: {
+        latitude: 45.457045,
+        longitude: -73.638223,
+      },
+    },
+    {
+      name: "F.C. Smith Building",
+      coordinate: {
+        latitude: 45.458389,
+        longitude: -73.639291,
+      },
+    },
+    {
+      name: "Centre for Structural and Functional Genomics",
+      coordinate: {
+        latitude: 45.456849,
+        longitude: -73.640396,
+      },
+    },
+    {
+      name: "Hingston Hall, wing HA",
+      coordinate: {
+        latitude: 45.459471,
+        longitude: -73.641211,
+      },
+    },
+    {
+      name: "Hingston Hall, wing HB",
+      coordinate: {
+        latitude: 45.459162,
+        longitude: -73.641962,
+      },
+    },
+    {
+      name: "Hingston Hall, wing HB",
+      coordinate: {
+        latitude: 45.459162,
+        longitude: -73.641962,
+      },
+    },
+    {
+      name: "Hingston Hall, wing HC",
+      coordinate: {
+        latitude: 45.458504,
+        longitude: -73.643225,
+      },
+    },
+    {
+      name: "Jesuit Residence",
+      coordinate: {
+        latitude: 45.458504,
+        longitude: -73.643225,
+      },
+    },
+    {
+      name: "Perform Center",
+      coordinate: {
+        latitude: 45.45697,
+        longitude: -73.637255,
+      },
+    },
+    {
+      name: "Physical Service",
+      coordinate: {
+        latitude: 45.459694,
+        longitude: -73.639858,
+      },
+    },
+    {
+      name: "Psychology Building",
+      coordinate: {
+        latitude: 45.45905,
+        longitude: -73.640454,
+      },
+    },
+    {
+      name: "Recreational and Athletics",
+      coordinate: {
+        latitude: 45.456677,
+        longitude: -73.637523,
+      },
+    },
+    {
+      name: "Loyola Jesuit Hall and Conference Center",
+      coordinate: {
+        latitude: 45.458551,
+        longitude: -73.641016,
+      },
+    },
+    {
+      name: "Student Center",
+      coordinate: {
+        latitude: 45.459137,
+        longitude: -73.639203,
+      },
+    },
+    {
+      name: "Richard J. Renaud Science Complex",
+      coordinate: {
+        latitude: 45.457567,
+        longitude: -73.641739,
+      },
+    },
+    {
+      name: "Vanier Library",
+      coordinate: {
+        latitude: 45.459058,
+        longitude: -73.638458,
+      },
+    },
 ];
 
