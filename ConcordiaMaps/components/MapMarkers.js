@@ -50,6 +50,8 @@ const styles = StyleSheet.create({
   },
 });
 
+// For the workflow
+
 MapMarkers.propTypes = {
   markers: PropTypes.arrayOf(
     PropTypes.shape({
