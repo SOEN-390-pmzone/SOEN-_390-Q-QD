@@ -1,4 +1,5 @@
 export const Building = [
+
   // SGW Campus buildings latitude and longitude
 
   {
@@ -12,42 +13,48 @@ export const Building = [
     name: "B Annex",
     coordinate: {
       latitude: 45.49791,
-      longitude: -73.579441,
+      longitude: -73.579441
+      ,
     },
   },
   {
     name: "CL Annex",
     coordinate: {
       latitude: 45.494228,
-      longitude: -73.579299,
+      longitude: -73.579299
+      ,
     },
   },
   {
     name: "CI Annex",
     coordinate: {
       latitude: 45.497438,
-      longitude: -73.579946,
+      longitude: -73.579946
+      ,
     },
   },
   {
     name: "D Annex",
     coordinate: {
       latitude: 45.497834,
-      longitude: -73.579282,
+      longitude: -73.579282
+      ,
     },
   },
   {
     name: "EN Annex",
     coordinate: {
       latitude: 45.496864,
-      longitude: -73.579561,
+      longitude: -73.579561
+      ,
     },
   },
   {
     name: "ER Building",
     coordinate: {
       latitude: 45.496362,
-      longitude: -73.580212,
+      longitude: -73.580212
+      ,
     },
   },
   {
@@ -61,49 +68,56 @@ export const Building = [
     name: "FA Annex",
     coordinate: {
       latitude: 45.496826,
-      longitude: -73.579481,
+      longitude: -73.579481
+      ,
     },
   },
   {
     name: "Faubourg Tower",
     coordinate: {
       latitude: 45.494683,
-      longitude: -73.577659,
+      longitude: -73.577659
+      ,
     },
   },
   {
     name: "Faubourg Building",
     coordinate: {
       latitude: 45.494362,
-      longitude: -73.578346,
+      longitude: -73.578346
+      ,
     },
   },
   {
     name: "Grey Nuns Annex",
     coordinate: {
       latitude: 45.494071,
-      longitude: -73.577986,
+      longitude: -73.577986
+      ,
     },
   },
   {
     name: "Guy-De Maisonneuve Building",
     coordinate: {
       latitude: 45.495682,
-      longitude: -73.578795,
+      longitude: -73.578795
+      ,
     },
   },
   {
     name: "Grey Nuns Building - Main Entrance",
     coordinate: {
       latitude: 45.4935,
-      longitude: -73.576873,
+      longitude: -73.576873
+      ,
     },
   },
   {
     name: "GS Building",
     coordinate: {
       latitude: 45.496331,
-      longitude: -73.580436,
+      longitude: -73.580436
+      ,
     },
   },
   {
@@ -233,153 +247,154 @@ export const Building = [
     },
   },
 
-  // Loyola Campus buildings latitude and longitude
+    // Loyola Campus buildings latitude and longitude
 
-  {
-    name: "Administration Building",
-    coordinate: {
-      latitude: 45.457772,
-      longitude: -73.639901,
+    {
+      name: "Administration Building",
+      coordinate: {
+        latitude: 45.457772,
+        longitude: -73.639901,
+      },
     },
-  },
-  {
-    name: "BB Annex",
-    coordinate: {
-      latitude: 45.459849,
-      longitude: -73.639339,
+    {
+      name: "BB Annex",
+      coordinate: {
+        latitude: 45.459849,
+        longitude: -73.639339,
+      },
     },
-  },
-  {
-    name: "BH Annex",
-    coordinate: {
-      latitude: 45.459729,
-      longitude: -73.639102,
+    {
+      name: "BH Annex",
+      coordinate: {
+        latitude: 45.459729,
+        longitude: -73.639102,
+      },
     },
-  },
-  {
-    name: "Central Building",
-    coordinate: {
-      latitude: 45.458271,
-      longitude: -73.64045,
+    {
+      name: "Central Building",
+      coordinate: {
+        latitude: 45.458271,
+        longitude: -73.64045,
+      },
     },
-  },
-  {
-    name: "Communication Studies and Journalism Building",
-    coordinate: {
-      latitude: 45.457254,
-      longitude: -73.640404,
+    {
+      name: "Communication Studies and Journalism Building",
+      coordinate: {
+        latitude: 45.457254,
+        longitude: -73.640404,
+      },
     },
-  },
-  {
-    name: "Stinger Dome",
-    coordinate: {
-      latitude: 45.457045,
-      longitude: -73.638223,
+    {
+      name: "Stinger Dome",
+      coordinate: {
+        latitude: 45.457045,
+        longitude: -73.638223,
+      },
     },
-  },
-  {
-    name: "F.C. Smith Building",
-    coordinate: {
-      latitude: 45.458389,
-      longitude: -73.639291,
+    {
+      name: "F.C. Smith Building",
+      coordinate: {
+        latitude: 45.458389,
+        longitude: -73.639291,
+      },
     },
-  },
-  {
-    name: "Centre for Structural and Functional Genomics",
-    coordinate: {
-      latitude: 45.456849,
-      longitude: -73.640396,
+    {
+      name: "Centre for Structural and Functional Genomics",
+      coordinate: {
+        latitude: 45.456849,
+        longitude: -73.640396,
+      },
     },
-  },
-  {
-    name: "Hingston Hall, wing HA",
-    coordinate: {
-      latitude: 45.459471,
-      longitude: -73.641211,
+    {
+      name: "Hingston Hall, wing HA",
+      coordinate: {
+        latitude: 45.459471,
+        longitude: -73.641211,
+      },
     },
-  },
-  {
-    name: "Hingston Hall, wing HB",
-    coordinate: {
-      latitude: 45.459162,
-      longitude: -73.641962,
+    {
+      name: "Hingston Hall, wing HB",
+      coordinate: {
+        latitude: 45.459162,
+        longitude: -73.641962,
+      },
     },
-  },
-  {
-    name: "Hingston Hall, wing HB",
-    coordinate: {
-      latitude: 45.459162,
-      longitude: -73.641962,
+    {
+      name: "Hingston Hall, wing HB",
+      coordinate: {
+        latitude: 45.459162,
+        longitude: -73.641962,
+      },
     },
-  },
-  {
-    name: "Hingston Hall, wing HC",
-    coordinate: {
-      latitude: 45.458504,
-      longitude: -73.643225,
+    {
+      name: "Hingston Hall, wing HC",
+      coordinate: {
+        latitude: 45.458504,
+        longitude: -73.643225,
+      },
     },
-  },
-  {
-    name: "Jesuit Residence",
-    coordinate: {
-      latitude: 45.458504,
-      longitude: -73.643225,
+    {
+      name: "Jesuit Residence",
+      coordinate: {
+        latitude: 45.458504,
+        longitude: -73.643225,
+      },
     },
-  },
-  {
-    name: "Perform Center",
-    coordinate: {
-      latitude: 45.45697,
-      longitude: -73.637255,
+    {
+      name: "Perform Center",
+      coordinate: {
+        latitude: 45.45697,
+        longitude: -73.637255,
+      },
     },
-  },
-  {
-    name: "Physical Service",
-    coordinate: {
-      latitude: 45.459694,
-      longitude: -73.639858,
+    {
+      name: "Physical Service",
+      coordinate: {
+        latitude: 45.459694,
+        longitude: -73.639858,
+      },
     },
-  },
-  {
-    name: "Psychology Building",
-    coordinate: {
-      latitude: 45.45905,
-      longitude: -73.640454,
+    {
+      name: "Psychology Building",
+      coordinate: {
+        latitude: 45.45905,
+        longitude: -73.640454,
+      },
     },
-  },
-  {
-    name: "Recreational and Athletics",
-    coordinate: {
-      latitude: 45.456677,
-      longitude: -73.637523,
+    {
+      name: "Recreational and Athletics",
+      coordinate: {
+        latitude: 45.456677,
+        longitude: -73.637523,
+      },
     },
-  },
-  {
-    name: "Loyola Jesuit Hall and Conference Center",
-    coordinate: {
-      latitude: 45.458551,
-      longitude: -73.641016,
+    {
+      name: "Loyola Jesuit Hall and Conference Center",
+      coordinate: {
+        latitude: 45.458551,
+        longitude: -73.641016,
+      },
     },
-  },
-  {
-    name: "Student Center",
-    coordinate: {
-      latitude: 45.459137,
-      longitude: -73.639203,
+    {
+      name: "Student Center",
+      coordinate: {
+        latitude: 45.459137,
+        longitude: -73.639203,
+      },
     },
-  },
-  {
-    name: "Richard J. Renaud Science Complex",
-    coordinate: {
-      latitude: 45.457567,
-      longitude: -73.641739,
+    {
+      name: "Richard J. Renaud Science Complex",
+      coordinate: {
+        latitude: 45.457567,
+        longitude: -73.641739,
+      },
     },
-  },
-  {
-    name: "Vanier Library",
-    coordinate: {
-      latitude: 45.459058,
-      longitude: -73.638458,
+    {
+      name: "Vanier Library",
+      coordinate: {
+        latitude: 45.459058,
+        longitude: -73.638458,
+      },
     },
-  },
 ];
+
