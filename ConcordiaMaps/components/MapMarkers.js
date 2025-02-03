@@ -1,6 +1,7 @@
 import React from "react";
 import { Marker, Callout } from "react-native-maps";
 import { Text, View, Image, StyleSheet } from "react-native";
+import PropTypes from "prop-types";
 
 const customMarkerImage = require('../assets/PinLogo.png'); 
 
@@ -48,5 +49,17 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
+
+MapMarkers.propTypes = {
+  markers: PropTypes.arrayOf(
+    PropTypes.shape({
+      coordinate: PropTypes.shape({
+        latitude: PropTypes.number.isRequired,
+        longitude: PropTypes.number.isRequired,
+      }).isRequired,
+      name: PropTypes.string.isRequired,
+    }),
+  ),
+};
 
 export default MapMarkers;
