@@ -51,6 +51,3 @@ const styles = StyleSheet.create({
 });
 
 export default MapMarkers;
-=======
-ConcordiaMaps/components/MapMarkers.js
->>>>>>> Stashed changes
