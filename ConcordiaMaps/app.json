@@ -1,9 +1,7 @@
 {
   "expo": {
     "name": "ConcordiaMaps",
-    "permissions": [
-      "LOCATION"
-    ],
+    "permissions": ["LOCATION"],
     "slug": "ConcordiaMaps",
     "version": "1.0.0",
     "orientation": "portrait",

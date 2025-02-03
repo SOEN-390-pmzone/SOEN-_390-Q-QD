@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect } from "react";
+import PropTypes from "prop-types";
 import * as Location from "expo-location";
 import { Alert } from "react-native";
 
@@ -13,17 +14,13 @@ export const LocationProvider = ({ children }) => {
       if (status !== "granted") {
         Alert.alert(
           "Permission Denied",
-          "We need location access to show your position."
+          "We need location access to show your position.",
         );
         return;
       }
 
-      const currentLocation = await Location.getCurrentPositionAsync({});
-      console.log("Current Location:", currentLocation); // Add this line
-      setLocation({
-        latitude: currentLocation.coords.latitude,
-        longitude: currentLocation.coords.longitude,
-      });
+      const { coords } = await Location.getCurrentPositionAsync({});
+      setLocation(coords);
     };
 
     requestLocation();
@@ -34,4 +31,8 @@ export const LocationProvider = ({ children }) => {
       {children}
     </LocationContext.Provider>
   );
+};
+
+LocationProvider.propTypes = {
+  children: PropTypes.node.isRequired,
 };
