@@ -5,8 +5,6 @@ import PropTypes from "prop-types";
 
 const customMarkerImage = require("../assets/PinLogo.png");
 
-const { width, height } = Dimensions.get("window");
-
 const MapMarkers = ({ markers }) => {
   if (!markers || markers.length === 0) return null;
 
@@ -24,13 +22,13 @@ const MapMarkers = ({ markers }) => {
 
 const styles = StyleSheet.create({
   markerImage: {
-    width: width*0.08,
-    height: height*0.08,
+    width: 40,
+    height: 40,
   },
   // Style for the Callout container
   calloutContainer: {
-    width: width*0.4,
-    height: height*0.1,
+    width: 160,
+    height: 50,
     padding: 5,
     backgroundColor: "rgba(255, 255, 255, 0.9)",
     borderRadius: 8,
