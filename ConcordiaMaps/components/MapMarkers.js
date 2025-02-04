@@ -1,60 +1,107 @@
 import React from "react";
-import { Marker, Callout } from "react-native-maps";
-import { Text, View, Image, StyleSheet } from "react-native";
-import PropTypes from "prop-types";
+import { View, Image } from "react-native";
+import MapView, { Marker } from "react-native-maps";
+import styles from "../styles";
 
 const customMarkerImage = require("../assets/PinLogo.png");
 
-const MapMarkers = ({ markers }) => {
-  if (!markers || markers.length === 0) return null;
-
-  return markers.map((marker, index) => (
-    <Marker key={index} coordinate={marker.coordinate} title={marker.name}>
-      <Image source={customMarkerImage} style={styles.markerImage} />
-      <Callout>
-        <View style={styles.calloutContainer}>
-          <Text style={styles.calloutText}>{marker.name}</Text>
-        </View>
-      </Callout>
-    </Marker>
-  ));
-};
-
-const styles = StyleSheet.create({
-  markerImage: {
-    width: 40,
-    height: 40,
+export const Building = [
+  // SGW Campus buildings
+  {
+    name: "Webster Library",
+    coordinate: { latitude: 45.4968158, longitude: -73.5779337 },
   },
-  // Style for the Callout container
-  calloutContainer: {
-    width: 160,
-    height: 50,
-    padding: 5,
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
-    borderRadius: 8,
-    justifyContent: "center",
-    alignItems: "center",
+  {
+    name: "B Annex",
+    coordinate: { latitude: 45.49791, longitude: -73.579441 },
   },
-  // Style for the text inside the Callout
-  calloutText: {
-    fontSize: 14,
-    color: "#333",
-    textAlign: "center",
+  {
+    name: "CL Annex",
+    coordinate: { latitude: 45.494228, longitude: -73.579299 },
   },
-});
+  {
+    name: "CI Annex",
+    coordinate: { latitude: 45.497438, longitude: -73.579946 },
+  },
+  {
+    name: "D Annex",
+    coordinate: { latitude: 45.497834, longitude: -73.579282 },
+  },
+  {
+    name: "EN Annex",
+    coordinate: { latitude: 45.496864, longitude: -73.579561 },
+  },
+  {
+    name: "ER Building",
+    coordinate: { latitude: 45.496362, longitude: -73.580212 },
+  },
+  {
+    name: "EV Building",
+    coordinate: { latitude: 45.495538, longitude: -73.577779 },
+  },
+  {
+    name: "Henry F. Hall",
+    coordinate: { latitude: 45.4973129, longitude: -73.578876 },
+  },
+  {
+    name: "John Molson School Of Business",
+    coordinate: { latitude: 45.495309, longitude: -73.579023 },
+  },
+  {
+    name: "Visual Art Building",
+    coordinate: { latitude: 45.495525, longitude: -73.573794 },
+  },
 
-// For the workflow
+  // Loyola Campus buildings
+  {
+    name: "Administration Building",
+    coordinate: { latitude: 45.457772, longitude: -73.639901 },
+  },
+  {
+    name: "BB Annex",
+    coordinate: { latitude: 45.459849, longitude: -73.639339 },
+  },
+  {
+    name: "Central Building",
+    coordinate: { latitude: 45.458271, longitude: -73.64045 },
+  },
+  {
+    name: "Stinger Dome",
+    coordinate: { latitude: 45.457045, longitude: -73.638223 },
+  },
+  {
+    name: "Vanier Library",
+    coordinate: { latitude: 45.459058, longitude: -73.638458 },
+  },
+];
 
-MapMarkers.propTypes = {
-  markers: PropTypes.arrayOf(
-    PropTypes.shape({
-      coordinate: PropTypes.shape({
-        latitude: PropTypes.number.isRequired,
-        longitude: PropTypes.number.isRequired,
-      }).isRequired,
-      name: PropTypes.string.isRequired,
-    }),
-  ),
+const MapMarkers = () => {
+  return (
+    <View style={styles.container}>
+      <MapView
+        style={styles.map}
+        initialRegion={{
+          latitude: 45.4973, // Centering around SGW campus
+          longitude: -73.5789,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        }}
+      >
+        {Building.map((building, index) => (
+          <Marker
+            key={index}
+            coordinate={building.coordinate}
+            title={building.name}
+          >
+            <Image
+              source={customMarkerImage}
+              style={styles.customMarkerImage}
+            />
+          </Marker>
+        ))}
+      </MapView>
+    </View>
+  );
 };
 
 export default MapMarkers;

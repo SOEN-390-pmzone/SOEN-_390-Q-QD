@@ -90,6 +90,10 @@ const styles = StyleSheet.create({
     color: "white", // Red color for menu items
     fontWeight: "bold",
   },
+  customMarkerImage: {
+    width: 30,
+    height: 30,
+  },
 });
 
 export default styles;

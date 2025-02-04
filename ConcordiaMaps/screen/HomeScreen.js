@@ -6,7 +6,6 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import styles from "../styles";
 import MapMarkers from "../components/MapMarkers";
-import { Building } from "../data/markersData";
 
 function HomeScreen() {
   return (
@@ -15,13 +14,7 @@ function HomeScreen() {
       <Header />
       <NavBar /> {/* This is the navigation bar */}
       {/* Map view */}
-      <MapView
-        style={styles.map}
-        showsUserLocation={true}
-        loadingEnabled={true}
-      >
-        <MapMarkers markers={Building} />
-      </MapView>
+      <MapMarkers />
       {/* Footer */}
       <Footer />
     </View>
