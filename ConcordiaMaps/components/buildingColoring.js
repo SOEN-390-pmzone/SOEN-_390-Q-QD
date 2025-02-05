@@ -1,27 +1,9 @@
 import React from "react";
-import { View } from "react-native";
-import MapView, { Polygon } from "react-native-maps";
+import { Polygon } from "react-native-maps";
 
-// Your GeoJSON data
 const geojson = {
   "type": "FeatureCollection",
   "features": [
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Polygon",
-        "coordinates": [
-          [
-            [-73.5779719697085, 45.49764623029149],
-            [-73.5806699302915, 45.49764623029149],
-            [-73.5806699302915, 45.49494826970849],
-            [-73.5779719697085, 45.49494826970849],
-            [-73.5779719697085, 45.49764623029149]
-          ]
-        ]
-      },
-      "properties": {}
-    },
     {
       "type": "Feature",
       "properties": {},
@@ -43,41 +25,30 @@ const geojson = {
   ]
 };
 
-const buildingColoring = () => {
+const BuildingColoring = () => {
   return (
-    <View style={{ flex: 1 }}>
-      <MapView
-        style={{ flex: 1 }}
-        initialRegion={{
-          latitude: 45.4963, // Approximate center of the polygons
-          longitude: -73.5793,
-          latitudeDelta: 0.02,
-          longitudeDelta: 0.02,
-        }}
-      >
-        {geojson.features.map((feature, index) => {
-          if (feature.geometry.type === "Polygon") {
-            // Convert GeoJSON coordinates to LatLng format
-            const coordinates = feature.geometry.coordinates[0].map((coord) => ({
-              latitude: coord[1],
-              longitude: coord[0],
-            }));
+    <>
+      {geojson.features.map((feature, index) => {
+        if (feature.geometry.type === "Polygon") {
+          const coordinates = feature.geometry.coordinates[0].map((coord) => ({
+            latitude: coord[1],
+            longitude: coord[0],
+          }));
 
-            return (
-              <Polygon
-                key={index}
-                coordinates={coordinates}
-                fillColor="rgba(255, 0, 0, 0.5)" // Red fill with 50% opacity
-                strokeColor="rgba(255, 0, 0, 1)" // Red border
-                strokeWidth={1}
-              />
-            );
-          }
-          return null;
-        })}
-      </MapView>
-    </View>
+          return (
+            <Polygon
+              key={index}
+              coordinates={coordinates}
+              fillColor="rgba(255, 0, 0, 0.5)" // Red fill with 50% opacity
+              strokeColor="rgba(255, 0, 0, 1)" // Red border
+              strokeWidth={1}
+            />
+          );
+        }
+        return null;
+      })}
+    </>
   );
 };
 
-export default buildingColoring;
+export default BuildingColoring;

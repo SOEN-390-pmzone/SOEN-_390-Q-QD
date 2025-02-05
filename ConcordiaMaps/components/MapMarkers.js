@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 import { View, Image } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import styles from "../styles";
@@ -391,7 +392,7 @@ export const Building = [
   },
 ];
 
-const MapMarkers = () => {
+const MapMarkers = ({ children }) => {
   return (
     <View style={styles.container}>
       <MapView
@@ -403,21 +404,21 @@ const MapMarkers = () => {
           longitudeDelta: 0.01,
         }}
       >
+        {/* Render child components (e.g., BuildingColoring) */}
+        {children}
+
+        {/* Render building markers */}
         {Building.map((building, index) => (
-          <Marker
-            key={index}
-            coordinate={building.coordinate}
-            title={building.name}
-          >
-            <Image
-              source={customMarkerImage}
-              style={styles.customMarkerImage}
-            />
+          <Marker key={index} coordinate={building.coordinate} title={building.name}>
+            <Image source={customMarkerImage} style={styles.customMarkerImage} />
           </Marker>
         ))}
       </MapView>
     </View>
   );
+};
+MapMarkers.propTypes = {
+  children: PropTypes.node,
 };
 
 export default MapMarkers;
