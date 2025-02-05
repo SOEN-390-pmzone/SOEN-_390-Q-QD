@@ -1,15 +1,39 @@
 import React from "react";
 import { Marker, Callout } from "react-native-maps";
-import { Text, View, Image, StyleSheet } from "react-native";
+import { Text, View, Image, StyleSheet, Alert } from "react-native";
 import PropTypes from "prop-types";
 
+
 const customMarkerImage = require("../assets/PinLogo.png");
+
 
 const MapMarkers = ({ markers }) => {
   if (!markers || markers.length === 0) return null;
 
+
+  const handleMarkerPress = (buildingName) => {
+    // Affiche une alerte avec le nom du bâtiment
+    Alert.alert(
+      "Info spéciale",
+      `Info spéciale de ${buildingName}`,
+      [
+        {
+          text: "Fermer",
+          onPress: () => console.log("Alerte fermée"),
+        },
+      ],
+      { cancelable: true }
+    );
+  };
+
+
   return markers.map((marker, index) => (
-    <Marker key={index} coordinate={marker.coordinate} title={marker.name}>
+    <Marker
+      key={index}
+      coordinate={marker.coordinate}
+      title={marker.name}
+      onPress={() => handleMarkerPress(marker.name)} // Affiche l'alerte lors du clic sur un marqueur
+    >
       <Image source={customMarkerImage} style={styles.markerImage} />
       <Callout>
         <View style={styles.calloutContainer}>
@@ -20,12 +44,12 @@ const MapMarkers = ({ markers }) => {
   ));
 };
 
+
 const styles = StyleSheet.create({
   markerImage: {
     width: 40,
     height: 40,
   },
-  // Style for the Callout container
   calloutContainer: {
     width: 160,
     height: 50,
@@ -35,7 +59,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  // Style for the text inside the Callout
   calloutText: {
     fontSize: 14,
     color: "#333",
@@ -43,7 +66,6 @@ const styles = StyleSheet.create({
   },
 });
 
-// For the workflow
 
 MapMarkers.propTypes = {
   markers: PropTypes.arrayOf(
@@ -57,4 +79,8 @@ MapMarkers.propTypes = {
   ),
 };
 
+
 export default MapMarkers;
+
+
+
