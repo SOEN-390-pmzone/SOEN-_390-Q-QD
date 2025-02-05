@@ -128,12 +128,39 @@ export const Building = [
     },
   },
   {
-    name: "Learning Square",
-    coordinate: {
-      latitude: 45.4963149,
-      longitude: -73.579472,
-    },
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "Learning Square"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-73.579472, 45.4963149]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {},
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [-73.57955713111238, 45.49653030013195],
+              [-73.5796681923123, 45.49641352707994],
+              [-73.57957431915551, 45.4963625546406],
+              [-73.57966422584043, 45.49626617026453],
+              [-73.5794725130558, 45.496174419599356],
+              [-73.57925435712785, 45.49639313811011],
+              [-73.57955713111238, 45.49653030013195]
+            ]
+          ]
+        }
+      }
+    ]
   },
+  
   {
     name: "M Annex",
     coordinate: {
