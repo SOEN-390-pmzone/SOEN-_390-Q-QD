@@ -4,7 +4,6 @@ import MapView from "react-native-maps";
 import NavBar from "../components/NavBar";
 import Header from "../components/Header";
 import { LocationContext } from "../contexts/LocationContext";
-import { Marker } from "react-native-maps";
 
 function HomeScreen() {
   const location = useContext(LocationContext);
@@ -28,18 +27,8 @@ function HomeScreen() {
         }
         showsUserLocation={true}
         loadingEnabled={true}
-      >
-        {/* Marker */}
-        {location && (
-          <Marker
-            coordinate={{
-              latitude: location.latitude,
-              longitude: location.longitude,
-            }}
-            title="You are here"
-          />
-        )}
-      </MapView>
+        watchUserLocation={true}
+      ></MapView>
     </View>
   );
 }
