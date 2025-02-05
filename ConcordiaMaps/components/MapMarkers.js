@@ -145,8 +145,8 @@ export const Building = [
   {
     name: "M Annex",
     coordinate: {
-      latitude: 45.497485,
-      longitude: -73.579953,
+      latitude: 45.497402,
+      longitude: -73.579715,
     },
   },
   {
@@ -159,8 +159,8 @@ export const Building = [
   {
     name: "MI Annex",
     coordinate: {
-      latitude: 45.49779,
-      longitude: -73.579234,
+      latitude: 45.490889,
+      longitude: -73.582412,
     },
   },
   {
@@ -173,8 +173,8 @@ export const Building = [
   {
     name: "P Annex",
     coordinate: {
-      latitude: 45.497001,
-      longitude: -73.57988,
+      latitude: 45.496661,
+      longitude: -73.579165,
     },
   },
   {
@@ -229,15 +229,15 @@ export const Building = [
   {
     name: "X Annex",
     coordinate: {
-      latitude: 45.497119,
-      longitude: -73.579937,
+      latitude: 45.496898,
+      longitude: -73.579722,
     },
   },
   {
     name: "Z Annex",
     coordinate: {
-      latitude: 45.497177,
-      longitude: -73.580328,
+      latitude: 45.496931,
+      longitude: -73.579743,
     },
   },
 
@@ -409,8 +409,15 @@ const MapMarkers = ({ children }) => {
 
         {/* Render building markers */}
         {Building.map((building, index) => (
-          <Marker key={index} coordinate={building.coordinate} title={building.name}>
-            <Image source={customMarkerImage} style={styles.customMarkerImage} />
+          <Marker
+            key={index}
+            coordinate={building.coordinate}
+            title={building.name}
+          >
+            <Image
+              source={customMarkerImage}
+              style={styles.customMarkerImage}
+            />
           </Marker>
         ))}
       </MapView>

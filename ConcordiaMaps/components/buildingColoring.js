@@ -9,7 +9,7 @@ const BuildingColoring = () => {
         const { geometry, properties } = feature;
 
         if (geometry.type === "Polygon") {
-          const coordinates = geometry.coordinates[0].map(coord => ({
+          const coordinates = geometry.coordinates[0].map((coord) => ({
             latitude: coord[1],
             longitude: coord[0],
           }));

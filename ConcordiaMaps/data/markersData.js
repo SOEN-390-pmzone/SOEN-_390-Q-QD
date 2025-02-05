@@ -128,44 +128,17 @@ export const Building = [
     },
   },
   {
-    "type": "FeatureCollection",
-    "features": [
-      {
-        "type": "Feature",
-        "properties": {
-          "name": "Learning Square"
-        },
-        "geometry": {
-          "type": "Point",
-          "coordinates": [-73.579472, 45.4963149]
-        }
-      },
-      {
-        "type": "Feature",
-        "properties": {},
-        "geometry": {
-          "type": "Polygon",
-          "coordinates": [
-            [
-              [-73.57955713111238, 45.49653030013195],
-              [-73.5796681923123, 45.49641352707994],
-              [-73.57957431915551, 45.4963625546406],
-              [-73.57966422584043, 45.49626617026453],
-              [-73.5794725130558, 45.496174419599356],
-              [-73.57925435712785, 45.49639313811011],
-              [-73.57955713111238, 45.49653030013195]
-            ]
-          ]
-        }
-      }
-    ]
+    name: "Learning Square",
+    coordinate: {
+      latitude: 45.4963149,
+      longitude: -73.579472,
+    },
   },
-  
   {
     name: "M Annex",
     coordinate: {
-      latitude: 45.497485,
-      longitude: -73.579953,
+      latitude: 45.497402,
+      longitude: -73.579715,
     },
   },
   {
@@ -178,8 +151,8 @@ export const Building = [
   {
     name: "MI Annex",
     coordinate: {
-      latitude: 45.49779,
-      longitude: -73.579234,
+      latitude: 45.490889,
+      longitude: -73.582412,
     },
   },
   {
@@ -192,8 +165,8 @@ export const Building = [
   {
     name: "P Annex",
     coordinate: {
-      latitude: 45.497001,
-      longitude: -73.57988,
+      latitude: 45.496661,
+      longitude: -73.579165,
     },
   },
   {
@@ -248,15 +221,15 @@ export const Building = [
   {
     name: "X Annex",
     coordinate: {
-      latitude: 45.497119,
-      longitude: -73.579937,
+      latitude: 45.496898,
+      longitude: -73.579722,
     },
   },
   {
     name: "Z Annex",
     coordinate: {
-      latitude: 45.497177,
-      longitude: -73.580328,
+      latitude: 45.496931,
+      longitude: -73.579743,
     },
   },
 
