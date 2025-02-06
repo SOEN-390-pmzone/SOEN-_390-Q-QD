@@ -19,85 +19,85 @@ export const Building = [
   {
     name: "B Annex",
     coordinate: {
-      latitude: 45.49791,
-      longitude: -73.579441,
+      latitude: 45.497856,
+      longitude: -73.579588,
     },
   },
   {
     name: "CL Annex",
     coordinate: {
-      latitude: 45.494228,
-      longitude: -73.579299,
+      latitude: 45.494259,
+      longitude: -73.579007,
     },
   },
   {
     name: "CI Annex",
     coordinate: {
-      latitude: 45.497438,
-      longitude: -73.579946,
+      latitude: 45.497467,
+      longitude: -73.579925,
     },
   },
   {
     name: "D Annex",
     coordinate: {
-      latitude: 45.497834,
-      longitude: -73.579282,
+      latitude: 45.497827,
+      longitude: -73.579409,
     },
   },
   {
     name: "EN Annex",
     coordinate: {
-      latitude: 45.496864,
-      longitude: -73.579561,
+      latitude: 45.496944,
+      longitude: -73.579555,
     },
   },
   {
     name: "ER Building",
     coordinate: {
-      latitude: 45.496362,
+      latitude: 45.496428,
       longitude: -73.580212,
     },
   },
   {
     name: "EV Building",
     coordinate: {
-      latitude: 45.495538,
-      longitude: -73.577779,
+      latitude: 45.495376,
+      longitude: -73.577997,
     },
   },
   {
     name: "FA Annex",
     coordinate: {
-      latitude: 45.496826,
-      longitude: -73.579481,
+      latitude: 45.496874,
+      longitude: -73.579468,
     },
   },
   {
     name: "Faubourg Tower",
     coordinate: {
-      latitude: 45.494683,
-      longitude: -73.577659,
+      latitude: 45.494666,
+      longitude: -73.577603,
     },
   },
   {
     name: "Faubourg Building",
     coordinate: {
-      latitude: 45.494362,
-      longitude: -73.578346,
+      latitude: 45.494381,
+      longitude: -73.578425,
     },
   },
   {
     name: "Grey Nuns Annex",
     coordinate: {
-      latitude: 45.494071,
-      longitude: -73.577986,
+      latitude: 45.494123,
+      longitude: -73.57787,
     },
   },
   {
     name: "Guy-De Maisonneuve Building",
     coordinate: {
-      latitude: 45.495682,
-      longitude: -73.578795,
+      latitude: 45.495983,
+      longitude: -73.578824,
     },
   },
   {
@@ -110,29 +110,43 @@ export const Building = [
   {
     name: "GS Building",
     coordinate: {
-      latitude: 45.496331,
-      longitude: -73.580436,
+      latitude: 45.496673,
+      longitude: -73.581409,
     },
   },
   {
     name: "Henry F. Hall",
     coordinate: {
-      latitude: 45.4973129,
-      longitude: -73.578876,
+      latitude: 45.497092,
+      longitude: -73.5788,
     },
   },
   {
     name: "K Annex",
     coordinate: {
-      latitude: 45.497803,
-      longitude: -73.579357,
+      latitude: 45.497777,
+      longitude: -73.579531,
+    },
+  },
+  {
+    name: "LB Building",
+    coordinate: {
+      latitude: 45.49705,
+      longitude: -73.578009,
+    },
+  },
+  {
+    name: "LC Building",
+    coordinate: {
+      latitude: 45.496782,
+      longitude: -73.577358,
     },
   },
   {
     name: "LD Building",
     coordinate: {
-      latitude: 45.496794,
-      longitude: -73.577231,
+      latitude: 45.496697,
+      longitude: -73.577312,
     },
   },
   {
@@ -145,29 +159,29 @@ export const Building = [
   {
     name: "M Annex",
     coordinate: {
-      latitude: 45.497402,
-      longitude: -73.579715,
+      latitude: 45.497368,
+      longitude: -73.579777,
     },
   },
   {
     name: "John Molson School Of Business",
     coordinate: {
-      latitude: 45.495309,
-      longitude: -73.579023,
+      latitude: 45.495304,
+      longitude: -73.579044,
     },
   },
   {
     name: "MI Annex",
     coordinate: {
-      latitude: 45.490889,
-      longitude: -73.582412,
+      latitude: 45.497807,
+      longitude: -73.579261,
     },
   },
   {
     name: "MU Annex",
     coordinate: {
-      latitude: 45.497896,
-      longitude: -73.579553,
+      latitude: 45.497963,
+      longitude: -73.579506,
     },
   },
   {
@@ -187,57 +201,57 @@ export const Building = [
   {
     name: "Q Annex",
     coordinate: {
-      latitude: 45.496619,
-      longitude: -73.579122,
+      latitude: 45.496648,
+      longitude: -73.579094,
     },
   },
   {
     name: "R Annex",
     coordinate: {
-      latitude: 45.496771,
-      longitude: -73.579424,
+      latitude: 45.496826,
+      longitude: -73.579389,
     },
   },
   {
     name: "RR Annex",
     coordinate: {
-      latitude: 45.497407,
-      longitude: -73.579848,
+      latitude: 45.496796,
+      longitude: -73.579259,
     },
   },
   {
     name: "Toronto-Dominion Building",
     coordinate: {
-      latitude: 45.494993,
-      longitude: -73.578129,
+      latitude: 45.495103,
+      longitude: -73.578375,
     },
   },
   {
     name: "V Annex",
     coordinate: {
-      latitude: 45.497021,
-      longitude: -73.579937,
+      latitude: 45.497101,
+      longitude: -73.579907,
     },
   },
   {
     name: "Visual Art Building",
     coordinate: {
-      latitude: 45.495525,
-      longitude: -73.573794,
+      latitude: 45.495543,
+      longitude: -73.573795,
     },
   },
   {
     name: "X Annex",
     coordinate: {
-      latitude: 45.496898,
-      longitude: -73.579722,
+      latitude: 45.49694,
+      longitude: -73.579593,
     },
   },
   {
     name: "Z Annex",
     coordinate: {
-      latitude: 45.496931,
-      longitude: -73.579743,
+      latitude: 45.496981,
+      longitude: -73.579705,
     },
   },
 
@@ -246,36 +260,36 @@ export const Building = [
   {
     name: "Administration Building",
     coordinate: {
-      latitude: 45.457772,
-      longitude: -73.639901,
+      latitude: 45.457984,
+      longitude: -73.639834,
     },
   },
   {
     name: "BB Annex",
     coordinate: {
-      latitude: 45.459849,
-      longitude: -73.639339,
+      latitude: 45.459793,
+      longitude: -73.639174,
     },
   },
   {
     name: "BH Annex",
     coordinate: {
-      latitude: 45.459729,
-      longitude: -73.639102,
+      latitude: 45.459819,
+      longitude: -73.639152,
     },
   },
   {
     name: "Central Building",
     coordinate: {
-      latitude: 45.458271,
-      longitude: -73.64045,
+      latitude: 45.458204,
+      longitude: -73.6403,
     },
   },
   {
     name: "Communication Studies and Journalism Building",
     coordinate: {
-      latitude: 45.457254,
-      longitude: -73.640404,
+      latitude: 45.457478,
+      longitude: -73.640354,
     },
   },
   {
@@ -288,71 +302,64 @@ export const Building = [
   {
     name: "F.C. Smith Building",
     coordinate: {
-      latitude: 45.458389,
-      longitude: -73.639291,
+      latitude: 45.458493,
+      longitude: -73.639287,
     },
   },
   {
     name: "Centre for Structural and Functional Genomics",
     coordinate: {
-      latitude: 45.456849,
-      longitude: -73.640396,
+      latitude: 45.457017,
+      longitude: -73.640432,
     },
   },
   {
     name: "Hingston Hall, wing HA",
     coordinate: {
-      latitude: 45.459471,
-      longitude: -73.641211,
+      latitude: 45.459356,
+      longitude:-73.64127,
     },
   },
   {
     name: "Hingston Hall, wing HB",
     coordinate: {
-      latitude: 45.459162,
-      longitude: -73.641962,
-    },
-  },
-  {
-    name: "Hingston Hall, wing HB",
-    coordinate: {
-      latitude: 45.459162,
-      longitude: -73.641962,
+      latitude: 45.459308,
+      longitude: -73.641849,
     },
   },
   {
     name: "Hingston Hall, wing HC",
     coordinate: {
-      latitude: 45.458504,
-      longitude: -73.643225,
+      latitude: 45.459663,
+      longitude: -73.64208,
     },
   },
   {
     name: "Jesuit Residence",
     coordinate: {
-      latitude: 45.458504,
-      longitude: -73.643225,
+      latitude: 45.458432,
+      longitude: -73.643235,
     },
   },
   {
     name: "Perform Center",
     coordinate: {
-      latitude: 45.45697,
-      longitude: -73.637255,
+      latitude: 45.457088,
+      longitude: -73.637683,
     },
   },
   {
     name: "Physical Service",
     coordinate: {
-      latitude: 45.459694,
-      longitude: -73.639858,
+      latitude: 45.459636,
+      longitude: -73.639758,
     },
   },
   {
     name: "Psychology Building",
     coordinate: {
-      latitude: 45.45905,
-      longitude: -73.640454,
+      latitude: 45.458938,
+      longitude: -73.640467,
     },
   },
   {
@@ -372,8 +379,8 @@ export const Building = [
   {
     name: "Student Center",
     coordinate: {
-      latitude: 45.459137,
-      longitude: -73.639203,
+      latitude: 45.459131,
+      longitude: -73.639251,
     },
   },
   {
@@ -386,10 +393,17 @@ export const Building = [
   {
     name: "Vanier Library",
     coordinate: {
-      latitude: 45.459058,
-      longitude: -73.638458,
+      latitude: 45.459026,
+      longitude: -73.638606,
     },
   },
+  {
+    name: "Applied Schience Hub",
+    coordinate: {
+      latitude: 45.458513,
+      longitude: -73.641921,
+    },
+  }
 ];
 
 const MapMarkers = ({ children }) => {
