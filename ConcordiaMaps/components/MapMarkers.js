@@ -59,6 +59,20 @@ export const Building = [
     },
   },
   {
+    name: "ES Building",
+    coordinate: {
+      latitude: 45.496172,
+      longitude: -73.579922,
+    },
+  },
+  {
+    name: "ET Building",
+    coordinate: {
+      latitude: 45.496163,
+      longitude: -73.579904,
+    },
+  },
+  {
     name: "EV Building",
     coordinate: {
       latitude: 45.495538,
@@ -129,6 +143,13 @@ export const Building = [
     },
   },
   {
+    name: "LC Building",
+    coordinate: {
+      latitude: 45.496782,
+      longitude: -73.577358,
+    },
+  },
+  {
     name: "LD Building",
     coordinate: {
       latitude: 45.496794,
@@ -161,6 +182,34 @@ export const Building = [
     coordinate: {
       latitude: 45.490889,
       longitude: -73.582412,
+    },
+  },
+  {
+    name: "MK Annex",
+    coordinate: {
+      latitude: 45.496606,
+      longitude: -73.579025,
+    },
+  },
+  {
+    name: "MM Annex",
+    coordinate: {
+      latitude: 45.494665,
+      longitude: -73.576315,
+    },
+  },
+  {
+    name: "MN Annex",
+    coordinate: {
+      latitude: 45.494568,
+      longitude: -73.579553,
+    },
+  },
+  {
+    name: "Montefiore Building, MT",
+    coordinate: {
+      latitude: 45.494442,
+      longitude: -73.576108,
     },
   },
   {
@@ -206,10 +255,38 @@ export const Building = [
     },
   },
   {
+    name: "S Annex",
+    coordinate: {
+      latitude: 45.497423,
+      longitude: -73.579851,
+    },
+  },
+  {
+    name: "T Annex",
+    coordinate: {
+      latitude: 45.49671,
+      longitude: -73.57927,
+    },
+  },
+  {
+    name: "Samuel Bronfman Building, SB Building",
+    coordinate: {
+      latitude: 45.4966,
+      longitude: -73.58609,
+    },
+  },
+  {
     name: "Toronto-Dominion Building",
     coordinate: {
       latitude: 45.494993,
       longitude: -73.578129,
+    },
+  },
+  {
+    name: "TU Tunnel",
+    coordinate: {
+      latitude: 45.49648,
+      longitude: -73.578918,
     },
   },
   {
@@ -253,8 +330,8 @@ export const Building = [
   {
     name: "BB Annex",
     coordinate: {
-      latitude: 45.459849,
-      longitude: -73.639339,
+      latitude: 45.459754,
+      longitude: -73.639176,
     },
   },
   {
@@ -281,8 +358,8 @@ export const Building = [
   {
     name: "Stinger Dome",
     coordinate: {
-      latitude: 45.457045,
-      longitude: -73.638223,
+      latitude: 45.457656,
+      longitude: -73.636098,
     },
   },
   {
@@ -314,13 +391,6 @@ export const Building = [
     },
   },
   {
-    name: "Hingston Hall, wing HB",
-    coordinate: {
-      latitude: 45.459162,
-      longitude: -73.641962,
-    },
-  },
-  {
     name: "Hingston Hall, wing HC",
     coordinate: {
       latitude: 45.458504,
@@ -328,10 +398,31 @@ export const Building = [
     },
   },
   {
+    name: "Applied Science Hub, HU Building",
+    coordinate: {
+      latitude: 45.458513,
+      longitude: -73.641921,
+    },
+  },
+  {
     name: "Jesuit Residence",
     coordinate: {
       latitude: 45.458504,
       longitude: -73.643225,
+    },
+  },
+  {
+    name: "PB Building",
+    coordinate: {
+      latitude: 45.456534,
+      longitude: -73.638106,
+    },
+  },
+  {
+    name: "Oscar Peterson Concert Hall, PT Building",
+    coordinate: {
+      latitude: 45.459308,
+      longitude: -73.638941,
     },
   },
   {
@@ -377,6 +468,27 @@ export const Building = [
     },
   },
   {
+    name: "Solar House, SH Building",
+    coordinate: {
+      latitude: 45.459298,
+      longitude: -73.642478,
+    },
+  },
+  {
+    name: "Terrebonne Building, TA Building",
+    coordinate: {
+      latitude: 45.460051,
+      longitude: -73.640842,
+    },
+  },
+  {
+    name: "TB Annex",
+    coordinate: {
+      latitude: 45.459992,
+      longitude: -73.640897,
+    },
+  },
+  {
     name: "Richard J. Renaud Science Complex",
     coordinate: {
       latitude: 45.457567,
@@ -388,6 +500,13 @@ export const Building = [
     coordinate: {
       latitude: 45.459058,
       longitude: -73.638458,
+    },
+  },
+  {
+    name: "Vanier Extension",
+    coordinate: {
+      latitude: 45.459026,
+      longitude: -73.638606,
     },
   },
 ];

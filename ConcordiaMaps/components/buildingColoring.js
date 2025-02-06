@@ -1,11 +1,11 @@
 import React from "react";
 import { Polygon, Marker } from "react-native-maps";
-import { Building } from "../data/markersData copy.js"; // Adjust path as needed
+import { coloringData } from "../data/coloringData.js"; 
 
 const BuildingColoring = () => {
   return (
     <>
-      {Building.features.map((feature, index) => {
+      {coloringData.features.map((feature, index) => {
         const { geometry, properties } = feature;
 
         if (geometry.type === "Polygon") {
