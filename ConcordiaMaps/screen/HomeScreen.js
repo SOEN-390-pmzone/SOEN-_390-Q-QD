@@ -5,7 +5,7 @@ import MapView from "react-native-maps";
 import NavBar from "../components/NavBar";
 import Header from "../components/Header";
 import styles from "../styles";
-import { GOOGLE_MAPS_API_KEY, LOYOLA_POSTAL_CODE, SGW_POSTAL_CODE } from '@env';
+import { GOOGLE_MAPS_API_KEY, LOYOLA_POSTAL_CODE, SGW_POSTAL_CODE } from "@env";
 
 function HomeScreen() {
   const loyolaPostalCode = LOYOLA_POSTAL_CODE;
@@ -18,7 +18,7 @@ function HomeScreen() {
   const mapRef = useRef(null);
 
   const convertToCoordinates = async (postal_code) => {
- // Replace with your actual API key
+    // Replace with your actual API key
     try {
       const response = await axios.get(
         `https://maps.googleapis.com/maps/api/geocode/json?address=${postal_code}&key=${GOOGLE_MAPS_API_KEY}`,
@@ -64,7 +64,6 @@ function HomeScreen() {
   }, [postalCode]);
 
   const handleChangeCampuses = () => {
-
     setPostalCode((prevPostalCode) =>
       prevPostalCode === sgwPostalCode ? loyolaPostalCode : sgwPostalCode,
     );
@@ -77,8 +76,8 @@ function HomeScreen() {
       {error ? <Text testID="error-message">{error}</Text> : null}
       {coordinates ? (
         <>
-          <MapView 
-            testID = "map-view"
+          <MapView
+            testID="map-view"
             style={styles.map}
             ref={mapRef}
             initialRegion={{
@@ -98,15 +97,12 @@ function HomeScreen() {
         activeOpacity={0.7}
         style={localStyles.button}
       >
-        
         <Image
           style={localStyles.buttonImage}
           source={require("../assets/download.jpg")}
           resizeMode={"cover"} // cover or contain its up to you view look
         />
       </TouchableOpacity>
-      
-      
     </View>
   );
 }

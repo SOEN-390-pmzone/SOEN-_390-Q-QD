@@ -8,8 +8,8 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "eslint . --ignore-pattern node_modules/  --ignore-pattern .expo/",
-    "prettier": "npx prettier \"*.{js,jsx,ts,tsx,json,css,scss,md}\" --check --ignore-path .gitignore",
-    "prettier:fix": "npx prettier \"*.{js,jsx,ts,tsx,json,css,scss,md}\" --write --ignore-path .gitignore",
+    "prettier": "npx prettier \"*/*.{js,jsx,ts,tsx,json,css,scss,md}\" --check --ignore-path .gitignore",
+    "prettier:fix": "npx prettier \"*/*.{js,jsx,ts,tsx,json,css,scss,md}\" --write --ignore-path .gitignore",
     "lint:fix": "eslint . --fix --ignore-pattern node_modules/ --ignore-pattern .expo/",
     "format": "npm run lint:fix & npm run prettier:fix",
     "test": "jest"
