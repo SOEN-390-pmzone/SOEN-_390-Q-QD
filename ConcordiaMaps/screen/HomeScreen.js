@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { View, StyleSheet } from "react-native";
+import { View } from "react-native";
 import MapView from "react-native-maps";
 import NavBar from "../components/NavBar";
 import Header from "../components/Header";
@@ -31,6 +31,8 @@ function HomeScreen() {
         loadingEnabled={true}
         watchUserLocation={true}
       ></MapView>
+      {/* Footer */}
+      <Footer />
     </View>
   );
 }
