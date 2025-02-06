@@ -5,10 +5,11 @@ import MapView from "react-native-maps";
 import NavBar from "../components/NavBar";
 import Header from "../components/Header";
 import styles from "../styles";
+import { GOOGLE_MAPS_API_KEY, LOYOLA_POSTAL_CODE, SGW_POSTAL_CODE } from '@env';
 
 function HomeScreen() {
-  const loyolaPostalCode = "H4B 1R6";
-  const sgwPostalCode = "H3G 1M8";
+  const loyolaPostalCode = LOYOLA_POSTAL_CODE;
+  const sgwPostalCode = SGW_POSTAL_CODE;
 
   const [postalCode, setPostalCode] = useState(sgwPostalCode);
   const [coordinates, setCoordinates] = useState(null);
@@ -17,10 +18,10 @@ function HomeScreen() {
   const mapRef = useRef(null);
 
   const convertToCoordinates = async (postal_code) => {
-    const key = "AIzaSyAW8gOP1PJiZp1br3kOPSlRYdPlDoGkkR4"; // Replace with your actual API key
+ // Replace with your actual API key
     try {
       const response = await axios.get(
-        `https://maps.googleapis.com/maps/api/geocode/json?address=${postal_code}&key=${key}`,
+        `https://maps.googleapis.com/maps/api/geocode/json?address=${postal_code}&key=${GOOGLE_MAPS_API_KEY}`,
       );
       const { status, results } = response.data;
 
@@ -35,7 +36,7 @@ function HomeScreen() {
         }
       } else {
         setCoordinates(null);
-        setError(`Error: ${status}`);
+        setError(`${status}`);
       }
     } catch (error) {
       console.error("Error:", error);
@@ -63,6 +64,7 @@ function HomeScreen() {
   }, [postalCode]);
 
   const handleChangeCampuses = () => {
+
     setPostalCode((prevPostalCode) =>
       prevPostalCode === sgwPostalCode ? loyolaPostalCode : sgwPostalCode,
     );
@@ -72,9 +74,11 @@ function HomeScreen() {
     <View style={styles.container}>
       <Header />
       <NavBar />
+      {error ? <Text testID="error-message">{error}</Text> : null}
       {coordinates ? (
         <>
-          <MapView
+          <MapView 
+            testID = "map-view"
             style={styles.map}
             ref={mapRef}
             initialRegion={{
@@ -94,12 +98,15 @@ function HomeScreen() {
         activeOpacity={0.7}
         style={localStyles.button}
       >
+        
         <Image
           style={localStyles.buttonImage}
           source={require("../assets/download.jpg")}
           resizeMode={"cover"} // cover or contain its up to you view look
         />
       </TouchableOpacity>
+      
+      
     </View>
   );
 }
