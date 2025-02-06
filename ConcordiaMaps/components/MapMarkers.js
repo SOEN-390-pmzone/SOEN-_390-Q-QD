@@ -1,11 +1,3 @@
-import React from "react";
-import PropTypes from "prop-types";
-import { View, Image } from "react-native";
-import MapView, { Marker } from "react-native-maps";
-import styles from "../styles";
-
-const customMarkerImage = require("../assets/PinLogo.png");
-
 export const Building = [
   // SGW Campus buildings latitude and longitude
 
@@ -511,40 +503,18 @@ export const Building = [
   },
 ];
 
-const MapMarkers = ({ children }) => {
-  return (
-    <View style={styles.container}>
-      <MapView
-        style={styles.map}
-        initialRegion={{
-          latitude: 45.4973, // Centering around SGW campus
-          longitude: -73.5789,
-          latitudeDelta: 0.01,
-          longitudeDelta: 0.01,
-        }}
-      >
-        {/* Render child components (e.g., BuildingColoring) */}
-        {children}
-
-        {/* Render building markers */}
-        {Building.map((building, index) => (
-          <Marker
-            key={index}
-            coordinate={building.coordinate}
-            title={building.name}
-          >
-            <Image
-              source={customMarkerImage}
-              style={styles.customMarkerImage}
-            />
-          </Marker>
-        ))}
-      </MapView>
-    </View>
-  );
+// Default center coordinates for each campus
+export const CampusCoordinates = {
+  SGW: {
+    latitude: 45.4973,
+    longitude: -73.5789,
+    latitudeDelta: 0.01,
+    longitudeDelta: 0.01,
+  },
+  Loyola: {
+    latitude: 45.458256,
+    longitude: -73.640472,
+    latitudeDelta: 0.01,
+    longitudeDelta: 0.01,
+  },
 };
-MapMarkers.propTypes = {
-  children: PropTypes.node,
-};
-
-export default MapMarkers;
