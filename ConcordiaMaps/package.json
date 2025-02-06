@@ -20,6 +20,7 @@
     "@react-native-async-storage/async-storage": "1.23.1",
     "@react-navigation/native": "^7.0.14",
     "@react-navigation/native-stack": "^7.2.0",
+    "concordiamaps": "file:",
     "expo": "~52.0.27",
     "expo-location": "~18.0.5",
     "expo-status-bar": "~2.0.1",
@@ -42,7 +43,8 @@
     "eslint": "^9.19.0",
     "eslint-plugin-jest": "^28.11.0",
     "eslint-plugin-react": "^7.37.4",
-    "globals": "^15.14.0"
+    "globals": "^15.14.0",
+    "@types/react": "~18.3.12"
   },
   "private": true
 }

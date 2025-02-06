@@ -1,34 +1,64 @@
-import React, { useContext } from "react";
+import React, { useContext, useState, useEffect, useRef } from "react";
 import { View, StyleSheet } from "react-native";
-import MapView from "react-native-maps";
+import MapView, { Marker } from "react-native-maps";
 import NavBar from "../components/NavBar";
 import Header from "../components/Header";
 import { LocationContext } from "../contexts/LocationContext";
+import FloatingSearchBar from "../components/FloatingSearchBar";
 
 function HomeScreen() {
   const location = useContext(LocationContext);
+  const [mapRegion, setMapRegion] = useState(null);
+  const mapRef = useRef(null);
+
+  useEffect(() => {
+    if (location) {
+      setMapRegion({
+        latitude: location.latitude,
+        longitude: location.longitude,
+        latitudeDelta: 0.005,
+        longitudeDelta: 0.005,
+      });
+    }
+  }, [location]);
+
+  const handlePlaceSelect = (newRegion) => {
+    console.log("handlePlaceSelect called with:", newRegion);
+    const region = {
+      ...newRegion,
+      latitudeDelta: 0.005,
+      longitudeDelta: 0.005,
+    };
+    
+    setTimeout(() => {
+      setMapRegion(region);
+      mapRef.current?.animateToRegion(region, 1000);
+    }, 100);
+  };
+
   return (
     <View style={styles.container}>
-      {/* Add Header and NavBar in the HomeScreen */}
       <Header />
-      <NavBar /> {/* This is the navigation bar */}
-      {/* Map view */}
+      <NavBar />
       <MapView
+        ref={mapRef}
         style={styles.map}
-        region={
-          location
-            ? {
-                latitude: location.latitude,
-                longitude: location.longitude,
-                latitudeDelta: 0.005,
-                longitudeDelta: 0.005,
-              }
-            : undefined
-        }
+        initialRegion={mapRegion}
         showsUserLocation={true}
         loadingEnabled={true}
-        watchUserLocation={true}
-      ></MapView>
+        onRegionChangeComplete={(region) => setMapRegion(region)}
+      >
+        {mapRegion && (
+          <Marker
+            coordinate={{
+              latitude: mapRegion.latitude,
+              longitude: mapRegion.longitude,
+            }}
+            title="Selected Location"
+          />
+        )}
+      </MapView>
+      <FloatingSearchBar onPlaceSelect={handlePlaceSelect} />
     </View>
   );
 }
