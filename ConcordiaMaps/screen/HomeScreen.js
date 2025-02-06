@@ -4,6 +4,8 @@ import MapView from "react-native-maps";
 import NavBar from "../components/NavBar";
 import Header from "../components/Header";
 import { LocationContext } from "../contexts/LocationContext";
+import Footer from "../components/Footer";
+import styles from "../styles";
 
 function HomeScreen() {
   const location = useContext(LocationContext);
@@ -32,15 +34,4 @@ function HomeScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#912338",
-  },
-  map: {
-    flex: 1,
-  },
-});
-
 export default HomeScreen;
