@@ -202,6 +202,8 @@ function ShuttleSchedule({ visible, onClose }) {
                 selectedCampus === "Loyola" && styles.activeButton,
               ]}
               onPress={() => setSelectedCampus("Loyola")}
+              accessibilityRole="button"
+              accessibilityLabel="Loyola"
             >
               <Text style={styles.toggleButtonText}>Loyola</Text>
             </TouchableOpacity>
