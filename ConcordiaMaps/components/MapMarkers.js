@@ -11,15 +11,17 @@ const MapMarkers = ({ markers }) => {
   if (!markers || markers.length === 0) return null;
 
 
-  const handleMarkerPress = (buildingName) => {
-    // Affiche une alerte avec le nom du bâtiment
+  const handleMarkerPress = (buildingName, latitude, longitude) => {
+    // Affiche une alerte avec le nom du bâtiment et ses coordonnées
     Alert.alert(
-      "Info spéciale",
-      `Info spéciale de ${buildingName}`,
+      "More Info",
+      `Building name: ${buildingName}
+      \nLatitude: ${latitude}
+      \nLongitude: ${longitude}`,
       [
         {
-          text: "Fermer",
-          onPress: () => console.log("Alerte fermée"),
+          text: "Close",
+          onPress: () => console.log("Alerte pour " + buildingName + " fermée"),
         },
       ],
       { cancelable: true }
@@ -32,7 +34,12 @@ const MapMarkers = ({ markers }) => {
       key={index}
       coordinate={marker.coordinate}
       title={marker.name}
-      onPress={() => handleMarkerPress(marker.name)} // Affiche l'alerte lors du clic sur un marqueur
+      // Affiche l'alerte lors du clic sur un marqueur
+      onPress={() => handleMarkerPress(
+        marker.name,
+        marker.coordinate.latitude,
+        marker.coordinate.longitude
+      )}
     >
       <Image source={customMarkerImage} style={styles.markerImage} />
       <Callout>
@@ -81,6 +88,3 @@ MapMarkers.propTypes = {
 
 
 export default MapMarkers;
-
-
-
