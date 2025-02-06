@@ -380,7 +380,7 @@ export const Building = [
     name: "Hingston Hall, wing HA",
     coordinate: {
       latitude: 45.459356,
-      longitude:-73.64127,
+      longitude: -73.64127,
     },
   },
   {

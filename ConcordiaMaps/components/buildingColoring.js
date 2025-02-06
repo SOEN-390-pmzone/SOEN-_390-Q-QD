@@ -1,6 +1,6 @@
 import React from "react";
 import { Polygon, Marker } from "react-native-maps";
-import { coloringData } from "../data/coloringData.js"; 
+import { coloringData } from "../data/coloringData.js";
 
 const BuildingColoring = () => {
   return (
