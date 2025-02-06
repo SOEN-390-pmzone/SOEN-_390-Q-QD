@@ -13,12 +13,11 @@ import { Building } from "../components/MapMarkers"; // Assuming Building array 
 
 function HomeScreen() {
   const location = useContext(LocationContext);
-
   return (
     <View style={styles.container}>
       <Header />
-      <NavBar />
-
+      <NavBar /> {/* This is the navigation bar */}
+      {/* Map view */}
       <MapView
         style={styles.map}
         region={
@@ -54,7 +53,7 @@ function HomeScreen() {
           </Marker>
         ))}
       </MapView>
-
+      {/* Footer */}
       <Footer />
     </View>
   );

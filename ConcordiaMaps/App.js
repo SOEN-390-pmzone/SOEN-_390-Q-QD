@@ -2,6 +2,7 @@ import * as React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import HomeScreen from "./screen/HomeScreen";
+import { LocationProvider } from "./contexts/LocationContext";
 import styles from "./styles";
 import { LocationProvider } from "./contexts/LocationContext";
 
