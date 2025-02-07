@@ -1,24 +1,21 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import Modal from "react-native-modal";
 import PropTypes from "prop-types";
 
 const PopupModal = ({ isVisible, data, onClose }) => {
   return (
     <View style={styles.modal}>
-      {" "}
-      {/* Custom style for the modal */}
       <Modal
         isVisible={isVisible}
-        onBackdropPress={onClose} // Close modal when tapping outside
-        onBackButtonPress={onClose} // Close modal on Android back button
-        onModalHide={onClose} // Ensure cleanup after modal hides
-        /* Animation properties */
-        animationIn="slideInUp" // Animation when modal opens
-        animationOut="slideOutDown" // Animation when modal closes
-        backdropTransitionOutTiming={0} // Ensure backdrop disappears immediately
-        useNativeDriver={true} // Use native driver for better performance
-        hideModalContentWhileAnimating={true} // Hide content during animation
+        onBackdropPress={onClose}
+        onBackButtonPress={onClose}
+        onModalHide={onClose}
+        animationIn="slideInUp"
+        animationOut="slideOutDown"
+        backdropTransitionOutTiming={0}
+        useNativeDriver={true}
+        hideModalContentWhileAnimating={true}
       >
         <View style={styles.modalContent}>
           <Text style={styles.popupTitle}>{data?.name}</Text>
@@ -27,10 +24,24 @@ const PopupModal = ({ isVisible, data, onClose }) => {
           </Text>
           <Text style={styles.popupText}>
             Longitude: {data?.coordinate.longitude}
-          </Text> 
-          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-            <Text style={styles.closeButtonText}>Close</Text>
-          </TouchableOpacity>
+          </Text>
+
+          {/* Buttons Container */}
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity 
+              style={styles.closeButton} 
+              onPress={onClose}
+            >
+              <Text style={styles.closeButtonText}>Close</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.directionButton} 
+              onPress={() => Alert.alert("Direction clicked")}
+            >
+              <Text style={styles.directionButtonText}>Get Direction</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </Modal>
     </View>
@@ -39,17 +50,14 @@ const PopupModal = ({ isVisible, data, onClose }) => {
 
 const styles = StyleSheet.create({
   modal: {
-    margin: 0, // Remove default margin
-    justifyContent: "flex-end", // Align modal to the bottom
-    backgroundColor: "rgba(255, 0, 0, 0.3)", // Temporary background color for debugging
+    margin: 0,
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(255, 0, 0, 0.3)",
   },
   modalContent: {
     backgroundColor: "white",
     padding: 20,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
+    borderRadius: 20,
     alignItems: "center",
   },
   popupTitle: {
@@ -61,13 +69,37 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginBottom: 5,
   },
-  closeButton: {
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
     marginTop: 15,
+  },
+  closeButton: {
+    backgroundColor: "white",
+    padding: 10,
+    borderRadius: 10,
+    flex: 1,
+    marginRight: 5,
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "black",
+  },
+  closeButtonText: {
+    color: "black",
+    fontSize: 14,
+    fontWeight: "bold",
+  },
+  directionButton: {
     backgroundColor: "#990033",
     padding: 10,
     borderRadius: 10,
+    borderColor: "black",
+    flex: 1,
+    marginLeft: 5,
+    alignItems: "center",
   },
-  closeButtonText: {
+  directionButtonText: {
     color: "white",
     fontSize: 14,
   },
@@ -86,3 +118,4 @@ PopupModal.propTypes = {
 };
 
 export default PopupModal;
+
