@@ -16,9 +16,6 @@ jobs:
         working-directory: ./ConcordiaMaps
         run: npm install
 
-      - name: Fix code style issues
-        run: npx prettier --write .
-
       - name: Lint Code
         working-directory: ./ConcordiaMaps
         run: npm run lint

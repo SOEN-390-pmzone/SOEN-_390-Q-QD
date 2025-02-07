@@ -79,7 +79,7 @@ MapMarkers.propTypes = {
         longitude: PropTypes.number.isRequired,
       }).isRequired,
       name: PropTypes.string.isRequired,
-    })
+    }),
   ),
 };
 
