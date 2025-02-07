@@ -531,7 +531,6 @@ export const Building = [
         latitude: 45.459636,
         longitude: -73.639758,
       },
-      address: "1455 de Maisonneuve Blvd W, Montreal, QC H3G 1M8"
     },
     {
       name: "Psychology Building",
@@ -539,7 +538,6 @@ export const Building = [
         latitude: 45.458938,
         longitude: -73.640467,
       },
-      address: "7141 Sherbrooke St W, Montreal, QC H4B 1R6"
     },
     {
       name: "Recreational and Athletics",
@@ -547,7 +545,6 @@ export const Building = [
         latitude: 45.456677,
         longitude: -73.637523,
       },
-      address: "7200 Sherbrooke St W, Montreal, QC H4B 1R6"
     },
     {
       name: "Loyola Jesuit Hall and Conference Center",
@@ -555,7 +552,6 @@ export const Building = [
         latitude: 45.458551,
         longitude: -73.641016,
       },
-      address: "7141 Sherbrooke St W, Montreal, QC H4B 1R6"
     },
     {
       name: "Student Center",
@@ -563,7 +559,6 @@ export const Building = [
         latitude: 45.459137,
         longitude: -73.639203,
       },
-      address: "1550 de Maisonneuve Blvd W, Montreal, QC H3G 1M8"
     },
     {
       name: "Solar House, SH Building",
@@ -571,7 +566,6 @@ export const Building = [
         latitude: 45.459298,
         longitude: -73.642478,
       },
-      address: "2200, rue Émery, Montreal, QC H3G 1M8"
     },
     {
       name: "Terrebonne Building, TA Building",
@@ -579,7 +573,6 @@ export const Building = [
         latitude: 45.460051,
         longitude: -73.640842,
       },
-      address: "1455 de Maisonneuve Blvd W, Montreal, QC H3G 1M8"
     },
     {
       name: "TB Annex",
@@ -587,7 +580,6 @@ export const Building = [
         latitude: 45.459992,
         longitude: -73.640897,
       },
-      address: "1455 de Maisonneuve Blvd W, Montreal, QC H3G 1M8"
     },
     {
       name: "Richard J. Renaud Science Complex",
@@ -595,7 +587,6 @@ export const Building = [
         latitude: 45.457567,
         longitude: -73.641739,
       },
-      address: "7141 Sherbrooke St W, Montreal, QC H4B 1R6"
     },
     {
       name: "Vanier Library",
@@ -603,7 +594,6 @@ export const Building = [
         latitude: 45.459026,
         longitude: -73.638606,
       },
-      address: "1400 de Maisonneuve Blvd W, Montreal, QC H3G 1M8"
     },
     {
       name: "Vanier Extension",
@@ -611,7 +601,6 @@ export const Building = [
         latitude: 45.459026,
         longitude: -73.638606,
       },
-      address: "1400 de Maisonneuve Blvd W, Montreal, QC H3G 1M8"
     },
   ];
   
