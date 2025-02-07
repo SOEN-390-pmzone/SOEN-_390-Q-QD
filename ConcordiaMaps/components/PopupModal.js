@@ -21,14 +21,13 @@ const PopupModal = ({ isVisible, data, onClose }) => {
         hideModalContentWhileAnimating={true} // Hide content during animation
       >
         <View style={styles.modalContent}>
-          <Text style={styles.popupTitle}>Building Info</Text>
-          <Text style={styles.popupText}>Name: {data?.name}</Text>
+          <Text style={styles.popupTitle}>{data?.name}</Text>
           <Text style={styles.popupText}>
             Latitude: {data?.coordinate.latitude}
           </Text>
           <Text style={styles.popupText}>
             Longitude: {data?.coordinate.longitude}
-          </Text>
+          </Text> 
           <TouchableOpacity style={styles.closeButton} onPress={onClose}>
             <Text style={styles.closeButtonText}>Close</Text>
           </TouchableOpacity>
@@ -47,12 +46,14 @@ const styles = StyleSheet.create({
   modalContent: {
     backgroundColor: "white",
     padding: 20,
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
     alignItems: "center",
   },
   popupTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "bold",
     marginBottom: 10,
   },
@@ -62,9 +63,9 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     marginTop: 15,
-    backgroundColor: "#007bff",
+    backgroundColor: "#990033",
     padding: 10,
-    borderRadius: 5,
+    borderRadius: 10,
   },
   closeButtonText: {
     color: "white",
