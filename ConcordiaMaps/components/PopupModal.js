@@ -24,12 +24,6 @@ const PopupModal = ({ isVisible, data, onClose }) => {
       <View style={styles.modalOverlay}>
         <View style={styles.modalContainer}>
           <Text style={styles.modalTitle}>{displayData.name}</Text>
-          <Text style={styles.modalText}>
-            Latitude: {displayData.coordinate.latitude}
-          </Text>
-          <Text style={styles.modalText}>
-            Longitude: {displayData.coordinate.longitude}
-          </Text>
           <TouchableOpacity style={styles.closeButton} onPress={onClose}>
             <Text style={styles.closeButtonText}>Close</Text>
           </TouchableOpacity>
