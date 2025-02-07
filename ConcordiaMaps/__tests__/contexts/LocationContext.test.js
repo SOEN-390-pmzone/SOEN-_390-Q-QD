@@ -1,6 +1,6 @@
 import React from "react";
 import { render, waitFor } from "@testing-library/react-native";
-import { LocationProvider, LocationContext } from "../contexts/LocationContext";
+import { LocationProvider, LocationContext } from "../../contexts/LocationContext";
 import * as Location from "expo-location";
 
 jest.mock("expo-location", () => ({
