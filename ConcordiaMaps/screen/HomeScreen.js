@@ -17,7 +17,10 @@ function HomeScreen() {
   return (
     <View style={styles.container}>
       <Header />
-      <NavBar /> {/* This is the navigation bar */}
+
+      {/* Navigation bar */}
+      <NavBar />
+
       {/* Map view */}
       <MapView
         style={styles.map}
@@ -55,6 +58,7 @@ function HomeScreen() {
         ))}
         <BuildingColoring />
       </MapView>
+
       {/* Footer */}
       <Footer />
     </View>
