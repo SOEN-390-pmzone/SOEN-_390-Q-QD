@@ -24,6 +24,10 @@ jobs:
         working-directory: ./ConcordiaMaps
         run: npx prettier --check .
 
+      - name: Run Jest Tests
+        working-directory: ./ConcordiaMaps
+        run: npm run test
+
   test:
     runs-on: ubuntu-latest
     steps:
@@ -41,6 +45,10 @@ jobs:
       - name: Format Code
         working-directory: ./ConcordiaMaps
         run: npx prettier --check .
+
+      - name: Run Jest Tests
+        working-directory: ./ConcordiaMaps
+        run: npm run test
 
   deploy:
     runs-on: ubuntu-latest

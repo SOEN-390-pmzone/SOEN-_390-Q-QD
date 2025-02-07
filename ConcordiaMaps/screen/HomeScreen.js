@@ -1,24 +1,33 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import { View, StyleSheet, Text, TouchableOpacity, Image } from "react-native";
 import axios from "axios";
-import MapView from "react-native-maps";
+import MapView, { Marker } from "react-native-maps";
 import NavBar from "../components/NavBar";
 import Header from "../components/Header";
+import { LocationContext } from "../contexts/LocationContext";
+import Footer from "../components/Footer";
 import styles from "../styles";
-//import { GOOGLE_MAPS_API_KEY, LOYOLA_POSTAL_CODE, SGW_POSTAL_CODE } from "@env";
 
+// Import the building data and custom marker image
+const customMarkerImage = require("../assets/PinLogo.png");
+import { Building } from "../components/MapMarkers"; // Assuming Building array is exported from MapMarkers
+import BuildingColoring from "../components/buildingColoring";
+import Legend from "../components/Legend";
+ 
 const SGW_POSTAL_CODE = process.env.SGW_POSTAL_CODE;
 const LOYOLA_POSTAL_CODE = process.env.LOYOLA_POSTAL_CODE;
 const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY;
 
 function HomeScreen() {
+  const location = useContext(LocationContext);
   const loyolaPostalCode = LOYOLA_POSTAL_CODE;
   const sgwPostalCode = SGW_POSTAL_CODE;
-
+  
   const [postalCode, setPostalCode] = useState(sgwPostalCode);
   const [coordinates, setCoordinates] = useState(null);
   const [error, setError] = useState("");
-
+  
   const mapRef = useRef(null);
 
   const convertToCoordinates = async (postal_code) => {
@@ -72,27 +81,53 @@ function HomeScreen() {
       prevPostalCode === sgwPostalCode ? loyolaPostalCode : sgwPostalCode,
     );
   };
-
   return (
     <View style={styles.container}>
       <Header />
       <NavBar />
-      {error ? <Text testID="error-message">{error}</Text> : null}
+
+     {error ? <Text testID="error-message">{error}</Text> : null}
       {coordinates ? (
         <>
           <MapView
             testID="map-view"
             style={styles.map}
             ref={mapRef}
-            initialRegion={{
-              latitude: coordinates.latitude,
-              longitude: coordinates.longitude,
-              latitudeDelta: 0.01, // Adjusted for a balance between close zoom and larger area
-              longitudeDelta: 0.01,
-            }}
-          />
-        </>
-      ) : (
+            initialRegion={
+          location
+            ? {
+                latitude: location.latitude,
+                longitude: location.longitude,
+                latitudeDelta: 0.005,
+                longitudeDelta: 0.005,
+              }
+            : {
+                latitude: 45.4973, // Default center (SGW campus)
+                longitude: -73.5789,
+                latitudeDelta: 0.01,
+                longitudeDelta: 0.01,
+              }
+        }
+        showsUserLocation={true}
+        loadingEnabled={true}
+        watchUserLocation={true}
+      >
+        {Building.map((building, index) => (
+          <Marker
+            key={index}
+            coordinate={building.coordinate}
+            title={building.name}
+          >
+            <Image
+              source={customMarkerImage}
+              style={styles.customMarkerImage}
+            />
+          </Marker>
+        ))}
+        <BuildingColoring />
+      </MapView>
+ </>
+ ) : (
         <Text>Loading...</Text>
       )}
       {error ? <Text>Error: {error}</Text> : null}
@@ -107,8 +142,11 @@ function HomeScreen() {
           resizeMode={"cover"} // cover or contain its up to you view look
         />
       </TouchableOpacity>
+      <Legend />
+
+      <Footer />
     </View>
-  );
+ );
 }
 const localStyles = StyleSheet.create({
   button: {

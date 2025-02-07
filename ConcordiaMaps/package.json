@@ -17,7 +17,8 @@
   "jest": {
     "preset": "jest-expo",
     "transformIgnorePatterns": [
-      "node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.|@expo-google-fonts/.|react-navigation|@react-navigation/.*|@sentry/react-native|native-base|react-native-svg)"
+      "node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@sentry/react-native|native-base|react-native-svg)"
+
     ]
   },
   "dependencies": {
@@ -27,7 +28,6 @@
     "@react-navigation/native-stack": "^7.2.0",
     "axios": "^1.7.9",
     "concordiamaps": "file:",
-    "expo": "~52.0.27",
     "expo-auth-session": "^6.0.3",
     "expo-location": "^18.0.5",
     "expo-status-bar": "~2.0.1",
@@ -36,14 +36,17 @@
     "metro-react-native-babel-preset": "^0.77.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "react-native": "0.76.6",
+    "expo": "~52.0.31",
+    "prop-types": "^15.8.1",
+    "react-native": "^0.76.7",
     "react-native-gesture-handler": "~2.20.2",
     "react-native-maps": "1.18.0",
     "react-native-reanimated": "^3.16.7",
     "react-native-safe-area-context": "4.12.0",
     "react-native-screens": "~4.4.0",
     "react-native-vector-icons": "^10.2.0",
-    "react-native-web": "~0.19.13"
+    "react-native-web": "~0.19.13",
+    "react-test-renderer": "18.3.1"
   },
   "devDependencies": {
     "@babel/core": "^7.26.7",
@@ -64,7 +67,8 @@
     "lint": "^0.8.19",
     "prettier": "3.4.2",
     "react-native-dotenv": "^3.4.11",
-    "react-test-renderer": "18.3.1"
+    "react-test-renderer": "18.3.1",
+    "eslint-plugin-jest": "^28.11.0"
   },
   "private": true
 }
