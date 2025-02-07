@@ -525,97 +525,109 @@ export const Building = [
       longitude: -73.637683,
     },
   },
-  {
-    name: "Physical Service",
-    coordinate: {
-      latitude: 45.459636,
-      longitude: -73.639758,
+    {
+      name: "Physical Service",
+      coordinate: {
+        latitude: 45.459636,
+        longitude: -73.639758,
+      },
+      address: "1455 de Maisonneuve Blvd W, Montreal, QC H3G 1M8"
     },
-  },
-  {
-    name: "Psychology Building",
-    coordinate: {
-      latitude: 45.458938,
-      longitude: -73.640467,
+    {
+      name: "Psychology Building",
+      coordinate: {
+        latitude: 45.458938,
+        longitude: -73.640467,
+      },
+      address: "7141 Sherbrooke St W, Montreal, QC H4B 1R6"
     },
-  },
-  {
-    name: "Recreational and Athletics",
-    coordinate: {
-      latitude: 45.456677,
-      longitude: -73.637523,
+    {
+      name: "Recreational and Athletics",
+      coordinate: {
+        latitude: 45.456677,
+        longitude: -73.637523,
+      },
+      address: "7200 Sherbrooke St W, Montreal, QC H4B 1R6"
     },
-  },
-  {
-    name: "Loyola Jesuit Hall and Conference Center",
-    coordinate: {
-      latitude: 45.458551,
-      longitude: -73.641016,
+    {
+      name: "Loyola Jesuit Hall and Conference Center",
+      coordinate: {
+        latitude: 45.458551,
+        longitude: -73.641016,
+      },
+      address: "7141 Sherbrooke St W, Montreal, QC H4B 1R6"
     },
-  },
-  {
-    name: "Student Center",
-    coordinate: {
-      latitude: 45.459137,
-      longitude: -73.639203,
+    {
+      name: "Student Center",
+      coordinate: {
+        latitude: 45.459137,
+        longitude: -73.639203,
+      },
+      address: "1550 de Maisonneuve Blvd W, Montreal, QC H3G 1M8"
     },
-  },
-  {
-    name: "Solar House, SH Building",
-    coordinate: {
-      latitude: 45.459298,
-      longitude: -73.642478,
+    {
+      name: "Solar House, SH Building",
+      coordinate: {
+        latitude: 45.459298,
+        longitude: -73.642478,
+      },
+      address: "2200, rue Émery, Montreal, QC H3G 1M8"
     },
-  },
-  {
-    name: "Terrebonne Building, TA Building",
-    coordinate: {
-      latitude: 45.460051,
-      longitude: -73.640842,
+    {
+      name: "Terrebonne Building, TA Building",
+      coordinate: {
+        latitude: 45.460051,
+        longitude: -73.640842,
+      },
+      address: "1455 de Maisonneuve Blvd W, Montreal, QC H3G 1M8"
     },
-  },
-  {
-    name: "TB Annex",
-    coordinate: {
-      latitude: 45.459992,
-      longitude: -73.640897,
+    {
+      name: "TB Annex",
+      coordinate: {
+        latitude: 45.459992,
+        longitude: -73.640897,
+      },
+      address: "1455 de Maisonneuve Blvd W, Montreal, QC H3G 1M8"
     },
-  },
-  {
-    name: "Richard J. Renaud Science Complex",
-    coordinate: {
-      latitude: 45.457567,
-      longitude: -73.641739,
+    {
+      name: "Richard J. Renaud Science Complex",
+      coordinate: {
+        latitude: 45.457567,
+        longitude: -73.641739,
+      },
+      address: "7141 Sherbrooke St W, Montreal, QC H4B 1R6"
     },
-  },
-  {
-    name: "Vanier Library",
-    coordinate: {
-      latitude: 45.459026,
-      longitude: -73.638606,
+    {
+      name: "Vanier Library",
+      coordinate: {
+        latitude: 45.459026,
+        longitude: -73.638606,
+      },
+      address: "1400 de Maisonneuve Blvd W, Montreal, QC H3G 1M8"
     },
-  },
-  {
-    name: "Vanier Extension",
-    coordinate: {
-      latitude: 45.459026,
-      longitude: -73.638606,
+    {
+      name: "Vanier Extension",
+      coordinate: {
+        latitude: 45.459026,
+        longitude: -73.638606,
+      },
+      address: "1400 de Maisonneuve Blvd W, Montreal, QC H3G 1M8"
     },
-  },
-];
-
-// Default center coordinates for each campus
-export const CampusCoordinates = {
-  SGW: {
-    latitude: 45.4973,
-    longitude: -73.5789,
-    latitudeDelta: 0.01,
-    longitudeDelta: 0.01,
-  },
-  Loyola: {
-    latitude: 45.458256,
-    longitude: -73.640472,
-    latitudeDelta: 0.01,
-    longitudeDelta: 0.01,
-  },
-};
+  ];
+  
+  // Default center coordinates for each campus
+  export const CampusCoordinates = {
+    SGW: {
+      latitude: 45.4973,
+      longitude: -73.5789,
+      latitudeDelta: 0.01,
+      longitudeDelta: 0.01,
+    },
+    Loyola: {
+      latitude: 45.458256,
+      longitude: -73.640472,
+      latitudeDelta: 0.01,
+      longitudeDelta: 0.01,
+    },
+  };
+  
