@@ -11,17 +11,14 @@ import styles from "../styles";
 const customMarkerImage = require("../assets/PinLogo.png");
 import { Building } from "../components/MapMarkers"; // Assuming Building array is exported from MapMarkers
 import BuildingColoring from "../components/buildingColoring";
+import Legend from "../components/Legend";
 
 function HomeScreen() {
   const location = useContext(LocationContext);
   return (
     <View style={styles.container}>
       <Header />
-
-      {/* Navigation bar */}
       <NavBar />
-
-      {/* Map view */}
       <MapView
         style={styles.map}
         region={
@@ -43,7 +40,6 @@ function HomeScreen() {
         loadingEnabled={true}
         watchUserLocation={true}
       >
-        {/* Render building markers */}
         {Building.map((building, index) => (
           <Marker
             key={index}
@@ -58,8 +54,8 @@ function HomeScreen() {
         ))}
         <BuildingColoring />
       </MapView>
+      <Legend />
 
-      {/* Footer */}
       <Footer />
     </View>
   );
