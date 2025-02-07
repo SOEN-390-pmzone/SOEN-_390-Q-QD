@@ -1,4 +1,10 @@
 import requests
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+api_key = os.getenv("GOOGLEMAPS_API_KEY")
+
 
 API_KEY = "AIzaSyClbt9KbeGYGRWAEhjkC9O7uBG9-TaKJ4g"
 # address = "1600 Amphitheatre Parkway, Mountain View, CA"
