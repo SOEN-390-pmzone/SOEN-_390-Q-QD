@@ -10,7 +10,7 @@ import styles from "../styles";
 // Import the building data and custom marker image
 const customMarkerImage = require("../assets/PinLogo.png");
 import { Building } from "../components/MapMarkers"; // Assuming Building array is exported from MapMarkers
-import BuildingColoring from "../components/buildingColoring"; 
+import BuildingColoring from "../components/buildingColoring";
 
 function HomeScreen() {
   const location = useContext(LocationContext);
@@ -52,7 +52,6 @@ function HomeScreen() {
               style={styles.customMarkerImage}
             />
           </Marker>
-
         ))}
         <BuildingColoring />
       </MapView>
