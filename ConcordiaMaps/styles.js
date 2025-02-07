@@ -1,4 +1,7 @@
 import { StyleSheet } from "react-native";
+// import { Dimensions} from "react-native";
+
+// const { width, height } = Dimensions.get("window");
 
 const styles = StyleSheet.create({
   container: {
@@ -89,6 +92,10 @@ const styles = StyleSheet.create({
     width: "100%",
     color: "white", // Red color for menu items
     fontWeight: "bold",
+  },
+  customMarkerImage: {
+    width: 30,
+    height: 30,
   },
 });
 
