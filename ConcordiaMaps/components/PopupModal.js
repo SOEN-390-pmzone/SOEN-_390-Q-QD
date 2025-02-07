@@ -1,121 +1,89 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
-import Modal from "react-native-modal";
+import { Modal, View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import PropTypes from "prop-types";
 
 const PopupModal = ({ isVisible, data, onClose }) => {
+  // Default data for testing if no specific data is provided
+  const defaultData = {
+    name: "Default Location",
+    coordinate: {
+      latitude: 0.0000,
+      longitude: 0.0000,
+    },
+  };
+
+  const displayData = data || defaultData; // Use defaultData if no data is provided
+
   return (
-    <View style={styles.modal}>
-      <Modal
-        isVisible={isVisible}
-        onBackdropPress={onClose}
-        onBackButtonPress={onClose}
-        onModalHide={onClose}
-        animationIn="slideInUp"
-        animationOut="slideOutDown"
-        backdropTransitionOutTiming={0}
-        useNativeDriver={true}
-        hideModalContentWhileAnimating={true}
-      >
-        <View style={styles.modalContent}>
-          <Text style={styles.popupTitle}>{data?.name}</Text>
-          <Text style={styles.popupText}>
-            Latitude: {data?.coordinate.latitude}
+    <Modal
+      transparent
+      animationType="slide"
+      visible={isVisible}
+      onRequestClose={onClose}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContainer}>
+          <Text style={styles.modalTitle}>{displayData.name}</Text>
+          <Text style={styles.modalText}>
+            Latitude: {displayData.coordinate.latitude}
           </Text>
-          <Text style={styles.popupText}>
-            Longitude: {data?.coordinate.longitude}
+          <Text style={styles.modalText}>
+            Longitude: {displayData.coordinate.longitude}
           </Text>
-
-          {/* Buttons Container */}
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity 
-              style={styles.closeButton} 
-              onPress={onClose}
-            >
-              <Text style={styles.closeButtonText}>Close</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity 
-              style={styles.directionButton} 
-              onPress={() => Alert.alert("Direction clicked")}
-            >
-              <Text style={styles.directionButtonText}>Get Direction</Text>
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+            <Text style={styles.closeButtonText}>Close</Text>
+          </TouchableOpacity>
         </View>
-      </Modal>
-    </View>
+      </View>
+    </Modal>
   );
 };
 
+PopupModal.propTypes = {
+  isVisible: PropTypes.bool.isRequired,
+  data: PropTypes.shape({
+    name: PropTypes.string.isRequired,
+    coordinate: PropTypes.shape({
+      latitude: PropTypes.number.isRequired,
+      longitude: PropTypes.number.isRequired,
+    }).isRequired,
+  }),
+  onClose: PropTypes.func.isRequired,
+};
+
 const styles = StyleSheet.create({
-  modal: {
-    margin: 0,
-    justifyContent: "flex-end",
-    backgroundColor: "rgba(255, 0, 0, 0.3)",
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
-  modalContent: {
+  modalContainer: {
     backgroundColor: "white",
     padding: 20,
-    borderRadius: 20,
+    borderRadius: 10,
+    width: 250,
     alignItems: "center",
   },
-  popupTitle: {
-    fontSize: 20,
+  modalTitle: {
+    fontSize: 18,
     fontWeight: "bold",
     marginBottom: 10,
   },
-  popupText: {
+  modalText: {
     fontSize: 14,
     marginBottom: 5,
   },
-  buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
-    marginTop: 15,
-  },
   closeButton: {
-    backgroundColor: "white",
+    marginTop: 10,
+    backgroundColor: "#007bff",
     padding: 10,
-    borderRadius: 10,
-    flex: 1,
-    marginRight: 5,
-    alignItems: "center",
-    borderWidth: 2,
-    borderColor: "black",
+    borderRadius: 5,
   },
   closeButtonText: {
-    color: "black",
-    fontSize: 14,
-    fontWeight: "bold",
-  },
-  directionButton: {
-    backgroundColor: "#990033",
-    padding: 10,
-    borderRadius: 10,
-    borderColor: "black",
-    flex: 1,
-    marginLeft: 5,
-    alignItems: "center",
-  },
-  directionButtonText: {
     color: "white",
     fontSize: 14,
   },
 });
 
-PopupModal.propTypes = {
-  isVisible: PropTypes.bool.isRequired,
-  data: PropTypes.shape({
-    name: PropTypes.string,
-    coordinate: PropTypes.shape({
-      latitude: PropTypes.number,
-      longitude: PropTypes.number,
-    }),
-  }),
-  onClose: PropTypes.func.isRequired,
-};
-
 export default PopupModal;
-

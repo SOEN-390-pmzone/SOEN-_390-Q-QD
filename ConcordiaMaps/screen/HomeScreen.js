@@ -6,17 +6,29 @@ import Header from "../components/Header";
 import { LocationContext } from "../contexts/LocationContext";
 import Footer from "../components/Footer";
 import styles from "../styles";
+import { Building } from "../components/MapMarkers";
+import { ModalContext } from "../App"; // Import ModalContext
+import PopupModal from "../components/PopupModal"; // Adjust the path if necessary
 
-// Import the building data and custom marker image
+
 const customMarkerImage = require("../assets/PinLogo.png");
-import { Building } from "../components/MapMarkers"; // Assuming Building array is exported from MapMarkers
 
 function HomeScreen() {
   const location = useContext(LocationContext);
+  const { isModalVisible, modalData, toggleModal } = useContext(ModalContext); // Correctly access modal context
+
+  // Function to handle marker press and pass data to the modal
+  const handleMarkerPress = (building) => {
+    toggleModal(); // Show modal
+    modalData.name = building.name; // Set the building name
+    modalData.coordinate = building.coordinate; // Set the building coordinates
+  };
+
   return (
     <View style={styles.container}>
       <Header />
-      <NavBar /> {/* This is the navigation bar */}
+      <NavBar /> {/* Navigation bar */}
+
       {/* Map view */}
       <MapView
         style={styles.map}
@@ -45,16 +57,22 @@ function HomeScreen() {
             key={index}
             coordinate={building.coordinate}
             title={building.name}
+            onPress={() => handleMarkerPress(building)} // Trigger modal on press
           >
-            <Image
-              source={customMarkerImage}
-              style={styles.customMarkerImage}
-            />
+            <Image source={customMarkerImage} style={styles.customMarkerImage} />
           </Marker>
         ))}
       </MapView>
+
       {/* Footer */}
       <Footer />
+
+      {/* Show the popup modal */}
+      <PopupModal
+        isVisible={isModalVisible}
+        data={modalData}
+        onClose={toggleModal}
+      />
     </View>
   );
 }
