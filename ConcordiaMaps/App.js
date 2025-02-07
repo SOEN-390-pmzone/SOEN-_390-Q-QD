@@ -4,7 +4,6 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import HomeScreen from "./screen/HomeScreen";
 import { LocationProvider } from "./contexts/LocationContext";
 import styles from "./styles";
-import { LocationProvider } from "./contexts/LocationContext";
 
 const Stack = createNativeStackNavigator();
 
