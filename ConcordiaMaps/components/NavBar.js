@@ -13,7 +13,7 @@ function NavBar() {
       toValue,
       duration: 300,
       useNativeDriver: true,
-    }).start(() => setIsOpen(!isOpen)); 
+    }).start(() => setIsOpen(!isOpen));
   };
 
   const handlePress = (item) => {

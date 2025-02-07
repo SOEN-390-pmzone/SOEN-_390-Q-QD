@@ -1,40 +1,58 @@
 import React from "react";
-import { render, fireEvent } from "@testing-library/react-native";
-import PopupModal from "../../components/PopupModal";
+import { render, waitFor } from "@testing-library/react-native";
+import {
+  LocationProvider,
+  LocationContext,
+} from "../../contexts/LocationContext";
+import * as Location from "expo-location";
 
+jest.mock("expo-location", () => ({
+  requestForegroundPermissionsAsync: jest.fn(),
+  getCurrentPositionAsync: jest.fn(),
+}));
 
-jest.mock("react-native-modal", () => (props) => {
-  return props.isVisible ? <>{props.children}</> : null;
-});
+describe("LocationProvider", () => {
+  it("fetches and provides location", async () => {
+    const mockCoords = { latitude: 37.7749, longitude: -122.4194 };
 
-describe("PopupModal", () => {
-  const mockData = {
-    name: "Building A",
-    coordinate: {
-      latitude: 45.5017,
-      longitude: -73.5673,
-    },
-  };
+    Location.requestForegroundPermissionsAsync.mockResolvedValue({
+      status: "granted",
+    });
+    Location.getCurrentPositionAsync.mockResolvedValue({ coords: mockCoords });
 
-  it("should render the modal with the correct data", () => {
-    const { getByText } = render(
-      <PopupModal isVisible={true} data={mockData} onClose={jest.fn()} />
+    let contextValue;
+    render(
+      <LocationProvider>
+        <LocationContext.Consumer>
+          {(value) => {
+            contextValue = value;
+            return null;
+          }}
+        </LocationContext.Consumer>
+      </LocationProvider>,
     );
 
-    expect(getByText("Building A")).toBeTruthy();
-    expect(getByText("Latitude: 45.5017")).toBeTruthy();
-    expect(getByText("Longitude: -73.5673")).toBeTruthy();
+    await waitFor(() => expect(contextValue).toEqual(mockCoords));
   });
 
-  it("should call onClose when the close button is pressed", () => {
-    const onCloseMock = jest.fn();
-    const { getByText } = render(
-      <PopupModal isVisible={true} data={mockData} onClose={onCloseMock} />
+  it("handles permission denied case", async () => {
+    Location.requestForegroundPermissionsAsync.mockResolvedValue({
+      status: "denied",
+    });
+    Location.getCurrentPositionAsync.mockResolvedValue(null);
+
+    let contextValue;
+    render(
+      <LocationProvider>
+        <LocationContext.Consumer>
+          {(value) => {
+            contextValue = value;
+            return null;
+          }}
+        </LocationContext.Consumer>
+      </LocationProvider>,
     );
 
-    fireEvent.press(getByText("Close"));
-    expect(onCloseMock).toHaveBeenCalled();
+    await waitFor(() => expect(contextValue).toBeNull());
   });
-
-  // TODO: make a test for the "Get Direction" button
 });

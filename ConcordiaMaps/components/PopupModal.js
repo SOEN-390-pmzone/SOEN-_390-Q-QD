@@ -28,15 +28,12 @@ const PopupModal = ({ isVisible, data, onClose }) => {
 
           {/* Buttons Container */}
           <View style={styles.buttonContainer}>
-            <TouchableOpacity 
-              style={styles.closeButton} 
-              onPress={onClose}
-            >
+            <TouchableOpacity style={styles.closeButton} onPress={onClose}>
               <Text style={styles.closeButtonText}>Close</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity 
-              style={styles.directionButton} 
+            <TouchableOpacity
+              style={styles.directionButton}
               onPress={() => Alert.alert("Direction clicked")}
             >
               <Text style={styles.directionButtonText}>Get Direction</Text>
@@ -106,6 +103,7 @@ const styles = StyleSheet.create({
 });
 
 PopupModal.propTypes = {
+  children: PropTypes.node.isRequired,
   isVisible: PropTypes.bool.isRequired,
   data: PropTypes.shape({
     name: PropTypes.string,
@@ -118,4 +116,3 @@ PopupModal.propTypes = {
 };
 
 export default PopupModal;
-
