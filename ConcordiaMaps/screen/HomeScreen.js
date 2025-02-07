@@ -5,7 +5,11 @@ import MapView from "react-native-maps";
 import NavBar from "../components/NavBar";
 import Header from "../components/Header";
 import styles from "../styles";
-import { GOOGLE_MAPS_API_KEY, LOYOLA_POSTAL_CODE, SGW_POSTAL_CODE } from "@env";
+//import { GOOGLE_MAPS_API_KEY, LOYOLA_POSTAL_CODE, SGW_POSTAL_CODE } from "@env";
+
+const SGW_POSTAL_CODE = process.env.SGW_POSTAL_CODE;
+const LOYOLA_POSTAL_CODE = process.env.LOYOLA_POSTAL_CODE;
+const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY;
 
 function HomeScreen() {
   const loyolaPostalCode = LOYOLA_POSTAL_CODE;
