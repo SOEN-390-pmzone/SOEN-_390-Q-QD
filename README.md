@@ -39,7 +39,7 @@ npm install --global @expo/ngrok@^4.1.0
 ```
 Then, run the following command inside of the `ConcordiaMaps` directory:
 ```
-npx expo start -c --tunnel
+npx expo start --tunnel
 ```
 - Scan the generated QR code in the terminal with the Expo Go app for Android or the Camera app for iOS
 
