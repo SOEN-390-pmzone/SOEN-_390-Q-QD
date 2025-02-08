@@ -48,12 +48,15 @@ jobs:
 
       - name: Run Jest Tests
         working-directory: ./ConcordiaMaps
-        run: npm run test -- --coverage
-
+        run: npm run test
+      
+      - name: Run Jest Coverage?
+        working-directory: ./ConcordiaMaps
+        run: npm jest --coverage
 
       - name: Run SonarQube analysis
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_CUBE_KEY }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           npx sonarqube-scanner \
             -Dsonar.projectKey=SOEN-390-pmzone_SOEN-_390-Q-QD \
