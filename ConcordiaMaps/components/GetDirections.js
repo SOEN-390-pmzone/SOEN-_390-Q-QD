@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Button, StyleSheet } from "react-native";
+import { View, Button } from "react-native";
 import MapView, { Polyline, Marker } from "react-native-maps";
 import FloatingSearchBar from "./FloatingSearchBar";
 import Header from "./Header";
@@ -44,10 +44,10 @@ const GetDirections = () => {
       <MapView
         style={styles.map}
         initialRegion={{
-          latitude: 43.65107,
-          longitude: -79.347015,
-          latitudeDelta: 0.05,
-          longitudeDelta: 0.05,
+          latitude: 45.4973, // Default center (SGW campus)
+          longitude: -73.5789,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
         }}
       >
         {origin && <Marker coordinate={origin} title="Origin" />}

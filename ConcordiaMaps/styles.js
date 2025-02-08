@@ -99,7 +99,6 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     marginTop: 10,
-    backgroundColor: "white",
     borderRadius: 25,
     paddingVertical: 5,
     shadowColor: "#000",

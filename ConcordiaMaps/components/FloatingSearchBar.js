@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import styles from "../styles";
+import PropTypes from "prop-types";
 
 const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
   const GOOGLE_MAPS_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
@@ -16,8 +17,6 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
   const [predictions, setPredictions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState("");
-
-  console.log(GOOGLE_MAPS_API_KEY);
 
   const searchPlaces = async (text) => {
     setSearchQuery(text);
@@ -29,7 +28,7 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
     setLoading(true);
     try {
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_MAPS_API_KEY}&components=country:ca`
+        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_MAPS_API_KEY}&components=country:ca`,
       );
       const { predictions } = await response.json();
       setPredictions(predictions || []);
@@ -43,7 +42,7 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
   const handleSelection = async (placeId, description) => {
     try {
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry&key=${GOOGLE_MAPS_API_KEY}`
+        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry&key=${GOOGLE_MAPS_API_KEY}`,
       );
       const { result } = await response.json();
       if (result?.geometry?.location) {
@@ -108,6 +107,11 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
       )}
     </View>
   );
+};
+//fix proptypes
+FloatingSearchBar.propTypes = {
+  onPlaceSelect: PropTypes.func.isRequired,
+  placeholder: PropTypes.string,
 };
 
 export default FloatingSearchBar;
