@@ -56,8 +56,8 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_CUBE_KEY }}
         run: |
           npx sonarqube-scanner \
-            -Dsonar.projectKey=PROJECT_KEY \
-            -Dsonar.organization=ORG_KEY \
+            -Dsonar.projectKey=SOEN-390-pmzone_SOEN-_390-Q-QD \
+            -Dsonar.organization=soen-390-pmzone \
             -Dsonar.sources=. \
             -Dsonar.exclusions=**/node_modules/**,**/*.test.js \
             -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
