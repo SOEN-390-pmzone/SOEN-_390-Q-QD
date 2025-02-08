@@ -120,6 +120,17 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     opacity: 0.8,
   },
+  button: {
+    position: "absolute",
+    bottom: 60,
+    right: 20,
+    width: 50,
+    height: 50,
+  },
+  buttonImage: {
+    width: "100%",
+    height: "100%",
+  },
 });
 
 export default styles;
