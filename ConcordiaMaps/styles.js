@@ -159,6 +159,26 @@ const styles = StyleSheet.create({
   },
   icon: {
     marginRight: 10,
+  colorBox: {
+    width: 20,
+    height: 20,
+    marginRight: 10,
+  },
+  label: {
+    fontSize: 14,
+  },
+  title: {
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
+  legendContainer: {
+    position: "absolute",
+    top: 740,
+    right: 230,
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    padding: 2,
+    borderRadius: 5,
+    opacity: 0.8,
   },
 });
 
