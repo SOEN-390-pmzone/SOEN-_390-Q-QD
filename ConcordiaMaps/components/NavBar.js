@@ -1,10 +1,13 @@
 import React, { useState } from "react";
-import { View, TouchableOpacity, Text, Animated, Alert } from "react-native";
+import { View, TouchableOpacity, Text, Animated } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 import styles from "../styles";
+import { Alert } from "react-native";
 
 function NavBar() {
   const [isOpen, setIsOpen] = useState(false);
   const animation = useState(new Animated.Value(0))[0];
+  const navigation = useNavigation();
 
   const toggleMenu = () => {
     const toValue = isOpen ? 0 : 1;
@@ -17,7 +20,11 @@ function NavBar() {
   };
 
   const handlePress = (item) => {
-    Alert.alert(`You clicked: ${item}`);
+    if (item === "Get directions") {
+      navigation.navigate("GetDirections");
+    } else {
+      Alert.alert(`You clicked: ${item}`);
+    }
   };
 
   const translateX = animation.interpolate({
@@ -56,4 +63,5 @@ function NavBar() {
     </View>
   );
 }
+
 export default NavBar;

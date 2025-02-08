@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import HomeScreen from "./screen/HomeScreen";
 import { LocationProvider } from "./contexts/LocationContext";
 import styles from "./styles";
+import GetDirections from "./components/GetDirections";
 
 const Stack = createNativeStackNavigator();
 
@@ -17,6 +18,7 @@ export default function App() {
             name="Home"
             component={HomeScreen}
           />
+          <Stack.Screen name="GetDirections" component={GetDirections} />
         </Stack.Navigator>
       </NavigationContainer>
     </LocationProvider>
