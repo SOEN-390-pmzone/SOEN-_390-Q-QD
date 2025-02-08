@@ -8,10 +8,10 @@ import Footer from "../components/Footer";
 import styles from "../styles";
 
 const customMarkerImage = require("../assets/PinLogo.png");
-import { Building } from "../components/MapMarkers"; // Assuming Building array is exported from MapMarkers
+import { Building } from "../components/MapMarkers"; 
 import BuildingColoring from "../components/buildingColoring";
 import Legend from "../components/Legend";
-import ShuttleStop from "../components/ShuttleStop"; // Ensure this is included
+import ShuttleStop from "../components/ShuttleStop"; 
 
 function HomeScreen() {
   const location = useContext(LocationContext);
@@ -40,7 +40,7 @@ function HomeScreen() {
         loadingEnabled={true}
         watchUserLocation={true}
       >
-        {/* Keep Building Markers */}
+
         {Building.map((building, index) => (
           <Marker
             key={index}
@@ -54,14 +54,11 @@ function HomeScreen() {
           </Marker>
         ))}
 
-        {/* Keep BuildingColoring */}
         <BuildingColoring />
 
-        {/* Ensure ShuttleStop is included */}
         <ShuttleStop />
       </MapView>
 
-      {/* Keep Legend */}
       <Legend />
       <Footer />
     </View>
