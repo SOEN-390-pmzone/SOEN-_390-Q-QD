@@ -30,7 +30,7 @@ const FloatingSearchBar = ({ onPlaceSelect }) => {
     setLoading(true);
     try {
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_MAPS_API_KEY}&components=country:ca`
+        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_MAPS_API_KEY}&components=country:ca`,
       );
       const { predictions } = await response.json();
       setPredictions(predictions || []);
@@ -44,7 +44,7 @@ const FloatingSearchBar = ({ onPlaceSelect }) => {
   const handleSelection = async (placeId) => {
     try {
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry&key=${GOOGLE_MAPS_API_KEY}`
+        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry&key=${GOOGLE_MAPS_API_KEY}`,
       );
       const { result } = await response.json();
       if (result?.geometry?.location) {
