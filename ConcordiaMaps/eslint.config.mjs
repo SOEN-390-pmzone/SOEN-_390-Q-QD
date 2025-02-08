@@ -3,7 +3,6 @@ import pluginJs from "@eslint/js";
 import pluginReact from "eslint-plugin-react";
 import pluginJest from "eslint-plugin-jest";
 
-
 /** @type {import('eslint').Linter.Config[]} */
 export default [
   { files: ["**/*.{js,mjs,cjs,jsx}"] },
