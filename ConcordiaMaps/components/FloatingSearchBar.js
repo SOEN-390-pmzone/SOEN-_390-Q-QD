@@ -6,19 +6,16 @@ import {
   Text,
   TouchableOpacity,
   ActivityIndicator,
-  StyleSheet,
-  Dimensions,
 } from "react-native";
 import PropTypes from "prop-types";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { GOOGLE_MAPS_API_KEY } from "@env";
-
-const { width } = Dimensions.get("window");
+import styles from "../styles";
 
 const FloatingSearchBar = ({ onPlaceSelect }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [predictions, setPredictions] = useState([]);
   const [loading, setLoading] = useState(false);
+  const GOOGLE_MAPS_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
 
   const searchPlaces = async (text) => {
     setSearchQuery(text);
@@ -61,7 +58,7 @@ const FloatingSearchBar = ({ onPlaceSelect }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={styles.searchBarContainer}>
       <View style={styles.searchBar}>
         <Ionicons name="search" size={20} color="#888" style={styles.icon} />
         <TextInput
@@ -107,54 +104,6 @@ const FloatingSearchBar = ({ onPlaceSelect }) => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    position: "absolute",
-    top: 100,
-    width: width - 20,
-    alignSelf: "center",
-    zIndex: 1,
-  },
-  searchBar: {
-    flexDirection: "row",
-    backgroundColor: "white",
-    padding: 10,
-    borderRadius: 25,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  input: {
-    flex: 1,
-    height: 40,
-    marginLeft: 10,
-  },
-  list: {
-    backgroundColor: "white",
-    maxHeight: 200,
-    marginTop: 5,
-    borderRadius: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  item: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-  },
-  icon: {
-    marginRight: 10,
-  },
-});
 
 FloatingSearchBar.propTypes = {
   onPlaceSelect: PropTypes.func.isRequired,

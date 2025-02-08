@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect, useRef } from "react";
-import { View, Image, StyleSheet } from "react-native";
+import { View, Image } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import NavBar from "../components/NavBar";
 import Header from "../components/Header";
@@ -9,6 +9,7 @@ import Footer from "../components/Footer";
 import { Building } from "../components/MapMarkers";
 import BuildingColoring from "../components/buildingColoring";
 import Legend from "../components/Legend";
+import styles from "../styles";
 
 // Import custom marker image
 const customMarkerImage = require("../assets/PinLogo.png");
@@ -49,6 +50,7 @@ function HomeScreen() {
     <View style={styles.container}>
       <Header />
       <NavBar />
+      <FloatingSearchBar onPlaceSelect={handlePlaceSelect} />
       <MapView
         ref={mapRef}
         style={styles.map}
@@ -92,26 +94,11 @@ function HomeScreen() {
           />
         )}
       </MapView>
-      <FloatingSearchBar onPlaceSelect={handlePlaceSelect} />
+
       <Legend />
       <Footer />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#912338",
-  },
-  map: {
-    flex: 1,
-  },
-  customMarkerImage: {
-    width: 30,
-    height: 30,
-    resizeMode: "contain",
-  },
-});
 
 export default HomeScreen;
