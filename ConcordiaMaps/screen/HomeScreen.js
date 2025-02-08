@@ -12,7 +12,7 @@ const customMarkerImage = require("../assets/PinLogo.png");
 import { Building } from "../components/MapMarkers"; // Assuming Building array is exported from MapMarkers
 import BuildingColoring from "../components/buildingColoring";
 import Legend from "../components/Legend";
-import ShuttleStop from "../components/ShuttleStop"; // Keep the ShuttleStop from PR branch
+import ShuttleStop from "../components/ShuttleStop"; // Ensure this is merged properly
 
 function HomeScreen() {
   const location = useContext(LocationContext);
@@ -58,11 +58,11 @@ function HomeScreen() {
         {/* Keep BuildingColoring */}
         <BuildingColoring />
 
-        {/* Add the ShuttleStop from PR */}
+        {/* Ensure ShuttleStop is included */}
         <ShuttleStop />
       </MapView>
 
-      {/* Keep Legend from Main */}
+      {/* Keep Legend */}
       <Legend />
       <Footer />
     </View>
