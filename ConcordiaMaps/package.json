@@ -7,7 +7,7 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "lint": "eslint . --ignore-pattern node_modules/  --ignore-pattern .expo/",
+    "lint": "eslint . --ignore-pattern node_modules/  --ignore-pattern .expo/ --ignore-pattern .coverage/",
     "prettier": "npx prettier \"*/*.{js,jsx,ts,tsx,json,css,scss,md}\" --check --ignore-path .gitignore",
     "prettier:fix": "npx prettier \"*/*.{js,jsx,ts,tsx,json,css,scss,md}\" --write --ignore-path .gitignore",
     "lint:fix": "eslint . --fix --ignore-pattern node_modules/ --ignore-pattern .expo/",

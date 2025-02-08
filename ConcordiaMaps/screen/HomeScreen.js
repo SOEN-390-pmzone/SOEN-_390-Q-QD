@@ -7,11 +7,6 @@ import Header from "../components/Header";
 import { LocationContext } from "../contexts/LocationContext";
 import Footer from "../components/Footer";
 import styles from "../styles";
-import {
-  REACT_APP_GOOGLE_MAPS_API_KEY,
-  REACT_APP_LOYOLA_POSTAL_CODE,
-  REACT_APP_SGW_POSTAL_CODE,
-} from "@env";
 
 // Import the building data and custom marker image
 const customMarkerImage = require("../assets/PinLogo.png");
@@ -20,9 +15,9 @@ import BuildingColoring from "../components/buildingColoring";
 import Legend from "../components/Legend";
 
 function HomeScreen() {
-  const loyolaPostalCode = REACT_APP_LOYOLA_POSTAL_CODE;
-  const sgwPostalCode = REACT_APP_SGW_POSTAL_CODE;
-  const GOOGLE_MAPS_API_KEY = REACT_APP_GOOGLE_MAPS_API_KEY;
+  const loyolaPostalCode = process.env.EXPO_PUBLIC_LOYOLA_POSTAL_CODE;
+  const sgwPostalCode = process.env.EXPO_PUBLIC_SGW_POSTAL_CODE;
+  const GOOGLE_MAPS_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
 
   const location = useContext(LocationContext);
 
@@ -53,9 +48,9 @@ function HomeScreen() {
         setError(`${status}`);
       }
     } catch (error) {
-      console.error("Error:", error);
       setCoordinates(null);
       setError("Something went wrong. Please try again later.");
+      console.log(error);
     }
   };
 
