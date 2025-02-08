@@ -159,6 +159,7 @@ const styles = StyleSheet.create({
   },
   icon: {
     marginRight: 10,
+  },
   colorBox: {
     width: 20,
     height: 20,

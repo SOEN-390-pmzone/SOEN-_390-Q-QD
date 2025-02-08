@@ -5,7 +5,6 @@ import styles from "../styles";
 import { Alert } from "react-native";
 import ShuttleSchedule from "./ShuttleSchedule";
 
-
 function NavBar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScheduleVisible, setIsScheduleVisible] = useState(false); // Added missing state
