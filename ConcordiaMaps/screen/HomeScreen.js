@@ -108,7 +108,6 @@ function HomeScreen() {
             loadingEnabled={true}
             watchUserLocation={true}
           >
-
             {Building.map((building, index) => (
               <Marker
                 key={index}
@@ -139,7 +138,7 @@ function HomeScreen() {
           source={require("../assets/download.jpg")}
           resizeMode={"cover"} // cover or contain its up to you view look
         />
-     
+      </TouchableOpacity>
       <Legend />
       <Footer />
     </View>
