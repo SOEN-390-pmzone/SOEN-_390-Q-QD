@@ -1,14 +1,22 @@
 import React, { useContext, useState, useEffect, useRef } from "react";
-import { View, StyleSheet } from "react-native";
+import { View, Image, StyleSheet } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import NavBar from "../components/NavBar";
 import Header from "../components/Header";
 import { LocationContext } from "../contexts/LocationContext";
 import FloatingSearchBar from "../components/FloatingSearchBar";
+import Footer from "../components/Footer";
+import { Building } from "../components/MapMarkers";
+import BuildingColoring from "../components/buildingColoring";
+import Legend from "../components/Legend";
+
+// Import custom marker image
+const customMarkerImage = require("../assets/PinLogo.png");
 
 function HomeScreen() {
   const location = useContext(LocationContext);
   const [mapRegion, setMapRegion] = useState(null);
+  const [selectedLocation, setSelectedLocation] = useState(null);
   const mapRef = useRef(null);
 
   useEffect(() => {
@@ -29,9 +37,10 @@ function HomeScreen() {
       latitudeDelta: 0.005,
       longitudeDelta: 0.005,
     };
-    
+
     setTimeout(() => {
       setMapRegion(region);
+      setSelectedLocation(region);
       mapRef.current?.animateToRegion(region, 1000);
     }, 100);
   };
@@ -43,22 +52,49 @@ function HomeScreen() {
       <MapView
         ref={mapRef}
         style={styles.map}
-        initialRegion={mapRegion}
+        region={
+          mapRegion || {
+            latitude: 45.4973, // Default center (SGW campus)
+            longitude: -73.5789,
+            latitudeDelta: 0.01,
+            longitudeDelta: 0.01,
+          }
+        }
         showsUserLocation={true}
         loadingEnabled={true}
         onRegionChangeComplete={(region) => setMapRegion(region)}
       >
-        {mapRegion && (
+        {/* Render Building Markers */}
+        {Building.map((building, index) => (
+          <Marker
+            key={index}
+            coordinate={building.coordinate}
+            title={building.name}
+          >
+            <Image
+              source={customMarkerImage}
+              style={styles.customMarkerImage}
+            />
+          </Marker>
+        ))}
+
+        {/* Highlight Buildings */}
+        <BuildingColoring />
+
+        {/* Marker for selected location from search */}
+        {selectedLocation && (
           <Marker
             coordinate={{
-              latitude: mapRegion.latitude,
-              longitude: mapRegion.longitude,
+              latitude: selectedLocation.latitude,
+              longitude: selectedLocation.longitude,
             }}
             title="Selected Location"
           />
         )}
       </MapView>
       <FloatingSearchBar onPlaceSelect={handlePlaceSelect} />
+      <Legend />
+      <Footer />
     </View>
   );
 }
@@ -70,6 +106,11 @@ const styles = StyleSheet.create({
   },
   map: {
     flex: 1,
+  },
+  customMarkerImage: {
+    width: 30,
+    height: 30,
+    resizeMode: "contain",
   },
 });
 
