@@ -160,8 +160,14 @@ function ShuttleSchedule({ visible, onClose }) {
   // Update the next shuttle when campus changes
   useEffect(() => {
     const day = new Date().getDay();
-    const scheduleType = day >= 1 && day <= 4 ? "weekday" : "friday"; // Weekday or Friday
 
+    if (day === 0 || day === 6) {
+      // 0 = Sunday, 6 = Saturday
+      setNextShuttle("No shuttle service on weekends");
+      return;
+    }
+    const scheduleType = day >= 1 && day <= 4 ? "weekday" : "friday";
+    setSelectedSchedule(scheduleType);
     setNextShuttle(getNextShuttle(schedules[selectedCampus][scheduleType]));
   }, [selectedCampus, selectedSchedule]); // Trigger when campus or schedule changes
 
