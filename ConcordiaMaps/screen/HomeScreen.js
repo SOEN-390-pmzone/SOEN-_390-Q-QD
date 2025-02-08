@@ -6,11 +6,12 @@ import Header from "../components/Header";
 import { LocationContext } from "../contexts/LocationContext";
 import Footer from "../components/Footer";
 import styles from "../styles";
+
 const customMarkerImage = require("../assets/PinLogo.png");
-import { Building } from "../components/MapMarkers"; 
+import { Building } from "../components/MapMarkers"; // Assuming Building array is exported from MapMarkers
 import BuildingColoring from "../components/buildingColoring";
 import Legend from "../components/Legend";
-import ShuttleStop from "../components/ShuttleStop";
+import ShuttleStop from "../components/ShuttleStop"; // Ensure this is included
 
 function HomeScreen() {
   const location = useContext(LocationContext);
@@ -56,6 +57,7 @@ function HomeScreen() {
         {/* Keep BuildingColoring */}
         <BuildingColoring />
 
+        {/* Ensure ShuttleStop is included */}
         <ShuttleStop />
       </MapView>
 
