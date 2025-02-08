@@ -50,10 +50,10 @@ jobs:
         working-directory: ./ConcordiaMaps
         run: npm run test -- --coverage
 
-        
+
       - name: Run SonarQube analysis
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_CUBE_KEY }}
         run: |
           npx sonarqube-scanner \
             -Dsonar.projectKey=<YOUR_PROJECT_KEY> \
