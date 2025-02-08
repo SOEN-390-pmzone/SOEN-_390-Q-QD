@@ -8,10 +8,10 @@ import Footer from "../components/Footer";
 import styles from "../styles";
 
 const customMarkerImage = require("../assets/PinLogo.png");
-import { Building } from "../components/MapMarkers"; 
+import { Building } from "../components/MapMarkers";
 import BuildingColoring from "../components/buildingColoring";
 import Legend from "../components/Legend";
-import ShuttleStop from "../components/ShuttleStop"; 
+import ShuttleStop from "../components/ShuttleStop";
 
 function HomeScreen() {
   const location = useContext(LocationContext);
@@ -40,7 +40,6 @@ function HomeScreen() {
         loadingEnabled={true}
         watchUserLocation={true}
       >
-
         {Building.map((building, index) => (
           <Marker
             key={index}

@@ -1,4 +1,4 @@
-/* eslint-disable no-undef */
+ 
 import React from "react";
 import { render, fireEvent, waitFor } from "@testing-library/react-native";
 import ShuttleSchedule from "../components/ShuttleSchedule";
