@@ -8,11 +8,11 @@ const customMarkerImage = require("../assets/Shuttle.png");
 const busStops = [
   {
     name: "SGW Stop",
-    coordinate: { latitude: 45.49374457888333, longitude: -73.57797533201096 },
+    coordinate: { latitude: 45.497135674356734, longitude: -73.57851252460765 },
   },
   {
     name: "Loyola Stop",
-    coordinate: { latitude: 45.45839834489367, longitude: -73.63917681851967 },
+    coordinate: { latitude: 45.458292913285604, longitude: -73.63900517492607 },
   },
 ];
 
