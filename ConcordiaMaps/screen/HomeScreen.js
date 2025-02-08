@@ -57,7 +57,6 @@ function HomeScreen() {
 
         <ShuttleStop />
       </MapView>
-
       <Legend />
       <Footer />
     </View>
