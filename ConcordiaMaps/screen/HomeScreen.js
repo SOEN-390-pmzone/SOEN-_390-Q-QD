@@ -11,8 +11,12 @@ import BuildingColoring from "../components/buildingColoring";
 import Legend from "../components/Legend";
 import styles from "../styles";
 
-// Import custom marker image
 const customMarkerImage = require("../assets/PinLogo.png");
+import { Building } from "../components/MapMarkers";
+import BuildingColoring from "../components/buildingColoring";
+import Legend from "../components/Legend";
+import ShuttleStop from "../components/ShuttleStop";
+
 
 function HomeScreen() {
   const location = useContext(LocationContext);
@@ -66,7 +70,7 @@ function HomeScreen() {
         loadingEnabled={true}
         onRegionChangeComplete={(region) => setMapRegion(region)}
       >
-        {/* Render Building Markers */}
+       
         {Building.map((building, index) => (
           <Marker
             key={index}
@@ -80,10 +84,10 @@ function HomeScreen() {
           </Marker>
         ))}
 
-        {/* Highlight Buildings */}
+       
         <BuildingColoring />
 
-        {/* Marker for selected location from search */}
+       
         {selectedLocation && (
           <Marker
             coordinate={{
@@ -93,6 +97,7 @@ function HomeScreen() {
             title="Selected Location"
           />
         )}
+         <ShuttleStop />
       </MapView>
 
       <Legend />
