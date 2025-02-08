@@ -26,7 +26,7 @@ jobs:
 
       - name: Run Jest Tests
         working-directory: ./ConcordiaMaps
-        run: npm run test
+        run: npm run test -- --coverage
 
   test:
     runs-on: ubuntu-latest
@@ -48,7 +48,7 @@ jobs:
 
       - name: Run Jest Tests
         working-directory: ./ConcordiaMaps
-        run: npm run test
+        run: npm run test -- --coverage
 
   deploy:
     runs-on: ubuntu-latest
