@@ -15,7 +15,7 @@ const GetDirections = () => {
   const [route, setRoute] = useState([]);
   const [isOriginSearch, setIsOriginSearch] = useState(true);
   const [directions, setDirections] = useState([]);
-    const [mode, setMode] = useState("driving"); 
+    const [mode, setMode] = useState("walking"); 
 
 
   const {getStepsInHTML } = useGoogleMapDirections();
@@ -24,7 +24,7 @@ const GetDirections = () => {
     //? Updates the Direction components with the directions for the text after the button is pressed
   const onAddressSubmit = async() => {
     try {
-      const result = await getStepsInHTML(origin, destination);
+      const result = await getStepsInHTML(origin, destination,mode);
       setDirections(result); 
     } catch(error) {
       console.error('Geocode Error:', error);
@@ -56,10 +56,10 @@ const GetDirections = () => {
         />
        
           <View style={styles.modes}>
-            <Button title="Walking" onPress={() => setMode("walking")}/>
-            <Button title="Car" onPress={() => setMode("driving")} />
-            <Button title="Transit" onPress={() => setMode("transit")} />
-            <Button title="Biking" onPress={() => setMode("biking")} />
+            <Button title="Walking" onPress={() => setMode("walking")}   color={mode === "walking" ? "#1E90FF" : "#D3D3D3"} />
+            <Button title="Car" onPress={() => setMode("driving")} color={mode === "driving" ? "#1E90FF" : "#D3D3D3"}/>
+            <Button title="Transit" onPress={() => setMode("transit")} color={mode === "transit" ? "#1E90FF" : "#D3D3D3"}/>
+            <Button title="Biking" onPress={() => setMode("biking")} color={mode === "biking" ? "#1E90FF" : "#D3D3D3"}/>
           </View>
           <View style={styles.buttonContainer}>
           <Button title="Get Directions" onPress={onAddressSubmit} />

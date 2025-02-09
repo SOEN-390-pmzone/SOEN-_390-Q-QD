@@ -184,7 +184,8 @@ const styles = StyleSheet.create({
   modes:{
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent:"space-evenly",
+    flexWrap:"wrap",
     marginTop:10,
   }
 });
