@@ -1,7 +1,4 @@
 import { StyleSheet } from "react-native";
-// import { Dimensions} from "react-native";
-
-// const { width, height } = Dimensions.get("window");
 
 const styles = StyleSheet.create({
   container: {
@@ -180,6 +177,17 @@ const styles = StyleSheet.create({
     padding: 2,
     borderRadius: 5,
     opacity: 0.8,
+  },
+  button: {
+    position: "absolute",
+    bottom: 60,
+    right: 20,
+    width: 50,
+    height: 50,
+  },
+  buttonImage: {
+    width: "100%",
+    height: "100%",
   },
 });
 
