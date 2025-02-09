@@ -3,7 +3,6 @@ import { View, Button } from "react-native";
 import MapView, { Polyline, Marker } from "react-native-maps";
 import FloatingSearchBar from "./FloatingSearchBar";
 import Header from "./Header";
-import Footer from "./Footer";
 import NavBar from "./NavBar";
 import styles from "../styles";
 import { useGoogleMapDirections } from "../hooks/useGoogleMapDirections";
@@ -12,11 +11,10 @@ import DirectionsBox from "./DirectionsBox";
 const GetDirections = () => {
   const [origin, setOrigin] = useState(null);
   const [destination, setDestination] = useState(null);
-  const [route, setRoute] = useState([]);
+  const [route] = useState([]);
   const [isOriginSearch, setIsOriginSearch] = useState(true);
   const [directions, setDirections] = useState([]);
-    const [mode, setMode] = useState("driving"); 
-
+    // const [mode, setMode] = useState("driving"); 
 
   const {getStepsInHTML } = useGoogleMapDirections();
 
@@ -55,12 +53,12 @@ const GetDirections = () => {
           style={[styles.searchBar, { marginTop: 10 }]}
         />
        
-          <View style={styles.modes}>
+          {/* <View style={styles.modes}>
             <Button title="Walking" onPress={() => setMode("walking")}/>
             <Button title="Car" onPress={() => setMode("driving")} />
             <Button title="Transit" onPress={() => setMode("transit")} />
             <Button title="Biking" onPress={() => setMode("biking")} />
-          </View>
+          </View> */}
           <View style={styles.buttonContainer}>
           <Button title="Get Directions" onPress={onAddressSubmit} />
         </View>
