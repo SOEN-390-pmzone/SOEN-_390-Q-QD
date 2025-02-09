@@ -15,8 +15,11 @@ const GetDirections = () => {
   const [route, setRoute] = useState([]);
   const [isOriginSearch, setIsOriginSearch] = useState(true);
   const [directions, setDirections] = useState([]);
+    const [mode, setMode] = useState("driving"); 
+
 
   const {getStepsInHTML } = useGoogleMapDirections();
+
 
     //? Updates the Direction components with the directions for the text after the button is pressed
   const onAddressSubmit = async() => {
@@ -51,9 +54,17 @@ const GetDirections = () => {
           placeholder="Enter Destination"
           style={[styles.searchBar, { marginTop: 10 }]}
         />
-        <View style={styles.buttonContainer}>
+       
+          <View style={styles.modes}>
+            <Button title="Walking" onPress={() => setMode("walking")}/>
+            <Button title="Car" onPress={() => setMode("driving")} />
+            <Button title="Transit" onPress={() => setMode("transit")} />
+            <Button title="Biking" onPress={() => setMode("biking")} />
+          </View>
+          <View style={styles.buttonContainer}>
           <Button title="Get Directions" onPress={onAddressSubmit} />
         </View>
+       
       </View>
       <MapView
         style={styles.map}

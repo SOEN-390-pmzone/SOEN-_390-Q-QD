@@ -33,8 +33,13 @@ function DirectionsDropdown({directions = []}) {
   //! TODO : Fix parsing for other cases such as <div> or <li>... are there others?
   // The google Maps API returns the directions with html syntax. It needs to be removed and added but parsed differently
   const parseHtmlInstructions = (htmlString) => {
-    // Remove <b> tags but keep their content with different styling
-    const parts = htmlString.split(/<\/?b>/);
+    // Split the HTML string by <b> tags while keeping the content
+    const parts = htmlString.split(/<\/?b>/).map((part) =>
+      part
+        .replace(/<div[^>]*>/gi, '')  
+        .replace(/<\/div>/gi, '')   
+        .replace(/<wbr[^>]*>/gi, '') 
+    );  
     return parts.map((part, index) => (
       <Text key={index} style={index % 2 === 1 ? styles.boldText : styles.normalText}>
         {part}
