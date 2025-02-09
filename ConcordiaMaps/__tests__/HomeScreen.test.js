@@ -40,4 +40,3 @@ describe("HomeScreen", () => {
     await waitFor(() => expect(getByTestId("home-screen")).toBeTruthy());
   });
 });
-//s
