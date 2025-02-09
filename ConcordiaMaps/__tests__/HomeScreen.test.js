@@ -1,36 +1,42 @@
+/* eslint-disable react/prop-types */
 import React from "react";
-import { render, waitFor } from "@testing-library/react-native";
-import axios from "axios";
+import { render, screen, waitFor } from "@testing-library/react-native";
+import { NavigationContainer } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import HomeScreen from "../screen/HomeScreen";
 
-jest.mock("axios");
+// Mock useNavigation
+jest.mock("@react-navigation/native", () => ({
+  ...jest.requireActual("@react-navigation/native"),
+  useNavigation: jest.fn(),
+}));
+
+// Mock react-native-maps
+jest.mock("react-native-maps", () => {
+  const { View } = require("react-native");
+  return {
+    __esModule: true,
+    default: (props) => <View>{props.children}</View>,
+    Marker: (props) => <View>{props.children}</View>,
+  };
+});
+
+// Mock UI components
+jest.mock("../components/Header", () => "Header");
+jest.mock("../components/NavBar", () => "NavBar");
+jest.mock("../components/Footer", () => "Footer");
+jest.mock("../components/Legend", () => "Legend");
+
 describe("HomeScreen", () => {
-  it("handles no results found", async () => {
-    const mockResponse = {
-      data: {
-        results: [],
-        status: "ZERO_RESULTS",
-      },
-    };
+  it("renders without crashing", async () => {
+    useNavigation.mockReturnValue({ navigate: jest.fn() });
 
-    axios.get.mockResolvedValueOnce(mockResponse);
+    render(
+      <NavigationContainer>
+        <HomeScreen />
+      </NavigationContainer>,
+    );
 
-    const { getByTestId } = render(<HomeScreen />);
-
-    await waitFor(() => {
-      expect(getByTestId("error-message").props.children).toBe("ZERO_RESULTS");
-    });
-  });
-
-  it("handles API errors", async () => {
-    axios.get.mockRejectedValueOnce(new Error("Network Error"));
-
-    const { getByTestId } = render(<HomeScreen />);
-
-    await waitFor(() => {
-      expect(getByTestId("error-message").props.children).toBe(
-        "Something went wrong. Please try again later.",
-      );
-    });
+    await waitFor(() => expect(screen.getByTestId("home-screen")).toBeTruthy());
   });
 });

@@ -1,6 +1,6 @@
 import React from "react";
 import { render, fireEvent } from "@testing-library/react-native";
-import ShuttleStop from "../components/ShuttleStop";
+import ShuttleStop from "../../components/ShuttleStop";
 
 describe("ShuttleStop Component", () => {
   it("renders both bus stop markers", () => {

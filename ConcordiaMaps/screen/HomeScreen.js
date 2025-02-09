@@ -78,7 +78,7 @@ function HomeScreen() {
     );
   };
   return (
-    <View style={styles.container}>
+    <View style={styles.container} testID="home-screen">
       <Header />
       <NavBar />
       {error ? <Text testID="error-message">{error}</Text> : null}
