@@ -2,17 +2,15 @@
 import React from "react";
 import { render, waitFor } from "@testing-library/react-native";
 import axios from "axios";
-import { NavigationContainer } from "@react-navigation/native"; // Keep this import here
-import { useNavigation } from "@react-navigation/native"; // Import as usual
+import { NavigationContainer } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import HomeScreen from "../screen/HomeScreen";
 
-// Mock only the necessary part of @react-navigation/native
 jest.mock("@react-navigation/native", () => ({
-  ...jest.requireActual("@react-navigation/native"), // Keep the actual NavigationContainer
-  useNavigation: jest.fn(), // Mock only useNavigation
+  ...jest.requireActual("@react-navigation/native"),
+  useNavigation: jest.fn(),
 }));
 
-// Mock react-native-maps
 jest.mock("react-native-maps", () => {
   const { View } = require("react-native");
   return {
@@ -22,13 +20,11 @@ jest.mock("react-native-maps", () => {
   };
 });
 
-// Mock UI components
 jest.mock("../components/Header", () => "Header");
 jest.mock("../components/NavBar", () => "NavBar");
 jest.mock("../components/Footer", () => "Footer");
 jest.mock("../components/Legend", () => "Legend");
 
-// Mock axios
 jest.mock("axios");
 
 beforeAll(() => {
