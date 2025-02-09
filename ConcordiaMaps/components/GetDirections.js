@@ -7,7 +7,7 @@ import Footer from "./Footer";
 import NavBar from "./NavBar";
 import styles from "../styles";
 import { useGoogleMapDirections } from "../hooks/useGoogleMapDirections";
-import DirectionsDropdown from "./DirectionsBox";
+import DirectionsBox from "./DirectionsBox";
 
 const GetDirections = () => {
   const [origin, setOrigin] = useState(null);
@@ -70,7 +70,7 @@ const GetDirections = () => {
           <Polyline coordinates={route} strokeWidth={4} strokeColor="blue" />
         )}
       </MapView>
-      <DirectionsDropdown directions= {directions}/>   
+      <DirectionsBox directions= {directions} isLoading = {isLoading}/>   
     </View>
   );
 };
