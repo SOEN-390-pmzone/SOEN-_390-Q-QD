@@ -1,7 +1,8 @@
 import React, { useState,useEffect } from "react";
 import { View, Text, ScrollView, Animated, TouchableOpacity } from "react-native";
+import styles from "../styles/DirectionBox.style"
 
-function DirectionsDropdown({directions = []}) {
+function DirectionsBox({directions = []}) {
 
 //? ANIMATION ONLY
   const [isCollapsed, setIsCollapsed] = useState(true);
@@ -30,7 +31,6 @@ function DirectionsDropdown({directions = []}) {
     outputRange: [0, 300], // Moves most of the container down, leaving handle visible
   });
 
-  //! TODO : Fix parsing for other cases such as <div> or <li>... are there others?
   // The google Maps API returns the directions with html syntax. It needs to be removed and added but parsed differently
   const parseHtmlInstructions = (htmlString) => {
     // Split the HTML string by <b> tags while keeping the content

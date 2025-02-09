@@ -81,7 +81,7 @@ const GetDirections = () => {
           <Polyline coordinates={route} strokeWidth={4} strokeColor="blue" />
         )}
       </MapView>
-      <DirectionsBox directions= {directions} isLoading = {isLoading}/>   
+      <DirectionsBox directions= {directions} />   
     </View>
   );
 };
