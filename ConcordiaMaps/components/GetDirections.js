@@ -14,20 +14,19 @@ const GetDirections = () => {
   const [route] = useState([]);
   const [isOriginSearch, setIsOriginSearch] = useState(true);
   const [directions, setDirections] = useState([]);
-    // const [mode, setMode] = useState("driving"); 
+  // const [mode, setMode] = useState("driving");
 
-  const {getStepsInHTML } = useGoogleMapDirections();
+  const { getStepsInHTML } = useGoogleMapDirections();
 
-
-    //? Updates the Direction components with the directions for the text after the button is pressed
-  const onAddressSubmit = async() => {
+  //? Updates the Direction components with the directions for the text after the button is pressed
+  const onAddressSubmit = async () => {
     try {
       const result = await getStepsInHTML(origin, destination);
-      setDirections(result); 
-    } catch(error) {
-      console.error('Geocode Error:', error);
+      setDirections(result);
+    } catch (error) {
+      console.error("Geocode Error:", error);
     }
-  }
+  };
   return (
     <View style={styles.container}>
       <Header />
@@ -52,17 +51,16 @@ const GetDirections = () => {
           placeholder="Enter Destination"
           style={[styles.searchBar, { marginTop: 10 }]}
         />
-       
-          {/* <View style={styles.modes}>
+
+        {/* <View style={styles.modes}>
             <Button title="Walking" onPress={() => setMode("walking")}/>
             <Button title="Car" onPress={() => setMode("driving")} />
             <Button title="Transit" onPress={() => setMode("transit")} />
             <Button title="Biking" onPress={() => setMode("biking")} />
           </View> */}
-          <View style={styles.buttonContainer}>
+        <View style={styles.buttonContainer}>
           <Button title="Get Directions" onPress={onAddressSubmit} />
         </View>
-       
       </View>
       <MapView
         style={styles.map}
@@ -79,7 +77,7 @@ const GetDirections = () => {
           <Polyline coordinates={route} strokeWidth={4} strokeColor="blue" />
         )}
       </MapView>
-      <DirectionsBox directions= {directions} />   
+      <DirectionsBox directions={directions} />
     </View>
   );
 };
