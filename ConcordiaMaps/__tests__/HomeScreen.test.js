@@ -5,6 +5,7 @@ import axios from "axios";
 import { useNavigation, NavigationContainer } from "@react-navigation/native";
 import HomeScreen from "../screen/HomeScreen";
 
+// Mock Navigation and components
 jest.mock("@react-navigation/native", () => ({
   ...jest.requireActual("@react-navigation/native"),
   useNavigation: jest.fn(),
@@ -27,8 +28,8 @@ jest.mock("../components/Legend", () => "Legend");
 jest.mock("axios");
 
 beforeAll(() => {
-  jest.spyOn(console, "log").mockImplementation(() => {});
-  jest.spyOn(console, "error").mockImplementation(() => {});
+  jest.spyOn(console, 'log').mockImplementation(() => {});
+  jest.spyOn(console, 'error').mockImplementation(() => {});
 });
 
 afterAll(() => {
@@ -43,7 +44,7 @@ describe("HomeScreen", () => {
     const { getByTestId } = render(
       <NavigationContainer>
         <HomeScreen />
-      </NavigationContainer>,
+      </NavigationContainer>
     );
 
     await waitFor(() => expect(getByTestId("home-screen")).toBeTruthy());
@@ -62,7 +63,7 @@ describe("HomeScreen", () => {
     const { getByTestId } = render(
       <NavigationContainer>
         <HomeScreen />
-      </NavigationContainer>,
+      </NavigationContainer>
     );
 
     await waitFor(() => {
@@ -76,12 +77,12 @@ describe("HomeScreen", () => {
     const { getByTestId } = render(
       <NavigationContainer>
         <HomeScreen />
-      </NavigationContainer>,
+      </NavigationContainer>
     );
 
     await waitFor(() => {
       expect(getByTestId("error-message").props.children).toBe(
-        "Something went wrong. Please try again later.",
+        "Something went wrong. Please try again later."
       );
     });
   });
