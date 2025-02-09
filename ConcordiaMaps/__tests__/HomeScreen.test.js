@@ -32,8 +32,8 @@ jest.mock("../components/Legend", () => "Legend");
 jest.mock("axios");
 
 beforeAll(() => {
-  jest.spyOn(console, 'log').mockImplementation(() => {});
-  jest.spyOn(console, 'error').mockImplementation(() => {});
+  jest.spyOn(console, "log").mockImplementation(() => {});
+  jest.spyOn(console, "error").mockImplementation(() => {});
 });
 
 afterAll(() => {
@@ -48,7 +48,7 @@ describe("HomeScreen", () => {
     const { getByTestId } = render(
       <NavigationContainer>
         <HomeScreen />
-      </NavigationContainer>
+      </NavigationContainer>,
     );
 
     await waitFor(() => expect(getByTestId("home-screen")).toBeTruthy());
