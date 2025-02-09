@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react-native";
+import { render, waitFor } from "@testing-library/react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { useNavigation } from "@react-navigation/native";
 import HomeScreen from "../screen/HomeScreen";
@@ -31,12 +31,12 @@ describe("HomeScreen", () => {
   it("renders without crashing", async () => {
     useNavigation.mockReturnValue({ navigate: jest.fn() });
 
-    render(
+    const { getByTestId } = render(
       <NavigationContainer>
         <HomeScreen />
       </NavigationContainer>,
     );
 
-    await waitFor(() => expect(screen.getByTestId("home-screen")).toBeTruthy());
+    await waitFor(() => expect(getByTestId("home-screen")).toBeTruthy());
   });
 });
