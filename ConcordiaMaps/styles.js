@@ -178,6 +178,13 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     opacity: 0.8,
   },
+
+  modes: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 10,
+  },
   button: {
     position: "absolute",
     bottom: 60,
