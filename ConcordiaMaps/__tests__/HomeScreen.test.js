@@ -34,7 +34,7 @@ describe("HomeScreen", () => {
     const { getByTestId } = render(
       <NavigationContainer>
         <HomeScreen />
-      </NavigationContainer>,
+      </NavigationContainer>
     );
 
     await waitFor(() => expect(getByTestId("home-screen")).toBeTruthy());
