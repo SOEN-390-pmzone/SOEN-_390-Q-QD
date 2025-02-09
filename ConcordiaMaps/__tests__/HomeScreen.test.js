@@ -2,7 +2,7 @@
 import React from "react";
 import { render, waitFor } from "@testing-library/react-native";
 import axios from "axios";
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer } from "@react-navigation/native"; // Keep this import
 import { useNavigation } from "@react-navigation/native";
 import HomeScreen from "../screen/HomeScreen";
 
@@ -10,6 +10,7 @@ import HomeScreen from "../screen/HomeScreen";
 jest.mock("@react-navigation/native", () => ({
   ...jest.requireActual("@react-navigation/native"),
   useNavigation: jest.fn(),
+  // Remove redundant import here for NavigationContainer
 }));
 
 // Mock react-native-maps
