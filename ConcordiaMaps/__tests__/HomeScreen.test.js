@@ -9,7 +9,6 @@ import HomeScreen from "../screen/HomeScreen";
 jest.mock("@react-navigation/native", () => ({
   ...jest.requireActual("@react-navigation/native"),
   useNavigation: jest.fn(),
-  NavigationContainer: jest.fn(({ children }) => <>{children}</>), // Mock NavigationContainer
 }));
 
 jest.mock("react-native-maps", () => {
