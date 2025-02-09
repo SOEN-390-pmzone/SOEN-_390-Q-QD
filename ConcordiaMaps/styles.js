@@ -184,6 +184,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginTop: 10,
+  },
   button: {
     position: "absolute",
     bottom: 60,
@@ -194,7 +195,6 @@ const styles = StyleSheet.create({
   buttonImage: {
     width: "100%",
     height: "100%",
-
   },
 });
 

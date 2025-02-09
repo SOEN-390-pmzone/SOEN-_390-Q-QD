@@ -2,6 +2,7 @@ import React from "react";
 import { render, waitFor } from "@testing-library/react-native";
 import axios from "axios";
 import HomeScreen from "../screen/HomeScreen";
+import { NavigationContainer } from "@react-navigation/native";
 
 jest.mock("axios");
 describe("HomeScreen", () => {
@@ -15,7 +16,11 @@ describe("HomeScreen", () => {
 
     axios.get.mockResolvedValueOnce(mockResponse);
 
-    const { getByTestId } = render(<HomeScreen />);
+    const { getByTestId } = render(
+      <NavigationContainer>
+        <HomeScreen />
+      </NavigationContainer>,
+    );
 
     await waitFor(() => {
       expect(getByTestId("error-message").props.children).toBe("ZERO_RESULTS");
@@ -25,7 +30,11 @@ describe("HomeScreen", () => {
   it("handles API errors", async () => {
     axios.get.mockRejectedValueOnce(new Error("Network Error"));
 
-    const { getByTestId } = render(<HomeScreen />);
+    const { getByTestId } = render(
+      <NavigationContainer>
+        <HomeScreen />
+      </NavigationContainer>,
+    );
 
     await waitFor(() => {
       expect(getByTestId("error-message").props.children).toBe(
