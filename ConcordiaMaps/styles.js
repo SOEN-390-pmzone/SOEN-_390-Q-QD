@@ -171,12 +171,19 @@ const styles = StyleSheet.create({
   },
   legendContainer: {
     position: "absolute",
-    top: 740,
-    right: 230,
+    top: 720,
+    right: 210,
     backgroundColor: "rgba(255, 255, 255, 0.8)",
     padding: 2,
     borderRadius: 5,
     opacity: 0.8,
+  },
+
+  modes: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 10,
   },
   button: {
     position: "absolute",
