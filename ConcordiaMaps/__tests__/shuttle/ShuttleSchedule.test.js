@@ -1,6 +1,6 @@
 import React from "react";
 import { render, fireEvent, waitFor } from "@testing-library/react-native";
-import ShuttleSchedule from "../components/ShuttleSchedule";
+import ShuttleSchedule from "../../components/ShuttleSchedule";
 
 jest.useFakeTimers().setSystemTime(new Date("2025-02-06T15:00:00Z")); // Mock current time
 
