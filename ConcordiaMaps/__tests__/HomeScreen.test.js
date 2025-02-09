@@ -2,15 +2,14 @@
 import React from "react";
 import { render, waitFor } from "@testing-library/react-native";
 import axios from "axios";
-import { NavigationContainer } from "@react-navigation/native"; // Keep this import
-import { useNavigation } from "@react-navigation/native";
+import { NavigationContainer } from "@react-navigation/native"; // Keep this import here
+import { useNavigation } from "@react-navigation/native"; // Import as usual
 import HomeScreen from "../screen/HomeScreen";
 
-// Mock useNavigation
+// Mock only the necessary part of @react-navigation/native
 jest.mock("@react-navigation/native", () => ({
-  ...jest.requireActual("@react-navigation/native"),
-  useNavigation: jest.fn(),
-  // Remove redundant import here for NavigationContainer
+  ...jest.requireActual("@react-navigation/native"), // Keep the actual NavigationContainer
+  useNavigation: jest.fn(), // Mock only useNavigation
 }));
 
 // Mock react-native-maps
