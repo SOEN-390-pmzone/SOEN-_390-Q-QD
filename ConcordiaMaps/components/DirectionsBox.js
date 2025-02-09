@@ -1,9 +1,16 @@
 import React, { useState,useEffect } from "react";
 import { View, Text, ScrollView, Animated, TouchableOpacity } from "react-native";
 import styles from "../styles/DirectionBox.style"
+import PropTypes from 'prop-types'; // Import prop-types
 
 function DirectionsBox({directions = []}) {
 
+  DirectionsBox.propTypes = {
+    directions: PropTypes.arrayOf(PropTypes.shape({ // Define the shape of each direction object
+      html_instructions: PropTypes.string.isRequired,
+      distance: PropTypes.string.isRequired,
+    })).isRequired,
+  };
 //? ANIMATION ONLY
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [animation] = useState(new Animated.Value(1));
