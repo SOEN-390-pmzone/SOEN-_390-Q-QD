@@ -24,12 +24,17 @@ describe("HomeScreen", () => {
 
     const { getByTestId } = render(
       <NavigationContainer>
-        <ModalContext.Provider value={{ toggleModal: mockToggleModal, setModalData: mockSetModalData }}>
+        <ModalContext.Provider
+          value={{
+            toggleModal: mockToggleModal,
+            setModalData: mockSetModalData,
+          }}
+        >
           <LocationContext.Provider value={{ location: mockLocation }}>
             <HomeScreen />
           </LocationContext.Provider>
         </ModalContext.Provider>
-      </NavigationContainer>
+      </NavigationContainer>,
     );
 
     await waitFor(() => {
@@ -42,17 +47,22 @@ describe("HomeScreen", () => {
 
     const { getByTestId } = render(
       <NavigationContainer>
-        <ModalContext.Provider value={{ toggleModal: mockToggleModal, setModalData: mockSetModalData }}>
+        <ModalContext.Provider
+          value={{
+            toggleModal: mockToggleModal,
+            setModalData: mockSetModalData,
+          }}
+        >
           <LocationContext.Provider value={{ location: mockLocation }}>
             <HomeScreen />
           </LocationContext.Provider>
         </ModalContext.Provider>
-      </NavigationContainer>
+      </NavigationContainer>,
     );
 
     await waitFor(() => {
       expect(getByTestId("error-message").props.children).toBe(
-        "Something went wrong. Please try again later."
+        "Something went wrong. Please try again later.",
       );
     });
   });
