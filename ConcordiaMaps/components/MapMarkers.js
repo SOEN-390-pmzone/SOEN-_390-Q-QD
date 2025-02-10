@@ -4,29 +4,23 @@ import { Text, View, Image, StyleSheet } from "react-native";
 import PropTypes from "prop-types";
 import PopupModal from "./PopupModal";
 
-
 const customMarkerImage = require("../assets/PinLogo.png");
-
 
 const MapMarkers = ({ markers }) => {
   if (!markers || markers.length === 0) return null;
 
-
   const [popupVisible, setPopupVisible] = useState(false);
   const [popupData, setPopupData] = useState(null);
-
 
   const handleMarkerPress = (marker) => {
     setPopupData(marker);
     setPopupVisible(true);
   };
 
-
   const closePopup = () => {
     setPopupVisible(false);
     setPopupData(null);
   };
-
 
   return (
     <>
@@ -46,7 +40,6 @@ const MapMarkers = ({ markers }) => {
         </Marker>
       ))}
 
-
       {/* Using PopupModal */}
       <PopupModal
         isVisible={popupVisible}
@@ -56,7 +49,6 @@ const MapMarkers = ({ markers }) => {
     </>
   );
 };
-
 
 const styles = StyleSheet.create({
   markerImage: {
@@ -79,7 +71,6 @@ const styles = StyleSheet.create({
   },
 });
 
-
 MapMarkers.propTypes = {
   markers: PropTypes.arrayOf(
     PropTypes.shape({
@@ -92,12 +83,7 @@ MapMarkers.propTypes = {
   ),
 };
 
-
 export default MapMarkers;
-
-
-
-
 
 export const Building = [
   // SGW Campus buildings latitude and longitude
@@ -525,98 +511,97 @@ export const Building = [
       longitude: -73.637683,
     },
   },
-    {
-      name: "Physical Service",
-      coordinate: {
-        latitude: 45.459636,
-        longitude: -73.639758,
-      },
+  {
+    name: "Physical Service",
+    coordinate: {
+      latitude: 45.459636,
+      longitude: -73.639758,
     },
-    {
-      name: "Psychology Building",
-      coordinate: {
-        latitude: 45.458938,
-        longitude: -73.640467,
-      },
+  },
+  {
+    name: "Psychology Building",
+    coordinate: {
+      latitude: 45.458938,
+      longitude: -73.640467,
     },
-    {
-      name: "Recreational and Athletics",
-      coordinate: {
-        latitude: 45.456677,
-        longitude: -73.637523,
-      },
+  },
+  {
+    name: "Recreational and Athletics",
+    coordinate: {
+      latitude: 45.456677,
+      longitude: -73.637523,
     },
-    {
-      name: "Loyola Jesuit Hall and Conference Center",
-      coordinate: {
-        latitude: 45.458551,
-        longitude: -73.641016,
-      },
+  },
+  {
+    name: "Loyola Jesuit Hall and Conference Center",
+    coordinate: {
+      latitude: 45.458551,
+      longitude: -73.641016,
     },
-    {
-      name: "Student Center",
-      coordinate: {
-        latitude: 45.459137,
-        longitude: -73.639203,
-      },
+  },
+  {
+    name: "Student Center",
+    coordinate: {
+      latitude: 45.459137,
+      longitude: -73.639203,
     },
-    {
-      name: "Solar House, SH Building",
-      coordinate: {
-        latitude: 45.459298,
-        longitude: -73.642478,
-      },
+  },
+  {
+    name: "Solar House, SH Building",
+    coordinate: {
+      latitude: 45.459298,
+      longitude: -73.642478,
     },
-    {
-      name: "Terrebonne Building, TA Building",
-      coordinate: {
-        latitude: 45.460051,
-        longitude: -73.640842,
-      },
+  },
+  {
+    name: "Terrebonne Building, TA Building",
+    coordinate: {
+      latitude: 45.460051,
+      longitude: -73.640842,
     },
-    {
-      name: "TB Annex",
-      coordinate: {
-        latitude: 45.459992,
-        longitude: -73.640897,
-      },
+  },
+  {
+    name: "TB Annex",
+    coordinate: {
+      latitude: 45.459992,
+      longitude: -73.640897,
     },
-    {
-      name: "Richard J. Renaud Science Complex",
-      coordinate: {
-        latitude: 45.457567,
-        longitude: -73.641739,
-      },
+  },
+  {
+    name: "Richard J. Renaud Science Complex",
+    coordinate: {
+      latitude: 45.457567,
+      longitude: -73.641739,
     },
-    {
-      name: "Vanier Library",
-      coordinate: {
-        latitude: 45.459026,
-        longitude: -73.638606,
-      },
+  },
+  {
+    name: "Vanier Library",
+    coordinate: {
+      latitude: 45.459026,
+      longitude: -73.638606,
     },
-    {
-      name: "Vanier Extension",
-      coordinate: {
-        latitude: 45.459026,
-        longitude: -73.638606,
-      },
+  },
+  {
+    name: "Vanier Extension",
+    coordinate: {
+      latitude: 45.459026,
+      longitude: -73.638606,
     },
-  ];
-  
-  // Default center coordinates for each campus
-  export const CampusCoordinates = {
-    SGW: {
-      latitude: 45.4973,
-      longitude: -73.5789,
-      latitudeDelta: 0.01,
-      longitudeDelta: 0.01,
-    },
-    Loyola: {
-      latitude: 45.458256,
-      longitude: -73.640472,
-      latitudeDelta: 0.01,
-      longitudeDelta: 0.01,
-    },
-  };
-  
+  },
+];
+
+// Default center coordinates for each campus
+export const CampusCoordinates = {
+  SGW: {
+    latitude: 45.4973,
+    longitude: -73.5789,
+    latitudeDelta: 0.01,
+    longitudeDelta: 0.01,
+  },
+  Loyola: {
+    latitude: 45.458256,
+    longitude: -73.640472,
+    latitudeDelta: 0.01,
+    longitudeDelta: 0.01,
+  },
+};

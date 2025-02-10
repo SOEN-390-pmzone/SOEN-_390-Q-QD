@@ -1,10 +1,15 @@
 import React from "react";
-import { Modal, View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
+import {
+  Modal,
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Alert,
+} from "react-native";
 import PropTypes from "prop-types";
 
 const PopupModal = ({ isVisible, data, onClose }) => {
- 
-
   const displayData = data; // Use defaultData if no data is provided
 
   // Function to handle "Get Directions" press
@@ -87,7 +92,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     borderWidth: 1.5,
     borderColor: "black",
-    marginTop:10,
+    marginTop: 10,
     marginRight: 5, // Space between buttons
   },
   closeButtonText: {
@@ -101,7 +106,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 10,
     borderRadius: 5,
-    marginTop:10,
+    marginTop: 10,
     marginLeft: 5, // Space between buttons
   },
   getDirectionsButtonText: {

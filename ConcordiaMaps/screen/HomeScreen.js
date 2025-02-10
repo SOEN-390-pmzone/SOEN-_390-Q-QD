@@ -10,7 +10,6 @@ import { Building } from "../components/MapMarkers";
 import { ModalContext } from "../App"; // Import ModalContext
 import PopupModal from "../components/PopupModal"; // Adjust the path if necessary
 
-
 const customMarkerImage = require("../assets/PinLogo.png");
 
 function HomeScreen() {
@@ -28,7 +27,6 @@ function HomeScreen() {
     <View style={styles.container}>
       <Header />
       <NavBar /> {/* Navigation bar */}
-
       {/* Map view */}
       <MapView
         style={styles.map}
@@ -59,14 +57,15 @@ function HomeScreen() {
             title={building.name}
             onPress={() => handleMarkerPress(building)} // Trigger modal on press
           >
-            <Image source={customMarkerImage} style={styles.customMarkerImage} />
+            <Image
+              source={customMarkerImage}
+              style={styles.customMarkerImage}
+            />
           </Marker>
         ))}
       </MapView>
-
       {/* Footer */}
       <Footer />
-
       {/* Show the popup modal */}
       <PopupModal
         isVisible={isModalVisible}
