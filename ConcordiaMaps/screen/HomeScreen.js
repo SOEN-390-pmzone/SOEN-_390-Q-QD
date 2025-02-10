@@ -8,7 +8,7 @@ import { LocationContext } from "../contexts/LocationContext";
 import Footer from "../components/Footer";
 import styles from "../styles";
 import { Building } from "../components/MapMarkers";
-import { ModalContext } from "../App"; // Import ModalContext
+import { ModalContext } from "../App";
 import BuildingColoring from "../components/buildingColoring";
 import Legend from "../components/Legend";
 import ShuttleStop from "../components/ShuttleStop";

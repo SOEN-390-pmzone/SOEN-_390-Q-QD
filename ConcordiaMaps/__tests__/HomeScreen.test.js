@@ -3,9 +3,16 @@ import { render, waitFor } from "@testing-library/react-native";
 import axios from "axios";
 import HomeScreen from "../screen/HomeScreen";
 import { NavigationContainer } from "@react-navigation/native";
+import { ModalContext } from "../App";
+import { LocationContext } from "../contexts/LocationContext";
 
 jest.mock("axios");
+
 describe("HomeScreen", () => {
+  const mockLocation = { latitude: 45.4973, longitude: -73.5789 };
+  const mockToggleModal = jest.fn();
+  const mockSetModalData = jest.fn();
+
   it("handles no results found", async () => {
     const mockResponse = {
       data: {
@@ -13,13 +20,16 @@ describe("HomeScreen", () => {
         status: "ZERO_RESULTS",
       },
     };
-
     axios.get.mockResolvedValueOnce(mockResponse);
 
     const { getByTestId } = render(
       <NavigationContainer>
-        <HomeScreen />
-      </NavigationContainer>,
+        <ModalContext.Provider value={{ toggleModal: mockToggleModal, setModalData: mockSetModalData }}>
+          <LocationContext.Provider value={{ location: mockLocation }}>
+            <HomeScreen />
+          </LocationContext.Provider>
+        </ModalContext.Provider>
+      </NavigationContainer>
     );
 
     await waitFor(() => {
@@ -32,13 +42,17 @@ describe("HomeScreen", () => {
 
     const { getByTestId } = render(
       <NavigationContainer>
-        <HomeScreen />
-      </NavigationContainer>,
+        <ModalContext.Provider value={{ toggleModal: mockToggleModal, setModalData: mockSetModalData }}>
+          <LocationContext.Provider value={{ location: mockLocation }}>
+            <HomeScreen />
+          </LocationContext.Provider>
+        </ModalContext.Provider>
+      </NavigationContainer>
     );
 
     await waitFor(() => {
       expect(getByTestId("error-message").props.children).toBe(
-        "Something went wrong. Please try again later.",
+        "Something went wrong. Please try again later."
       );
     });
   });
