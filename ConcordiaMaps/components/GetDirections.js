@@ -7,24 +7,18 @@ import NavBar from "./NavBar";
 import styles from "../styles";
 import { useGoogleMapDirections } from "../hooks/useGoogleMapDirections";
 import DirectionsBox from "./DirectionsBox";
-const fakePolyline = [
-  { latitude: 45.5017, longitude: -73.5673 },   // Start point (e.g., near McGill)
-  { latitude: 45.5035, longitude: -73.5696 },
-  { latitude: 45.5052, longitude: -73.5714 },
-  { latitude: 45.5070, longitude: -73.5732 },
-  { latitude: 45.5088, longitude: -73.5750 },
-  { latitude: 45.5106, longitude: -73.5768 },
-  { latitude: 45.5124, longitude: -73.5786 },
-  { latitude: 45.5142, longitude: -73.5804 },
-  { latitude: 45.5160, longitude: -73.5822 },
-  { latitude: 45.5178, longitude: -73.5840 },   // End point (e.g., Parc Jeanne-Mance)
-];
+
 const GetDirections = () => {
   const [origin, setOrigin] = useState(null);
   const [destination, setDestination] = useState(null);
   const [directions, setDirections] = useState([]);
-  const [route, setRoute] = useState(fakePolyline); // Set the fake polyline as the initial state
+  const [route, setRoute] = useState([]); 
+  const [isInNavigationMode, setIsInNavigationMode] = useState(false);
+  const [isDirectionsBoxCollapsed, setIsDirectionsBoxCollapsed] = useState(true); // state to tell DirectionsBox when to pop up
 
+    // New state variables for fake GPS coordinates
+    const [fakeLatitude, setFakeLatitude] = useState("45.4973");
+    const [fakeLongitude, setFakeLongitude] = useState("-73.5789");
 
   // const [mode, setMode] = useState("driving");
 
@@ -38,17 +32,34 @@ const GetDirections = () => {
       //? Sets the polyline
       const polyline = await getPolyline(origin, destination);
       setRoute(polyline);
+      //? Goes to navigation Mode
+      setIsInNavigationMode(true);
+      setIsDirectionsBoxCollapsed(false); //? to pop up the direction box
       console.log("Success! drawing the line..")
     } catch (error) {
       console.error("Geocode Error:", error);
     }
+  };
+
+  const onChangeDirections = async() =>{
+    setIsInNavigationMode(false);
+    setIsDirectionsBoxCollapsed(true);
+  }
+
+  const updateOrigin = () => {
+    setOrigin({
+      latitude: parseFloat(fakeLatitude),
+      longitude: parseFloat(fakeLongitude),
+    });
   };
   return (
     <View style={styles.container}>
       <Header />
       <NavBar />
       <View style={styles.searchContainer}>
-        <FloatingSearchBar
+        {!isInNavigationMode && (
+        <View>
+          <FloatingSearchBar
           onPlaceSelect={(location) => {
               setOrigin(location);
           }}
@@ -62,7 +73,8 @@ const GetDirections = () => {
           placeholder="Enter Destination"
           style={[styles.searchBar, { marginTop: 10 }]}
         />
-
+        </View>)
+        }
         {/* <View style={styles.modes}>
             <Button title="Walking" onPress={() => setMode("walking")}/>
             <Button title="Car" onPress={() => setMode("driving")} />
@@ -70,18 +82,19 @@ const GetDirections = () => {
             <Button title="Biking" onPress={() => setMode("biking")} />
           </View> */}
         <View style={styles.buttonContainer}>
-          <Button title="Get Directions" onPress={onAddressSubmit} />
+          <Button title={isInNavigationMode ? "Change Directions":"Get Directions"} onPress={ isInNavigationMode? onChangeDirections:onAddressSubmit} />
         </View>
       </View>
       <MapView
         style={styles.map}
         initialRegion={{
-          latitude: 45.4973, // Default center (SGW campus)
-          longitude: -73.5789,
+          latitude:parseFloat(fakeLatitude), // Default center (SGW campus)
+          longitude: parseFloat(fakeLongitude),
           latitudeDelta: 0.01,
           longitudeDelta: 0.01,
         }}
         loadingEnabled={true}
+        
       >
         {origin && <Marker coordinate={origin} title="Origin" />}
         {destination && <Marker coordinate={destination} title="Destination" />}
@@ -89,7 +102,10 @@ const GetDirections = () => {
           <Polyline coordinates={route} strokeWidth={10} strokeColor="blue" />
         )}
       </MapView>
-      <DirectionsBox directions={directions} />
+      <DirectionsBox directions={directions}
+      isCollapsed={isDirectionsBoxCollapsed} // Pass the state
+      setIsCollapsed={setIsDirectionsBoxCollapsed} // Pass the setter function
+     />
     </View>
   );
 };

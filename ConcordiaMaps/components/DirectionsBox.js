@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -9,7 +9,7 @@ import {
 import styles from "../styles/DirectionBox.style";
 import PropTypes from "prop-types"; // Import prop-types
 
-function DirectionsBox({ directions = [] }) {
+function DirectionsBox({ directions = [], isCollapsed, setIsCollapsed }) {
   DirectionsBox.propTypes = {
     directions: PropTypes.arrayOf(
       PropTypes.shape({
@@ -18,26 +18,28 @@ function DirectionsBox({ directions = [] }) {
         distance: PropTypes.string.isRequired,
       }),
     ).isRequired,
+    isCollapsed: PropTypes.bool.isRequired,
+    setIsCollapsed: PropTypes.func.isRequired,
   };
   //? ANIMATION ONLY
-  const [isCollapsed, setIsCollapsed] = useState(true);
-  const [animation] = useState(new Animated.Value(1));
+  const [animation] = useState(new Animated.Value(isCollapsed ? 1 : 0));
+  const isCollapsedRef = useRef(isCollapsed);
 
-  // Run initial animation when component mounts
   useEffect(() => {
+    isCollapsedRef.current = isCollapsed;
     Animated.timing(animation, {
       toValue: isCollapsed ? 1 : 0,
       duration: 0, // Immediate for initial state
       useNativeDriver: true,
     }).start();
-  }, []);
+  }, [isCollapsed]);
 
   const toggleCollapse = () => {
     Animated.timing(animation, {
-      toValue: isCollapsed ? 0 : 1,
+      toValue: isCollapsedRef.current ? 0 : 1,
       duration: 300,
       useNativeDriver: true,
-    }).start(() => setIsCollapsed(!isCollapsed));
+    }).start(() => setIsCollapsed(!isCollapsedRef.current));
   };
 
   const translateY = animation.interpolate({
