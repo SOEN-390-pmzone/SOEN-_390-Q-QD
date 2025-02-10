@@ -9,12 +9,11 @@ import Footer from "../components/Footer";
 import styles from "../styles";
 import { Building } from "../components/MapMarkers";
 import { ModalContext } from "../App"; // Import ModalContext
-import PopupModal from "../components/PopupModal"; // Adjust the path if necessary
-
-const customMarkerImage = require("../assets/PinLogo.png");
 import BuildingColoring from "../components/buildingColoring";
 import Legend from "../components/Legend";
 import ShuttleStop from "../components/ShuttleStop";
+
+const customMarkerImage = require("../assets/PinLogo.png");
 
 function HomeScreen() {
   const loyolaPostalCode = process.env.EXPO_PUBLIC_LOYOLA_POSTAL_CODE;
@@ -22,6 +21,7 @@ function HomeScreen() {
   const GOOGLE_MAPS_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
 
   const location = useContext(LocationContext);
+  const { isModalVisible, modalData, toggleModal, setModalData } = useContext(ModalContext); // Access setModalData
 
   const [postalCode, setPostalCode] = useState(sgwPostalCode);
   const [coordinates, setCoordinates] = useState(null);
@@ -79,13 +79,11 @@ function HomeScreen() {
       prevPostalCode === sgwPostalCode ? loyolaPostalCode : sgwPostalCode,
     );
   };
-  const { isModalVisible, modalData, toggleModal } = useContext(ModalContext); // Correctly access modal context
 
   // Function to handle marker press and pass data to the modal
   const handleMarkerPress = (building) => {
+    setModalData({ name: building.name, coordinate: building.coordinate }); // Update modalData
     toggleModal(); // Show modal
-    modalData.name = building.name; // Set the building name
-    modalData.coordinate = building.coordinate; // Set the building coordinates
   };
 
   return (
@@ -124,6 +122,7 @@ function HomeScreen() {
                 key={index}
                 coordinate={building.coordinate}
                 title={building.name}
+                onPress={() => handleMarkerPress(building)} // Add onPress handler
               >
                 <Image
                   source={customMarkerImage}
@@ -152,12 +151,6 @@ function HomeScreen() {
       </TouchableOpacity>
       <Legend />
       <Footer />
-      {/* Show the popup modal */}
-      <PopupModal
-        isVisible={isModalVisible}
-        data={modalData}
-        onClose={toggleModal}
-      />
     </View>
   );
 }

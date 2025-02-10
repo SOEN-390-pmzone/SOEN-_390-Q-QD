@@ -15,8 +15,8 @@ const Stack = createNativeStackNavigator();
 export default function App() {
   const [isModalVisible, setModalVisible] = useState(false);
   const [modalData, setModalData] = useState({
-    name: "Sample Location",
-    coordinate: { latitude: 51.5074, longitude: -0.1278 },
+    name: "",
+    coordinate: { latitude: 0, longitude: 0 },
   });
 
   const toggleModal = () => {
@@ -26,7 +26,9 @@ export default function App() {
   return (
     <LocationProvider>
       {/* Provide the modal context to all components */}
-      <ModalContext.Provider value={{ isModalVisible, modalData, toggleModal }}>
+      <ModalContext.Provider
+        value={{ isModalVisible, modalData, toggleModal, setModalData }}
+      >
         <NavigationContainer>
           <Stack.Navigator screenOptions={{ headerShown: false }}>
             <Stack.Screen
@@ -35,7 +37,7 @@ export default function App() {
               component={HomeScreen}
             />
             <Stack.Screen name="GetDirections" component={GetDirections} />
-        </Stack.Navigator>
+          </Stack.Navigator>
         </NavigationContainer>
 
         {/* Add PopupModal here */}

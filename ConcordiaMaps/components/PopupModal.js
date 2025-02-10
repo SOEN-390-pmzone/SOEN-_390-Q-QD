@@ -10,13 +10,6 @@ import {
 import PropTypes from "prop-types";
 
 const PopupModal = ({ isVisible, data, onClose }) => {
-  const displayData = data; // Use defaultData if no data is provided
-
-  // Function to handle "Get Directions" press
-  const handleGetDirections = () => {
-    Alert.alert("Get Directions", "Get Directions pressed");
-  };
-
   return (
     <Modal
       transparent
@@ -26,19 +19,18 @@ const PopupModal = ({ isVisible, data, onClose }) => {
     >
       <View style={styles.modalOverlay}>
         <View style={styles.modalContainer}>
-          <Text style={styles.modalTitle}>{displayData.name}</Text>
+          <Text style={styles.modalTitle}>{data.name}</Text>
+      
+        
 
-          {/* Buttons row */}
           <View style={styles.buttonsContainer}>
-            {/* Close Button */}
             <TouchableOpacity style={styles.closeButton} onPress={onClose}>
               <Text style={styles.closeButtonText}>Close</Text>
             </TouchableOpacity>
 
-            {/* Get Directions Button */}
             <TouchableOpacity
               style={styles.getDirectionsButton}
-              onPress={handleGetDirections}
+              onPress={() => Alert.alert("Get Directions", "Directions pressed")}
             >
               <Text style={styles.getDirectionsButtonText}>Get Directions</Text>
             </TouchableOpacity>
@@ -80,9 +72,13 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 10,
   },
+  modalText: {
+    fontSize: 14,
+    marginBottom: 5,
+  },
   buttonsContainer: {
-    flexDirection: "row", // Align buttons horizontally
-    justifyContent: "center", // Center buttons
+    flexDirection: "row",
+    justifyContent: "center",
     width: "100%",
   },
   closeButton: {
@@ -93,7 +89,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: "black",
     marginTop: 10,
-    marginRight: 5, // Space between buttons
+    marginRight: 5,
   },
   closeButtonText: {
     color: "black",
@@ -102,12 +98,12 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   getDirectionsButton: {
-    backgroundColor: "#990033", // Concordia red
+    backgroundColor: "#990033",
     paddingVertical: 8,
     paddingHorizontal: 10,
     borderRadius: 5,
     marginTop: 10,
-    marginLeft: 5, // Space between buttons
+    marginLeft: 5,
   },
   getDirectionsButtonText: {
     color: "white",

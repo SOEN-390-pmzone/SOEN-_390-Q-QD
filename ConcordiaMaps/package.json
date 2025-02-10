@@ -33,7 +33,7 @@
     "dotenv": "^16.4.7",
     "denodeify": "^1.2.1",
     "expo": "~52.0.27",
-    "expo-auth-session": "^6.0.3",
+    "expo-auth-session": "~6.0.3",
     "expo-location": "^18.0.5",
     "expo-status-bar": "~2.0.1",
     "jest": "~29.7.0",
