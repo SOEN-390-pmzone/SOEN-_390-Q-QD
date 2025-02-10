@@ -7,9 +7,11 @@ import Header from "../components/Header";
 import { LocationContext } from "../contexts/LocationContext";
 import Footer from "../components/Footer";
 import styles from "../styles";
+import { Building } from "../components/MapMarkers";
+import { ModalContext } from "../App"; // Import ModalContext
+import PopupModal from "../components/PopupModal"; // Adjust the path if necessary
 
 const customMarkerImage = require("../assets/PinLogo.png");
-import { Building } from "../components/MapMarkers";
 import BuildingColoring from "../components/buildingColoring";
 import Legend from "../components/Legend";
 import ShuttleStop from "../components/ShuttleStop";
@@ -77,6 +79,15 @@ function HomeScreen() {
       prevPostalCode === sgwPostalCode ? loyolaPostalCode : sgwPostalCode,
     );
   };
+  const { isModalVisible, modalData, toggleModal } = useContext(ModalContext); // Correctly access modal context
+
+  // Function to handle marker press and pass data to the modal
+  const handleMarkerPress = (building) => {
+    toggleModal(); // Show modal
+    modalData.name = building.name; // Set the building name
+    modalData.coordinate = building.coordinate; // Set the building coordinates
+  };
+
   return (
     <View style={styles.container} testID="home-screen">
       <Header />
@@ -141,6 +152,12 @@ function HomeScreen() {
       </TouchableOpacity>
       <Legend />
       <Footer />
+      {/* Show the popup modal */}
+      <PopupModal
+        isVisible={isModalVisible}
+        data={modalData}
+        onClose={toggleModal}
+      />
     </View>
   );
 }
