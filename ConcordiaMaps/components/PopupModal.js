@@ -20,8 +20,6 @@ const PopupModal = ({ isVisible, data, onClose }) => {
       <View style={styles.modalOverlay}>
         <View style={styles.modalContainer}>
           <Text style={styles.modalTitle}>{data.name}</Text>
-      
-        
 
           <View style={styles.buttonsContainer}>
             <TouchableOpacity style={styles.closeButton} onPress={onClose}>
@@ -30,7 +28,9 @@ const PopupModal = ({ isVisible, data, onClose }) => {
 
             <TouchableOpacity
               style={styles.getDirectionsButton}
-              onPress={() => Alert.alert("Get Directions", "Directions pressed")}
+              onPress={() =>
+                Alert.alert("Get Directions", "Directions pressed")
+              }
             >
               <Text style={styles.getDirectionsButtonText}>Get Directions</Text>
             </TouchableOpacity>

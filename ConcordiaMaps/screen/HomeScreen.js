@@ -21,7 +21,8 @@ function HomeScreen() {
   const GOOGLE_MAPS_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
 
   const location = useContext(LocationContext);
-  const { isModalVisible, modalData, toggleModal, setModalData } = useContext(ModalContext); // Access setModalData
+  const { isModalVisible, modalData, toggleModal, setModalData } =
+    useContext(ModalContext); // Access setModalData
 
   const [postalCode, setPostalCode] = useState(sgwPostalCode);
   const [coordinates, setCoordinates] = useState(null);
