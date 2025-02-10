@@ -21,6 +21,13 @@ const GetDirections = () => {
   //  state variables for fake GPS coordinates located as SGW
   const [fakeLatitude] = useState("45.4973");
   const [fakeLongitude] = useState("-73.5789");
+    useEffect(() => {
+    // Set initial origin to fake coordinates
+    setOrigin({
+      latitude: parseFloat(fakeLatitude),
+      longitude: parseFloat(fakeLongitude),
+    });
+  }, []); // Empty dependency array ensures this runs only once
 
   const { getStepsInHTML, getPolyline } = useGoogleMapDirections();
 
