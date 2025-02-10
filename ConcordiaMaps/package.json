@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "@expo/metro-runtime": "~4.0.1",
+    "@mapbox/polyline": "^1.2.1",
     "@react-native-async-storage/async-storage": "1.23.1",
     "@react-navigation/native": "^7.0.14",
     "@react-navigation/native-stack": "^7.2.0",
@@ -44,7 +45,7 @@
     "react-dom": "18.3.1",
     "react-native": "^0.76.7",
     "react-native-gesture-handler": "~2.20.2",
-    "react-native-maps": "1.18.0",
+    "react-native-maps": "^1.20.1",
     "react-native-modal": "^13.0.1",
     "react-native-reanimated": "^3.16.7",
     "react-native-safe-area-context": "4.12.0",
