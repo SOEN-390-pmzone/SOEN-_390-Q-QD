@@ -125,6 +125,7 @@ const GetDirections = () => {
         </View>
       </View>
       <MapView
+        key={`${origin?.latitude}-${origin?.longitude}-${destination?.latitude}-${destination?.longitude}-${route.length}`}
         style={styles.map}
         initialRegion={{
           latitude: parseFloat(fakeLatitude), // Default center (SGW campus)
