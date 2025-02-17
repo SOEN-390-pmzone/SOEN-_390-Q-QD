@@ -20,6 +20,8 @@ const PopupModal = ({ isVisible, data, onClose }) => {
       <View style={styles.modalOverlay}>
         <View style={styles.modalContainer}>
           <Text style={styles.modalTitle}>{data.name}</Text>
+          <Text style={styles.modalText}>{data.address}</Text>
+
 
           <View style={styles.buttonsContainer}>
             <TouchableOpacity style={styles.closeButton} onPress={onClose}>
@@ -73,7 +75,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   modalText: {
-    fontSize: 14,
+    fontSize: 12,
     marginBottom: 5,
   },
   buttonsContainer: {
