@@ -86,7 +86,6 @@ MapMarkers.propTypes = {
 
 export default MapMarkers;
 
-
 export const Building = [
   // SGW Campus buildings latitude and longitude
   {
@@ -570,14 +569,14 @@ export const Building = [
       longitude: -73.639758,
     },
     address: "7141 Sherbrooke West",
-},
- {
+  },
+  {
     name: "Psychology Building",
     coordinate: {
       latitude: 45.458938,
       longitude: -73.640467,
     },
-address:"7141 Sherbrooke W",
+    address: "7141 Sherbrooke W",
   },
   {
     name: "Recreational and Athletics",
@@ -585,7 +584,7 @@ address:"7141 Sherbrooke W",
       latitude: 45.456677,
       longitude: -73.637523,
     },
-address:"7200 Sherbrooke W",
+    address: "7200 Sherbrooke W",
   },
   {
     name: "Loyola Jesuit Hall and Conference Center",
@@ -593,7 +592,7 @@ address:"7200 Sherbrooke W",
       latitude: 45.458551,
       longitude: -73.641016,
     },
-address:"7141 Sherbrooke W",
+    address: "7141 Sherbrooke W",
   },
   {
     name: "Student Center",
@@ -601,7 +600,7 @@ address:"7141 Sherbrooke W",
       latitude: 45.459137,
       longitude: -73.639203,
     },
-address:"7141 Sherbrooke W",
+    address: "7141 Sherbrooke W",
   },
   {
     name: "Solar House, SH Building",
@@ -609,7 +608,7 @@ address:"7141 Sherbrooke W",
       latitude: 45.459298,
       longitude: -73.642478,
     },
-address:"7141 Sherbrooke W",
+    address: "7141 Sherbrooke W",
   },
   {
     name: "Terrebonne Building, TA Building",
@@ -617,7 +616,7 @@ address:"7141 Sherbrooke W",
       latitude: 45.460051,
       longitude: -73.640842,
     },
-address:"7079 Terrebonne",
+    address: "7079 Terrebonne",
   },
   {
     name: "TB Annex",
@@ -625,7 +624,7 @@ address:"7079 Terrebonne",
       latitude: 45.459992,
       longitude: -73.640897,
     },
-address:"7075 Terrebonne",
+    address: "7075 Terrebonne",
   },
   {
     name: "Richard J. Renaud Science Complex",
@@ -633,7 +632,7 @@ address:"7075 Terrebonne",
       latitude: 45.457567,
       longitude: -73.641739,
     },
-address:"7141 Sherbrooke W",
+    address: "7141 Sherbrooke W",
   },
   {
     name: "Vanier Library",
@@ -641,7 +640,7 @@ address:"7141 Sherbrooke W",
       latitude: 45.459026,
       longitude: -73.638606,
     },
-address:"7141 Sherbrooke W",
+    address: "7141 Sherbrooke W",
   },
   {
     name: "Vanier Extension",
@@ -649,9 +648,8 @@ address:"7141 Sherbrooke W",
       latitude: 45.459026,
       longitude: -73.638606,
     },
-address: "7141 Sherbrooke W",
+    address: "7141 Sherbrooke W",
   },
-
 ];
 
 // Default center coordinates for each campus

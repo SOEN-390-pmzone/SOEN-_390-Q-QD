@@ -82,7 +82,11 @@ function HomeScreen() {
 
   // Function to handle marker press and pass data to the modal
   const handleMarkerPress = (building) => {
-    setModalData({ name: building.name, coordinate: building.coordinat, address:building.address }); // Update modalData
+    setModalData({
+      name: building.name,
+      coordinate: building.coordinat,
+      address: building.address,
+    }); // Update modalData
     toggleModal(); // Show modal
   };
 

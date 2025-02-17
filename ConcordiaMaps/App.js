@@ -6,7 +6,7 @@ import { LocationProvider } from "./contexts/LocationContext";
 import PopupModal from "./components/PopupModal"; // Import the PopupModal
 import styles from "./styles";
 import GetDirections from "./components/GetDirections";
-import MapMarkers from "./components/MapMarkers"; // Ensure this import exists
+// import MapMarkers from "./components/MapMarkers"; // Ensure this import exists
 
 // Create Context for modal data and visibility
 export const ModalContext = createContext();
@@ -30,8 +30,6 @@ export default function App() {
       <ModalContext.Provider
         value={{ isModalVisible, modalData, toggleModal, setModalData }}
       >
-      
-
         <NavigationContainer>
           <Stack.Navigator screenOptions={{ headerShown: false }}>
             <Stack.Screen
