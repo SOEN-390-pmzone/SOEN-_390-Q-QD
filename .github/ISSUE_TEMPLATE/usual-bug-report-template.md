@@ -17,7 +17,7 @@ Steps to reproduce the behavior:
 3. 
 
 **How was this tested?**
-[ ] manual tests
+- [ ] manual tests
 
 
 **Screenshots**
