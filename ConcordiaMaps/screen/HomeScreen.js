@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef, useContext } from "react";
-import { View, Text, TouchableOpacity, Image } from "react-native";
+import { View, Text, TouchableOpacity, Image, Animated } from "react-native";
 import axios from "axios";
 import MapView, { Marker } from "react-native-maps";
 import NavBar from "../components/NavBar";
 import Header from "../components/Header";
+import ToggleModal from "../components/toggleModal"
 import { LocationContext } from "../contexts/LocationContext";
 import Footer from "../components/Footer";
 import styles from "../styles";
@@ -24,6 +25,7 @@ function HomeScreen() {
   const [postalCode, setPostalCode] = useState(sgwPostalCode);
   const [coordinates, setCoordinates] = useState(null);
   const [error, setError] = useState("");
+  
 
   const mapRef = useRef(null);
 
@@ -77,6 +79,30 @@ function HomeScreen() {
       prevPostalCode === sgwPostalCode ? loyolaPostalCode : sgwPostalCode,
     );
   };
+  const [borderColorAnim] = useState(new Animated.Value(0)); // Create an animated value
+  const borderColor = borderColorAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["#000000", "#FF0000"], // Change from black to red
+  });
+  useEffect(() => {
+    // Define the border color animation
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(borderColorAnim, {
+          toValue: 1,
+          duration: 500,
+          useNativeDriver: false,
+        }),
+        Animated.timing(borderColorAnim, {
+          toValue: 0,
+          duration: 500,
+          useNativeDriver: false,
+        }),
+      ]),
+    ).start();
+  }, [borderColorAnim]);
+  
+  
   return (
     <View style={styles.container}>
       <Header />
@@ -128,19 +154,25 @@ function HomeScreen() {
         <Text>Loading...</Text>
       )}
       {error ? <Text>Error: {error}</Text> : null}
-      <TouchableOpacity
-        onPress={handleChangeCampuses}
-        activeOpacity={0.7}
-        style={styles.button}
-      >
-        <Image
-          style={styles.buttonImage}
-          source={require("../assets/download.jpg")}
-          resizeMode={"cover"} // cover or contain its up to you view look
-        />
-      </TouchableOpacity>
+      <View style={styles.toggleView}>
+        <TouchableOpacity
+          onPress={handleChangeCampuses}
+          activeOpacity={0.7}
+        >
+          <Animated.View style={[styles.button, { borderColor }]}>
+            <Image
+              style={styles.buttonImage}
+              source={require("../assets/download.jpg")}
+              resizeMode={"cover"} // cover or contain its up to you view look
+            />
+          </Animated.View>
+        </TouchableOpacity>
+        <ToggleModal text = "Press the coat of arms to switch campuses"/>
+      </View>
+      
       <Legend />
       <Footer />
+      
     </View>
   );
 }

@@ -41,9 +41,6 @@ function NavBar() {
         <TouchableOpacity onPress={() => handlePress("Get directions")}>
           <Text style={styles.menuItem}>Get directions</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => handlePress("Switch campuses")}>
-          <Text style={styles.menuItem}>Switch campuses</Text>
-        </TouchableOpacity>
         <TouchableOpacity
           onPress={() => handlePress("Outdoor Points of Interest")}
         >
