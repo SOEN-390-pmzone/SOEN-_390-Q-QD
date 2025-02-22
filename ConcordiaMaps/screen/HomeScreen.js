@@ -12,6 +12,7 @@ import { ModalContext } from "../App";
 import BuildingColoring from "../components/buildingColoring";
 import Legend from "../components/Legend";
 import ShuttleStop from "../components/ShuttleStop";
+import LiveBusTracker from "../components/LiveBusTracker";
 
 const customMarkerImage = require("../assets/PinLogo.png");
 
@@ -132,6 +133,7 @@ function HomeScreen() {
             ))}
             <BuildingColoring />
             <ShuttleStop />
+            <LiveBusTracker mapRef={mapRef} />
           </MapView>
         </>
       ) : (
@@ -151,6 +153,7 @@ function HomeScreen() {
       </TouchableOpacity>
       <Legend />
       <Footer />
+     
     </View>
   );
 }

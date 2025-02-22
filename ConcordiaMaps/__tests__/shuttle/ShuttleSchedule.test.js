@@ -29,7 +29,7 @@ it("updates next shuttle time when campus is switched", async () => {
 });
 
 it("displays Friday schedule on Fridays", async () => {
-  jest.setSystemTime(new Date("2025-02-07T10:00:00Z")); // Friday
+  jest.setSystemTime(new Date("2025-02-07T10:00:00Z"));
   const { getByText } = render(
     <ShuttleSchedule visible={true} onClose={jest.fn()} />,
   );
