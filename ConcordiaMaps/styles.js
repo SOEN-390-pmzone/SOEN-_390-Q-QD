@@ -169,8 +169,7 @@ const styles = StyleSheet.create({
     fontFamily: "Times New Roman",
     fontWeight: "bold",
     textAlign: "center",
-  }
-
+  },
 });
 
 export default styles;

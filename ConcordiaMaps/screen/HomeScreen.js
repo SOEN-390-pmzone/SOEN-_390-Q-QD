@@ -148,7 +148,7 @@ function HomeScreen() {
           onPress={handleChangeCampuses}
           activeOpacity={0.7}
           style={{ borderColor: borderColor, borderWidth: 2, borderRadius: 10 }}
-        > 
+        >
           <Image
             style={styles.buttonImage}
             source={require("../assets/download.jpg")}

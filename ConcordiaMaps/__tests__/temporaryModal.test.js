@@ -4,7 +4,9 @@ import TemporaryModal from "../components/temporaryModal"; // Adjust the import 
 
 describe("TemporaryModal", () => {
   it("should render the modal with the provided text", () => {
-    const { getByText } = render(<TemporaryModal text="Hello, World!" />);
+    const { getByText } = render(
+      <TemporaryModal text="Hello, World!" my_state={true} time={3000} />,
+    );
 
     // Check if the modal text is rendered
     expect(getByText("Hello, World!")).toBeTruthy();
@@ -13,7 +15,9 @@ describe("TemporaryModal", () => {
   it("should hide the modal after 3 seconds", () => {
     jest.useFakeTimers(); // Mock the timers
 
-    const { queryByText } = render(<TemporaryModal text="Hello, World!" />);
+    const { queryByText } = render(
+      <TemporaryModal text="Hello, World!" my_state={true} time={3000} />,
+    );
 
     // Check if the modal is initially visible
     expect(queryByText("Hello, World!")).toBeTruthy();
