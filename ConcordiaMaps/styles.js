@@ -141,6 +141,7 @@ const styles = StyleSheet.create({
     width: "100%", // Make the image take the full width of the parent view
     height: "100%", // Make the image take the full height of the parent view
     borderRadius: 10, // Optional: Add rounded corners to the image
+    //borderColor: "#FFFFFF", // Optional: Add a border color to the image
   },
   modalView: {
     margin: 20,

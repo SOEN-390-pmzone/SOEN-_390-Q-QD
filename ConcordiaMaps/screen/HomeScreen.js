@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef, useContext } from "react";
-import { View, Text, TouchableOpacity, Image, Animated } from "react-native";
+import { View, Text, TouchableOpacity, Image } from "react-native";
 import axios from "axios";
 import MapView, { Marker } from "react-native-maps";
 import NavBar from "../components/NavBar";
 import Header from "../components/Header";
-import ToggleModal from "../components/toggleModal"
+import TemporaryModal from "../components/temporaryModal";
 import { LocationContext } from "../contexts/LocationContext";
 import Footer from "../components/Footer";
 import styles from "../styles";
@@ -25,7 +25,8 @@ function HomeScreen() {
   const [postalCode, setPostalCode] = useState(sgwPostalCode);
   const [coordinates, setCoordinates] = useState(null);
   const [error, setError] = useState("");
-  
+  const [modalState, setModalState] = useState(true);
+  const [borderColor, setBorderColor] = useState("#912338"); // Initial border color (black)
 
   const mapRef = useRef(null);
 
@@ -79,30 +80,18 @@ function HomeScreen() {
       prevPostalCode === sgwPostalCode ? loyolaPostalCode : sgwPostalCode,
     );
   };
-  const [borderColorAnim] = useState(new Animated.Value(0)); // Create an animated value
-  const borderColor = borderColorAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ["#000000", "#FF0000"], // Change from black to red
-  });
+
   useEffect(() => {
-    // Define the border color animation
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(borderColorAnim, {
-          toValue: 1,
-          duration: 500,
-          useNativeDriver: false,
-        }),
-        Animated.timing(borderColorAnim, {
-          toValue: 0,
-          duration: 500,
-          useNativeDriver: false,
-        }),
-      ]),
-    ).start();
-  }, [borderColorAnim]);
-  
-  
+    if (modalState) {
+      const timer = setTimeout(() => {
+        setBorderColor("#ffffff");
+        setModalState(false);
+      }, 3000); // Modal will disappear after 3 seconds
+
+      return () => clearTimeout(timer); // Cleanup the timer if the component unmounts
+    }
+  }, [modalState]);
+
   return (
     <View style={styles.container}>
       <Header />
@@ -158,21 +147,23 @@ function HomeScreen() {
         <TouchableOpacity
           onPress={handleChangeCampuses}
           activeOpacity={0.7}
+          style={{ borderColor: borderColor, borderWidth: 2, borderRadius: 10 }}
         >
-          <Animated.View style={[styles.button, { borderColor }]}>
-            <Image
-              style={styles.buttonImage}
-              source={require("../assets/download.jpg")}
-              resizeMode={"cover"} // cover or contain its up to you view look
-            />
-          </Animated.View>
+          <Image
+            style={styles.buttonImage}
+            source={require("../assets/download.jpg")}
+            resizeMode={"cover"} // cover or contain its up to you view look
+          />
         </TouchableOpacity>
-        <ToggleModal text = "Press the coat of arms to switch campuses"/>
+        <TemporaryModal
+          text="Press the coat of arms to switch campuses"
+          my_state={modalState}
+          time="3000"
+        />
       </View>
-      
+
       <Legend />
       <Footer />
-      
     </View>
   );
 }
