@@ -153,7 +153,6 @@ function HomeScreen() {
       </TouchableOpacity>
       <Legend />
       <Footer />
-     
     </View>
   );
 }

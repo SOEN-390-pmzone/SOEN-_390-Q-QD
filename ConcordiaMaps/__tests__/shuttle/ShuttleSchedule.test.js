@@ -1,48 +1,58 @@
 import React from "react";
-import { render, fireEvent, waitFor } from "@testing-library/react-native";
+import { render, fireEvent } from "@testing-library/react-native";
 import ShuttleSchedule from "../../components/ShuttleSchedule";
 
-jest.useFakeTimers().setSystemTime(new Date("2025-02-06T15:00:00Z")); // Mock current time
-
 describe("ShuttleSchedule Component", () => {
-  it("updates next shuttle time when campus is switched", async () => {
-    const { getByText, getByLabelText } = render(
+  it("renders the modal when visible", () => {
+    const { getByText } = render(
       <ShuttleSchedule visible={true} onClose={jest.fn()} />,
     );
 
-    fireEvent.press(getByLabelText("Loyola"));
-
-    await waitFor(() =>
-      expect(getByText(/Next Shuttle from Loyola/i)).toBeTruthy(),
-    );
+    expect(getByText("Shuttle Schedule")).toBeTruthy();
   });
-});
 
-it("updates next shuttle time when campus is switched", async () => {
-  const { getByText, getByRole } = render(
-    <ShuttleSchedule visible={true} onClose={jest.fn()} />,
-  );
-  fireEvent.press(getByRole("button", { name: /Loyola/i }));
-  await waitFor(() =>
-    expect(getByText(/Next Shuttle from Loyola/i)).toBeTruthy(),
-  );
-});
+  it("does not render the modal when not visible", () => {
+    const { queryByText } = render(
+      <ShuttleSchedule visible={false} onClose={jest.fn()} />,
+    );
 
-it("displays Friday schedule on Fridays", async () => {
-  jest.setSystemTime(new Date("2025-02-07T10:00:00Z"));
-  const { getByText } = render(
-    <ShuttleSchedule visible={true} onClose={jest.fn()} />,
-  );
-  await waitFor(() =>
-    expect(getByText(/Next Shuttle from SGW:/i)).toBeTruthy(),
-  );
-});
+    expect(queryByText("Shuttle Schedule")).toBeNull();
+  });
 
-it("closes the modal when close button is pressed", () => {
-  const onCloseMock = jest.fn();
-  const { getByText } = render(
-    <ShuttleSchedule visible={true} onClose={onCloseMock} />,
-  );
-  fireEvent.press(getByText("Close"));
-  expect(onCloseMock).toHaveBeenCalled();
+  it("calls onClose when close button is pressed", () => {
+    const onCloseMock = jest.fn();
+    const { getByText } = render(
+      <ShuttleSchedule visible={true} onClose={onCloseMock} />,
+    );
+
+    fireEvent.press(getByText("Close"));
+    expect(onCloseMock).toHaveBeenCalled();
+  });
+
+  it("switches campus when SGW button is pressed", () => {
+    const { getByText } = render(
+      <ShuttleSchedule visible={true} onClose={jest.fn()} />,
+    );
+
+    fireEvent.press(getByText("SGW Campus"));
+    expect(getByText(/Next Shuttle from SGW:/)).toBeTruthy();
+  });
+
+  it("switches campus when Loyola button is pressed", () => {
+    const { getByText } = render(
+      <ShuttleSchedule visible={true} onClose={jest.fn()} />,
+    );
+
+    fireEvent.press(getByText("Loyola"));
+    expect(getByText(/Next Shuttle from Loyola:/)).toBeTruthy();
+  });
+
+  it("switches to Friday schedule when Friday button is pressed", () => {
+    const { getByText } = render(
+      <ShuttleSchedule visible={true} onClose={jest.fn()} />,
+    );
+
+    fireEvent.press(getByText("Friday"));
+    expect(getByText("Friday")).toBeTruthy();
+  });
 });

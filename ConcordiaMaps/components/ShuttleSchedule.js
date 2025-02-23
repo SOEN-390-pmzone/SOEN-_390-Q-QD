@@ -164,15 +164,13 @@ function ShuttleSchedule({ visible, onClose }) {
       setNextShuttle("No shuttle service on weekends");
       return;
     }
-  
-    if (!["weekday", "friday"].includes(selectedSchedule)) {
-      const scheduleType = day >= 1 && day <= 4 ? "weekday" : "friday";
-      setSelectedSchedule(scheduleType);
-    }
-  
-    setNextShuttle(getNextShuttle(schedules[selectedCampus][selectedSchedule]));
-  }, [selectedCampus]);
-   // Trigger when campus or schedule changes
+
+    const scheduleType = day >= 1 && day <= 4 ? "weekday" : "friday";
+    setSelectedSchedule(scheduleType);
+
+    setNextShuttle(getNextShuttle(schedules[selectedCampus][scheduleType]));
+  }, [selectedCampus, selectedSchedule]);
+  // Trigger when campus or schedule changes
 
   const schedule = schedules[selectedCampus][selectedSchedule];
 
