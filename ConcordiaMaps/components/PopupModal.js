@@ -22,6 +22,7 @@ const PopupModal = ({ isVisible, data, onClose }) => {
         <View style={styles.modalContainer}>
           <Text style={styles.modalTitle}>{data.name}</Text>
           <Text style={styles.modalText}>{data.address}</Text>
+          <Text style={styles.modalText}>{data.fullBuildingName}</Text>
 
           <View style={styles.buttonsContainer}>
             <TouchableOpacity style={styles.closeButton} onPress={onClose}>

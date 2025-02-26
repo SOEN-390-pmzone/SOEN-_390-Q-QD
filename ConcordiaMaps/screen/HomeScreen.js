@@ -86,6 +86,7 @@ function HomeScreen() {
       name: building.name,
       coordinate: building.coordinat,
       address: building.address,
+      fullBuildingName: building.fullBuildingName,
     }); // Update modalData
     toggleModal(); // Show modal
   };
@@ -127,6 +128,7 @@ function HomeScreen() {
                 coordinate={building.coordinate}
                 title={building.name}
                 address={building.address}
+                fullBuildingName={building.fullBuildingName}
                 onPress={() => handleMarkerPress(building)} // Add onPress handler
               >
                 <Image

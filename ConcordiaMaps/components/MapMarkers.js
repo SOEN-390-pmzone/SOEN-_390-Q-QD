@@ -30,6 +30,7 @@ const MapMarkers = ({ markers }) => {
           coordinate={marker.coordinate}
           title={marker.name}
           address={marker.address}
+          fullBuildingName={marker.fullBuildingName}
           onPress={() => handleMarkerPress(marker)}
         >
           <Image source={customMarkerImage} style={styles.markerImage} />
@@ -37,6 +38,7 @@ const MapMarkers = ({ markers }) => {
             <View style={styles.calloutContainer}>
               <Text style={styles.calloutText}>{marker.name}</Text>
               <Text style={styles.calloutText}>{marker.address}</Text>
+              <Text style={styles.calloutText}>{marker.fullBuildingName}</Text>
             </View>
           </Callout>
         </Marker>
