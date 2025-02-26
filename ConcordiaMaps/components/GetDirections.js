@@ -1,53 +1,83 @@
-import React, { useState, useRef, useEffect, memo } from "react";
-import { View, Button, TextInput } from "react-native";
+import React, {
+  useState,
+  useRef,
+  useEffect,
+  memo,
+  useContext,
+  useMemo,
+} from "react";
+import { View, Button } from "react-native";
 import MapView, { Polyline, Marker } from "react-native-maps";
+import * as Location from "expo-location";
 import FloatingSearchBar from "./FloatingSearchBar";
 import Header from "./Header";
 import NavBar from "./NavBar";
 import styles from "../styles";
 import { useGoogleMapDirections } from "../hooks/useGoogleMapDirections";
 import DirectionsBox from "./DirectionsBox";
+import { LocationContext } from "../contexts/LocationContext";
 
-// Memoize the Marker component
 const MemoizedMarker = memo(Marker);
-
-// Memoize the Polyline component
 const MemoizedPolyline = memo(Polyline);
+const MemoizedMapView = memo(MapView);
+
+const RoutePolyline = memo(({ route }) => {
+  if (route.length === 0) return null;
+  return <Polyline coordinates={route} strokeWidth={10} strokeColor="blue" />;
+});
+
+const LocationMarkers = memo(({ origin, destination }) => {
+  return (
+    <>
+      {origin && <Marker coordinate={origin} title="Origin" />}
+      {destination && <Marker coordinate={destination} title="Destination" />}
+    </>
+  );
+});
 
 const GetDirections = () => {
   const mapRef = useRef(null);
+  const location = useContext(LocationContext);
 
   const [origin, setOrigin] = useState(null);
   const [destination, setDestination] = useState(null);
   const [directions, setDirections] = useState([]);
   const [route, setRoute] = useState([]);
   const [isInNavigationMode, setIsInNavigationMode] = useState(false);
-  const [isDirectionsBoxCollapsed, setIsDirectionsBoxCollapsed] = useState(true); // state to tell DirectionsBox when to pop up
-
-  //  state variables for fake GPS coordinates located as SGW
-  const [fakeLatitude, setFakeLatitude] = useState("45.4973");
-  const [fakeLongitude, setFakeLongitude] = useState("-73.5789");
-
-  useEffect(() => {
-    // Set initial origin to fake coordinates
-    setOrigin({
-      latitude: parseFloat(fakeLatitude),
-      longitude: parseFloat(fakeLongitude),
-    });
-  }, []); // Empty dependency array ensures this runs only once
+  const [isDirectionsBoxCollapsed, setIsDirectionsBoxCollapsed] =
+    useState(true);
 
   const { getStepsInHTML, getPolyline } = useGoogleMapDirections();
+  const [useCurrentLocation, setUseCurrentLocation] = useState(true);
 
-  // Function to fit the map to given coordinates
+  // Set initial location from context
+  useEffect(() => {
+    if (location && useCurrentLocation) {
+      setOrigin({
+        latitude: location.latitude,
+        longitude: location.longitude,
+      });
+    }
+  }, [location, useCurrentLocation]);
+
   const fitMapToCoordinates = (coordinates, animated = true) => {
     if (mapRef.current && coordinates.length > 0) {
       mapRef.current.fitToCoordinates(coordinates, {
-        //? Padding to where to show the map
         edgePadding: { top: 10, right: 50, bottom: 100, left: 50 },
         animated,
       });
     }
   };
+
+  const initialRegion = useMemo(
+    () => ({
+      latitude: location?.latitude || 45.4972159,
+      longitude: location?.longitude || -73.578956,
+      latitudeDelta: 0.01,
+      longitudeDelta: 0.01,
+    }),
+    [location]
+  );
 
   useEffect(() => {
     if (origin) {
@@ -67,18 +97,15 @@ const GetDirections = () => {
     }
   }, [route]);
 
-  //? Updates the Direction components with the directions for the text after the button is pressed
   const onAddressSubmit = async () => {
     try {
       const result = await getStepsInHTML(origin, destination);
       setDirections(result);
-      //? Sets the polyline
       const polyline = await getPolyline(origin, destination);
       setRoute(polyline);
-      //? Goes to navigation Mode
       setIsInNavigationMode(true);
-      setIsDirectionsBoxCollapsed(false); //? to pop up the direction box
-      console.log("Success! drawing the line..");
+      setIsDirectionsBoxCollapsed(false);
+      console.log("Success! drawing the line...");
     } catch (error) {
       console.error("Geocode Error:", error);
     }
@@ -89,42 +116,59 @@ const GetDirections = () => {
     setIsDirectionsBoxCollapsed(true);
   };
 
-  const updateOrigin = () => {
-    setOrigin({
-      latitude: parseFloat(fakeLatitude),
-      longitude: parseFloat(fakeLongitude),
-    });
-  };
-
+  // Real-time location tracking during navigation
   useEffect(() => {
     let intervalId;
-    if (isInNavigationMode) {
-      intervalId = setInterval(async () => {
-        // Update origin with current fake coordinates
-        const newOrigin = {
-          latitude: parseFloat(fakeLatitude),
-          longitude: parseFloat(fakeLongitude),
-        };
-        setOrigin(newOrigin);
 
-        // Re-render the polyline
-        try {
+    const updateLocation = async () => {
+      try {
+        const newLocation = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.High,
+        });
+
+        const newOrigin = {
+          latitude: newLocation.coords.latitude,
+          longitude: newLocation.coords.longitude,
+        };
+
+        // Only update state if location has changed
+        if (
+          origin?.latitude !== newOrigin.latitude ||
+          origin?.longitude !== newOrigin.longitude
+        ) {
+          setOrigin(newOrigin);
+
           const polyline = await getPolyline(newOrigin, destination);
           setRoute(polyline);
-          console.log("Polyline re-rendered!");
-        } catch (error) {
-          console.error("Error re-rendering polyline:", error);
+          console.log("Route updated with new location");
         }
-      }, 10000); // Every 10 seconds
+      } catch (error) {
+        console.error("Error updating location");
+      }
+    };
+
+    if (isInNavigationMode && destination) {
+      updateLocation(); // Initial call to set the location immediately
+      intervalId = setInterval(updateLocation, 20000); // Every 20 seconds
     }
 
     return () => {
       if (intervalId) {
-        clearInterval(intervalId); // Clear interval on unmount or mode change
+        clearInterval(intervalId);
       }
     };
-  }, [isInNavigationMode, fakeLatitude, fakeLongitude, getPolyline, destination]);
+  }, [isInNavigationMode, destination, getPolyline, origin]);
 
+  useEffect(() => {
+    if (location && useCurrentLocation) {
+      setOrigin({
+        latitude: location.latitude,
+        longitude: location.longitude,
+      });
+    }
+  }, [location, useCurrentLocation]);
+
+  // Update the FloatingSearchBar for origin
   return (
     <View style={styles.container}>
       <Header />
@@ -134,10 +178,18 @@ const GetDirections = () => {
           <View>
             <FloatingSearchBar
               onPlaceSelect={(location) => {
+                setUseCurrentLocation(false); // Disable auto-update when manual location entered
                 setOrigin(location);
               }}
-              placeholder="Enter Origin"
+              placeholder={
+                useCurrentLocation ? "Using Current Location" : "Enter Origin"
+              }
               style={styles.searchBar}
+              initialValue={
+                useCurrentLocation && origin
+                  ? `Current Location (${origin.latitude.toFixed(4)}, ${origin.longitude.toFixed(4)})`
+                  : ""
+              }
             />
             <FloatingSearchBar
               onPlaceSelect={(location) => {
@@ -148,28 +200,6 @@ const GetDirections = () => {
             />
           </View>
         )}
-        {/* <View style={styles.modes}>
-          <Button title="Walking" onPress={() => setMode("walking")}/>
-          <Button title="Car" onPress={() => setMode("driving")} />
-          <Button title="Transit" onPress={() => setMode("transit")} />
-          <Button title="Biking" onPress={() => setMode("biking")} />
-        </View> */}
-        <View>
-          <TextInput
-            style={{ height: 40, borderColor: "gray", borderWidth: 1, marginBottom: 5 }}
-            onChangeText={text => setFakeLatitude(text)}
-            value={fakeLatitude}
-            placeholder="Latitude"
-            keyboardType="numeric"
-          />
-          <TextInput
-            style={{ height: 40, borderColor: "gray", borderWidth: 1 }}
-            onChangeText={text => setFakeLongitude(text)}
-            value={fakeLongitude}
-            placeholder="Longitude"
-            keyboardType="numeric"
-          />
-        </View>
         <View style={styles.buttonContainer}>
           <Button
             title={isInNavigationMode ? "Change Directions" : "Get Directions"}
@@ -177,28 +207,20 @@ const GetDirections = () => {
           />
         </View>
       </View>
-      <MapView
-        key={`${origin?.latitude}-${origin?.longitude}-${destination?.latitude}-${destination?.longitude}`}
+
+      <MemoizedMapView
         style={styles.map}
-        initialRegion={{
-          latitude: parseFloat(fakeLatitude), // Default center (SGW campus)
-          longitude: parseFloat(fakeLongitude),
-          latitudeDelta: 0.01,
-          longitudeDelta: 0.01,
-        }}
+        initialRegion={initialRegion}
         loadingEnabled={true}
         ref={mapRef}
       >
-        {origin && <MemoizedMarker coordinate={origin} title="Origin" />}
-        {destination && <MemoizedMarker coordinate={destination} title="Destination" />}
-        {route.length > 0 && (
-          <MemoizedPolyline coordinates={route} strokeWidth={10} strokeColor="blue" />
-        )}
-      </MapView>
+        <LocationMarkers origin={origin} destination={destination} />
+        <RoutePolyline route={route} />
+      </MemoizedMapView>
       <DirectionsBox
         directions={directions}
-        isCollapsed={isDirectionsBoxCollapsed} // Pass the state
-        setIsCollapsed={setIsDirectionsBoxCollapsed} // Pass the setter function
+        isCollapsed={isDirectionsBoxCollapsed}
+        setIsCollapsed={setIsDirectionsBoxCollapsed}
       />
     </View>
   );
