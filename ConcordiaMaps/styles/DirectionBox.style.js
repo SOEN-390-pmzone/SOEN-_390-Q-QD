@@ -82,13 +82,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "bold",
-    marginBottom: 10,
+    marginBottom: 5,
   },
   modalText: {
     fontSize: 12,
     marginBottom: 5,
+  },
+  modalText1: {
+    fontSize: 12,
+    marginBottom: 10,
+
   },
   buttonsContainer: {
     flexDirection: "row",
