@@ -1,6 +1,7 @@
 const GOOGLE_MAPS_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
 import polyline from "@mapbox/polyline"; //? To use the polyline decoding
 
+
 export const useGoogleMapDirections = () => {
   //? To turn a text address into its longitude and latitude coordinates
   const geocodeAddress = async (address) => {
@@ -87,12 +88,19 @@ export const useGoogleMapDirections = () => {
         throw new Error("No routes available");
       }
 
+      //! TODO : Implement the polyline in the map
+      //   const route = data.routes[0];
+      //   const encodedPolyline = route.overview_polyline.points;
+      //   const decodedPolyline = decodePolyline(encodedPolyline);
+      //   setDirections(decodedPolyline);
+
       return data;
     } catch (error) {
       console.error("Directions error:", error);
       throw error;
     }
   };
+
 
   const getPolyline = async (origin, destination) => {
     try {
@@ -138,6 +146,7 @@ export const useGoogleMapDirections = () => {
     }
   };
 
+
   return {
     // State
 
@@ -147,6 +156,5 @@ export const useGoogleMapDirections = () => {
     geocodeAddress,
     getStepsInHTML,
     getDirections,
-    getPolyline,
   };
 };

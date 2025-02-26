@@ -1,3 +1,4 @@
+
 import React, {
   useState,
   useRef,
@@ -6,6 +7,7 @@ import React, {
   useContext,
   useMemo,
 } from "react";
+
 import { View, Button } from "react-native";
 import MapView, { Polyline, Marker } from "react-native-maps";
 import * as Location from "expo-location";
@@ -62,7 +64,10 @@ const GetDirections = () => {
 
   const [origin, setOrigin] = useState(null);
   const [destination, setDestination] = useState(null);
+  const [route] = useState([]);
+  const [isOriginSearch, setIsOriginSearch] = useState(true);
   const [directions, setDirections] = useState([]);
+
   const [route, setRoute] = useState([]);
   const [isInNavigationMode, setIsInNavigationMode] = useState(false);
   const [isDirectionsBoxCollapsed, setIsDirectionsBoxCollapsed] =
@@ -112,21 +117,19 @@ const GetDirections = () => {
     }
   }, [destination]);
 
-  useEffect(() => {
-    if (route.length > 0) {
-      fitMapToCoordinates(route);
-    }
-  }, [route]);
+  const { getStepsInHTML } = useGoogleMapDirections();
 
   const onAddressSubmit = async () => {
     try {
       const result = await getStepsInHTML(origin, destination);
       setDirections(result);
+
       const polyline = await getPolyline(origin, destination);
       setRoute(polyline);
       setIsInNavigationMode(true);
       setIsDirectionsBoxCollapsed(false);
       console.log("Success! drawing the line...");
+
     } catch (error) {
       console.error("Geocode Error:", error);
     }
@@ -195,7 +198,7 @@ const GetDirections = () => {
     }
   }, [location, useCurrentLocation]);
 
-  // Update the FloatingSearchBar for origin
+
   return (
     <View style={styles.container}>
       <Header />
@@ -225,13 +228,17 @@ const GetDirections = () => {
               placeholder="Enter Destination"
               style={[styles.searchBar, { marginTop: 10 }]}
             />
+            {/* <View style={styles.modes}>
+            <Button title="Walking" onPress={() => setMode("walking")}/>
+            <Button title="Car" onPress={() => setMode("driving")} />
+            <Button title="Transit" onPress={() => setMode("transit")} />
+            <Button title="Biking" onPress={() => setMode("biking")} />
+          </View> */}
           </View>
         )}
+
         <View style={styles.buttonContainer}>
-          <Button
-            title={isInNavigationMode ? "Change Directions" : "Get Directions"}
-            onPress={isInNavigationMode ? onChangeDirections : onAddressSubmit}
-          />
+          <Button title="Get Directions" onPress={onAddressSubmit} />
         </View>
       </View>
 

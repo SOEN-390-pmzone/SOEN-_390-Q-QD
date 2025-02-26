@@ -7,12 +7,13 @@ import Header from "../components/Header";
 import { LocationContext } from "../contexts/LocationContext";
 import Footer from "../components/Footer";
 import styles from "../styles";
-
-const customMarkerImage = require("../assets/PinLogo.png");
 import { Building } from "../components/MapMarkers";
+import { ModalContext } from "../App";
 import BuildingColoring from "../components/buildingColoring";
 import Legend from "../components/Legend";
 import ShuttleStop from "../components/ShuttleStop";
+
+const customMarkerImage = require("../assets/PinLogo.png");
 
 function HomeScreen() {
   const loyolaPostalCode = process.env.EXPO_PUBLIC_LOYOLA_POSTAL_CODE;
@@ -20,6 +21,7 @@ function HomeScreen() {
   const GOOGLE_MAPS_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
 
   const location = useContext(LocationContext);
+  const { toggleModal, setModalData } = useContext(ModalContext); // Access setModalData
 
   const [postalCode, setPostalCode] = useState(sgwPostalCode);
   const [coordinates, setCoordinates] = useState(null);
@@ -77,6 +79,13 @@ function HomeScreen() {
       prevPostalCode === sgwPostalCode ? loyolaPostalCode : sgwPostalCode,
     );
   };
+
+  // Function to handle marker press and pass data to the modal
+  const handleMarkerPress = (building) => {
+    setModalData({ name: building.name, coordinate: building.coordinate }); // Update modalData
+    toggleModal(); // Show modal
+  };
+
   return (
     <View style={styles.container} testID="home-screen">
       <Header />
@@ -113,6 +122,7 @@ function HomeScreen() {
                 key={index}
                 coordinate={building.coordinate}
                 title={building.name}
+                onPress={() => handleMarkerPress(building)} // Add onPress handler
               >
                 <Image
                   source={customMarkerImage}
