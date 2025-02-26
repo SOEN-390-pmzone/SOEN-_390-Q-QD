@@ -1,5 +1,5 @@
 const GOOGLE_MAPS_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
-import polyline from '@mapbox/polyline'; //? To use the polyline decoding
+import polyline from "@mapbox/polyline"; //? To use the polyline decoding
 
 export const useGoogleMapDirections = () => {
   //? To turn a text address into its longitude and latitude coordinates
@@ -100,31 +100,37 @@ export const useGoogleMapDirections = () => {
         `https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&mode=walking&key=${GOOGLE_MAPS_API_KEY}`,
       );
       const data = await response.json();
-  
+
       console.log("API Response:", data);
-  
+
       if (!data || data.status !== "OK") {
         console.error("Error fetching polyline: API error", data);
         return [];
       }
-  
+
       if (!data.routes || data.routes.length === 0) {
         console.error("Error fetching polyline: No routes found", data);
         return [];
       }
-  
-      if (!data.routes[0].overview_polyline || !data.routes[0].overview_polyline.points) {
-        console.error("Error fetching polyline: No overview_polyline.points found", data);
+
+      if (
+        !data.routes[0].overview_polyline ||
+        !data.routes[0].overview_polyline.points
+      ) {
+        console.error(
+          "Error fetching polyline: No overview_polyline.points found",
+          data,
+        );
         return [];
       }
-  
+
       const points = polyline.decode(data.routes[0].overview_polyline.points);
       const coords = points.map((point) => ({
         latitude: point[0],
         longitude: point[1],
       }));
-      console.log(coords)
-      console.log(coords[0])
+      console.log(coords);
+      console.log(coords[0]);
       return coords;
     } catch (error) {
       console.error("Error fetching polyline:", error);

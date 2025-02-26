@@ -10,6 +10,8 @@ jest.mock("../hooks/useGoogleMapDirections");
 // Mock the dependencies with forwardRef for MapView
 jest.mock("react-native-maps", () => {
   const React = require("react");
+  const PropTypes = require("prop-types");
+
   const MockMapView = React.forwardRef(({ children, ...props }, ref) => {
     return (
       <mock-map-view ref={ref} {...props}>
@@ -17,6 +19,11 @@ jest.mock("react-native-maps", () => {
       </mock-map-view>
     );
   });
+
+  MockMapView.displayName = "MockMapView";
+  MockMapView.propTypes = {
+    children: PropTypes.node,
+  };
 
   return {
     __esModule: true,
@@ -89,7 +96,7 @@ describe("GetDirections", () => {
     return render(
       <LocationContext.Provider value={mockLocation}>
         {component}
-      </LocationContext.Provider>
+      </LocationContext.Provider>,
     );
   };
 
@@ -186,6 +193,50 @@ describe("GetDirections", () => {
     // Wait for the second polyline call with increased timeout
     await waitFor(() => {
       expect(mockGetPolyline).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it("update directions when user location changes", async () => {
+    const { getByText } = renderWithContext(<GetDirections />);
+
+    // Set up initial mock location
+    mockGetCurrentPositionAsync.mockResolvedValue({
+      coords: {
+        latitude: 45.499,
+        longitude: -73.58,
+      },
+    });
+
+    // First call to getPolyline when getting initial directions
+    await act(async () => {
+      fireEvent.press(getByText("Get Directions"));
+      await jest.runAllTimers();
+    });
+
+    // Ensure the first getPolyline call is completed
+    await waitFor(() => {
+      expect(mockGetStepsInHTML).toHaveBeenCalledTimes(1);
+    });
+
+    // Update mock location and wait for effect to trigger
+    await act(async () => {
+      // Update location mock with new coordinates
+      mockGetCurrentPositionAsync.mockResolvedValue({
+        coords: {
+          latitude: 699,
+          longitude: -200,
+        },
+      });
+
+      // Trigger all timers multiple times to ensure interval runs
+      for (let i = 0; i < 3; i++) {
+        await jest.runAllTimers();
+      }
+    });
+
+    // Wait for the second polyline call with increased timeout
+    await waitFor(() => {
+      expect(mockGetStepsInHTML).toHaveBeenCalledTimes(1);
     });
   });
 });

@@ -15,16 +15,25 @@ import NavBar from "./NavBar";
 import styles from "../styles";
 import { useGoogleMapDirections } from "../hooks/useGoogleMapDirections";
 import DirectionsBox from "./DirectionsBox";
+import PropTypes from "prop-types";
 import { LocationContext } from "../contexts/LocationContext";
 
-const MemoizedMarker = memo(Marker);
-const MemoizedPolyline = memo(Polyline);
 const MemoizedMapView = memo(MapView);
 
 const RoutePolyline = memo(({ route }) => {
   if (route.length === 0) return null;
   return <Polyline coordinates={route} strokeWidth={10} strokeColor="blue" />;
 });
+
+RoutePolyline.displayName = "RoutePolyline";
+RoutePolyline.propTypes = {
+  route: PropTypes.arrayOf(
+    PropTypes.shape({
+      latitude: PropTypes.number.isRequired,
+      longitude: PropTypes.number.isRequired,
+    }),
+  ).isRequired,
+};
 
 const LocationMarkers = memo(({ origin, destination }) => {
   return (
@@ -34,6 +43,18 @@ const LocationMarkers = memo(({ origin, destination }) => {
     </>
   );
 });
+
+LocationMarkers.displayName = "LocationMarkers";
+LocationMarkers.propTypes = {
+  origin: PropTypes.shape({
+    latitude: PropTypes.number.isRequired,
+    longitude: PropTypes.number.isRequired,
+  }),
+  destination: PropTypes.shape({
+    latitude: PropTypes.number.isRequired,
+    longitude: PropTypes.number.isRequired,
+  }),
+};
 
 const GetDirections = () => {
   const mapRef = useRef(null);
@@ -76,7 +97,7 @@ const GetDirections = () => {
       latitudeDelta: 0.01,
       longitudeDelta: 0.01,
     }),
-    [location]
+    [location],
   );
 
   useEffect(() => {
@@ -138,12 +159,18 @@ const GetDirections = () => {
         ) {
           setOrigin(newOrigin);
 
-          const polyline = await getPolyline(newOrigin, destination);
-          setRoute(polyline);
-          console.log("Route updated with new location");
+          // Update both polyline and directions
+          const [newDirections, newPolyline] = await Promise.all([
+            getStepsInHTML(newOrigin, destination),
+            getPolyline(newOrigin, destination),
+          ]);
+
+          setDirections(newDirections);
+          setRoute(newPolyline);
+          console.log("Route and directions updated with new location");
         }
       } catch (error) {
-        console.error("Error updating location");
+        console.error("Error updating location" + error);
       }
     };
 
@@ -157,7 +184,7 @@ const GetDirections = () => {
         clearInterval(intervalId);
       }
     };
-  }, [isInNavigationMode, destination, getPolyline, origin]);
+  }, [isInNavigationMode, destination, getPolyline, getStepsInHTML, origin]);
 
   useEffect(() => {
     if (location && useCurrentLocation) {
