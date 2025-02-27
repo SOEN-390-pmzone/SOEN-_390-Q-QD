@@ -53,6 +53,7 @@ PopupModal.propTypes = {
       longitude: PropTypes.number.isRequired,
     }).isRequired,
     address: PropTypes.string.isRequired,
+    fullBuildingName: PropTypes.string.isRequired,
   }),
   onClose: PropTypes.func.isRequired,
 };
