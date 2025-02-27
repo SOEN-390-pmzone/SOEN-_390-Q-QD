@@ -1,4 +1,5 @@
 const GOOGLE_MAPS_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
+import polyline from "@mapbox/polyline"; //? To use the polyline decoding
 
 export const useGoogleMapDirections = () => {
   //? To turn a text address into its longitude and latitude coordinates
@@ -86,12 +87,6 @@ export const useGoogleMapDirections = () => {
         throw new Error("No routes available");
       }
 
-      //! TODO : Implement the polyline in the map
-      //   const route = data.routes[0];
-      //   const encodedPolyline = route.overview_polyline.points;
-      //   const decodedPolyline = decodePolyline(encodedPolyline);
-      //   setDirections(decodedPolyline);
-
       return data;
     } catch (error) {
       console.error("Directions error:", error);
@@ -99,43 +94,49 @@ export const useGoogleMapDirections = () => {
     }
   };
 
-  //! TODO : Decode and imlpement the poly line
-  //   const decodePolyline = (encoded) => {
-  //     const poly = [];
-  //     let index = 0,
-  //       len = encoded.length;
-  //     let lat = 0,
-  //       lng = 0;
+  const getPolyline = async (origin, destination) => {
+    try {
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&mode=walking&key=${GOOGLE_MAPS_API_KEY}`,
+      );
+      const data = await response.json();
 
-  //     while (index < len) {
-  //       let b,
-  //         shift = 0,
-  //         result = 0;
-  //       do {
-  //         b = encoded.charCodeAt(index++) - 63;
-  //         result |= (b & 0x1f) << shift;
-  //         shift += 5;
-  //       } while (b >= 0x20);
-  //       const dlat = ((result & 1) != 0 ? ~(result >> 1) : result >> 1);
-  //       lat += dlat;
+      console.log("API Response:", data);
 
-  //       shift = 0;
-  //       result = 0;
-  //       do {
-  //         b = encoded.charCodeAt(index++) - 63;
-  //         result |= (b & 0x1f) << shift;
-  //         shift += 5;
-  //       } while (b >= 0x20);
-  //       const dlng = ((result & 1) != 0 ? ~(result >> 1) : result >> 1);
-  //       lng += dlng;
+      if (!data || data.status !== "OK") {
+        console.error("Error fetching polyline: API error", data);
+        return [];
+      }
 
-  //       poly.push({
-  //         latitude: lat / 1e5,
-  //         longitude: lng / 1e5,
-  //       });
-  //     }
-  //     return poly;
-  //   };
+      if (!data.routes || data.routes.length === 0) {
+        console.error("Error fetching polyline: No routes found", data);
+        return [];
+      }
+
+      if (
+        !data.routes[0].overview_polyline ||
+        !data.routes[0].overview_polyline.points
+      ) {
+        console.error(
+          "Error fetching polyline: No overview_polyline.points found",
+          data,
+        );
+        return [];
+      }
+
+      const points = polyline.decode(data.routes[0].overview_polyline.points);
+      const coords = points.map((point) => ({
+        latitude: point[0],
+        longitude: point[1],
+      }));
+      console.log(coords);
+      console.log(coords[0]);
+      return coords;
+    } catch (error) {
+      console.error("Error fetching polyline:", error);
+      return [];
+    }
+  };
 
   return {
     // State
@@ -146,5 +147,6 @@ export const useGoogleMapDirections = () => {
     geocodeAddress,
     getStepsInHTML,
     getDirections,
+    getPolyline,
   };
 };
