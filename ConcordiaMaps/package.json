@@ -21,8 +21,7 @@
     ],
     "moduleNameMapper": {
       "@env": "<rootDir>/__mocks__/envMock.js"
-    },
-    "testEnvironment": "jsdom"
+    }
   },
   "dependencies": {
     "@expo/metro-runtime": "~4.0.1",
