@@ -139,7 +139,6 @@ function HomeScreen() {
           <ShuttleStop />
           <LiveBusTracker mapRef={mapRef} />
         </MapView>
-
       ) : (
         <Text>Loading...</Text>
       )}
