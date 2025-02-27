@@ -1,5 +1,5 @@
 import React from "react";
-import { Marker } from "react-native-maps";
+import { Marker, Callout } from "react-native-maps";
 import { Text, View, Image, StyleSheet } from "react-native";
 
 const customMarkerImage = require("../assets/Shuttle.png");
@@ -25,26 +25,33 @@ const ShuttleStop = () => {
       testID={`shuttle-stop-marker-${index}`}
     >
       <Image source={customMarkerImage} style={styles.markerImage} />
-      <View style={styles.calloutContainer}>
-        <Text>{marker.name}</Text>
-      </View>
+      <Callout>
+        <View style={styles.calloutContainer}>
+          <Text>{marker.name}</Text>
+        </View>
+      </Callout>
     </Marker>
   ));
 };
 
 const styles = StyleSheet.create({
   markerImage: {
-    width: 30,
-    height: 30,
+    width: 40,
+    height: 40,
     borderRadius: 20,
   },
   calloutContainer: {
-    minWidth: 110,
-    padding: 10,
-    alignItems: "center",
+    width: 140,
+    height: 25,
+    padding: 5,
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    borderRadius: 8,
     justifyContent: "center",
+    alignItems: "center",
   },
   calloutText: {
+    fontSize: 14,
+    color: "#333",
     textAlign: "center",
   },
 });
