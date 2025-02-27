@@ -93,7 +93,6 @@ const styles = StyleSheet.create({
   modalText1: {
     fontSize: 12,
     marginBottom: 10,
-
   },
   buttonsContainer: {
     flexDirection: "row",
