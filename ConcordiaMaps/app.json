@@ -1,7 +1,9 @@
 {
   "expo": {
     "name": "ConcordiaMaps",
-    "permissions": ["LOCATION"],
+    "permissions": [
+      "LOCATION"
+    ],
     "slug": "ConcordiaMaps",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -25,6 +27,12 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "0a09cd0b-0726-4414-944d-de6d62295354"
+      }
+    },
+    "owner": "golimar"
   }
 }
