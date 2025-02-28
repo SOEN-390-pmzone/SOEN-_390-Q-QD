@@ -1,23 +1,165 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1738985391670" clover="3.2.0">
-  <project timestamp="1738985391670" name="All files">
-    <metrics statements="14" coveredstatements="14" conditionals="2" coveredconditionals="2" methods="3" coveredmethods="3" elements="19" coveredelements="19" complexity="0" loc="14" ncloc="14" packages="1" files="1" classes="1"/>
-    <file name="LocationContext.js" path="/Users/shanv/Desktop/NUS Semester 1/CS4243/SOEN-_390-Q-QD/ConcordiaMaps/contexts/LocationContext.js">
+<coverage generated="1739125863792" clover="3.2.0">
+  <project timestamp="1739125863792" name="All files">
+    <metrics statements="108" coveredstatements="77" conditionals="54" coveredconditionals="33" methods="24" coveredmethods="15" elements="186" coveredelements="125" complexity="0" loc="108" ncloc="108" packages="6" files="11" classes="11"/>
+    <package name="ConcordiaMaps">
+      <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+      <file name="styles.js" path="/Users/mohamedgueye/Documents/Concordia/Winter 2025/SOEN 390/SOEN-_390-Q-QD/ConcordiaMaps/styles.js">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="3" count="1" type="stmt"/>
+      </file>
+    </package>
+    <package name="ConcordiaMaps.assets">
+      <metrics statements="3" coveredstatements="3" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+      <file name="PinLogo.png" path="/Users/mohamedgueye/Documents/Concordia/Winter 2025/SOEN 390/SOEN-_390-Q-QD/ConcordiaMaps/assets/PinLogo.png">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="1" type="stmt"/>
+      </file>
+      <file name="Shuttle.png" path="/Users/mohamedgueye/Documents/Concordia/Winter 2025/SOEN 390/SOEN-_390-Q-QD/ConcordiaMaps/assets/Shuttle.png">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="2" type="stmt"/>
+      </file>
+      <file name="download.jpg" path="/Users/mohamedgueye/Documents/Concordia/Winter 2025/SOEN 390/SOEN-_390-Q-QD/ConcordiaMaps/assets/download.jpg">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="1" type="stmt"/>
+      </file>
+    </package>
+    <package name="ConcordiaMaps.components">
+      <metrics statements="54" coveredstatements="40" conditionals="34" coveredconditionals="26" methods="14" coveredmethods="8"/>
+      <file name="MapMarkers.js" path="/Users/mohamedgueye/Documents/Concordia/Winter 2025/SOEN 390/SOEN-_390-Q-QD/ConcordiaMaps/components/MapMarkers.js">
+        <metrics statements="2" coveredstatements="2" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="1" type="stmt"/>
+        <line num="507" count="1" type="stmt"/>
+      </file>
+      <file name="ShuttleSchedule.js" path="/Users/mohamedgueye/Documents/Concordia/Winter 2025/SOEN 390/SOEN-_390-Q-QD/ConcordiaMaps/components/ShuttleSchedule.js">
+        <metrics statements="37" coveredstatements="31" conditionals="30" coveredconditionals="26" methods="9" coveredmethods="6"/>
+        <line num="6" count="1" type="stmt"/>
+        <line num="134" count="1" type="stmt"/>
+        <line num="135" count="8" type="stmt"/>
+        <line num="136" count="8" type="stmt"/>
+        <line num="138" count="8" type="stmt"/>
+        <line num="139" count="22" type="stmt"/>
+        <line num="140" count="22" type="stmt"/>
+        <line num="141" count="22" type="stmt"/>
+        <line num="144" count="22" type="cond" truecount="2" falsecount="2"/>
+        <line num="145" count="22" type="cond" truecount="3" falsecount="1"/>
+        <line num="147" count="22" type="stmt"/>
+        <line num="149" count="22" type="cond" truecount="2" falsecount="0"/>
+        <line num="152" count="0" type="stmt"/>
+        <line num="156" count="14" type="stmt"/>
+        <line num="157" count="14" type="stmt"/>
+        <line num="158" count="14" type="stmt"/>
+        <line num="161" count="14" type="stmt"/>
+        <line num="162" count="8" type="stmt"/>
+        <line num="164" count="8" type="cond" truecount="3" falsecount="1"/>
+        <line num="166" count="0" type="stmt"/>
+        <line num="167" count="0" type="stmt"/>
+        <line num="169" count="8" type="cond" truecount="4" falsecount="0"/>
+        <line num="170" count="8" type="stmt"/>
+        <line num="171" count="8" type="stmt"/>
+        <line num="174" count="14" type="stmt"/>
+        <line num="177" count="14" type="stmt"/>
+        <line num="178" count="14" type="stmt"/>
+        <line num="179" count="146" type="stmt"/>
+        <line num="182" count="14" type="stmt"/>
+        <line num="201" count="0" type="stmt"/>
+        <line num="210" count="2" type="stmt"/>
+        <line num="224" count="0" type="stmt"/>
+        <line num="233" count="0" type="stmt"/>
+        <line num="244" count="146" type="stmt"/>
+        <line num="246" count="422" type="stmt"/>
+        <line num="270" count="1" type="stmt"/>
+        <line num="360" count="1" type="stmt"/>
+      </file>
+      <file name="ShuttleStop.js" path="/Users/mohamedgueye/Documents/Concordia/Winter 2025/SOEN 390/SOEN-_390-Q-QD/ConcordiaMaps/components/ShuttleStop.js">
+        <metrics statements="6" coveredstatements="6" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="2"/>
+        <line num="5" count="2" type="stmt"/>
+        <line num="8" count="2" type="stmt"/>
+        <line num="19" count="2" type="stmt"/>
+        <line num="20" count="3" type="stmt"/>
+        <line num="21" count="6" type="stmt"/>
+        <line num="37" count="2" type="stmt"/>
+      </file>
+      <file name="buildingColoring.js" path="/Users/mohamedgueye/Documents/Concordia/Winter 2025/SOEN 390/SOEN-_390-Q-QD/ConcordiaMaps/components/buildingColoring.js">
+        <metrics statements="9" coveredstatements="1" conditionals="4" coveredconditionals="0" methods="3" coveredmethods="0"/>
+        <line num="5" count="1" type="stmt"/>
+        <line num="6" count="0" type="stmt"/>
+        <line num="9" count="0" type="stmt"/>
+        <line num="11" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="12" count="0" type="stmt"/>
+        <line num="17" count="0" type="stmt"/>
+        <line num="28" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="29" count="0" type="stmt"/>
+        <line num="41" count="0" type="stmt"/>
+      </file>
+    </package>
+    <package name="ConcordiaMaps.contexts">
       <metrics statements="14" coveredstatements="14" conditionals="2" coveredconditionals="2" methods="3" coveredmethods="3"/>
-      <line num="6" count="1" type="stmt"/>
-      <line num="8" count="1" type="stmt"/>
-      <line num="9" count="3" type="stmt"/>
-      <line num="11" count="3" type="stmt"/>
-      <line num="12" count="2" type="stmt"/>
-      <line num="13" count="2" type="stmt"/>
-      <line num="14" count="2" type="cond" truecount="2" falsecount="0"/>
-      <line num="15" count="1" type="stmt"/>
-      <line num="19" count="1" type="stmt"/>
-      <line num="22" count="1" type="stmt"/>
-      <line num="23" count="1" type="stmt"/>
-      <line num="26" count="2" type="stmt"/>
-      <line num="29" count="3" type="stmt"/>
-      <line num="36" count="1" type="stmt"/>
-    </file>
+      <file name="LocationContext.js" path="/Users/mohamedgueye/Documents/Concordia/Winter 2025/SOEN 390/SOEN-_390-Q-QD/ConcordiaMaps/contexts/LocationContext.js">
+        <metrics statements="14" coveredstatements="14" conditionals="2" coveredconditionals="2" methods="3" coveredmethods="3"/>
+        <line num="6" count="2" type="stmt"/>
+        <line num="8" count="2" type="stmt"/>
+        <line num="9" count="3" type="stmt"/>
+        <line num="11" count="3" type="stmt"/>
+        <line num="12" count="2" type="stmt"/>
+        <line num="13" count="2" type="stmt"/>
+        <line num="14" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="15" count="1" type="stmt"/>
+        <line num="19" count="1" type="stmt"/>
+        <line num="22" count="1" type="stmt"/>
+        <line num="23" count="1" type="stmt"/>
+        <line num="26" count="2" type="stmt"/>
+        <line num="29" count="3" type="stmt"/>
+        <line num="36" count="2" type="stmt"/>
+      </file>
+    </package>
+    <package name="ConcordiaMaps.data">
+      <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+      <file name="coloringData.js" path="/Users/mohamedgueye/Documents/Concordia/Winter 2025/SOEN 390/SOEN-_390-Q-QD/ConcordiaMaps/data/coloringData.js">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="1" type="stmt"/>
+      </file>
+    </package>
+    <package name="ConcordiaMaps.screen">
+      <metrics statements="35" coveredstatements="18" conditionals="18" coveredconditionals="5" methods="7" coveredmethods="4"/>
+      <file name="HomeScreen.js" path="/Users/mohamedgueye/Documents/Concordia/Winter 2025/SOEN 390/SOEN-_390-Q-QD/ConcordiaMaps/screen/HomeScreen.js">
+        <metrics statements="35" coveredstatements="18" conditionals="18" coveredconditionals="5" methods="7" coveredmethods="4"/>
+        <line num="11" count="1" type="stmt"/>
+        <line num="18" count="1" type="stmt"/>
+        <line num="19" count="1" type="stmt"/>
+        <line num="20" count="1" type="stmt"/>
+        <line num="22" count="1" type="stmt"/>
+        <line num="24" count="1" type="stmt"/>
+        <line num="25" count="1" type="stmt"/>
+        <line num="26" count="1" type="stmt"/>
+        <line num="28" count="1" type="stmt"/>
+        <line num="30" count="1" type="stmt"/>
+        <line num="31" count="1" type="stmt"/>
+        <line num="32" count="1" type="stmt"/>
+        <line num="35" count="0" type="stmt"/>
+        <line num="37" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="38" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="39" count="0" type="stmt"/>
+        <line num="40" count="0" type="stmt"/>
+        <line num="41" count="0" type="stmt"/>
+        <line num="43" count="0" type="stmt"/>
+        <line num="44" count="0" type="stmt"/>
+        <line num="47" count="0" type="stmt"/>
+        <line num="48" count="0" type="stmt"/>
+        <line num="51" count="0" type="stmt"/>
+        <line num="52" count="0" type="stmt"/>
+        <line num="53" count="0" type="stmt"/>
+        <line num="57" count="1" type="stmt"/>
+        <line num="58" count="1" type="cond" truecount="2" falsecount="2"/>
+        <line num="59" count="0" type="stmt"/>
+        <line num="71" count="1" type="stmt"/>
+        <line num="72" count="1" type="stmt"/>
+        <line num="75" count="1" type="stmt"/>
+        <line num="76" count="0" type="stmt"/>
+        <line num="77" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="80" count="1" type="stmt"/>
+        <line num="112" count="0" type="stmt"/>
+      </file>
+    </package>
   </project>
 </coverage>

@@ -1,7 +1,4 @@
 import { StyleSheet } from "react-native";
-// import { Dimensions} from "react-native";
-
-// const { width, height } = Dimensions.get("window");
 
 const styles = StyleSheet.create({
   container: {
@@ -38,7 +35,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#912338",
     padding: 10,
     position: "relative",
-    zIndex: 1, // Ensures the logo appears on top
+    zIndex: 1,
   },
   logo: {
     width: 50,
@@ -75,7 +72,7 @@ const styles = StyleSheet.create({
   hamburgerLine: {
     width: 30,
     height: 4,
-    backgroundColor: "#fff", // White color for hamburger lines
+    backgroundColor: "#fff",
     marginVertical: 4,
   },
   menu: {
@@ -83,39 +80,38 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 50,
     left: -21,
-    minHeight: 737, // Adjust height as needed
+    minHeight: 737,
     zIndex: 10,
   },
   menuItem: {
     fontSize: 20,
     padding: 8,
     width: "100%",
-    color: "white", // Red color for menu items
+    color: "white",
     fontWeight: "bold",
   },
   customMarkerImage: {
     width: 30,
     height: 30,
   },
-  colorBox: {
-    width: 20,
-    height: 20,
-    marginRight: 10,
+  buttonContainer: {
+    marginTop: 10,
+    borderRadius: 25,
+    paddingVertical: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    backgroundColor: "transparent",
   },
-  label: {
-    fontSize: 12,
-  },
-  title: {
-    fontWeight: "bold",
-    marginBottom: 5,
-  },
-  legendContainer: {
+  searchBarContainer: {
     position: "absolute",
-    top: 700,
-    right: 220,
-    backgroundColor: "rgba(255, 255, 255, 0.8)",
-    padding: 1,
-    opacity: 0.8,
+    top: 120,
+    left: 20,
+    right: 20,
+    zIndex: 1,
+    width: "70%",
   },
   searchBar: {
     flexDirection: "row",
@@ -128,6 +124,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
+    marginBottom: 10,
+    left: 15,
   },
   input: {
     flex: 1,
@@ -155,13 +153,42 @@ const styles = StyleSheet.create({
   icon: {
     marginRight: 10,
   },
-  searchBarContainer: {
+  colorBox: {
+    width: 20,
+    height: 20,
+    marginRight: 10,
+  },
+  label: {
+    fontSize: 12,
+  },
+  title: {
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
+  legendContainer: {
     position: "absolute",
-    top: 120,
-    left: 20,
+    top: 720,
+    right: 210,
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    padding: 1,
+    opacity: 0.8,
+  },
+  modes: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 10,
+  },
+  button: {
+    position: "absolute",
+    bottom: 60,
     right: 20,
-    zIndex: 1,
-    width: "70%",
+    width: 50,
+    height: 50,
+  },
+  buttonImage: {
+    width: "100%",
+    height: "100%",
   },
 });
 
