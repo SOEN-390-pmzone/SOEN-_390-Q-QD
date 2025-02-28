@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1740763873956" clover="3.2.0">
-  <project timestamp="1740763873956" name="All files">
+<coverage generated="1740764360162" clover="3.2.0">
+  <project timestamp="1740764360162" name="All files">
     <metrics statements="389" coveredstatements="229" conditionals="188" coveredconditionals="96" methods="95" coveredmethods="45" elements="672" coveredelements="370" complexity="0" loc="389" ncloc="389" packages="8" files="23" classes="23"/>
     <package name="ConcordiaMaps">
       <metrics statements="8" coveredstatements="3" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="0"/>

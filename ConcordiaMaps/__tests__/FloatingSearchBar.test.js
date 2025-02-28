@@ -17,7 +17,7 @@ jest.mock("@expo/vector-icons/Ionicons", () => "Ionicons");
 global.fetch = jest.fn(() =>
   Promise.resolve({
     json: () => Promise.resolve({ predictions: [] }),
-  })
+  }),
 );
 
 describe("FloatingSearchBar", () => {
@@ -27,7 +27,7 @@ describe("FloatingSearchBar", () => {
 
   it("renders and updates search query", async () => {
     const { getByPlaceholderText } = render(
-      <FloatingSearchBar onPlaceSelect={() => {}} />
+      <FloatingSearchBar onPlaceSelect={() => {}} />,
     );
     const input = getByPlaceholderText("Search for a place...");
     expect(input).toBeTruthy();
@@ -44,13 +44,13 @@ describe("FloatingSearchBar", () => {
     });
 
     const { getByPlaceholderText, getByText, queryByText } = render(
-      <FloatingSearchBar />
+      <FloatingSearchBar />,
     );
     const input = getByPlaceholderText("Search for a place...");
 
     await act(() => fireEvent.changeText(input, "Mont"));
     expect(fetch).toHaveBeenCalledWith(
-      expect.stringContaining("autocomplete/json")
+      expect.stringContaining("autocomplete/json"),
     );
 
     await waitFor(() => expect(getByText("Montreal, QC, Canada")).toBeTruthy());
@@ -63,7 +63,7 @@ describe("FloatingSearchBar", () => {
 
   it("does not fetch predictions when search query is less than 3 characters", async () => {
     const { getByPlaceholderText } = render(
-      <FloatingSearchBar onPlaceSelect={() => {}} />
+      <FloatingSearchBar onPlaceSelect={() => {}} />,
     );
     const input = getByPlaceholderText("Search for a place...");
 
@@ -89,14 +89,14 @@ describe("FloatingSearchBar", () => {
 
     const onPlaceSelectMock = jest.fn();
     const { getByPlaceholderText, getByText } = render(
-      <FloatingSearchBar onPlaceSelect={onPlaceSelectMock} />
+      <FloatingSearchBar onPlaceSelect={onPlaceSelectMock} />,
     );
 
     await act(() =>
       fireEvent.changeText(
         getByPlaceholderText("Search for a place..."),
-        "Montreal"
-      )
+        "Montreal",
+      ),
     );
     await waitFor(() => getByText("Montreal, QC, Canada"));
     await act(() => fireEvent.press(getByText("Montreal, QC, Canada")));
@@ -106,7 +106,7 @@ describe("FloatingSearchBar", () => {
       expect(onPlaceSelectMock).toHaveBeenCalledWith({
         latitude: 45.5,
         longitude: -73.6,
-      })
+      }),
     );
   });
 
@@ -119,8 +119,8 @@ describe("FloatingSearchBar", () => {
     await act(() =>
       fireEvent.changeText(
         getByPlaceholderText("Search for a place..."),
-        "Error"
-      )
+        "Error",
+      ),
     );
     expect(consoleErrorSpy).toHaveBeenCalled();
     consoleErrorSpy.mockRestore();
