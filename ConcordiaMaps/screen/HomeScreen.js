@@ -12,6 +12,7 @@ import { ModalContext } from "../App";
 import BuildingColoring from "../components/buildingColoring";
 import Legend from "../components/Legend";
 import ShuttleStop from "../components/ShuttleStop";
+import LiveBusTracker from "../components/LiveBusTracker";
 
 const customMarkerImage = require("../assets/PinLogo.png");
 
@@ -98,49 +99,46 @@ function HomeScreen() {
       {error ? <Text testID="error-message">{error}</Text> : null}
 
       {coordinates ? (
-        <>
-          <MapView
-            testID="map-view"
-            style={styles.map}
-            ref={mapRef}
-            initialRegion={
-              location
-                ? {
-                    latitude: location.latitude,
-                    longitude: location.longitude,
-                    latitudeDelta: 0.005,
-                    longitudeDelta: 0.005,
-                  }
-                : {
-                    latitude: 45.4973, // Default center (SGW campus)
-                    longitude: -73.5789,
-                    latitudeDelta: 0.01,
-                    longitudeDelta: 0.01,
-                  }
-            }
-            showsUserLocation={true}
-            loadingEnabled={true}
-            watchUserLocation={true}
-          >
-            {Building.map((building, index) => (
-              <Marker
-                key={index}
-                coordinate={building.coordinate}
-                title={building.name}
-                address={building.address}
-                fullBuildingName={building.fullBuildingName}
-                onPress={() => handleMarkerPress(building)} // Add onPress handler
-              >
-                <Image
-                  source={customMarkerImage}
-                  style={styles.customMarkerImage}
-                />
-              </Marker>
-            ))}
-            <BuildingColoring />
-            <ShuttleStop />
-          </MapView>
-        </>
+        <MapView
+          testID="map-view"
+          style={styles.map}
+          ref={mapRef}
+          initialRegion={
+            location
+              ? {
+                  latitude: location.latitude,
+                  longitude: location.longitude,
+                  latitudeDelta: 0.005,
+                  longitudeDelta: 0.005,
+                }
+              : {
+                  latitude: 45.4973, // Default center (SGW campus)
+                  longitude: -73.5789,
+                  latitudeDelta: 0.01,
+                  longitudeDelta: 0.01,
+                }
+          }
+          showsUserLocation={true}
+          loadingEnabled={true}
+          watchUserLocation={true}
+        >
+          {Building.map((building, index) => (
+            <Marker
+              key={index}
+              coordinate={building.coordinate}
+              title={building.name}
+              onPress={() => handleMarkerPress(building)} // Add onPress handler
+            >
+              <Image
+                source={customMarkerImage}
+                style={styles.customMarkerImage}
+              />
+            </Marker>
+          ))}
+          <BuildingColoring />
+          <ShuttleStop />
+          <LiveBusTracker mapRef={mapRef} />
+        </MapView>
       ) : (
         <Text>Loading...</Text>
       )}
