@@ -1,11 +1,11 @@
 import React from "react";
-import { Marker, Callout } from "react-native-maps";
-import { Text, View, Image, StyleSheet } from "react-native";
+import { Marker } from "react-native-maps";
+import { Image, StyleSheet } from "react-native";
 
 const customMarkerImage = require("../assets/Shuttle.png");
 
 // Bus stop coordinates from Google Maps
-const busStops = [
+export const busStops = [
   {
     name: "SGW Stop",
     coordinate: { latitude: 45.497135674356734, longitude: -73.57851252460765 },
@@ -17,19 +17,14 @@ const busStops = [
 ];
 
 const ShuttleStop = () => {
-  return busStops.map((marker, index) => (
+  return busStops.map((stop, index) => (
     <Marker
       key={index}
-      coordinate={marker.coordinate}
-      title={marker.name}
+      coordinate={stop.coordinate}
+      title={stop.name}
       testID={`shuttle-stop-marker-${index}`}
     >
       <Image source={customMarkerImage} style={styles.markerImage} />
-      <Callout>
-        <View style={styles.calloutContainer}>
-          <Text>{marker.name}</Text>
-        </View>
-      </Callout>
     </Marker>
   ));
 };
