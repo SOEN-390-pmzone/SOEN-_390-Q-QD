@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   TextInput,
@@ -11,12 +11,10 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import * as Location from "expo-location";
 import styles from "../styles";
 import PropTypes from "prop-types";
-import { LocationContext } from "../contexts/LocationContext";
 
 const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
   const GOOGLE_MAPS_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
 
-  const locationContext = useContext(LocationContext);
   const [searchQuery, setSearchQuery] = useState("");
   const [predictions, setPredictions] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -28,7 +26,7 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
       try {
         let { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== "granted") {
-          console.warn("Permission to access location was denied");
+          console.warn("No access to location");
           return;
         }
 
@@ -76,6 +74,25 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
       console.error(error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSelection = async (placeId) => {
+    try {
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry&key=${GOOGLE_MAPS_API_KEY}`
+      );
+      const { result } = await response.json();
+      if (result?.geometry?.location) {
+        onPlaceSelect({
+          latitude: result.geometry.location.lat,
+          longitude: result.geometry.location.lng,
+        });
+        setSearchQuery("");
+        setPredictions([]);
+      }
+    } catch (error) {
+      console.error("Error fetching place details:", error);
     }
   };
 

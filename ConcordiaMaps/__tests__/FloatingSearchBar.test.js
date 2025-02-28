@@ -3,6 +3,15 @@ import { render, fireEvent, waitFor } from "@testing-library/react-native";
 import FloatingSearchBar from "../components/FloatingSearchBar";
 import { act } from "react-test-renderer";
 
+jest.mock("expo-location", () => ({
+  getCurrentPositionAsync: jest.fn().mockResolvedValue({
+    coords: { latitude: 45.5017, longitude: -73.5673 }, // Example: Montreal coordinates
+  }),
+  requestForegroundPermissionsAsync: jest.fn().mockResolvedValue({
+    granted: true,
+  }),
+}));
+
 jest.mock("@expo/vector-icons/Ionicons", () => "Ionicons");
 
 global.fetch = jest.fn(() =>

@@ -27,15 +27,15 @@ function HomeScreen() {
   const [postalCode, setPostalCode] = useState(sgwPostalCode);
   const [coordinates, setCoordinates] = useState(null);
   const [error, setError] = useState("");
-  const [mapRegion, setMapRegion] = useState(null);
   const [selectedLocation, setSelectedLocation] = useState(null);
+  const [, setMapRegion] = useState(null);
 
   const mapRef = useRef(null);
 
   const convertToCoordinates = async (postal_code) => {
     try {
       const response = await axios.get(
-        `https://maps.googleapis.com/maps/api/geocode/json?address=${postal_code}&key=${GOOGLE_MAPS_API_KEY}`
+        `https://maps.googleapis.com/maps/api/geocode/json?address=${postal_code}&key=${GOOGLE_MAPS_API_KEY}`,
       );
       const { status, results } = response.data;
 
@@ -79,7 +79,7 @@ function HomeScreen() {
           latitudeDelta: 0.01,
           longitudeDelta: 0.01,
         },
-        2500
+        2500,
       ); // Duration of the animation in milliseconds
     }
   }, [coordinates]);
@@ -90,7 +90,7 @@ function HomeScreen() {
 
   const handleChangeCampuses = () => {
     setPostalCode((prevPostalCode) =>
-      prevPostalCode === sgwPostalCode ? loyolaPostalCode : sgwPostalCode
+      prevPostalCode === sgwPostalCode ? loyolaPostalCode : sgwPostalCode,
     );
   };
 
