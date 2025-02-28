@@ -63,10 +63,14 @@ const GetDirections = () => {
   const [origin, setOrigin] = useState(null);
   const [destination, setDestination] = useState(null);
   const [directions, setDirections] = useState([]);
+<<<<<<< HEAD
   const [route, setRoute] = useState([]);
   const [isInNavigationMode, setIsInNavigationMode] = useState(false);
   const [isDirectionsBoxCollapsed, setIsDirectionsBoxCollapsed] =
     useState(true);
+=======
+    const [mode, setMode] = useState("walking"); 
+>>>>>>> US-10-ModeofTransport
 
   const { getStepsInHTML, getPolyline } = useGoogleMapDirections();
   const [useCurrentLocation, setUseCurrentLocation] = useState(true);
@@ -120,6 +124,7 @@ const GetDirections = () => {
 
   const onAddressSubmit = async () => {
     try {
+<<<<<<< HEAD
       const result = await getStepsInHTML(origin, destination);
       setDirections(result);
       const polyline = await getPolyline(origin, destination);
@@ -129,6 +134,12 @@ const GetDirections = () => {
       console.log("Success! drawing the line...");
     } catch (error) {
       console.error("Geocode Error:", error);
+=======
+      const result = await getStepsInHTML(origin, destination,mode);
+      setDirections(result); 
+    } catch(error) {
+      console.error('Geocode Error:', error);
+>>>>>>> US-10-ModeofTransport
     }
   };
 
@@ -201,6 +212,7 @@ const GetDirections = () => {
       <Header />
       <NavBar />
       <View style={styles.searchContainer}>
+<<<<<<< HEAD
         {!isInNavigationMode && (
           <View>
             <FloatingSearchBar
@@ -225,6 +237,33 @@ const GetDirections = () => {
               placeholder="Enter Destination"
               style={[styles.searchBar, { marginTop: 10 }]}
             />
+=======
+        <FloatingSearchBar
+          onPlaceSelect={(location) => {
+            if (isOriginSearch) {
+              setOrigin(location);
+              setIsOriginSearch(false);
+            } else {
+              setDestination(location);
+            }
+          }}
+          placeholder={isOriginSearch ? "Enter Origin" : "Enter Destination"}
+          style={styles.searchBar}
+        />
+        <FloatingSearchBar
+          onPlaceSelect={(location) => {
+            setDestination(location);
+          }}
+          placeholder="Enter Destination"
+          style={[styles.searchBar, { marginTop: 10 }]}
+        />
+       
+          <View style={styles.modes}>
+            <Button title="Walking" onPress={() => setMode("walking")}   color={mode === "walking" ? "#1E90FF" : "#D3D3D3"} />
+            <Button title="Car" onPress={() => setMode("driving")} color={mode === "driving" ? "#1E90FF" : "#D3D3D3"}/>
+            <Button title="Transit" onPress={() => setMode("transit")} color={mode === "transit" ? "#1E90FF" : "#D3D3D3"}/>
+            <Button title="Biking" onPress={() => setMode("biking")} color={mode === "biking" ? "#1E90FF" : "#D3D3D3"}/>
+>>>>>>> US-10-ModeofTransport
           </View>
         )}
         <View style={styles.buttonContainer}>
