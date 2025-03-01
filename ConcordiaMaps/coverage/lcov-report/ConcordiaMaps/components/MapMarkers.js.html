@@ -670,6 +670,7 @@
 <a name='L605'></a><a href='#L605'>605</a>
 <a name='L606'></a><a href='#L606'>606</a>
 <a name='L607'></a><a href='#L607'>607</a>
+<<<<<<< HEAD
 <a name='L608'></a><a href='#L608'>608</a>
 <a name='L609'></a><a href='#L609'>609</a>
 <a name='L610'></a><a href='#L610'>610</a>
@@ -806,6 +807,9 @@
 <a name='L741'></a><a href='#L741'>741</a>
 <a name='L742'></a><a href='#L742'>742</a>
 <a name='L743'></a><a href='#L743'>743</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+=======
+<a name='L608'></a><a href='#L608'>608</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+>>>>>>> 01c7ca86f908bd8aab763a8160d673696808d3a6
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -836,8 +840,11 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<<<<<<< HEAD
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+=======
+>>>>>>> 01c7ca86f908bd8aab763a8160d673696808d3a6
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -859,7 +866,10 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<<<<<<< HEAD
 <span class="cline-any cline-neutral">&nbsp;</span>
+=======
+>>>>>>> 01c7ca86f908bd8aab763a8160d673696808d3a6
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -896,6 +906,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
+<<<<<<< HEAD
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1028,6 +1039,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+=======
+>>>>>>> 01c7ca86f908bd8aab763a8160d673696808d3a6
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1552,6 +1565,93 @@ import { Marker, Callout } from "react-native-maps";
 import { Text, View, Image, StyleSheet } from "react-native";
 import PropTypes from "prop-types";
 import PopupModal from "./PopupModal";
+<<<<<<< HEAD
+=======
+&nbsp;
+const customMarkerImage = require("../assets/PinLogo.png");
+&nbsp;
+const MapMarkers = <span class="fstat-no" title="function not covered" >({</span> markers }) =&gt; {
+<span class="cstat-no" title="statement not covered" >  if (!markers || markers.length === 0) <span class="cstat-no" title="statement not covered" >return null;</span></span>
+&nbsp;
+  const [popupVisible, setPopupVisible] = <span class="cstat-no" title="statement not covered" >useState(false);</span>
+  const [popupData, setPopupData] = <span class="cstat-no" title="statement not covered" >useState(null);</span>
+&nbsp;
+  const handleMarkerPress = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(m</span>arker) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >    setPopupData(marker);</span>
+<span class="cstat-no" title="statement not covered" >    setPopupVisible(true);</span>
+  };
+&nbsp;
+  const closePopup = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >()</span> =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >    setPopupVisible(false);</span>
+<span class="cstat-no" title="statement not covered" >    setPopupData(null);</span>
+  };
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  return (</span>
+    &lt;&gt;
+      {markers.map(<span class="fstat-no" title="function not covered" >(m</span>arker, index) =&gt; (
+<span class="cstat-no" title="statement not covered" >        &lt;Marker</span>
+          key={index}
+          coordinate={marker.coordinate}
+          title={marker.name}
+          onPress={<span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >handleMarkerPress(marker)}</span>
+        &gt;
+          &lt;Image source={customMarkerImage} style={styles.markerImage} /&gt;
+          &lt;Callout&gt;
+            &lt;View style={styles.calloutContainer}&gt;
+              &lt;Text style={styles.calloutText}&gt;{marker.name}&lt;/Text&gt;
+            &lt;/View&gt;
+          &lt;/Callout&gt;
+        &lt;/Marker&gt;
+      ))}
+&nbsp;
+      {/* Using PopupModal */}
+      &lt;PopupModal
+        isVisible={popupVisible}
+        data={popupData}
+        onClose={closePopup}
+      /&gt;
+    &lt;/&gt;
+  );
+};
+&nbsp;
+const styles = StyleSheet.create({
+  markerImage: {
+    width: 40,
+    height: 40,
+  },
+  calloutContainer: {
+    width: 160,
+    height: 50,
+    padding: 5,
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    borderRadius: 8,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  calloutText: {
+    fontSize: 14,
+    color: "#333",
+    textAlign: "center",
+  },
+});
+&nbsp;
+MapMarkers.propTypes = {
+  markers: PropTypes.arrayOf(
+    PropTypes.shape({
+      coordinate: PropTypes.shape({
+        latitude: PropTypes.number.isRequired,
+        longitude: PropTypes.number.isRequired,
+      }).isRequired,
+      name: PropTypes.string.isRequired,
+    }),
+  ),
+};
+&nbsp;
+export default MapMarkers;
+&nbsp;
+export const Building = [
+  // SGW Campus buildings latitude and longitude
+>>>>>>> 01c7ca86f908bd8aab763a8160d673696808d3a6
 &nbsp;
 const customMarkerImage = require("../assets/PinLogo.png");
 &nbsp;
@@ -2296,7 +2396,11 @@ export const CampusCoordinates = {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
+<<<<<<< HEAD
                 at 2025-02-28T17:39:19.999Z
+=======
+                at 2025-02-23T21:53:34.289Z
+>>>>>>> 01c7ca86f908bd8aab763a8160d673696808d3a6
             </div>
         <script src="../../prettify.js"></script>
         <script>

@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 /* eslint-disable */
+=======
+ 
+>>>>>>> 01c7ca86f908bd8aab763a8160d673696808d3a6
 var addSorting = (function() {
     'use strict';
     var cols,
