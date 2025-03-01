@@ -182,9 +182,9 @@ const styles = StyleSheet.create({
   modes: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent:"space-evenly",
-    flexWrap:"wrap",
-        marginTop:10,
+    justifyContent: "space-evenly",
+    flexWrap: "wrap",
+    marginTop: 10,
   },
   button: {
     position: "absolute",

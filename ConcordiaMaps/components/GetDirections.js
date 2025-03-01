@@ -59,7 +59,7 @@ LocationMarkers.propTypes = {
 const GetDirections = () => {
   const mapRef = useRef(null);
   const location = useContext(LocationContext);
-  const [mode, setMode] = useState("walking"); 
+  const [mode, setMode] = useState("walking");
   const [origin, setOrigin] = useState(null);
   const [destination, setDestination] = useState(null);
   const [directions, setDirections] = useState([]);
@@ -120,9 +120,9 @@ const GetDirections = () => {
 
   const onAddressSubmit = async () => {
     try {
-      const result = await getStepsInHTML(origin, destination,mode);
+      const result = await getStepsInHTML(origin, destination, mode);
       setDirections(result);
-      const polyline = await getPolyline(origin, destination,mode);
+      const polyline = await getPolyline(origin, destination, mode);
       setRoute(polyline);
       setIsInNavigationMode(true);
       setIsDirectionsBoxCollapsed(false);
@@ -161,8 +161,8 @@ const GetDirections = () => {
 
           // Update both polyline and directions
           const [newDirections, newPolyline] = await Promise.all([
-            getStepsInHTML(newOrigin, destination,mode),
-            getPolyline(newOrigin, destination,mode),
+            getStepsInHTML(newOrigin, destination, mode),
+            getPolyline(newOrigin, destination, mode),
           ]);
 
           setDirections(newDirections);
@@ -225,16 +225,31 @@ const GetDirections = () => {
               placeholder="Enter Destination"
               style={[styles.searchBar, { marginTop: 10 }]}
             />
-          <View style={styles.modes}>
-            <Button title="Walking" onPress={() => setMode("walking")}   color={mode === "walking" ? "#1E90FF" : "#D3D3D3"} />
-            <Button title="Car" onPress={() => setMode("driving")} color={mode === "driving" ? "#1E90FF" : "#D3D3D3"}/>
-            <Button title="Transit" onPress={() => setMode("transit")} color={mode === "transit" ? "#1E90FF" : "#D3D3D3"}/>
-            <Button title="Biking" onPress={() => setMode("biking")} color={mode === "biking" ? "#1E90FF" : "#D3D3D3"}/>
-          </View>          
+            <View style={styles.modes}>
+              <Button
+                title="Walking"
+                onPress={() => setMode("walking")}
+                color={mode === "walking" ? "#1E90FF" : "#D3D3D3"}
+              />
+              <Button
+                title="Car"
+                onPress={() => setMode("driving")}
+                color={mode === "driving" ? "#1E90FF" : "#D3D3D3"}
+              />
+              <Button
+                title="Transit"
+                onPress={() => setMode("transit")}
+                color={mode === "transit" ? "#1E90FF" : "#D3D3D3"}
+              />
+              <Button
+                title="Biking"
+                onPress={() => setMode("biking")}
+                color={mode === "biking" ? "#1E90FF" : "#D3D3D3"}
+              />
+            </View>
           </View>
-
         )}
-        
+
         <View style={styles.buttonContainer}>
           <Button
             title={isInNavigationMode ? "Change Directions" : "Get Directions"}
