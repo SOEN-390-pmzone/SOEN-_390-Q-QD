@@ -1,0 +1,15 @@
+appId: com.anonymous.ConcordiaMaps
+---
+- launchApp
+- swipe:
+  start: 57%,62%
+  end: 47%,50%
+  duration: 969
+- doubleTapOn:
+  point: 48%,52%
+- swipe:
+  start: 48%,52%
+  end: 41%,45%
+  duration: 1188
+- tapOn:
+  point: 89%,88%
