@@ -12,6 +12,7 @@ import { ModalContext } from "../App";
 import BuildingColoring from "../components/buildingColoring";
 import Legend from "../components/Legend";
 import ShuttleStop from "../components/ShuttleStop";
+import FloatingSearchBar from "../components/FloatingSearchBar";
 import LiveBusTracker from "../components/LiveBusTracker";
 
 const customMarkerImage = require("../assets/PinLogo.png");
@@ -27,6 +28,8 @@ function HomeScreen() {
   const [postalCode, setPostalCode] = useState(sgwPostalCode);
   const [coordinates, setCoordinates] = useState(null);
   const [error, setError] = useState("");
+  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [, setMapRegion] = useState(null);
 
   const mapRef = useRef(null);
 
@@ -58,6 +61,17 @@ function HomeScreen() {
   };
 
   useEffect(() => {
+    if (location) {
+      setMapRegion({
+        latitude: location.latitude,
+        longitude: location.longitude,
+        latitudeDelta: 0.005,
+        longitudeDelta: 0.005,
+      });
+    }
+  }, [location]);
+
+  useEffect(() => {
     if (coordinates && mapRef.current) {
       mapRef.current.animateToRegion(
         {
@@ -81,6 +95,21 @@ function HomeScreen() {
     );
   };
 
+  const handlePlaceSelect = (newRegion) => {
+    console.log("handlePlaceSelect called with:", newRegion);
+    const region = {
+      ...newRegion,
+      latitudeDelta: 0.005,
+      longitudeDelta: 0.005,
+    };
+
+    setTimeout(() => {
+      setMapRegion(region);
+      setSelectedLocation(region);
+      mapRef.current?.animateToRegion(region, 1000);
+    }, 100);
+  };
+
   // Function to handle marker press and pass data to the modal
   const handleMarkerPress = (building) => {
     setModalData({
@@ -96,49 +125,64 @@ function HomeScreen() {
     <View style={styles.container} testID="home-screen">
       <Header />
       <NavBar />
+      <FloatingSearchBar onPlaceSelect={handlePlaceSelect} />
       {error ? <Text testID="error-message">{error}</Text> : null}
 
       {coordinates ? (
-        <MapView
-          testID="map-view"
-          style={styles.map}
-          ref={mapRef}
-          initialRegion={
-            location
-              ? {
-                  latitude: location.latitude,
-                  longitude: location.longitude,
-                  latitudeDelta: 0.005,
-                  longitudeDelta: 0.005,
-                }
-              : {
-                  latitude: 45.4973, // Default center (SGW campus)
-                  longitude: -73.5789,
-                  latitudeDelta: 0.01,
-                  longitudeDelta: 0.01,
-                }
-          }
-          showsUserLocation={true}
-          loadingEnabled={true}
-          watchUserLocation={true}
-        >
-          {Building.map((building, index) => (
-            <Marker
-              key={index}
-              coordinate={building.coordinate}
-              title={building.name}
-              onPress={() => handleMarkerPress(building)} // Add onPress handler
-            >
-              <Image
-                source={customMarkerImage}
-                style={styles.customMarkerImage}
+        <>
+          <MapView
+            testID="map-view"
+            style={styles.map}
+            ref={mapRef}
+            initialRegion={
+              location
+                ? {
+                    latitude: location.latitude,
+                    longitude: location.longitude,
+                    latitudeDelta: 0.005,
+                    longitudeDelta: 0.005,
+                  }
+                : {
+                    latitude: 45.4973, // Default center (SGW campus)
+                    longitude: -73.5789,
+                    latitudeDelta: 0.01,
+                    longitudeDelta: 0.01,
+                  }
+            }
+            showsUserLocation={true}
+            loadingEnabled={true}
+            watchUserLocation={true}
+            onRegionChangeComplete={(region) => setMapRegion(region)}
+          >
+            {Building.map((building, index) => (
+              <Marker
+                key={index}
+                coordinate={building.coordinate}
+                title={building.name}
+                address={building.address}
+                fullBuildingName={building.fullBuildingName}
+                onPress={() => handleMarkerPress(building)} // Add onPress handler
+              >
+                <Image
+                  source={customMarkerImage}
+                  style={styles.customMarkerImage}
+                />
+              </Marker>
+            ))}
+            <BuildingColoring />
+            {selectedLocation && (
+              <Marker
+                coordinate={{
+                  latitude: selectedLocation.latitude,
+                  longitude: selectedLocation.longitude,
+                }}
+                title="Selected Location"
               />
-            </Marker>
-          ))}
-          <BuildingColoring />
-          <ShuttleStop />
-          <LiveBusTracker mapRef={mapRef} />
-        </MapView>
+            )}
+            <ShuttleStop />
+            <LiveBusTracker mapRef={mapRef} />
+          </MapView>
+        </>
       ) : (
         <Text>Loading...</Text>
       )}
