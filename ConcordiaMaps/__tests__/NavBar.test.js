@@ -1,7 +1,6 @@
 import React from "react";
 import { render, fireEvent, waitFor } from "@testing-library/react-native";
 import NavBar from "../components/NavBar";
-import { useNavigation } from "@react-navigation/native";
 import { Alert } from "react-native";
 
 jest.mock("@react-navigation/native", () => ({
@@ -49,7 +48,7 @@ describe("NavBar Component", () => {
 
     // Wait for the modal to be rendered
     await waitFor(() =>
-      expect(queryByTestId("shuttle-schedule-modal-container")).toBeTruthy()
+      expect(queryByTestId("shuttle-schedule-modal-container")).toBeTruthy(),
     );
   });
 
@@ -69,7 +68,7 @@ describe("NavBar Component", () => {
 
     // Wait for the modal to be rendered - use a more unique testID for the modal
     await waitFor(() =>
-      expect(queryByTestId("shuttle-schedule-modal-container")).toBeTruthy()
+      expect(queryByTestId("shuttle-schedule-modal-container")).toBeTruthy(),
     );
 
     // Close the modal - use getByTestId to ensure finding the element
@@ -78,7 +77,7 @@ describe("NavBar Component", () => {
 
     // Wait for the modal to be removed
     await waitFor(() =>
-      expect(queryByTestId("shuttle-schedule-modal-container")).toBeFalsy()
+      expect(queryByTestId("shuttle-schedule-modal-container")).toBeFalsy(),
     );
   });
 });

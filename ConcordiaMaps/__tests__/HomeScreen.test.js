@@ -26,7 +26,7 @@ describe("HomeScreen", () => {
             <HomeScreen />
           </LocationContext.Provider>
         </ModalContext.Provider>
-      </NavigationContainer>
+      </NavigationContainer>,
     );
 
   it("renders the map correctly on successful API call", async () => {
@@ -93,7 +93,7 @@ describe("HomeScreen", () => {
 
     await waitFor(() => {
       expect(getByTestId("error-message").props.children).toBe(
-        "No results found."
+        "No results found.",
       );
     });
   });

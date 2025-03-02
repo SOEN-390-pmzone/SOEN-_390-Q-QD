@@ -7,7 +7,7 @@ import { render, waitFor, fireEvent } from "@testing-library/react-native";
 // Mock expo-location
 jest.mock("expo-location", () => ({
   requestForegroundPermissionsAsync: jest.fn(() =>
-    Promise.resolve({ status: "granted" })
+    Promise.resolve({ status: "granted" }),
   ),
   getCurrentPositionAsync: jest.fn(() =>
     Promise.resolve({
@@ -16,29 +16,30 @@ jest.mock("expo-location", () => ({
         longitude: -73.579,
         accuracy: 5,
       },
-    })
+    }),
   ),
 }));
 
 jest.mock("react-native-maps", () => {
   const { View } = require("react-native");
+  const PropTypes = require("prop-types");
+
   const MockMapView = (props) => {
     return <View>{props.children}</View>;
   };
-
-  // Remove PropTypes validation
-  // MockMapView.propTypes = {
-  //   children: PropTypes.node,
-  // };
 
   const MockMarker = (props) => {
     return <View>{props.children}</View>;
   };
 
-  // Remove PropTypes validation
-  // MockMarker.propTypes = {
-  //   children: PropTypes.node,
-  // };
+  // Define PropTypes for mock components
+  MockMapView.propTypes = {
+    children: PropTypes.node,
+  };
+
+  MockMarker.propTypes = {
+    children: PropTypes.node,
+  };
 
   return {
     __esModule: true,
