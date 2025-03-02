@@ -49,7 +49,7 @@ jobs:
       - name: Run Jest Tests
         working-directory: ./ConcordiaMaps
         run: npm run test -- --coverage
-      
+
       # - name: Run Jest Coverage?
       #   working-directory: ./ConcordiaMaps
       #   run: npm jest --coverage
@@ -63,9 +63,8 @@ jobs:
             -Dsonar.organization=soen-390-pmzone \
             -Dsonar.sources=. \
             -Dsonar.exclusions=**/node_modules/**,**/*.test.js \
-            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+            -Dsonar.javascript.lcov.reportPaths=./coverage/lcov.info \
             -Dsonar.host.url=https://sonarcloud.io
-      
 
   deploy:
     runs-on: ubuntu-latest
