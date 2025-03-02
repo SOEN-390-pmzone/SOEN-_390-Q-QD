@@ -182,7 +182,10 @@ function ShuttleSchedule({ visible, onClose }) {
   return (
     <Modal transparent visible={visible} animationType="fade">
       <View style={styles.modalOverlay}>
-        <View style={styles.modalContainer}>
+        <View
+          style={styles.modalContainer}
+          testID="shuttle-schedule-modal-container"
+        >
           <Text style={styles.modalTitle}>Shuttle Schedule</Text>
 
           {/* Next Shuttle Display */}
@@ -258,7 +261,11 @@ function ShuttleSchedule({ visible, onClose }) {
             </View>
           </View>
 
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+          <TouchableOpacity
+            onPress={onClose}
+            style={styles.closeButton}
+            testID="shuttle-schedule-close-button"
+          >
             <Text style={styles.closeButtonText}>Close</Text>
           </TouchableOpacity>
         </View>
