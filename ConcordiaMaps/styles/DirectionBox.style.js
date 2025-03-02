@@ -123,6 +123,16 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginLeft: 5,
   },
+  getDirectionsButton1: {
+    backgroundColor: "#4285F4",
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+    marginTop: 10,
+    marginLeft: 5,
+    borderColor: "black",
+    borderWidth: 0.5,
+  },
   getDirectionsButtonText: {
     color: "white",
     fontSize: 14,
