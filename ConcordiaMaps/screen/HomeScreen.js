@@ -12,8 +12,12 @@ import { Building } from "../components/MapMarkers";
 import BuildingColoring from "../components/buildingColoring";
 import Legend from "../components/Legend";
 import ShuttleStop from "../components/ShuttleStop";
-import { saveToAsyncStorage, getFromAsyncStorage } from "../components/AsyncPersistence";
+import {
+  saveToAsyncStorage,
+  getFromAsyncStorage,
+} from "../components/AsyncPersistence";
 import convertToCoordinates from "../components/convertToCoordinates";
+import PropTypes from "prop-types";
 
 function HomeScreen({ asyncKey = "Campus" }) {
   const loyolaPostalCode = process.env.EXPO_PUBLIC_LOYOLA_POSTAL_CODE;
@@ -28,7 +32,6 @@ function HomeScreen({ asyncKey = "Campus" }) {
   const [borderColor, setBorderColor] = useState("#912338"); // Initial border color (red)
   const mapRef = useRef(null);
 
-
   useEffect(() => {
     const fetchLastCampus = async () => {
       const campus = await getFromAsyncStorage(asyncKey, sgwPostalCode);
@@ -39,12 +42,12 @@ function HomeScreen({ asyncKey = "Campus" }) {
       } else {
         setCoordinates(coords);
       }
-  };
-  fetchLastCampus();
-  },[])
+    };
+    fetchLastCampus();
+  }, []);
 
   useEffect(() => {
-    const saveCurrentCampus = async(asyncKey, postalcode) =>{
+    const saveCurrentCampus = async (asyncKey, postalcode) => {
       if (postalcode) {
         await saveToAsyncStorage(asyncKey, postalCode);
         const coordinates = await convertToCoordinates(postalCode);
@@ -54,10 +57,9 @@ function HomeScreen({ asyncKey = "Campus" }) {
           setCoordinates(coordinates);
         }
       }
-      }
+    };
     saveCurrentCampus(asyncKey, postalCode);
   }, [postalCode]);
-  
 
   useEffect(() => {
     if (modalState) {
@@ -72,7 +74,6 @@ function HomeScreen({ asyncKey = "Campus" }) {
 
   useEffect(() => {
     if (coordinates && mapRef.current) {
-
       mapRef.current.animateToRegion(
         {
           latitude: coordinates.latitude,
@@ -99,10 +100,10 @@ function HomeScreen({ asyncKey = "Campus" }) {
       {coordinates ? (
         <>
           <TemporaryModal
-          text="Press the button to switch campuses"
-          my_state={modalState}
-          time="3000"
-        />
+            text="Press the button to switch campuses"
+            my_state={modalState}
+            time="3000"
+          />
           <MapView
             testID="map-view"
             style={styles.map}
@@ -142,32 +143,35 @@ function HomeScreen({ asyncKey = "Campus" }) {
             <ShuttleStop />
           </MapView>
           <View style={styles.toggleView}>
-          <TouchableOpacity
-            testID="toggle-button"
-            onPress={handleChangeCampuses}
-            activeOpacity={0.7}
-            style={{ borderColor: borderColor, borderWidth: 2, borderRadius: 10 }}
-          >
-            <Image
-              style={styles.buttonImage}
-              source={require("../assets/ToggleButton.png")}
-              resizeMode={"cover"} // cover or contain its up to you view look
-            />
-          </TouchableOpacity>
-      </View>
-      <Legend />
+            <TouchableOpacity
+              testID="toggle-button"
+              onPress={handleChangeCampuses}
+              activeOpacity={0.7}
+              style={{
+                borderColor: borderColor,
+                borderWidth: 2,
+                borderRadius: 10,
+              }}
+            >
+              <Image
+                style={styles.buttonImage}
+                source={require("../assets/ToggleButton.png")}
+                resizeMode={"cover"} // cover or contain its up to you view look
+              />
+            </TouchableOpacity>
+          </View>
+          <Legend />
         </>
       ) : (
         <Text>Loading...</Text>
       )}
       {error ? <Text>Error: {error}</Text> : null}
-      
 
-      
       <Footer />
-      
     </View>
   );
 }
-
+HomeScreen.propTypes = {
+  asyncKey: PropTypes.string,
+};
 export default HomeScreen;

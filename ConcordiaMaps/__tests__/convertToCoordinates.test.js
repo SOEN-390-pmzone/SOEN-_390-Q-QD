@@ -29,7 +29,7 @@ describe("convertToCoordinates", () => {
 
     expect(result).toEqual({ latitude: 45.4972159, longitude: -73.6103642 });
     expect(axios.get).toHaveBeenCalledWith(
-      `https://maps.googleapis.com/maps/api/geocode/json?address=H3G 1M8&key=${GOOGLE_MAPS_API_KEY}`
+      `https://maps.googleapis.com/maps/api/geocode/json?address=H3G 1M8&key=${GOOGLE_MAPS_API_KEY}`,
     );
   });
 
@@ -47,7 +47,7 @@ describe("convertToCoordinates", () => {
 
     expect(result).toEqual({ error: "ZERO_RESULTS" });
     expect(axios.get).toHaveBeenCalledWith(
-      `https://maps.googleapis.com/maps/api/geocode/json?address=INVALID_POSTAL_CODE&key=${GOOGLE_MAPS_API_KEY}`
+      `https://maps.googleapis.com/maps/api/geocode/json?address=INVALID_POSTAL_CODE&key=${GOOGLE_MAPS_API_KEY}`,
     );
   });
 
@@ -65,7 +65,7 @@ describe("convertToCoordinates", () => {
 
     expect(result).toEqual({ error: "REQUEST_DENIED" });
     expect(axios.get).toHaveBeenCalledWith(
-      `https://maps.googleapis.com/maps/api/geocode/json?address=H3G 1M8&key=${GOOGLE_MAPS_API_KEY}`
+      `https://maps.googleapis.com/maps/api/geocode/json?address=H3G 1M8&key=${GOOGLE_MAPS_API_KEY}`,
     );
   });
 
@@ -74,9 +74,11 @@ describe("convertToCoordinates", () => {
 
     const result = await convertToCoordinates("H3G 1M8");
 
-    expect(result).toEqual({ error: "Something went wrong. Please try again later." });
+    expect(result).toEqual({
+      error: "Something went wrong. Please try again later.",
+    });
     expect(axios.get).toHaveBeenCalledWith(
-      `https://maps.googleapis.com/maps/api/geocode/json?address=H3G 1M8&key=${GOOGLE_MAPS_API_KEY}`
+      `https://maps.googleapis.com/maps/api/geocode/json?address=H3G 1M8&key=${GOOGLE_MAPS_API_KEY}`,
     );
   });
 });

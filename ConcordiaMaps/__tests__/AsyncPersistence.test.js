@@ -1,20 +1,23 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { saveToAsyncStorage, getFromAsyncStorage } from '../components/AsyncPersistence';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import {
+  saveToAsyncStorage,
+  getFromAsyncStorage,
+} from "../components/AsyncPersistence";
 
-jest.mock('@react-native-async-storage/async-storage', () => ({
+jest.mock("@react-native-async-storage/async-storage", () => ({
   setItem: jest.fn(),
   getItem: jest.fn(),
 }));
 
-describe('AsyncPersistence Tests', () => {
+describe("AsyncPersistence Tests", () => {
   beforeEach(() => {
     // Clear all mocks before each test
     jest.clearAllMocks();
   });
 
-  it('should save data to AsyncStorage', async () => {
-    const key = 'lastCampus';
-    const value = 'H3G 1M8';
+  it("should save data to AsyncStorage", async () => {
+    const key = "lastCampus";
+    const value = "H3G 1M8";
 
     await saveToAsyncStorage(key, value);
 
@@ -22,10 +25,10 @@ describe('AsyncPersistence Tests', () => {
     expect(AsyncStorage.setItem).toHaveBeenCalledTimes(1);
   });
 
-  it('should handle errors when saving data to AsyncStorage', async () => {
-    const key = 'lastCampus';
-    const value = 'H3G 1M8';
-    const errorMessage = 'Error saving campus';
+  it("should handle errors when saving data to AsyncStorage", async () => {
+    const key = "lastCampus";
+    const value = "H3G 1M8";
+    const errorMessage = "Error saving campus";
 
     AsyncStorage.setItem.mockRejectedValueOnce(new Error(errorMessage));
 
@@ -36,10 +39,10 @@ describe('AsyncPersistence Tests', () => {
     // You can also check if the error was logged to the console
   });
 
-  it('should retrieve data from AsyncStorage', async () => {
-    const key = 'lastCampus';
-    const defaultValue = 'H3G 1M8';
-    const storedValue = 'H4B 1R6';
+  it("should retrieve data from AsyncStorage", async () => {
+    const key = "lastCampus";
+    const defaultValue = "H3G 1M8";
+    const storedValue = "H4B 1R6";
 
     AsyncStorage.getItem.mockResolvedValueOnce(storedValue);
 
@@ -50,9 +53,9 @@ describe('AsyncPersistence Tests', () => {
     expect(result).toBe(storedValue);
   });
 
-  it('should return default value if data is not found in AsyncStorage', async () => {
-    const key = 'lastCampus';
-    const defaultValue = 'H3G 1M8';
+  it("should return default value if data is not found in AsyncStorage", async () => {
+    const key = "lastCampus";
+    const defaultValue = "H3G 1M8";
 
     AsyncStorage.getItem.mockResolvedValueOnce(null);
 
@@ -63,10 +66,10 @@ describe('AsyncPersistence Tests', () => {
     expect(result).toBe(defaultValue);
   });
 
-  it('should handle errors when retrieving data from AsyncStorage', async () => {
-    const key = 'lastCampus';
-    const defaultValue = 'H3G 1M8';
-    const errorMessage = 'Error retrieving campus';
+  it("should handle errors when retrieving data from AsyncStorage", async () => {
+    const key = "lastCampus";
+    const defaultValue = "H3G 1M8";
+    const errorMessage = "Error retrieving campus";
 
     AsyncStorage.getItem.mockRejectedValueOnce(new Error(errorMessage));
 
