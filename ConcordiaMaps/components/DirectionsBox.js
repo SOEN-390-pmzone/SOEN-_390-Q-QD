@@ -65,8 +65,8 @@ function DirectionsBox({ directions = [] }) {
   };
 
   return (
-    <Animated.View style={[styles.container, { transform: [{ translateY }] }]}>
-      <TouchableOpacity onPress={toggleCollapse} style={styles.handle}>
+    <Animated.View style={[styles.container, { transform: [{ translateY }] }]} testID="directionsBox">
+      <TouchableOpacity onPress={toggleCollapse} style={styles.handle} testID="handle">
         <View style={styles.handleBar} />
       </TouchableOpacity>
       <ScrollView style={styles.scrollView}>

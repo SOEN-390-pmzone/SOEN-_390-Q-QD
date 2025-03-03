@@ -9,20 +9,17 @@ import {
 } from "react-native";
 import styles from "../styles";
 import { useNavigation } from "@react-navigation/native";
+import { getByTestId } from "@testing-library/react";
 
 function Header() {
   const navigation = useNavigation();
   const handlePress = (item) => {
-    if (item === "Home") {
       navigation.navigate("Home");
-    } else {
-      Alert.alert(`You clicked: ${item}`);
-    }
   };
   return (
     <SafeAreaView>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => handlePress("Home")}>
+        <TouchableOpacity testID="logoButton" onPress={() => handlePress("Home") }>
           <Image
             source={require("../assets/ConcordiaLogo.png")}
             style={styles.logo}
