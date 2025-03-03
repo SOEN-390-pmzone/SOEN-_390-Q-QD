@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   TextInput,
@@ -8,15 +8,40 @@ import {
   ActivityIndicator,
 } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import * as Location from "expo-location";
 import styles from "../styles";
 import PropTypes from "prop-types";
 
 const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
   const GOOGLE_MAPS_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
+
   const [searchQuery, setSearchQuery] = useState("");
   const [predictions, setPredictions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState("");
+  const [userLocation, setUserLocation] = useState(null);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") {
+          console.warn("No access to location");
+          return;
+        }
+
+        let location = await Location.getCurrentPositionAsync({});
+        const userCoords = {
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+        };
+
+        setUserLocation(userCoords);
+      } catch (error) {
+        console.error("Error getting location:", error);
+      }
+    })();
+  }, []);
 
   const searchPlaces = async (text) => {
     setSearchQuery(text);
@@ -26,10 +51,23 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
       return;
     }
     setLoading(true);
+
     try {
+      let locationParam = "";
+      if (userLocation?.latitude && userLocation?.longitude) {
+        locationParam = `&location=${userLocation.latitude},${userLocation.longitude}&radius=5000`;
+      } else {
+        console.warn(
+          "User location not available. Searching without location bias.",
+        );
+      }
+
+      const sessionToken = Math.random().toString(36).substring(2, 15);
+
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_MAPS_API_KEY}&components=country:ca`,
+        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_MAPS_API_KEY}&components=country:ca${locationParam}&sessiontoken=${sessionToken}`,
       );
+
       const { predictions } = await response.json();
       setPredictions(predictions || []);
     } catch (error) {
@@ -39,7 +77,7 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
     }
   };
 
-  const handleSelection = async (placeId, description) => {
+  const handleSelection = async (placeId) => {
     try {
       const response = await fetch(
         `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry&key=${GOOGLE_MAPS_API_KEY}`,
@@ -50,12 +88,11 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
           latitude: result.geometry.location.lat,
           longitude: result.geometry.location.lng,
         });
-        setSelectedLocation(description);
         setSearchQuery("");
         setPredictions([]);
       }
     } catch (error) {
-      console.error(error);
+      console.error("Error fetching place details:", error);
     }
   };
 
@@ -108,7 +145,7 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
     </View>
   );
 };
-//fix proptypes
+
 FloatingSearchBar.propTypes = {
   onPlaceSelect: PropTypes.func.isRequired,
   placeholder: PropTypes.string,

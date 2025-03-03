@@ -68,6 +68,66 @@ const styles = StyleSheet.create({
     marginTop: 10,
     color: "#555",
   },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContainer: {
+    backgroundColor: "white",
+    padding: 20,
+    borderRadius: 10,
+    width: 330,
+    alignItems: "center",
+  },
+  modalTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
+  modalText: {
+    fontSize: 12,
+    marginBottom: 5,
+  },
+  modalText1: {
+    fontSize: 12,
+    marginBottom: 10,
+  },
+  buttonsContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    width: "100%",
+  },
+  closeButton: {
+    backgroundColor: "white",
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+    borderWidth: 1.5,
+    borderColor: "black",
+    marginTop: 10,
+    marginRight: 5,
+  },
+  closeButtonText: {
+    color: "black",
+    fontSize: 14,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  getDirectionsButton: {
+    backgroundColor: "#990033",
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+    marginTop: 10,
+    marginLeft: 5,
+  },
+  getDirectionsButtonText: {
+    color: "white",
+    fontSize: 14,
+    textAlign: "center",
+  },
 });
 
 export default styles;

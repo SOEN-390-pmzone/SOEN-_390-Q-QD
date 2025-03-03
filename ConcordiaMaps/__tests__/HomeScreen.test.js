@@ -6,6 +6,19 @@ import { NavigationContainer } from "@react-navigation/native";
 import { ModalContext } from "../App";
 import { LocationContext } from "../contexts/LocationContext";
 
+jest.mock("expo-location", () => ({
+  getCurrentPositionAsync: jest.fn().mockResolvedValue({
+    coords: { latitude: 45.5017, longitude: -73.5673 }, // Example: Montreal coordinates
+  }),
+  requestForegroundPermissionsAsync: jest.fn().mockResolvedValue({
+    granted: true,
+  }),
+}));
+
+jest.mock("expo-font", () => ({
+  isLoaded: jest.fn().mockReturnValue(true),
+}));
+
 jest.mock("axios");
 
 describe("HomeScreen", () => {
