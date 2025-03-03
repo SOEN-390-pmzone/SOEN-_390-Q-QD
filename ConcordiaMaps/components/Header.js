@@ -4,22 +4,23 @@ import {
   View,
   Text,
   Image,
-  Alert,
   TouchableOpacity,
 } from "react-native";
 import styles from "../styles";
 import { useNavigation } from "@react-navigation/native";
-import { getByTestId } from "@testing-library/react";
 
 function Header() {
   const navigation = useNavigation();
-  const handlePress = (item) => {
-      navigation.navigate("Home");
+  const handlePress = () => {
+    navigation.navigate("Home");
   };
   return (
     <SafeAreaView>
       <View style={styles.header}>
-        <TouchableOpacity testID="logoButton" onPress={() => handlePress("Home") }>
+        <TouchableOpacity
+          testID="logoButton"
+          onPress={() => handlePress("Home")}
+        >
           <Image
             source={require("../assets/ConcordiaLogo.png")}
             style={styles.logo}
