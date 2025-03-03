@@ -9,6 +9,7 @@ import Footer from "../components/Footer";
 import styles from "../styles";
 const customMarkerImage = require("../assets/PinLogo.png");
 import { Building } from "../components/MapMarkers";
+import { ModalContext } from "../App";
 import BuildingColoring from "../components/buildingColoring";
 import Legend from "../components/Legend";
 import ShuttleStop from "../components/ShuttleStop";
@@ -24,6 +25,7 @@ function HomeScreen({ asyncKey = "Campus" }) {
   const sgwPostalCode = process.env.EXPO_PUBLIC_SGW_POSTAL_CODE;
 
   const location = useContext(LocationContext);
+  const { toggleModal, setModalData } = useContext(ModalContext); // Access setModalData
 
   const [postalCode, setPostalCode] = useState(null);
   const [coordinates, setCoordinates] = useState(null);
@@ -91,8 +93,20 @@ function HomeScreen({ asyncKey = "Campus" }) {
       prevPostalCode === sgwPostalCode ? loyolaPostalCode : sgwPostalCode,
     );
   };
+
+  // Function to handle marker press and pass data to the modal
+  const handleMarkerPress = (building) => {
+    setModalData({
+      name: building.name,
+      coordinate: building.coordinat,
+      address: building.address,
+      fullBuildingName: building.fullBuildingName,
+    }); // Update modalData
+    toggleModal(); // Show modal
+  };
+
   return (
-    <View style={styles.container}>
+    <View style={styles.container} testID="home-screen">
       <Header />
       <NavBar />
       {error ? <Text testID="error-message">{error}</Text> : null}
@@ -130,8 +144,12 @@ function HomeScreen({ asyncKey = "Campus" }) {
             {Building.map((building, index) => (
               <Marker
                 key={index}
+                testID={`marker-${index}`}
                 coordinate={building.coordinate}
                 title={building.name}
+                address={building.address}
+                fullBuildingName={building.fullBuildingName}
+                onPress={() => handleMarkerPress(building)} // Add onPress handler
               >
                 <Image
                   source={customMarkerImage}
@@ -166,7 +184,6 @@ function HomeScreen({ asyncKey = "Campus" }) {
         <Text>Loading...</Text>
       )}
       {error ? <Text>Error: {error}</Text> : null}
-
       <Footer />
     </View>
   );

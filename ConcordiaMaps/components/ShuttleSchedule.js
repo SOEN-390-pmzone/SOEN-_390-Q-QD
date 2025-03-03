@@ -160,8 +160,14 @@ function ShuttleSchedule({ visible, onClose }) {
   // Update the next shuttle when campus changes
   useEffect(() => {
     const day = new Date().getDay();
-    const scheduleType = day >= 1 && day <= 4 ? "weekday" : "friday"; // Weekday or Friday
 
+    if (day === 0 || day === 6) {
+      // 0 = Sunday, 6 = Saturday
+      setNextShuttle("No shuttle service on weekends");
+      return;
+    }
+    const scheduleType = day >= 1 && day <= 4 ? "weekday" : "friday";
+    setSelectedSchedule(scheduleType);
     setNextShuttle(getNextShuttle(schedules[selectedCampus][scheduleType]));
   }, [selectedCampus, selectedSchedule]); // Trigger when campus or schedule changes
 
@@ -176,7 +182,10 @@ function ShuttleSchedule({ visible, onClose }) {
   return (
     <Modal transparent visible={visible} animationType="fade">
       <View style={styles.modalOverlay}>
-        <View style={styles.modalContainer}>
+        <View
+          style={styles.modalContainer}
+          testID="shuttle-schedule-modal-container"
+        >
           <Text style={styles.modalTitle}>Shuttle Schedule</Text>
 
           {/* Next Shuttle Display */}
@@ -252,7 +261,11 @@ function ShuttleSchedule({ visible, onClose }) {
             </View>
           </View>
 
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+          <TouchableOpacity
+            onPress={onClose}
+            style={styles.closeButton}
+            testID="shuttle-schedule-close-button"
+          >
             <Text style={styles.closeButtonText}>Close</Text>
           </TouchableOpacity>
         </View>

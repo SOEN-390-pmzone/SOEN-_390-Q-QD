@@ -1,12 +1,15 @@
 import React, { useState } from "react";
-import { View, TouchableOpacity, Text, Animated, Alert } from "react-native";
+import { View, TouchableOpacity, Text, Animated } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 import styles from "../styles";
+import { Alert } from "react-native";
 import ShuttleSchedule from "./ShuttleSchedule";
 
 function NavBar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScheduleVisible, setIsScheduleVisible] = useState(false); // Added missing state
   const animation = useState(new Animated.Value(0))[0];
+  const navigation = useNavigation();
 
   const toggleMenu = () => {
     const toValue = isOpen ? 0 : 1;
@@ -18,7 +21,11 @@ function NavBar() {
   };
 
   const handlePress = (item) => {
-    Alert.alert(`You clicked: ${item}`);
+    if (item === "Get directions") {
+      navigation.navigate("GetDirections");
+    } else {
+      Alert.alert(`You clicked: ${item}`);
+    }
   };
 
   const translateX = animation.interpolate({
@@ -28,7 +35,11 @@ function NavBar() {
 
   return (
     <View style={styles.navbar}>
-      <TouchableOpacity onPress={toggleMenu} style={styles.hamburger}>
+      <TouchableOpacity
+        onPress={toggleMenu}
+        style={styles.hamburger}
+        testID="hamburger-button"
+      >
         <View style={styles.hamburgerLine}></View>
         <View style={styles.hamburgerLine}></View>
         <View style={styles.hamburgerLine}></View>
@@ -49,7 +60,10 @@ function NavBar() {
         <TouchableOpacity onPress={() => handlePress("Smart Planner")}>
           <Text style={styles.menuItem}>Smart Planner</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => setIsScheduleVisible(true)}>
+        <TouchableOpacity
+          onPress={() => setIsScheduleVisible(true)}
+          testID="shuttle-schedule-modal"
+        >
           <Text style={styles.menuItem}>Shuttle Schedule</Text>
         </TouchableOpacity>
       </Animated.View>
