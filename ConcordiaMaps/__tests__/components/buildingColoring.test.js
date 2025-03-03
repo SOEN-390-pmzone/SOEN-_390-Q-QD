@@ -1,10 +1,10 @@
 import React from "react";
 import { render } from "@testing-library/react-native";
-import BuildingColoring from "../components/buildingColoring.js";
+import BuildingColoring from "../../components/buildingColoring.js";
 import { Polygon, Marker } from "react-native-maps";
 
 // Mock the coloringData
-jest.mock("../data/coloringData.js", () => ({
+jest.mock("../../data/coloringData.js", () => ({
   coloringData: {
     features: [
       {

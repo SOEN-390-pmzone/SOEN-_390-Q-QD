@@ -1,6 +1,6 @@
 import React from "react";
 import { render, fireEvent, waitFor } from "@testing-library/react-native";
-import NavBar from "../components/NavBar";
+import NavBar from "../../components/NavBar";
 import { Alert } from "react-native";
 
 jest.mock("@react-navigation/native", () => ({

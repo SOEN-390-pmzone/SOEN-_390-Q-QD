@@ -1,6 +1,6 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react-native";
-import PopupModal from "../components/PopupModal";
+import PopupModal from "../../components/PopupModal";
 import { Alert } from "react-native";
 
 // Mock Alert to prevent actual pop-ups
