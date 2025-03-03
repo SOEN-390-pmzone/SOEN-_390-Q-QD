@@ -1,0 +1,9 @@
+appId: com.anonymous.ConcordiaMaps
+---
+- launchApp
+- doubleTapOn:
+    point: 49%,61%
+- tapOn: "Webster Library"
+- tapOn: "Close"
+- tapOn: "Henry F. Hall"
+- tapOn: "Close"

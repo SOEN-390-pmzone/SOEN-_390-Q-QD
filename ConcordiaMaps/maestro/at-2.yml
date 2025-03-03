@@ -4,5 +4,8 @@ appId: com.anonymous.ConcordiaMaps
 - swipe:
     start: 57%,62%
     end: 47%,50%
-- tapOn:
-    point: 89%,88%
+- doubleTapOn:
+    point: 48%,52%
+- swipe:
+    start: 48%,52%
+    end: 41%,45%
