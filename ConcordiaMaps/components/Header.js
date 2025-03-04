@@ -17,10 +17,7 @@ function Header() {
   return (
     <SafeAreaView>
       <View style={styles.header}>
-        <TouchableOpacity
-          testID="logoButton"
-          onPress={() => handlePress("Home")}
-        >
+        <TouchableOpacity testID="logoButton" onPress={() => handlePress()}>
           <Image
             source={require("../assets/ConcordiaLogo.png")}
             style={styles.logo}
