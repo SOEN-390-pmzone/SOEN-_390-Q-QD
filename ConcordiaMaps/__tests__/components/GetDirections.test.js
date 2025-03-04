@@ -420,4 +420,84 @@ describe("GetDirections", () => {
       expect(mockGetPolyline).toHaveBeenCalledTimes(1);
     });
   });
+
+  it("handles user denied location permission", async () => {
+    // Mock location permission denied
+    const mockRequestPermission = jest.fn().mockResolvedValueOnce({
+      granted: false,
+    });
+
+    // Override the mock for this test
+    jest.mock("expo-location", () => ({
+      ...jest.requireActual("expo-location"),
+      requestForegroundPermissionsAsync: mockRequestPermission,
+      getCurrentPositionAsync: jest.fn(),
+    }));
+
+    const { getByText } = renderWithContext(<GetDirections />);
+
+    // Verify component still renders even with denied permissions
+    expect(getByText("Get Directions")).toBeTruthy();
+  });
+
+  it("cancels ongoing navigation", async () => {
+    const { getByText } = renderWithContext(<GetDirections />);
+
+    // Get directions first
+    await act(async () => {
+      fireEvent.press(getByText("Get Directions"));
+      await jest.runAllTimers();
+    });
+
+    // Verify we're in navigation mode
+    await waitFor(() => {
+      expect(getByText("Change Directions")).toBeTruthy();
+    });
+
+    // Now cancel navigation
+    await act(async () => {
+      const cancelButton = getByText("Change Directions");
+      fireEvent.press(cancelButton);
+      await jest.runAllTimers();
+    });
+
+    // Verify we're back in input mode
+    expect(getByText("Get Directions")).toBeTruthy();
+  });
+
+  it("handles location errors gracefully", async () => {
+    // Simulate a location error
+    mockGetCurrentPositionAsync.mockRejectedValueOnce(
+      new Error("Location service unavailable"),
+    );
+
+    // Spy on console
+    const consoleSpy = jest.spyOn(console, "error").mockImplementation();
+
+    const { getByText, getByTestId } = renderWithContext(<GetDirections />);
+
+    // Set a destination
+    const destination = {
+      latitude: 45.5017,
+      longitude: -73.5673,
+      name: "Destination",
+    };
+
+    await act(async () => {
+      const destSearchBar = getByTestId("search-bar-Enter Destination");
+      fireEvent(destSearchBar, "onPlaceSelect", destination);
+    });
+
+    // Try to get directions
+    await act(async () => {
+      fireEvent.press(getByText("Get Directions"));
+      await jest.runAllTimers();
+    });
+
+    // Should have logged an error
+    expect(consoleSpy).toHaveBeenCalled();
+
+    // Clean up
+    consoleSpy.mockRestore();
+  });
 });
