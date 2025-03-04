@@ -574,4 +574,111 @@ describe("GetDirections", () => {
     // Check if new directions are fetched
     expect(mockGetPolyline).toHaveBeenCalled();
   });
+
+  it("successfully goes into navigation mode", async () => {
+    const { getByText, getByTestId } = renderWithContext(<GetDirections />);
+
+    // Set origin
+    await act(async () => {
+      const originSearchBar = getByTestId("search-bar-Using Current Location");
+      fireEvent(originSearchBar, "onPlaceSelect", {
+        latitude: 45.499,
+        longitude: -73.58,
+      });
+    });
+
+    // Set destination
+    await act(async () => {
+      const destSearchBar = getByTestId("search-bar-Enter Destination");
+      fireEvent(destSearchBar, "onPlaceSelect", {
+        latitude: 45.5017,
+        longitude: -73.5673,
+        name: "Destination",
+      });
+    });
+
+    // Get directions
+    await act(async () => {
+      fireEvent.press(getByText("Get Directions"));
+      await jest.runAllTimers();
+    });
+
+    // Verify we're in navigation mode
+    await waitFor(() => {
+      expect(getByText("Change Directions")).toBeTruthy();
+    });
+  });
+
+  it("updates directions when isInNavigationMode && destination", async () => {
+    const { getByText, getByTestId } = renderWithContext(<GetDirections />);
+
+    // Set origin
+    await act(async () => {
+      const originSearchBar = getByTestId("search-bar-Using Current Location");
+      fireEvent(originSearchBar, "onPlaceSelect", {
+        latitude: 45.499,
+        longitude: -73.58,
+      });
+    });
+
+    // Set destination
+    await act(async () => {
+      const destSearchBar = getByTestId("search-bar-Enter Destination");
+      fireEvent(destSearchBar, "onPlaceSelect", {
+        latitude: 45.5017,
+        longitude: -73.5673,
+        name: "Destination",
+      });
+    });
+
+    // Reset mocks to track only navigation calls
+    mockGetStepsInHTML.mockClear();
+    mockGetPolyline.mockClear();
+
+    // Get directions
+    await act(async () => {
+      fireEvent.press(getByText("Get Directions"));
+      await jest.runAllTimers();
+    });
+
+    // Verify we're in navigation mode and first directions were fetched
+    await waitFor(() => {
+      expect(getByText("Change Directions")).toBeTruthy();
+      expect(mockGetStepsInHTML).toHaveBeenCalledTimes(1);
+      expect(mockGetPolyline).toHaveBeenCalledTimes(1);
+    });
+
+    // First, exit navigation mode to get back to search screen
+    await act(async () => {
+      fireEvent.press(getByText("Change Directions"));
+      await jest.advanceTimersByTime(2000); // Advance by a fixed amount
+    });
+
+    // Clear mocks for the next set of directions
+    mockGetStepsInHTML.mockClear();
+    mockGetPolyline.mockClear();
+
+    // Now we can update the destination since search bars are visible again
+    await act(async () => {
+      const destSearchBar = getByTestId("search-bar-Enter Destination");
+      fireEvent(destSearchBar, "onPlaceSelect", {
+        latitude: 46.0, // Different destination
+        longitude: -74.0,
+        name: "New Destination",
+      });
+    });
+
+    // Get directions again
+    await act(async () => {
+      fireEvent.press(getByText("Get Directions"));
+      await jest.advanceTimersByTime(2000); // Advance by a fixed amount
+    });
+
+    // Verify we're back in navigation mode and new directions were fetched
+    await waitFor(() => {
+      expect(getByText("Change Directions")).toBeTruthy();
+      expect(mockGetStepsInHTML).toHaveBeenCalledTimes(1);
+      expect(mockGetPolyline).toHaveBeenCalledTimes(1);
+    });
+  });
 });
