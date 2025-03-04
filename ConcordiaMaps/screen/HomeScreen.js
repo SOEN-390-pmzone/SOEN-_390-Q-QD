@@ -13,6 +13,8 @@ import { ModalContext } from "../App";
 import BuildingColoring from "../components/buildingColoring";
 import Legend from "../components/Legend";
 import ShuttleStop from "../components/ShuttleStop";
+import FloatingSearchBar from "../components/FloatingSearchBar";
+import LiveBusTracker from "../components/LiveBusTracker";
 import {
   saveToAsyncStorage,
   getFromAsyncStorage,
@@ -30,6 +32,8 @@ function HomeScreen({ asyncKey = "Campus" }) {
   const [postalCode, setPostalCode] = useState(null);
   const [coordinates, setCoordinates] = useState(null);
   const [error, setError] = useState("");
+  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [, setMapRegion] = useState(null);
   const [modalState, setModalState] = useState(true);
   const [borderColor, setBorderColor] = useState("#912338"); // Initial border color (red)
   const mapRef = useRef(null);
@@ -75,6 +79,17 @@ function HomeScreen({ asyncKey = "Campus" }) {
   }, [modalState]);
 
   useEffect(() => {
+    if (location) {
+      setMapRegion({
+        latitude: location.latitude,
+        longitude: location.longitude,
+        latitudeDelta: 0.005,
+        longitudeDelta: 0.005,
+      });
+    }
+  }, [location]);
+
+  useEffect(() => {
     if (coordinates && mapRef.current) {
       mapRef.current.animateToRegion(
         {
@@ -94,6 +109,21 @@ function HomeScreen({ asyncKey = "Campus" }) {
     );
   };
 
+  const handlePlaceSelect = (newRegion) => {
+    console.log("handlePlaceSelect called with:", newRegion);
+    const region = {
+      ...newRegion,
+      latitudeDelta: 0.005,
+      longitudeDelta: 0.005,
+    };
+
+    setTimeout(() => {
+      setMapRegion(region);
+      setSelectedLocation(region);
+      mapRef.current?.animateToRegion(region, 1000);
+    }, 100);
+  };
+
   // Function to handle marker press and pass data to the modal
   const handleMarkerPress = (building) => {
     setModalData({
@@ -109,6 +139,7 @@ function HomeScreen({ asyncKey = "Campus" }) {
     <View style={styles.container} testID="home-screen">
       <Header />
       <NavBar />
+      <FloatingSearchBar onPlaceSelect={handlePlaceSelect} />
       {error ? <Text testID="error-message">{error}</Text> : null}
 
       {coordinates ? (
@@ -140,6 +171,7 @@ function HomeScreen({ asyncKey = "Campus" }) {
             showsUserLocation={true}
             loadingEnabled={true}
             watchUserLocation={true}
+            onRegionChangeComplete={(region) => setMapRegion(region)}
           >
             {Building.map((building, index) => (
               <Marker
@@ -158,7 +190,17 @@ function HomeScreen({ asyncKey = "Campus" }) {
               </Marker>
             ))}
             <BuildingColoring />
+            {selectedLocation && (
+              <Marker
+                coordinate={{
+                  latitude: selectedLocation.latitude,
+                  longitude: selectedLocation.longitude,
+                }}
+                title="Selected Location"
+              />
+            )}
             <ShuttleStop />
+            <LiveBusTracker mapRef={mapRef} />
           </MapView>
           <View style={styles.toggleView}>
             <TouchableOpacity

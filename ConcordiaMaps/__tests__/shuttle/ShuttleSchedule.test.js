@@ -46,3 +46,12 @@ it("closes the modal when close button is pressed", () => {
   fireEvent.press(getByText("Close"));
   expect(onCloseMock).toHaveBeenCalled();
 });
+
+it("displays next shuttle bus time", async () => {
+  const { getByText } = render(
+    <ShuttleSchedule visible={true} onClose={jest.fn()} />,
+  );
+  await waitFor(() =>
+    expect(getByText(/Next Shuttle from SGW:/i)).toBeTruthy(),
+  );
+});

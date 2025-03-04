@@ -1,8 +1,19 @@
 import App from "../App";
 import React from "react";
 import { render, waitFor, fireEvent } from "@testing-library/react-native";
-// Remove PropTypes import since we won't be using it in mocks
-// import PropTypes from "prop-types";
+
+// Mock expo-font
+jest.mock("expo-font", () => ({
+  isLoaded: jest.fn(() => true),
+  loadAsync: jest.fn(() => Promise.resolve()),
+  __internal: {
+    nativeFontFaceMap: {},
+  },
+  Font: {
+    isLoaded: jest.fn(() => true),
+    loadAsync: jest.fn(() => Promise.resolve()),
+  },
+}));
 
 // Mock expo-location
 jest.mock("expo-location", () => ({
@@ -20,10 +31,20 @@ jest.mock("expo-location", () => ({
   ),
 }));
 
+// Mock @expo/vector-icons
+jest.mock("@expo/vector-icons", () => {
+  const { View } = require("react-native");
+  const MockIcon = () => <View />;
+  return {
+    Ionicons: MockIcon,
+    FontAwesome: MockIcon,
+    MaterialIcons: MockIcon,
+    MaterialCommunityIcons: MockIcon,
+  };
+});
+
 jest.mock("react-native-maps", () => {
   const { View } = require("react-native");
-  const PropTypes = require("prop-types");
-
   const MockMapView = (props) => {
     return <View>{props.children}</View>;
   };
@@ -32,13 +53,12 @@ jest.mock("react-native-maps", () => {
     return <View>{props.children}</View>;
   };
 
-  // Define PropTypes for mock components
   MockMapView.propTypes = {
-    children: PropTypes.node,
+    children: require("prop-types").node,
   };
 
   MockMarker.propTypes = {
-    children: PropTypes.node,
+    children: require("prop-types").node,
   };
 
   return {
@@ -52,10 +72,25 @@ jest.mock("react-native-maps", () => {
 let mockPopupModalProps = {};
 jest.mock("../components/PopupModal", () => {
   const { View } = require("react-native");
+  const PropTypes = require("prop-types");
+
   const PopupModal = (props) => {
     mockPopupModalProps = props;
     return <View testID="popup-modal" />;
   };
+
+  PopupModal.propTypes = {
+    isVisible: PropTypes.bool,
+    data: PropTypes.shape({
+      name: PropTypes.string,
+      coordinate: PropTypes.shape({
+        latitude: PropTypes.number,
+        longitude: PropTypes.number,
+      }),
+    }),
+    onClose: PropTypes.func,
+  };
+
   return PopupModal;
 });
 

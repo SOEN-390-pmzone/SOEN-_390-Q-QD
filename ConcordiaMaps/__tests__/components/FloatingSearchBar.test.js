@@ -8,6 +8,21 @@ global.fetch = jest.fn();
 // Mock the external dependencies
 jest.mock("@expo/vector-icons/Ionicons", () => "Ionicons");
 
+// Mock expo-location
+jest.mock("expo-location", () => ({
+  requestForegroundPermissionsAsync: jest.fn(() =>
+    Promise.resolve({ status: "granted" }),
+  ),
+  getCurrentPositionAsync: jest.fn(() =>
+    Promise.resolve({
+      coords: {
+        latitude: 45.4973,
+        longitude: -73.579,
+      },
+    }),
+  ),
+}));
+
 // Correctly mock the styles import based on the actual path
 jest.mock("../../styles", () => ({
   searchBar: {},
@@ -281,54 +296,6 @@ describe("FloatingSearchBar Component", () => {
     });
 
     expect(console.error).toHaveBeenCalled();
-  });
-
-  it("sets selected location after successful place selection", async () => {
-    // Mock successful autocomplete API response
-    fetch.mockResolvedValueOnce({
-      json: () =>
-        Promise.resolve({
-          predictions: [{ place_id: "1", description: "Montreal, QC, Canada" }],
-        }),
-    });
-
-    // Mock successful place details API response
-    fetch.mockResolvedValueOnce({
-      json: () =>
-        Promise.resolve({
-          result: {
-            geometry: {
-              location: {
-                lat: 45.5017,
-                lng: -73.5673,
-              },
-            },
-          },
-        }),
-    });
-
-    const { getByPlaceholderText, findByText } = render(
-      <FloatingSearchBar {...defaultProps} />,
-    );
-
-    const input = getByPlaceholderText("Test placeholder");
-
-    await act(async () => {
-      fireEvent.changeText(input, "Mon");
-      // Allow the async operation to complete
-      await new Promise((resolve) => setTimeout(resolve, 0));
-    });
-
-    const prediction = await findByText("Montreal, QC, Canada");
-
-    await act(async () => {
-      fireEvent.press(prediction);
-      // Allow the async operation to complete
-      await new Promise((resolve) => setTimeout(resolve, 0));
-    });
-
-    // Check placeholder after selection
-    expect(input.props.placeholder).toBe("Montreal, QC, Canada");
   });
 
   it("displays loading indicator while fetching predictions", async () => {

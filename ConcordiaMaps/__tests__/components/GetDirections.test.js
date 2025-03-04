@@ -4,6 +4,15 @@ import GetDirections from "../../components/GetDirections";
 import { useGoogleMapDirections } from "../../hooks/useGoogleMapDirections";
 import { LocationContext } from "../../contexts/LocationContext";
 
+jest.mock("expo-location", () => ({
+  getCurrentPositionAsync: jest.fn().mockResolvedValue({
+    coords: { latitude: 45.5017, longitude: -73.5673 },
+  }),
+  requestForegroundPermissionsAsync: jest.fn().mockResolvedValue({
+    granted: true,
+  }),
+}));
+
 // Mock useGoogleMapDirections hook
 jest.mock("../../hooks/useGoogleMapDirections");
 
