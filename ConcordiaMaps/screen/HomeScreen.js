@@ -162,7 +162,7 @@ function HomeScreen({ asyncKey = "Campus" }) {
           </MapView>
           <View style={styles.toggleView}>
             <TouchableOpacity
-              testID="toggle-button"
+              testID="change-campus-button"
               onPress={handleChangeCampuses}
               activeOpacity={0.7}
               style={{

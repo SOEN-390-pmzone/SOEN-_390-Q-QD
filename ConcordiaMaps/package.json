@@ -21,15 +21,20 @@
     ],
     "moduleNameMapper": {
       "@env": "<rootDir>/__mocks__/envMock.js"
-    }
+    },
+    "setupFiles": [
+      "<rootDir>/__tests__/jestSetupFile.js"
+    ]
   },
   "dependencies": {
     "@expo/metro-runtime": "~4.0.1",
+    "@mapbox/polyline": "^1.2.1",
     "@react-native-async-storage/async-storage": "^2.1.2",
     "@react-navigation/native": "^7.0.14",
     "@react-navigation/native-stack": "^7.2.0",
     "@testing-library/react": "^16.2.0",
     "axios": "^1.7.9",
+    "ci": "^2.3.0",
     "concordiamaps": "file:",
     "denodeify": "^1.2.1",
     "dotenv": "^16.4.7",
