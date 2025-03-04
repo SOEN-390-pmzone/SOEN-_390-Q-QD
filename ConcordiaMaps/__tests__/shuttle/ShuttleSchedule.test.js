@@ -7,41 +7,41 @@ jest.useFakeTimers().setSystemTime(new Date("2025-02-06T15:00:00Z")); // Mock cu
 describe("ShuttleSchedule Component", () => {
   it("updates next shuttle time when campus is switched", async () => {
     const { getByText, getByLabelText } = render(
-      <ShuttleSchedule visible={true} onClose={jest.fn()} />
+      <ShuttleSchedule visible={true} onClose={jest.fn()} />,
     );
 
     fireEvent.press(getByLabelText("Loyola"));
 
     await waitFor(() =>
-      expect(getByText(/Next Shuttle from Loyola/i)).toBeTruthy()
+      expect(getByText(/Next Shuttle from Loyola/i)).toBeTruthy(),
     );
   });
 });
 
 it("updates next shuttle time when campus is switched", async () => {
   const { getByText, getByRole } = render(
-    <ShuttleSchedule visible={true} onClose={jest.fn()} />
+    <ShuttleSchedule visible={true} onClose={jest.fn()} />,
   );
   fireEvent.press(getByRole("button", { name: /Loyola/i }));
   await waitFor(() =>
-    expect(getByText(/Next Shuttle from Loyola/i)).toBeTruthy()
+    expect(getByText(/Next Shuttle from Loyola/i)).toBeTruthy(),
   );
 });
 
 it("displays Friday schedule on Fridays", async () => {
   jest.setSystemTime(new Date("2025-02-07T10:00:00Z")); // Friday
   const { getByText } = render(
-    <ShuttleSchedule visible={true} onClose={jest.fn()} />
+    <ShuttleSchedule visible={true} onClose={jest.fn()} />,
   );
   await waitFor(() =>
-    expect(getByText(/Next Shuttle from SGW:/i)).toBeTruthy()
+    expect(getByText(/Next Shuttle from SGW:/i)).toBeTruthy(),
   );
 });
 
 it("closes the modal when close button is pressed", () => {
   const onCloseMock = jest.fn();
   const { getByText } = render(
-    <ShuttleSchedule visible={true} onClose={onCloseMock} />
+    <ShuttleSchedule visible={true} onClose={onCloseMock} />,
   );
   fireEvent.press(getByText("Close"));
   expect(onCloseMock).toHaveBeenCalled();
@@ -49,74 +49,72 @@ it("closes the modal when close button is pressed", () => {
 
 it("displays next shuttle bus time", async () => {
   const { getByText } = render(
-    <ShuttleSchedule visible={true} onClose={jest.fn()} />
+    <ShuttleSchedule visible={true} onClose={jest.fn()} />,
   );
   await waitFor(() =>
-    expect(getByText(/Next Shuttle from SGW:/i)).toBeTruthy()
+    expect(getByText(/Next Shuttle from SGW:/i)).toBeTruthy(),
   );
 });
 
 it("toggles to Friday schedule when Friday button is pressed", async () => {
-  const { getByText, debug } = render(
-    <ShuttleSchedule visible={true} onClose={jest.fn()} />
+  const { getByText } = render(
+    <ShuttleSchedule visible={true} onClose={jest.fn()} />,
   );
 
-  // Get initial state for debugging
-  const initialFridayButton = getByText("Friday");
-
   // Press the Friday button
-  fireEvent.press(initialFridayButton);
+  fireEvent.press(getByText("Friday"));
 
   // Wait for the state to update
   await waitFor(() => {
-    // The component might be re-rendering, so get a fresh reference
+    // Get a fresh reference to the Friday button
     const fridayButton = getByText("Friday");
 
-    // Navigate up to find parent container with styles
-    let element = fridayButton;
-    let foundStyle = false;
-
-    // Check the element and up to 3 levels of parents for the active style
-    for (let i = 0; i < 3; i++) {
-      if (!element || !element.props) break;
-
-      const style = element.props.style;
-      if (style) {
-        // Style might be an array or a single object
-        const styles = Array.isArray(style) ? style : [style];
-
-        foundStyle = styles.some(
-          (s) =>
-            s &&
-            (s.backgroundColor === "#912338" ||
-              s.background === "#912338" ||
-              JSON.stringify(s).includes("#912338"))
-        );
-
-        if (foundStyle) break;
-      }
-
-      element = element.parent;
-    }
-
-    // If we can't find the expected style, try another approach
-    if (!foundStyle) {
-      // Check if there's any indication that Friday is active
-      // This could be checking for other props like aria-selected, etc.
-      expect(
-        fridayButton.parent.props.accessibilityState?.selected ||
-          fridayButton.parent.props["aria-selected"] ||
-          fridayButton.parent.props.accessibilityRole === "button"
-      ).toBeTruthy();
-    } else {
-      expect(foundStyle).toBe(true);
-    }
+    // Find the element or its parent with the active style
+    const hasActiveStyle = checkForActiveStyle(fridayButton);
+    // Unconditional expect
+    expect(hasActiveStyle).toBe(true);
   });
 });
 
+// Helper function to check for active style
+function checkForActiveStyle(element) {
+  // Check the element and up to 3 levels of parents for the active style
+  for (let i = 0; i < 3; i++) {
+    if (!element || !element.props) return false;
+
+    const style = element.props.style;
+    if (style) {
+      // Style might be an array or a single object
+      const styles = Array.isArray(style) ? style : [style];
+
+      const foundStyle = styles.some(
+        (s) =>
+          s &&
+          (s.backgroundColor === "#912338" ||
+            s.background === "#912338" ||
+            JSON.stringify(s).includes("#912338")),
+      );
+
+      if (foundStyle) return true;
+    }
+
+    // Also check accessibility props
+    if (
+      element.props.accessibilityState?.selected === true ||
+      element.props["aria-selected"] === true
+    ) {
+      return true;
+    }
+
+    element = element.parent;
+  }
+
+  return false;
+}
+
 it("toggles back to weekday schedule when Mon - Thu button is pressed", async () => {
   const { getByText } = render(
-    <ShuttleSchedule visible={true} onClose={jest.fn()} />
+    <ShuttleSchedule visible={true} onClose={jest.fn()} />,
   );
 
   // First switch to Friday
@@ -126,47 +124,9 @@ it("toggles back to weekday schedule when Mon - Thu button is pressed", async ()
 
   // Wait for the state to update
   await waitFor(() => {
-    // The component might be re-rendering, so get a fresh reference
     const weekdayButton = getByText("Mon - Thu");
-
-    // Navigate up to find parent container with styles
-    let element = weekdayButton;
-    let foundStyle = false;
-
-    // Check the element and up to 3 levels of parents for the active style
-    for (let i = 0; i < 3; i++) {
-      if (!element || !element.props) break;
-
-      const style = element.props.style;
-      if (style) {
-        // Style might be an array or a single object
-        const styles = Array.isArray(style) ? style : [style];
-
-        foundStyle = styles.some(
-          (s) =>
-            s &&
-            (s.backgroundColor === "#912338" ||
-              s.background === "#912338" ||
-              JSON.stringify(s).includes("#912338"))
-        );
-
-        if (foundStyle) break;
-      }
-
-      element = element.parent;
-    }
-
-    // If we can't find the expected style, try another approach
-    if (!foundStyle) {
-      // Check if there's any indication that Monday-Thursday is active
-      expect(
-        weekdayButton.parent.props.accessibilityState?.selected ||
-          weekdayButton.parent.props["aria-selected"] ||
-          weekdayButton.parent.props.accessibilityRole === "button"
-      ).toBeTruthy();
-    } else {
-      expect(foundStyle).toBe(true);
-    }
+    const hasActiveStyle = checkForActiveStyle(weekdayButton);
+    expect(hasActiveStyle).toBe(true);
   });
 });
 
@@ -175,11 +135,11 @@ it("shows 'No shuttle service on weekends' message on weekends", async () => {
   jest.setSystemTime(new Date("2025-02-09T10:00:00Z"));
 
   const { getByText } = render(
-    <ShuttleSchedule visible={true} onClose={jest.fn()} />
+    <ShuttleSchedule visible={true} onClose={jest.fn()} />,
   );
 
   await waitFor(() =>
-    expect(getByText(/No shuttle service on weekends/i)).toBeTruthy()
+    expect(getByText(/No shuttle service on weekends/i)).toBeTruthy(),
   );
 });
 
@@ -188,11 +148,11 @@ it("shows 'No more shuttles today' when current time is after last shuttle", asy
   jest.setSystemTime(new Date("2025-02-06T23:30:00Z"));
 
   const { getByText } = render(
-    <ShuttleSchedule visible={true} onClose={jest.fn()} />
+    <ShuttleSchedule visible={true} onClose={jest.fn()} />,
   );
 
   await waitFor(() =>
-    expect(getByText(/No more shuttles today/i)).toBeTruthy()
+    expect(getByText(/No more shuttles today/i)).toBeTruthy(),
   );
 });
 
@@ -201,7 +161,7 @@ it("highlights the next shuttle time in the schedule", async () => {
   jest.setSystemTime(new Date("2025-02-06T09:20:00Z")); // 9:20 AM, before 9:30 AM shuttle
 
   const { getAllByText } = render(
-    <ShuttleSchedule visible={true} onClose={jest.fn()} />
+    <ShuttleSchedule visible={true} onClose={jest.fn()} />,
   );
 
   await waitFor(() => {
@@ -215,7 +175,7 @@ it("highlights the next shuttle time in the schedule", async () => {
 
     const hasHighlightStyle = styles.some(
       (style) =>
-        style && style.fontWeight === "bold" && style.color === "#912338"
+        style && style.fontWeight === "bold" && style.color === "#912338",
     );
     expect(hasHighlightStyle).toBe(true);
   });
@@ -223,7 +183,7 @@ it("highlights the next shuttle time in the schedule", async () => {
 
 it("renders shuttle schedule table correctly", () => {
   const { getByText } = render(
-    <ShuttleSchedule visible={true} onClose={jest.fn()} />
+    <ShuttleSchedule visible={true} onClose={jest.fn()} />,
   );
 
   // Update with times that are actually in the schedule based on component dump
@@ -234,7 +194,7 @@ it("renders shuttle schedule table correctly", () => {
 
 it("has accessible buttons for campus selection", () => {
   const { getByLabelText } = render(
-    <ShuttleSchedule visible={true} onClose={jest.fn()} />
+    <ShuttleSchedule visible={true} onClose={jest.fn()} />,
   );
 
   expect(getByLabelText("Loyola")).toBeTruthy();
@@ -242,7 +202,7 @@ it("has accessible buttons for campus selection", () => {
 
 it("modal container has correct test ID", () => {
   const { getByTestId } = render(
-    <ShuttleSchedule visible={true} onClose={jest.fn()} />
+    <ShuttleSchedule visible={true} onClose={jest.fn()} />,
   );
 
   expect(getByTestId("shuttle-schedule-modal-container")).toBeTruthy();
@@ -250,7 +210,7 @@ it("modal container has correct test ID", () => {
 
 it("close button has correct test ID", () => {
   const { getByTestId } = render(
-    <ShuttleSchedule visible={true} onClose={jest.fn()} />
+    <ShuttleSchedule visible={true} onClose={jest.fn()} />,
   );
 
   expect(getByTestId("shuttle-schedule-close-button")).toBeTruthy();
@@ -258,7 +218,7 @@ it("close button has correct test ID", () => {
 
 it("does not render when visible prop is false", () => {
   const { queryByTestId } = render(
-    <ShuttleSchedule visible={false} onClose={jest.fn()} />
+    <ShuttleSchedule visible={false} onClose={jest.fn()} />,
   );
 
   expect(queryByTestId("shuttle-schedule-modal-container")).toBeNull();
@@ -284,11 +244,11 @@ it("handles invalid time formats in schedule gracefully", async () => {
   });
 
   const { getByText } = render(
-    <ShuttleSchedule visible={true} onClose={jest.fn()} />
+    <ShuttleSchedule visible={true} onClose={jest.fn()} />,
   );
 
   await waitFor(() =>
-    expect(getByText(/Next Shuttle from SGW:/i)).toBeTruthy()
+    expect(getByText(/Next Shuttle from SGW:/i)).toBeTruthy(),
   );
 
   // Restore console.error
