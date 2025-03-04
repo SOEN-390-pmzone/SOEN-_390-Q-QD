@@ -181,32 +181,34 @@ function ShuttleSchedule({ visible, onClose }) {
   const [selectedCampus, setSelectedCampus] = useState("SGW");
   const [selectedSchedule, setSelectedSchedule] = useState("weekday");
 
-  // Initial setup and auto-detection of day
   useEffect(() => {
-    const day = new Date().getDay();
-    if (day === 0 || day === 6) {
-      setNextShuttle("No shuttle service on weekends");
-      return;
-    }
+    const updateScheduleAndShuttle = () => {
+      const day = new Date().getDay();
 
-    // Only set the initial schedule type - don't override user selection
-    if (selectedSchedule === "weekday" && day === 5) {
-      setSelectedSchedule("friday");
-    } else if (selectedSchedule === "friday" && day !== 5) {
-      setSelectedSchedule("weekday");
-    }
-  }, [visible]); // Only run when modal becomes visible
+      // Handle weekends
+      if (day === 0 || day === 6) {
+        setNextShuttle("No shuttle service on weekends");
+        return;
+      }
 
-  // Update next shuttle based on selected campus and schedule
-  useEffect(() => {
-    const day = new Date().getDay();
-    if (day === 0 || day === 6) {
-      setNextShuttle("No shuttle service on weekends");
-      return;
-    }
+      // Determine if it's Friday
+      const isFriday = day === 5;
+      const currentScheduleType = isFriday ? "friday" : "weekday";
 
-    setNextShuttle(getNextShuttle(schedules[selectedCampus][selectedSchedule]));
-  }, [selectedCampus, selectedSchedule]);
+      // Update schedule type if needed (without triggering another effect)
+      if (selectedSchedule !== currentScheduleType) {
+        setSelectedSchedule(currentScheduleType);
+      }
+
+      // Always calculate next shuttle
+      setNextShuttle(
+        getNextShuttle(schedules[selectedCampus][currentScheduleType]),
+      );
+    };
+
+    // Call the function immediately
+    updateScheduleAndShuttle();
+  }, [visible, selectedCampus]); // Only re-run when modal visibility or campus changes
 
   // Rest of the component remains unchanged
   const schedule = schedules[selectedCampus][selectedSchedule];
