@@ -310,8 +310,10 @@ it("skips invalid shuttle times (out of range values)", () => {
 });
 
 it("handles unexpected errors gracefully", () => {
-  const schedule = ["09:00 AM", null, "11:00 AM"]; // Null will cause match() to throw
-  expect(getNextShuttle(schedule)).toBe("No more shuttles today"); // Expect the error message for unexpected errors
+  const schedule = ["09:00 AM", null, "11:00 AM"];
+  jest.setSystemTime(new Date("2025-02-06T23:00:00Z"));
+
+  expect(getNextShuttle(schedule)).toBe("No more shuttles today");
 });
 
 it("converts 12 AM to midnight correctly", () => {
