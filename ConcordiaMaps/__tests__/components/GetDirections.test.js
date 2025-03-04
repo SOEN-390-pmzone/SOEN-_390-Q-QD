@@ -500,4 +500,78 @@ describe("GetDirections", () => {
     // Clean up
     consoleSpy.mockRestore();
   });
+
+  it("fetches new directions and route when in navigation mode", async () => {
+    // Mock the polyline
+    mockGetPolyline.mockResolvedValue([
+      { latitude: 45.4973, longitude: -73.5789 },
+      { latitude: 45.5017, longitude: -73.5673 },
+    ]);
+
+    const { getByText, getByTestId } = renderWithContext(<GetDirections />);
+
+    // Set origin
+    await act(async () => {
+      const originSearchBar = getByTestId("search-bar-Using Current Location");
+      fireEvent(originSearchBar, "onPlaceSelect", {
+        latitude: 45.499,
+        longitude: -73.58,
+      });
+    });
+
+    // Set destination
+    await act(async () => {
+      const destSearchBar = getByTestId("search-bar-Enter Destination");
+      fireEvent(destSearchBar, "onPlaceSelect", {
+        latitude: 45.5017,
+        longitude: -73.5673,
+        name: "Destination",
+      });
+    });
+
+    // Reset mock call history before Getting Directions
+    mockGetPolyline.mockClear();
+
+    // Click Get Directions - use advanceTimersByTime instead of runAllTimers
+    await act(async () => {
+      fireEvent.press(getByText("Get Directions"));
+      jest.advanceTimersByTime(1000); // Advance by a fixed amount
+    });
+
+    // Verify we're in navigation mode
+    await waitFor(() => {
+      expect(getByText("Change Directions")).toBeTruthy();
+    });
+
+    // Verify first polyline call happens
+    expect(mockGetPolyline).toHaveBeenCalledTimes(1);
+    mockGetPolyline.mockClear();
+
+    // Exit navigation mode - use advanceTimersByTime instead
+    await act(async () => {
+      fireEvent.press(getByText("Change Directions"));
+      jest.advanceTimersByTime(1000); // Advance by a fixed amount
+    });
+
+    // Verify we're back in input mode without waiting for timers
+    expect(getByText("Get Directions")).toBeTruthy();
+
+    // Now update the origin
+    await act(async () => {
+      const originSearchBar = getByTestId("search-bar-Enter Origin");
+      fireEvent(originSearchBar, "onPlaceSelect", {
+        latitude: 500,
+        longitude: -73.58,
+      });
+    });
+
+    // Get directions again with advanceTimersByTime
+    await act(async () => {
+      fireEvent.press(getByText("Get Directions"));
+      jest.advanceTimersByTime(1000); // Advance by a fixed amount
+    });
+
+    // Check if new directions are fetched
+    expect(mockGetPolyline).toHaveBeenCalled();
+  });
 });
