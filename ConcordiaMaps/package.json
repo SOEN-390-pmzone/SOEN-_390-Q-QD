@@ -23,7 +23,7 @@
       "@env": "<rootDir>/__mocks__/envMock.js"
     },
     "setupFiles": [
-      "<rootDir>/__tests__/jestSetupFile.js"
+      "<rootDir>/__mocks__/jestSetupFile.js"
     ]
   },
   "dependencies": {
