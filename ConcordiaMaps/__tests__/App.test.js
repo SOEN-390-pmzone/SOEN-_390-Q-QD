@@ -1,13 +1,24 @@
 import App from "../App";
 import React from "react";
 import { render, waitFor, fireEvent } from "@testing-library/react-native";
-// Remove PropTypes import since we won't be using it in mocks
-// import PropTypes from "prop-types";
+
+// Mock expo-font
+jest.mock("expo-font", () => ({
+  isLoaded: jest.fn(() => true),
+  loadAsync: jest.fn(() => Promise.resolve()),
+  __internal: {
+    nativeFontFaceMap: {},
+  },
+  Font: {
+    isLoaded: jest.fn(() => true),
+    loadAsync: jest.fn(() => Promise.resolve()),
+  },
+}));
 
 // Mock expo-location
 jest.mock("expo-location", () => ({
   requestForegroundPermissionsAsync: jest.fn(() =>
-    Promise.resolve({ status: "granted" }),
+    Promise.resolve({ status: "granted" })
   ),
   getCurrentPositionAsync: jest.fn(() =>
     Promise.resolve({
@@ -16,29 +27,34 @@ jest.mock("expo-location", () => ({
         longitude: -73.579,
         accuracy: 5,
       },
-    }),
+    })
   ),
 }));
 
+// Mock @expo/vector-icons
+jest.mock("@expo/vector-icons", () => {
+  const { View } = require("react-native");
+  // eslint-disable-next-line react/prop-types
+  const MockIcon = () => <View />;
+  return {
+    Ionicons: MockIcon,
+    FontAwesome: MockIcon,
+    MaterialIcons: MockIcon,
+    MaterialCommunityIcons: MockIcon,
+    // Add any other icon sets your app uses
+  };
+});
+
 jest.mock("react-native-maps", () => {
   const { View } = require("react-native");
-  const PropTypes = require("prop-types");
-
+  // eslint-disable-next-line react/prop-types
   const MockMapView = (props) => {
     return <View>{props.children}</View>;
   };
 
+  // eslint-disable-next-line react/prop-types
   const MockMarker = (props) => {
     return <View>{props.children}</View>;
-  };
-
-  // Define PropTypes for mock components
-  MockMapView.propTypes = {
-    children: PropTypes.node,
-  };
-
-  MockMarker.propTypes = {
-    children: PropTypes.node,
   };
 
   return {
@@ -52,6 +68,7 @@ jest.mock("react-native-maps", () => {
 let mockPopupModalProps = {};
 jest.mock("../components/PopupModal", () => {
   const { View } = require("react-native");
+  // eslint-disable-next-line react/prop-types
   const PopupModal = (props) => {
     mockPopupModalProps = props;
     return <View testID="popup-modal" />;

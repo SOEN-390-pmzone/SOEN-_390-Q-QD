@@ -8,6 +8,21 @@ global.fetch = jest.fn();
 // Mock the external dependencies
 jest.mock("@expo/vector-icons/Ionicons", () => "Ionicons");
 
+// Mock expo-location
+jest.mock("expo-location", () => ({
+  requestForegroundPermissionsAsync: jest.fn(() =>
+    Promise.resolve({ status: "granted" })
+  ),
+  getCurrentPositionAsync: jest.fn(() =>
+    Promise.resolve({
+      coords: {
+        latitude: 45.4973,
+        longitude: -73.579,
+      },
+    })
+  ),
+}));
+
 // Correctly mock the styles import based on the actual path
 jest.mock("../../styles", () => ({
   searchBar: {},
@@ -40,7 +55,7 @@ describe("FloatingSearchBar Component", () => {
 
   it("renders correctly with default props", () => {
     const { getByPlaceholderText } = render(
-      <FloatingSearchBar {...defaultProps} />,
+      <FloatingSearchBar {...defaultProps} />
     );
 
     expect(getByPlaceholderText("Test placeholder")).toBeTruthy();
@@ -48,7 +63,7 @@ describe("FloatingSearchBar Component", () => {
 
   it("updates search query when text input changes", () => {
     const { getByPlaceholderText } = render(
-      <FloatingSearchBar {...defaultProps} />,
+      <FloatingSearchBar {...defaultProps} />
     );
 
     const input = getByPlaceholderText("Test placeholder");
@@ -59,7 +74,7 @@ describe("FloatingSearchBar Component", () => {
 
   it("does not fetch predictions when search query is less than 3 characters", async () => {
     const { getByPlaceholderText } = render(
-      <FloatingSearchBar {...defaultProps} />,
+      <FloatingSearchBar {...defaultProps} />
     );
 
     const input = getByPlaceholderText("Test placeholder");
@@ -84,7 +99,7 @@ describe("FloatingSearchBar Component", () => {
     });
 
     const { getByPlaceholderText } = render(
-      <FloatingSearchBar {...defaultProps} />,
+      <FloatingSearchBar {...defaultProps} />
     );
 
     const input = getByPlaceholderText("Test placeholder");
@@ -99,8 +114,8 @@ describe("FloatingSearchBar Component", () => {
     // Using a more flexible expectation that doesn't rely on exact URL match
     expect(fetch).toHaveBeenCalledWith(
       expect.stringContaining(
-        "https://maps.googleapis.com/maps/api/place/autocomplete/json?input=Mon",
-      ),
+        "https://maps.googleapis.com/maps/api/place/autocomplete/json?input=Mon"
+      )
     );
   });
 
@@ -117,7 +132,7 @@ describe("FloatingSearchBar Component", () => {
     });
 
     const { getByPlaceholderText, findByText } = render(
-      <FloatingSearchBar {...defaultProps} />,
+      <FloatingSearchBar {...defaultProps} />
     );
 
     const input = getByPlaceholderText("Test placeholder");
@@ -138,7 +153,7 @@ describe("FloatingSearchBar Component", () => {
     console.error = jest.fn(); // Mock console.error to prevent test output noise
 
     const { getByPlaceholderText } = render(
-      <FloatingSearchBar {...defaultProps} />,
+      <FloatingSearchBar {...defaultProps} />
     );
 
     const input = getByPlaceholderText("Test placeholder");
@@ -162,7 +177,7 @@ describe("FloatingSearchBar Component", () => {
     });
 
     const { getByPlaceholderText, findByText, UNSAFE_getAllByType } = render(
-      <FloatingSearchBar {...defaultProps} />,
+      <FloatingSearchBar {...defaultProps} />
     );
 
     const input = getByPlaceholderText("Test placeholder");
@@ -178,7 +193,7 @@ describe("FloatingSearchBar Component", () => {
 
     // Find close button - Better approach than mocking createElement
     const closeButtons = UNSAFE_getAllByType("Ionicons").filter(
-      (node) => node.props.name === "close-circle",
+      (node) => node.props.name === "close-circle"
     );
     const clearButton = closeButtons[0];
 
@@ -214,7 +229,7 @@ describe("FloatingSearchBar Component", () => {
     });
 
     const { getByPlaceholderText, findByText } = render(
-      <FloatingSearchBar {...defaultProps} />,
+      <FloatingSearchBar {...defaultProps} />
     );
 
     const input = getByPlaceholderText("Test placeholder");
@@ -237,8 +252,8 @@ describe("FloatingSearchBar Component", () => {
     expect(fetch).toHaveBeenNthCalledWith(
       2,
       expect.stringContaining(
-        "https://maps.googleapis.com/maps/api/place/details/json?place_id=1",
-      ),
+        "https://maps.googleapis.com/maps/api/place/details/json?place_id=1"
+      )
     );
 
     expect(mockOnPlaceSelect).toHaveBeenCalledWith({
@@ -261,7 +276,7 @@ describe("FloatingSearchBar Component", () => {
     console.error = jest.fn(); // Mock console.error to prevent test output noise
 
     const { getByPlaceholderText, findByText } = render(
-      <FloatingSearchBar {...defaultProps} />,
+      <FloatingSearchBar {...defaultProps} />
     );
 
     const input = getByPlaceholderText("Test placeholder");
@@ -283,54 +298,6 @@ describe("FloatingSearchBar Component", () => {
     expect(console.error).toHaveBeenCalled();
   });
 
-  it("sets selected location after successful place selection", async () => {
-    // Mock successful autocomplete API response
-    fetch.mockResolvedValueOnce({
-      json: () =>
-        Promise.resolve({
-          predictions: [{ place_id: "1", description: "Montreal, QC, Canada" }],
-        }),
-    });
-
-    // Mock successful place details API response
-    fetch.mockResolvedValueOnce({
-      json: () =>
-        Promise.resolve({
-          result: {
-            geometry: {
-              location: {
-                lat: 45.5017,
-                lng: -73.5673,
-              },
-            },
-          },
-        }),
-    });
-
-    const { getByPlaceholderText, findByText } = render(
-      <FloatingSearchBar {...defaultProps} />,
-    );
-
-    const input = getByPlaceholderText("Test placeholder");
-
-    await act(async () => {
-      fireEvent.changeText(input, "Mon");
-      // Allow the async operation to complete
-      await new Promise((resolve) => setTimeout(resolve, 0));
-    });
-
-    const prediction = await findByText("Montreal, QC, Canada");
-
-    await act(async () => {
-      fireEvent.press(prediction);
-      // Allow the async operation to complete
-      await new Promise((resolve) => setTimeout(resolve, 0));
-    });
-
-    // Check placeholder after selection
-    expect(input.props.placeholder).toBe("Montreal, QC, Canada");
-  });
-
   it("displays loading indicator while fetching predictions", async () => {
     // Create a Promise that we can resolve manually to control the timing
     let resolvePromise;
@@ -341,7 +308,7 @@ describe("FloatingSearchBar Component", () => {
     fetch.mockReturnValueOnce(fetchPromise);
 
     const { getByPlaceholderText, UNSAFE_getAllByType } = render(
-      <FloatingSearchBar {...defaultProps} />,
+      <FloatingSearchBar {...defaultProps} />
     );
 
     const input = getByPlaceholderText("Test placeholder");

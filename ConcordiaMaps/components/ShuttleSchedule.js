@@ -181,7 +181,7 @@ function ShuttleSchedule({ visible, onClose }) {
   const [selectedCampus, setSelectedCampus] = useState("SGW");
   const [selectedSchedule, setSelectedSchedule] = useState("weekday");
 
-  // Update the next shuttle when campus changes
+  // Initial setup and auto-detection of day
   useEffect(() => {
     const day = new Date().getDay();
     if (day === 0 || day === 6) {
@@ -189,13 +189,26 @@ function ShuttleSchedule({ visible, onClose }) {
       return;
     }
 
-    const scheduleType = day >= 1 && day <= 4 ? "weekday" : "friday";
-    setSelectedSchedule(scheduleType);
+    // Only set the initial schedule type - don't override user selection
+    if (selectedSchedule === "weekday" && day === 5) {
+      setSelectedSchedule("friday");
+    } else if (selectedSchedule === "friday" && day !== 5) {
+      setSelectedSchedule("weekday");
+    }
+  }, [visible]); // Only run when modal becomes visible
 
-    setNextShuttle(getNextShuttle(schedules[selectedCampus][scheduleType]));
+  // Update next shuttle based on selected campus and schedule
+  useEffect(() => {
+    const day = new Date().getDay();
+    if (day === 0 || day === 6) {
+      setNextShuttle("No shuttle service on weekends");
+      return;
+    }
+
+    setNextShuttle(getNextShuttle(schedules[selectedCampus][selectedSchedule]));
   }, [selectedCampus, selectedSchedule]);
-  // Trigger when campus or schedule changes
 
+  // Rest of the component remains unchanged
   const schedule = schedules[selectedCampus][selectedSchedule];
 
   // Split the schedule into 3 columns
