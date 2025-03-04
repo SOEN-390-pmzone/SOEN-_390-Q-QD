@@ -10,9 +10,10 @@ assignees: ''
 
 ### Issue Tracking
 This acceptance test is for [#issue_number](link_to_issue).
-See the test running [here](link_to_wiki_page).
+See the test running [here](link_to_User_Story_header_in_wiki_page).
 
-### User Acceptance Flow
+### User Acceptance Test Flow
 - Criterion
 - Criterion
 - Criterion
+...
