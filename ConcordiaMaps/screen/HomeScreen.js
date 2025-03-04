@@ -12,6 +12,8 @@ import { ModalContext } from "../App";
 import BuildingColoring from "../components/buildingColoring";
 import Legend from "../components/Legend";
 import ShuttleStop from "../components/ShuttleStop";
+import FloatingSearchBar from "../components/FloatingSearchBar";
+import LiveBusTracker from "../components/LiveBusTracker";
 
 const customMarkerImage = require("../assets/PinLogo.png");
 
@@ -26,6 +28,8 @@ function HomeScreen() {
   const [postalCode, setPostalCode] = useState(sgwPostalCode);
   const [coordinates, setCoordinates] = useState(null);
   const [error, setError] = useState("");
+  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [, setMapRegion] = useState(null);
 
   const mapRef = useRef(null);
 
@@ -57,6 +61,17 @@ function HomeScreen() {
   };
 
   useEffect(() => {
+    if (location) {
+      setMapRegion({
+        latitude: location.latitude,
+        longitude: location.longitude,
+        latitudeDelta: 0.005,
+        longitudeDelta: 0.005,
+      });
+    }
+  }, [location]);
+
+  useEffect(() => {
     if (coordinates && mapRef.current) {
       mapRef.current.animateToRegion(
         {
@@ -80,6 +95,21 @@ function HomeScreen() {
     );
   };
 
+  const handlePlaceSelect = (newRegion) => {
+    console.log("handlePlaceSelect called with:", newRegion);
+    const region = {
+      ...newRegion,
+      latitudeDelta: 0.005,
+      longitudeDelta: 0.005,
+    };
+
+    setTimeout(() => {
+      setMapRegion(region);
+      setSelectedLocation(region);
+      mapRef.current?.animateToRegion(region, 1000);
+    }, 100);
+  };
+
   // Function to handle marker press and pass data to the modal
   const handleMarkerPress = (building) => {
     setModalData({
@@ -95,6 +125,7 @@ function HomeScreen() {
     <View style={styles.container} testID="home-screen">
       <Header />
       <NavBar />
+      <FloatingSearchBar onPlaceSelect={handlePlaceSelect} />
       {error ? <Text testID="error-message">{error}</Text> : null}
 
       {coordinates ? (
@@ -121,6 +152,7 @@ function HomeScreen() {
             showsUserLocation={true}
             loadingEnabled={true}
             watchUserLocation={true}
+            onRegionChangeComplete={(region) => setMapRegion(region)}
           >
             {Building.map((building, index) => (
               <Marker
@@ -139,7 +171,17 @@ function HomeScreen() {
               </Marker>
             ))}
             <BuildingColoring />
+            {selectedLocation && (
+              <Marker
+                coordinate={{
+                  latitude: selectedLocation.latitude,
+                  longitude: selectedLocation.longitude,
+                }}
+                title="Selected Location"
+              />
+            )}
             <ShuttleStop />
+            <LiveBusTracker mapRef={mapRef} />
           </MapView>
         </>
       ) : (
