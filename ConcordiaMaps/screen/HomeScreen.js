@@ -157,6 +157,7 @@ function HomeScreen() {
             {Building.map((building, index) => (
               <Marker
                 key={index}
+                testID={`marker-${index}`}
                 coordinate={building.coordinate}
                 title={building.name}
                 address={building.address}
@@ -190,6 +191,7 @@ function HomeScreen() {
       <TouchableOpacity
         onPress={handleChangeCampuses}
         activeOpacity={0.7}
+        testID="change-campus-button"
         style={styles.button}
       >
         <Image
