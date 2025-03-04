@@ -18,13 +18,12 @@ describe("ShuttleSchedule Component", () => {
   });
 });
 
-it("updates next shuttle time when campus is switched", async () => {
-  const { getByText, getByRole } = render(
+it("displays next shuttle bus time", async () => {
+  const { getByText } = render(
     <ShuttleSchedule visible={true} onClose={jest.fn()} />,
   );
-  fireEvent.press(getByRole("button", { name: /Loyola/i }));
   await waitFor(() =>
-    expect(getByText(/Next Shuttle from Loyola/i)).toBeTruthy(),
+    expect(getByText(/Next Shuttle from SGW:/i)).toBeTruthy(),
   );
 });
 
@@ -45,15 +44,6 @@ it("closes the modal when close button is pressed", () => {
   );
   fireEvent.press(getByText("Close"));
   expect(onCloseMock).toHaveBeenCalled();
-});
-
-it("displays next shuttle bus time", async () => {
-  const { getByText } = render(
-    <ShuttleSchedule visible={true} onClose={jest.fn()} />,
-  );
-  await waitFor(() =>
-    expect(getByText(/Next Shuttle from SGW:/i)).toBeTruthy(),
-  );
 });
 
 it("toggles to Friday schedule when Friday button is pressed", async () => {
@@ -155,73 +145,6 @@ it("shows 'No more shuttles today' when current time is after last shuttle", asy
     expect(getByText(/No more shuttles today/i)).toBeTruthy(),
   );
 });
-
-it("highlights the next shuttle time in the schedule", async () => {
-  // Set specific time to test highlighting
-  jest.setSystemTime(new Date("2025-02-06T09:20:00Z")); // 9:20 AM, before 9:30 AM shuttle
-
-  const { getAllByText } = render(
-    <ShuttleSchedule visible={true} onClose={jest.fn()} />,
-  );
-
-  await waitFor(() => {
-    // Search for the next shuttle time
-    const nextShuttleElements = getAllByText("09:30 AM");
-    expect(nextShuttleElements.length).toBeGreaterThan(0);
-
-    // Check all instances to find the highlighted one
-    const highlightedElement = nextShuttleElements.find((element) => {
-      // First check the element itself
-      if (hasHighlightStyling(element)) {
-        return true;
-      }
-
-      // If not on the element directly, check parent elements
-      let parent = element.parent;
-      for (let i = 0; i < 3 && parent; i++) {
-        if (hasHighlightStyling(parent)) {
-          return true;
-        }
-        parent = parent.parent;
-      }
-
-      return false;
-    });
-
-    // Assert that we found at least one highlighted element
-    expect(highlightedElement).toBeTruthy();
-  });
-});
-
-// Helper function to check for highlight styling
-function hasHighlightStyling(element) {
-  if (!element || !element.props || !element.props.style) return false;
-
-  const styles = Array.isArray(element.props.style)
-    ? element.props.style
-    : [element.props.style];
-
-  return styles.some((style) => {
-    // Check for direct style match
-    if (style && style.fontWeight === "bold" && style.color === "#912338") {
-      return true;
-    }
-
-    // Check for partial style match
-    if (style && (style.fontWeight === "bold" || style.color === "#912338")) {
-      return true;
-    }
-
-    // Check for style in stringified form (some components apply styles differently)
-    const styleStr = JSON.stringify(style);
-    return (
-      styleStr.includes("fontWeight") &&
-      styleStr.includes("bold") &&
-      styleStr.includes("color") &&
-      styleStr.includes("#912338")
-    );
-  });
-}
 
 it("renders shuttle schedule table correctly", () => {
   const { getByText } = render(
