@@ -45,6 +45,8 @@ jest.mock("react-native-maps", () => {
 // Mock FloatingSearchBar component with value tracking
 jest.mock("../../components/FloatingSearchBar", () => {
   const React = require("react");
+  const PropTypes = require("prop-types");
+
   const MockFloatingSearchBar = ({ onPlaceSelect, placeholder, value }) => (
     <mock-search-bar
       testID={`search-bar-${placeholder}`}
@@ -53,6 +55,13 @@ jest.mock("../../components/FloatingSearchBar", () => {
       value={value}
     />
   );
+
+  MockFloatingSearchBar.propTypes = {
+    onPlaceSelect: PropTypes.func,
+    placeholder: PropTypes.string,
+    value: PropTypes.string,
+  };
+
   return {
     __esModule: true,
     default: MockFloatingSearchBar,
@@ -110,7 +119,7 @@ describe("GetDirections", () => {
     return render(
       <LocationContext.Provider value={mockLocation}>
         {component}
-      </LocationContext.Provider>
+      </LocationContext.Provider>,
     );
   };
 
@@ -297,7 +306,7 @@ describe("GetDirections", () => {
     mockGetPolyline.mockRejectedValueOnce(new Error("Some error"));
 
     const { getByText, getByTestId, queryByText } = renderWithContext(
-      <GetDirections />
+      <GetDirections />,
     );
 
     const destination = {
