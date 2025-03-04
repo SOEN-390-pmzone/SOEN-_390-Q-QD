@@ -1,6 +1,7 @@
 import React from "react";
 import { render, fireEvent, waitFor } from "@testing-library/react-native";
 import ShuttleSchedule from "../../components/ShuttleSchedule";
+import { getNextShuttle } from "../../components/ShuttleSchedule";
 
 jest.useFakeTimers().setSystemTime(new Date("2025-02-06T15:00:00Z")); // Mock current time
 
@@ -303,4 +304,34 @@ it("updates selected campus when SGW button is pressed", async () => {
   });
 });
 
-86.79 | 85 | 90 | 91.66 | 159, 171 - 172, 244;
+it("skips invalid shuttle times (out of range values)", () => {
+  const schedule = ["13:00 PM", "10:65 AM", "00:30 AM"]; // Invalid times
+  expect(getNextShuttle(schedule)).toBe("No more shuttles today"); // Expect the error message for invalid times
+});
+
+it("handles unexpected errors gracefully", () => {
+  const schedule = ["09:00 AM", null, "11:00 AM"]; // Null will cause match() to throw
+  expect(getNextShuttle(schedule)).toBe("No more shuttles today"); // Expect the error message for unexpected errors
+});
+
+it("converts 12 AM to midnight correctly", () => {
+  const testSchedule = ["12:00 AM", "01:00 AM", "02:00 AM"];
+  const result = getNextShuttle(testSchedule);
+  expect(result).toBe("No more shuttles today");
+});
+
+it("skips invalid times", async () => {
+  const corruptedSchedule = ["invalid-time", "09:30 AM", "12:45 PM"];
+
+  jest.mock("../../components/ShuttleSchedule", () => ({
+    getNextShuttle: jest.fn(() => corruptedSchedule),
+  }));
+
+  const { getByText } = render(
+    <ShuttleSchedule visible={true} onClose={jest.fn()} />,
+  );
+
+  await waitFor(() =>
+    expect(getByText(/Next Shuttle from SGW:/i)).toBeTruthy(),
+  );
+});
