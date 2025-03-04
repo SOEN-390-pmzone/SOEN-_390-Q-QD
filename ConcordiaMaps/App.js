@@ -6,6 +6,7 @@ import { LocationProvider } from "./contexts/LocationContext";
 import PopupModal from "./components/PopupModal"; // Import the PopupModal
 import styles from "./styles";
 import GetDirections from "./components/GetDirections";
+import IndoorNavigation from "./components/IndoorNavigation"; // Add this import
 // import MapMarkers from "./components/MapMarkers"; // Ensure this import exists
 
 // Create Context for modal data and visibility
@@ -38,6 +39,7 @@ export default function App() {
               component={HomeScreen}
             />
             <Stack.Screen name="GetDirections" component={GetDirections} />
+            <Stack.Screen name="IndoorNavigation" component={IndoorNavigation} />
           </Stack.Navigator>
         </NavigationContainer>
 

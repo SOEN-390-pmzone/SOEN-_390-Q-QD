@@ -21,8 +21,12 @@ function NavBar() {
   };
 
   const handlePress = (item) => {
-    if (item === "Get directions") {
+    if (item === "Home") {
+      navigation.navigate("Home");
+    } else if (item === "Get directions") {
       navigation.navigate("GetDirections");
+    } else if (item === "Indoor Navigation") {
+      navigation.navigate("IndoorNavigation");
     } else {
       Alert.alert(`You clicked: ${item}`);
     }
@@ -47,6 +51,9 @@ function NavBar() {
         </TouchableOpacity>
         <TouchableOpacity onPress={() => handlePress("Get directions")}>
           <Text style={styles.menuItem}>Get directions</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => handlePress("Indoor Navigation")}>
+          <Text style={styles.menuItem}>Indoor Navigation</Text>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => handlePress("Outdoor Points of Interest")}
