@@ -11,7 +11,7 @@ jest.mock("@expo/vector-icons/Ionicons", () => "Ionicons");
 // Mock expo-location
 jest.mock("expo-location", () => ({
   requestForegroundPermissionsAsync: jest.fn(() =>
-    Promise.resolve({ status: "granted" })
+    Promise.resolve({ status: "granted" }),
   ),
   getCurrentPositionAsync: jest.fn(() =>
     Promise.resolve({
@@ -19,7 +19,7 @@ jest.mock("expo-location", () => ({
         latitude: 45.4973,
         longitude: -73.579,
       },
-    })
+    }),
   ),
 }));
 
@@ -55,7 +55,7 @@ describe("FloatingSearchBar Component", () => {
 
   it("renders correctly with default props", () => {
     const { getByPlaceholderText } = render(
-      <FloatingSearchBar {...defaultProps} />
+      <FloatingSearchBar {...defaultProps} />,
     );
 
     expect(getByPlaceholderText("Test placeholder")).toBeTruthy();
@@ -63,7 +63,7 @@ describe("FloatingSearchBar Component", () => {
 
   it("updates search query when text input changes", () => {
     const { getByPlaceholderText } = render(
-      <FloatingSearchBar {...defaultProps} />
+      <FloatingSearchBar {...defaultProps} />,
     );
 
     const input = getByPlaceholderText("Test placeholder");
@@ -74,7 +74,7 @@ describe("FloatingSearchBar Component", () => {
 
   it("does not fetch predictions when search query is less than 3 characters", async () => {
     const { getByPlaceholderText } = render(
-      <FloatingSearchBar {...defaultProps} />
+      <FloatingSearchBar {...defaultProps} />,
     );
 
     const input = getByPlaceholderText("Test placeholder");
@@ -99,7 +99,7 @@ describe("FloatingSearchBar Component", () => {
     });
 
     const { getByPlaceholderText } = render(
-      <FloatingSearchBar {...defaultProps} />
+      <FloatingSearchBar {...defaultProps} />,
     );
 
     const input = getByPlaceholderText("Test placeholder");
@@ -114,8 +114,8 @@ describe("FloatingSearchBar Component", () => {
     // Using a more flexible expectation that doesn't rely on exact URL match
     expect(fetch).toHaveBeenCalledWith(
       expect.stringContaining(
-        "https://maps.googleapis.com/maps/api/place/autocomplete/json?input=Mon"
-      )
+        "https://maps.googleapis.com/maps/api/place/autocomplete/json?input=Mon",
+      ),
     );
   });
 
@@ -132,7 +132,7 @@ describe("FloatingSearchBar Component", () => {
     });
 
     const { getByPlaceholderText, findByText } = render(
-      <FloatingSearchBar {...defaultProps} />
+      <FloatingSearchBar {...defaultProps} />,
     );
 
     const input = getByPlaceholderText("Test placeholder");
@@ -153,7 +153,7 @@ describe("FloatingSearchBar Component", () => {
     console.error = jest.fn(); // Mock console.error to prevent test output noise
 
     const { getByPlaceholderText } = render(
-      <FloatingSearchBar {...defaultProps} />
+      <FloatingSearchBar {...defaultProps} />,
     );
 
     const input = getByPlaceholderText("Test placeholder");
@@ -177,7 +177,7 @@ describe("FloatingSearchBar Component", () => {
     });
 
     const { getByPlaceholderText, findByText, UNSAFE_getAllByType } = render(
-      <FloatingSearchBar {...defaultProps} />
+      <FloatingSearchBar {...defaultProps} />,
     );
 
     const input = getByPlaceholderText("Test placeholder");
@@ -193,7 +193,7 @@ describe("FloatingSearchBar Component", () => {
 
     // Find close button - Better approach than mocking createElement
     const closeButtons = UNSAFE_getAllByType("Ionicons").filter(
-      (node) => node.props.name === "close-circle"
+      (node) => node.props.name === "close-circle",
     );
     const clearButton = closeButtons[0];
 
@@ -229,7 +229,7 @@ describe("FloatingSearchBar Component", () => {
     });
 
     const { getByPlaceholderText, findByText } = render(
-      <FloatingSearchBar {...defaultProps} />
+      <FloatingSearchBar {...defaultProps} />,
     );
 
     const input = getByPlaceholderText("Test placeholder");
@@ -252,8 +252,8 @@ describe("FloatingSearchBar Component", () => {
     expect(fetch).toHaveBeenNthCalledWith(
       2,
       expect.stringContaining(
-        "https://maps.googleapis.com/maps/api/place/details/json?place_id=1"
-      )
+        "https://maps.googleapis.com/maps/api/place/details/json?place_id=1",
+      ),
     );
 
     expect(mockOnPlaceSelect).toHaveBeenCalledWith({
@@ -276,7 +276,7 @@ describe("FloatingSearchBar Component", () => {
     console.error = jest.fn(); // Mock console.error to prevent test output noise
 
     const { getByPlaceholderText, findByText } = render(
-      <FloatingSearchBar {...defaultProps} />
+      <FloatingSearchBar {...defaultProps} />,
     );
 
     const input = getByPlaceholderText("Test placeholder");
@@ -308,7 +308,7 @@ describe("FloatingSearchBar Component", () => {
     fetch.mockReturnValueOnce(fetchPromise);
 
     const { getByPlaceholderText, UNSAFE_getAllByType } = render(
-      <FloatingSearchBar {...defaultProps} />
+      <FloatingSearchBar {...defaultProps} />,
     );
 
     const input = getByPlaceholderText("Test placeholder");

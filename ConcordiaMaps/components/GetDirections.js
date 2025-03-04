@@ -31,7 +31,7 @@ RoutePolyline.propTypes = {
     PropTypes.shape({
       latitude: PropTypes.number.isRequired,
       longitude: PropTypes.number.isRequired,
-    })
+    }),
   ).isRequired,
 };
 
@@ -97,7 +97,7 @@ const GetDirections = () => {
       latitudeDelta: 0.01,
       longitudeDelta: 0.01,
     }),
-    [location]
+    [location],
   );
 
   useEffect(() => {

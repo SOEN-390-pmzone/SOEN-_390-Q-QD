@@ -18,7 +18,7 @@ jest.mock("expo-font", () => ({
 // Mock expo-location
 jest.mock("expo-location", () => ({
   requestForegroundPermissionsAsync: jest.fn(() =>
-    Promise.resolve({ status: "granted" })
+    Promise.resolve({ status: "granted" }),
   ),
   getCurrentPositionAsync: jest.fn(() =>
     Promise.resolve({
@@ -27,34 +27,38 @@ jest.mock("expo-location", () => ({
         longitude: -73.579,
         accuracy: 5,
       },
-    })
+    }),
   ),
 }));
 
 // Mock @expo/vector-icons
 jest.mock("@expo/vector-icons", () => {
   const { View } = require("react-native");
-  // eslint-disable-next-line react/prop-types
   const MockIcon = () => <View />;
   return {
     Ionicons: MockIcon,
     FontAwesome: MockIcon,
     MaterialIcons: MockIcon,
     MaterialCommunityIcons: MockIcon,
-    // Add any other icon sets your app uses
   };
 });
 
 jest.mock("react-native-maps", () => {
   const { View } = require("react-native");
-  // eslint-disable-next-line react/prop-types
   const MockMapView = (props) => {
     return <View>{props.children}</View>;
   };
 
-  // eslint-disable-next-line react/prop-types
   const MockMarker = (props) => {
     return <View>{props.children}</View>;
+  };
+
+  MockMapView.propTypes = {
+    children: require("prop-types").node,
+  };
+
+  MockMarker.propTypes = {
+    children: require("prop-types").node,
   };
 
   return {
@@ -68,11 +72,25 @@ jest.mock("react-native-maps", () => {
 let mockPopupModalProps = {};
 jest.mock("../components/PopupModal", () => {
   const { View } = require("react-native");
-  // eslint-disable-next-line react/prop-types
+  const PropTypes = require("prop-types");
+
   const PopupModal = (props) => {
     mockPopupModalProps = props;
     return <View testID="popup-modal" />;
   };
+
+  PopupModal.propTypes = {
+    isVisible: PropTypes.bool,
+    data: PropTypes.shape({
+      name: PropTypes.string,
+      coordinate: PropTypes.shape({
+        latitude: PropTypes.number,
+        longitude: PropTypes.number,
+      }),
+    }),
+    onClose: PropTypes.func,
+  };
+
   return PopupModal;
 });
 
