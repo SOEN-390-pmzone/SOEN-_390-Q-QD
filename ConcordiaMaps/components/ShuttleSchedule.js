@@ -143,7 +143,7 @@ const getNextShuttle = (schedule) => {
       // Skip invalid formats
       if (!timeMatch) continue;
 
-      const [_, hour, minute, period] = timeMatch;
+      const [hour, minute, period] = timeMatch;
       let shuttleHour = parseInt(hour, 10);
       const shuttleMinute = parseInt(minute, 10);
 

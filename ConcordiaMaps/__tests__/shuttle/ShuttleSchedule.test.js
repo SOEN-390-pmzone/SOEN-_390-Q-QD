@@ -7,41 +7,41 @@ jest.useFakeTimers().setSystemTime(new Date("2025-02-06T15:00:00Z")); // Mock cu
 describe("ShuttleSchedule Component", () => {
   it("updates next shuttle time when campus is switched", async () => {
     const { getByText, getByLabelText } = render(
-      <ShuttleSchedule visible={true} onClose={jest.fn()} />
+      <ShuttleSchedule visible={true} onClose={jest.fn()} />,
     );
 
     fireEvent.press(getByLabelText("Loyola"));
 
     await waitFor(() =>
-      expect(getByText(/Next Shuttle from Loyola/i)).toBeTruthy()
+      expect(getByText(/Next Shuttle from Loyola/i)).toBeTruthy(),
     );
   });
 });
 
 it("updates next shuttle time when campus is switched", async () => {
   const { getByText, getByRole } = render(
-    <ShuttleSchedule visible={true} onClose={jest.fn()} />
+    <ShuttleSchedule visible={true} onClose={jest.fn()} />,
   );
   fireEvent.press(getByRole("button", { name: /Loyola/i }));
   await waitFor(() =>
-    expect(getByText(/Next Shuttle from Loyola/i)).toBeTruthy()
+    expect(getByText(/Next Shuttle from Loyola/i)).toBeTruthy(),
   );
 });
 
 it("displays Friday schedule on Fridays", async () => {
   jest.setSystemTime(new Date("2025-02-07T10:00:00Z")); // Friday
   const { getByText } = render(
-    <ShuttleSchedule visible={true} onClose={jest.fn()} />
+    <ShuttleSchedule visible={true} onClose={jest.fn()} />,
   );
   await waitFor(() =>
-    expect(getByText(/Next Shuttle from SGW:/i)).toBeTruthy()
+    expect(getByText(/Next Shuttle from SGW:/i)).toBeTruthy(),
   );
 });
 
 it("closes the modal when close button is pressed", () => {
   const onCloseMock = jest.fn();
   const { getByText } = render(
-    <ShuttleSchedule visible={true} onClose={onCloseMock} />
+    <ShuttleSchedule visible={true} onClose={onCloseMock} />,
   );
   fireEvent.press(getByText("Close"));
   expect(onCloseMock).toHaveBeenCalled();
@@ -49,9 +49,9 @@ it("closes the modal when close button is pressed", () => {
 
 it("displays next shuttle bus time", async () => {
   const { getByText } = render(
-    <ShuttleSchedule visible={true} onClose={jest.fn()} />
+    <ShuttleSchedule visible={true} onClose={jest.fn()} />,
   );
   await waitFor(() =>
-    expect(getByText(/Next Shuttle from SGW:/i)).toBeTruthy()
+    expect(getByText(/Next Shuttle from SGW:/i)).toBeTruthy(),
   );
 });
