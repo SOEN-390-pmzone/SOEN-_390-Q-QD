@@ -26,7 +26,7 @@ function NavBar() {
     } else if (item === "Get directions") {
       navigation.navigate("GetDirections");
     } else if (item === "Indoor Navigation") {
-      navigation.navigate("IndoorNavigation");
+      navigation.navigate("BuildingSelector");
     } else {
       Alert.alert(`You clicked: ${item}`);
     }

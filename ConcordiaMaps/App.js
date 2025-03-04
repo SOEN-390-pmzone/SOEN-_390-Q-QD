@@ -1,18 +1,33 @@
 import React, { useState, createContext } from "react";
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer, useNavigation } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import HomeScreen from "./screen/HomeScreen";
 import { LocationProvider } from "./contexts/LocationContext";
-import PopupModal from "./components/PopupModal"; // Import the PopupModal
+import PopupModal from "./components/PopupModal";
 import styles from "./styles";
 import GetDirections from "./components/GetDirections";
-import IndoorNavigation from "./components/IndoorNavigation"; // Add this import
+import IndoorNavigation from "./components/IndoorNavigation";
+import FloorSelector from "./components/FloorSelector";
+import BuildingSelector from "./components/BuildingSelector";
 // import MapMarkers from "./components/MapMarkers"; // Ensure this import exists
 
 // Create Context for modal data and visibility
 export const ModalContext = createContext();
 
 const Stack = createNativeStackNavigator();
+
+// Create a wrapper component for PopupModal that has access to navigation
+const PopupModalWrapper = ({ isVisible, data, onClose }) => {
+  const navigation = useNavigation();
+  return (
+    <PopupModal
+      isVisible={isVisible}
+      data={data}
+      onClose={onClose}
+      navigation={navigation}
+    />
+  );
+};
 
 export default function App() {
   const [isModalVisible, setModalVisible] = useState(false);
@@ -39,16 +54,17 @@ export default function App() {
               component={HomeScreen}
             />
             <Stack.Screen name="GetDirections" component={GetDirections} />
+            <Stack.Screen name="BuildingSelector" component={BuildingSelector} />
+            <Stack.Screen name="FloorSelector" component={FloorSelector} />
             <Stack.Screen name="IndoorNavigation" component={IndoorNavigation} />
           </Stack.Navigator>
-        </NavigationContainer>
 
-        {/* Add PopupModal here */}
-        <PopupModal
-          isVisible={isModalVisible}
-          data={modalData}
-          onClose={toggleModal}
-        />
+          <PopupModalWrapper
+            isVisible={isModalVisible}
+            data={modalData}
+            onClose={toggleModal}
+          />
+        </NavigationContainer>
       </ModalContext.Provider>
     </LocationProvider>
   );
