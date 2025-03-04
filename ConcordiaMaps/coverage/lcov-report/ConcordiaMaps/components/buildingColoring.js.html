@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">10% </span>
+                <span class="strong">90% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>1/10</span>
+                <span class='fraction'>9/10</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">75% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/4</span>
+                <span class='fraction'>3/4</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/3</span>
+                <span class='fraction'>3/3</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">11.11% </span>
+                <span class="strong">88.88% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>1/9</span>
+                <span class='fraction'>8/9</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -114,22 +114,19 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">6x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">216x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">216x</span>
+<span class="cline-any cline-yes">2469x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">213x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -137,8 +134,11 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -161,19 +161,19 @@
 import { Polygon, Marker } from "react-native-maps";
 import { coloringData } from "../data/coloringData.js";
 &nbsp;
-const BuildingColoring = <span class="fstat-no" title="function not covered" >()</span> =&gt; {
-<span class="cstat-no" title="statement not covered" >  return (</span>
+const BuildingColoring = () =&gt; {
+  return (
     &lt;&gt;
-      {coloringData.features.map(<span class="fstat-no" title="function not covered" >(f</span>eature, index) =&gt; {
-        const { geometry, properties } = <span class="cstat-no" title="statement not covered" >feature;</span>
+      {coloringData.features.map((feature, index) =&gt; {
+        const { geometry, properties } = feature;
 &nbsp;
-<span class="cstat-no" title="statement not covered" >        if (geometry.type === "Polygon") {</span>
-          const coordinates = <span class="cstat-no" title="statement not covered" >geometry.coordinates[0].map(<span class="fstat-no" title="function not covered" >(c</span>oord) =&gt; (<span class="cstat-no" title="statement not covered" >{</span></span>
+        if (geometry.type === "Polygon") {
+          const coordinates = geometry.coordinates[0].map((coord) =&gt; ({
             latitude: coord[1],
             longitude: coord[0],
           }));
 &nbsp;
-<span class="cstat-no" title="statement not covered" >          return (</span>
+          return (
             &lt;Polygon
               key={index}
               coordinates={coordinates}
@@ -184,8 +184,8 @@ const BuildingColoring = <span class="fstat-no" title="function not covered" >()
           );
         }
 &nbsp;
-<span class="cstat-no" title="statement not covered" >        if (geometry.type === "Point") {</span>
-<span class="cstat-no" title="statement not covered" >          return (</span>
+        <span class="missing-if-branch" title="else path not taken" >E</span>if (geometry.type === "Point") {
+          return (
             &lt;Marker
               key={index}
               coordinate={{
@@ -211,7 +211,7 @@ export default BuildingColoring;
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-03-01T18:33:37.919Z
+                at 2025-03-04T16:54:10.096Z
             </div>
         <script src="../../prettify.js"></script>
         <script>
