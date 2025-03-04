@@ -136,17 +136,41 @@ const getNextShuttle = (schedule) => {
   const currentTime = now.getHours() * 60 + now.getMinutes();
 
   for (let time of schedule) {
-    const [hour, minute, period] = time.match(/(\d+):(\d+)\s(AM|PM)/).slice(1);
-    let shuttleHour = parseInt(hour, 10);
-    const shuttleMinute = parseInt(minute, 10);
+    try {
+      // Use a safer, more explicit regex pattern with limits
+      const timeMatch = time.match(/^(\d{1,2}):(\d{2})\s(AM|PM)$/);
 
-    // Convert to 24-hour format
-    if (period === "PM" && shuttleHour !== 12) shuttleHour += 12;
-    if (period === "AM" && shuttleHour === 12) shuttleHour = 0;
+      // Skip invalid formats
+      if (!timeMatch) continue;
 
-    const shuttleTime = shuttleHour * 60 + shuttleMinute;
+      const [hour, minute, period] = timeMatch;
+      let shuttleHour = parseInt(hour, 10);
+      const shuttleMinute = parseInt(minute, 10);
 
-    if (shuttleTime > currentTime) return time;
+      // Validate parsed values
+      if (
+        isNaN(shuttleHour) ||
+        isNaN(shuttleMinute) ||
+        shuttleHour < 1 ||
+        shuttleHour > 12 ||
+        shuttleMinute < 0 ||
+        shuttleMinute > 59
+      ) {
+        continue;
+      }
+
+      // Convert to 24-hour format
+      if (period === "PM" && shuttleHour !== 12) shuttleHour += 12;
+      if (period === "AM" && shuttleHour === 12) shuttleHour = 0;
+
+      const shuttleTime = shuttleHour * 60 + shuttleMinute;
+
+      if (shuttleTime > currentTime) return time;
+    } catch (error) {
+      // Log error but continue with next time
+      console.error(`Error parsing shuttle time: ${time}`, error);
+      continue;
+    }
   }
 
   return "No more shuttles today";
@@ -157,7 +181,7 @@ function ShuttleSchedule({ visible, onClose }) {
   const [selectedCampus, setSelectedCampus] = useState("SGW");
   const [selectedSchedule, setSelectedSchedule] = useState("weekday");
 
-  // Update the next shuttle when campus changes
+  // Initial setup and auto-detection of day
   useEffect(() => {
     const day = new Date().getDay();
     if (day === 0 || day === 6) {
@@ -165,13 +189,26 @@ function ShuttleSchedule({ visible, onClose }) {
       return;
     }
 
-    const scheduleType = day >= 1 && day <= 4 ? "weekday" : "friday";
-    setSelectedSchedule(scheduleType);
+    // Only set the initial schedule type - don't override user selection
+    if (selectedSchedule === "weekday" && day === 5) {
+      setSelectedSchedule("friday");
+    } else if (selectedSchedule === "friday" && day !== 5) {
+      setSelectedSchedule("weekday");
+    }
+  }, [visible]); // Only run when modal becomes visible
 
-    setNextShuttle(getNextShuttle(schedules[selectedCampus][scheduleType]));
+  // Update next shuttle based on selected campus and schedule
+  useEffect(() => {
+    const day = new Date().getDay();
+    if (day === 0 || day === 6) {
+      setNextShuttle("No shuttle service on weekends");
+      return;
+    }
+
+    setNextShuttle(getNextShuttle(schedules[selectedCampus][selectedSchedule]));
   }, [selectedCampus, selectedSchedule]);
-  // Trigger when campus or schedule changes
 
+  // Rest of the component remains unchanged
   const schedule = schedules[selectedCampus][selectedSchedule];
 
   // Split the schedule into 3 columns
@@ -183,7 +220,10 @@ function ShuttleSchedule({ visible, onClose }) {
   return (
     <Modal transparent visible={visible} animationType="fade">
       <View style={styles.modalOverlay}>
-        <View style={styles.modalContainer}>
+        <View
+          style={styles.modalContainer}
+          testID="shuttle-schedule-modal-container"
+        >
           <Text style={styles.modalTitle}>Shuttle Schedule</Text>
 
           {/* Next Shuttle Display */}
@@ -259,7 +299,11 @@ function ShuttleSchedule({ visible, onClose }) {
             </View>
           </View>
 
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+          <TouchableOpacity
+            onPress={onClose}
+            style={styles.closeButton}
+            testID="shuttle-schedule-close-button"
+          >
             <Text style={styles.closeButtonText}>Close</Text>
           </TouchableOpacity>
         </View>

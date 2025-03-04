@@ -1,8 +1,8 @@
 import React from "react";
 import { render, fireEvent, act, waitFor } from "@testing-library/react-native";
-import GetDirections from "../components/GetDirections";
-import { useGoogleMapDirections } from "../hooks/useGoogleMapDirections";
-import { LocationContext } from "../contexts/LocationContext";
+import GetDirections from "../../components/GetDirections";
+import { useGoogleMapDirections } from "../../hooks/useGoogleMapDirections";
+import { LocationContext } from "../../contexts/LocationContext";
 
 jest.mock("expo-location", () => ({
   getCurrentPositionAsync: jest.fn().mockResolvedValue({
@@ -14,7 +14,7 @@ jest.mock("expo-location", () => ({
 }));
 
 // Mock useGoogleMapDirections hook
-jest.mock("../hooks/useGoogleMapDirections");
+jest.mock("../../hooks/useGoogleMapDirections");
 
 // Mock the dependencies with forwardRef for MapView
 jest.mock("react-native-maps", () => {
@@ -43,7 +43,7 @@ jest.mock("react-native-maps", () => {
 });
 
 // Mock FloatingSearchBar component
-jest.mock("../components/FloatingSearchBar", () => ({
+jest.mock("../../components/FloatingSearchBar", () => ({
   __esModule: true,
   default: ({ onPlaceSelect, placeholder }) => (
     <mock-search-bar
@@ -54,9 +54,9 @@ jest.mock("../components/FloatingSearchBar", () => ({
   ),
 }));
 
-jest.mock("../components/Header", () => "Header");
-jest.mock("../components/NavBar", () => "NavBar");
-jest.mock("../components/DirectionsBox", () => "DirectionsBox");
+jest.mock("../../components/Header", () => "Header");
+jest.mock("../../components/NavBar", () => "NavBar");
+jest.mock("../../components/DirectionsBox", () => "DirectionsBox");
 
 const mockGetCurrentPositionAsync = jest.fn().mockResolvedValue({
   coords: {
