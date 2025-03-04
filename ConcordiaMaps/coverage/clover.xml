@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1741108868683" clover="3.2.0">
-  <project timestamp="1741108868683" name="All files">
-    <metrics statements="419" coveredstatements="377" conditionals="202" coveredconditionals="167" methods="103" coveredmethods="97" elements="724" coveredelements="641" complexity="0" loc="419" ncloc="419" packages="8" files="24" classes="24"/>
+<coverage generated="1741111525891" clover="3.2.0">
+  <project timestamp="1741111525891" name="All files">
+    <metrics statements="419" coveredstatements="378" conditionals="202" coveredconditionals="167" methods="103" coveredmethods="98" elements="724" coveredelements="643" complexity="0" loc="419" ncloc="419" packages="8" files="24" classes="24"/>
     <package name="ConcordiaMaps">
       <metrics statements="8" coveredstatements="8" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="2"/>
-      <file name="App.js" path="C:\Users\User\OneDrive\Documents\GitHub\SOEN-_390-Q-QD\ConcordiaMaps\App.js">
+      <file name="App.js" path="/Users/mohamedgueye/Documents/Concordia/Winter 2025/SOEN 390/SOEN-_390-Q-QD/ConcordiaMaps/App.js">
         <metrics statements="7" coveredstatements="7" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="2"/>
         <line num="12" count="2" type="stmt"/>
         <line num="14" count="2" type="stmt"/>
@@ -14,33 +14,33 @@
         <line num="24" count="1" type="stmt"/>
         <line num="27" count="10" type="stmt"/>
       </file>
-      <file name="styles.js" path="C:\Users\User\OneDrive\Documents\GitHub\SOEN-_390-Q-QD\ConcordiaMaps\styles.js">
+      <file name="styles.js" path="/Users/mohamedgueye/Documents/Concordia/Winter 2025/SOEN 390/SOEN-_390-Q-QD/ConcordiaMaps/styles.js">
         <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
         <line num="3" count="4" type="stmt"/>
       </file>
     </package>
     <package name="ConcordiaMaps.assets">
       <metrics statements="4" coveredstatements="4" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
-      <file name="ConcordiaLogo.png" path="C:\Users\User\OneDrive\Documents\GitHub\SOEN-_390-Q-QD\ConcordiaMaps\assets\ConcordiaLogo.png">
+      <file name="ConcordiaLogo.png" path="/Users/mohamedgueye/Documents/Concordia/Winter 2025/SOEN 390/SOEN-_390-Q-QD/ConcordiaMaps/assets/ConcordiaLogo.png">
         <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
         <line num="1" count="2" type="stmt"/>
       </file>
-      <file name="PinLogo.png" path="C:\Users\User\OneDrive\Documents\GitHub\SOEN-_390-Q-QD\ConcordiaMaps\assets\PinLogo.png">
+      <file name="PinLogo.png" path="/Users/mohamedgueye/Documents/Concordia/Winter 2025/SOEN 390/SOEN-_390-Q-QD/ConcordiaMaps/assets/PinLogo.png">
         <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
         <line num="1" count="3" type="stmt"/>
       </file>
-      <file name="Shuttle.png" path="C:\Users\User\OneDrive\Documents\GitHub\SOEN-_390-Q-QD\ConcordiaMaps\assets\Shuttle.png">
+      <file name="Shuttle.png" path="/Users/mohamedgueye/Documents/Concordia/Winter 2025/SOEN 390/SOEN-_390-Q-QD/ConcordiaMaps/assets/Shuttle.png">
         <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
         <line num="1" count="4" type="stmt"/>
       </file>
-      <file name="download.jpg" path="C:\Users\User\OneDrive\Documents\GitHub\SOEN-_390-Q-QD\ConcordiaMaps\assets\download.jpg">
+      <file name="download.jpg" path="/Users/mohamedgueye/Documents/Concordia/Winter 2025/SOEN 390/SOEN-_390-Q-QD/ConcordiaMaps/assets/download.jpg">
         <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
         <line num="1" count="2" type="stmt"/>
       </file>
     </package>
     <package name="ConcordiaMaps.components">
-      <metrics statements="278" coveredstatements="259" conditionals="139" coveredconditionals="115" methods="78" coveredmethods="75"/>
-      <file name="DirectionsBox.js" path="C:\Users\User\OneDrive\Documents\GitHub\SOEN-_390-Q-QD\ConcordiaMaps\components\DirectionsBox.js">
+      <metrics statements="278" coveredstatements="260" conditionals="139" coveredconditionals="115" methods="78" coveredmethods="76"/>
+      <file name="DirectionsBox.js" path="/Users/mohamedgueye/Documents/Concordia/Winter 2025/SOEN 390/SOEN-_390-Q-QD/ConcordiaMaps/components/DirectionsBox.js">
         <metrics statements="16" coveredstatements="16" conditionals="9" coveredconditionals="7" methods="8" coveredmethods="8"/>
         <line num="13" count="13" type="stmt"/>
         <line num="23" count="13" type="stmt"/>
@@ -59,16 +59,16 @@
         <line num="67" count="13" type="stmt"/>
         <line num="82" count="21" type="stmt"/>
       </file>
-      <file name="FloatingSearchBar.js" path="C:\Users\User\OneDrive\Documents\GitHub\SOEN-_390-Q-QD\ConcordiaMaps\components\FloatingSearchBar.js">
+      <file name="FloatingSearchBar.js" path="/Users/mohamedgueye/Documents/Concordia/Winter 2025/SOEN 390/SOEN-_390-Q-QD/ConcordiaMaps/components/FloatingSearchBar.js">
         <metrics statements="52" coveredstatements="50" conditionals="21" coveredconditionals="17" methods="9" coveredmethods="9"/>
         <line num="15" count="3" type="stmt"/>
-        <line num="16" count="64" type="stmt"/>
-        <line num="18" count="64" type="stmt"/>
-        <line num="19" count="64" type="stmt"/>
-        <line num="20" count="64" type="stmt"/>
-        <line num="21" count="64" type="stmt"/>
-        <line num="22" count="64" type="stmt"/>
-        <line num="24" count="64" type="stmt"/>
+        <line num="16" count="65" type="stmt"/>
+        <line num="18" count="65" type="stmt"/>
+        <line num="19" count="65" type="stmt"/>
+        <line num="20" count="65" type="stmt"/>
+        <line num="21" count="65" type="stmt"/>
+        <line num="22" count="65" type="stmt"/>
+        <line num="24" count="65" type="stmt"/>
         <line num="25" count="24" type="stmt"/>
         <line num="26" count="24" type="stmt"/>
         <line num="27" count="24" type="stmt"/>
@@ -79,7 +79,7 @@
         <line num="34" count="19" type="stmt"/>
         <line num="39" count="19" type="stmt"/>
         <line num="41" count="0" type="stmt"/>
-        <line num="46" count="64" type="stmt"/>
+        <line num="46" count="65" type="stmt"/>
         <line num="47" count="9" type="stmt"/>
         <line num="48" count="9" type="stmt"/>
         <line num="49" count="9" type="cond" truecount="2" falsecount="0"/>
@@ -97,7 +97,7 @@
         <line num="72" count="6" type="cond" truecount="1" falsecount="1"/>
         <line num="74" count="2" type="stmt"/>
         <line num="76" count="8" type="stmt"/>
-        <line num="80" count="64" type="stmt"/>
+        <line num="80" count="65" type="stmt"/>
         <line num="81" count="2" type="stmt"/>
         <line num="82" count="2" type="stmt"/>
         <line num="85" count="1" type="stmt"/>
@@ -106,7 +106,7 @@
         <line num="91" count="1" type="stmt"/>
         <line num="92" count="1" type="stmt"/>
         <line num="95" count="1" type="stmt"/>
-        <line num="99" count="64" type="stmt"/>
+        <line num="99" count="65" type="stmt"/>
         <line num="115" count="1" type="stmt"/>
         <line num="116" count="1" type="stmt"/>
         <line num="126" count="14" type="stmt"/>
@@ -114,11 +114,11 @@
         <line num="131" count="2" type="stmt"/>
         <line num="149" count="3" type="stmt"/>
       </file>
-      <file name="Footer.js" path="C:\Users\User\OneDrive\Documents\GitHub\SOEN-_390-Q-QD\ConcordiaMaps\components\Footer.js">
+      <file name="Footer.js" path="/Users/mohamedgueye/Documents/Concordia/Winter 2025/SOEN 390/SOEN-_390-Q-QD/ConcordiaMaps/components/Footer.js">
         <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
-        <line num="6" count="40" type="stmt"/>
+        <line num="6" count="41" type="stmt"/>
       </file>
-      <file name="GetDirections.js" path="C:\Users\User\OneDrive\Documents\GitHub\SOEN-_390-Q-QD\ConcordiaMaps\components\GetDirections.js">
+      <file name="GetDirections.js" path="/Users/mohamedgueye/Documents/Concordia/Winter 2025/SOEN 390/SOEN-_390-Q-QD/ConcordiaMaps/components/GetDirections.js">
         <metrics statements="78" coveredstatements="69" conditionals="57" coveredconditionals="47" methods="17" coveredmethods="17"/>
         <line num="21" count="3" type="stmt"/>
         <line num="23" count="3" type="stmt"/>
@@ -199,20 +199,20 @@
         <line num="222" count="3" type="stmt"/>
         <line num="236" count="11" type="stmt"/>
       </file>
-      <file name="Header.js" path="C:\Users\User\OneDrive\Documents\GitHub\SOEN-_390-Q-QD\ConcordiaMaps\components\Header.js">
+      <file name="Header.js" path="/Users/mohamedgueye/Documents/Concordia/Winter 2025/SOEN 390/SOEN-_390-Q-QD/ConcordiaMaps/components/Header.js">
         <metrics statements="5" coveredstatements="5" conditionals="0" coveredconditionals="0" methods="3" coveredmethods="3"/>
-        <line num="13" count="42" type="stmt"/>
-        <line num="14" count="42" type="stmt"/>
+        <line num="13" count="43" type="stmt"/>
+        <line num="14" count="43" type="stmt"/>
         <line num="15" count="1" type="stmt"/>
-        <line num="17" count="42" type="stmt"/>
+        <line num="17" count="43" type="stmt"/>
         <line num="20" count="1" type="stmt"/>
       </file>
-      <file name="Legend.js" path="C:\Users\User\OneDrive\Documents\GitHub\SOEN-_390-Q-QD\ConcordiaMaps\components\Legend.js">
+      <file name="Legend.js" path="/Users/mohamedgueye/Documents/Concordia/Winter 2025/SOEN 390/SOEN-_390-Q-QD/ConcordiaMaps/components/Legend.js">
         <metrics statements="2" coveredstatements="2" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
         <line num="5" count="2" type="stmt"/>
-        <line num="6" count="40" type="stmt"/>
+        <line num="6" count="41" type="stmt"/>
       </file>
-      <file name="LiveBusTracker.js" path="C:\Users\User\OneDrive\Documents\GitHub\SOEN-_390-Q-QD\ConcordiaMaps\components\LiveBusTracker.js">
+      <file name="LiveBusTracker.js" path="/Users/mohamedgueye/Documents/Concordia/Winter 2025/SOEN 390/SOEN-_390-Q-QD/ConcordiaMaps/components/LiveBusTracker.js">
         <metrics statements="19" coveredstatements="19" conditionals="0" coveredconditionals="0" methods="7" coveredmethods="7"/>
         <line num="7" count="3" type="stmt"/>
         <line num="9" count="3" type="stmt"/>
@@ -234,7 +234,7 @@
         <line num="60" count="2" type="stmt"/>
         <line num="75" count="3" type="stmt"/>
       </file>
-      <file name="MapMarkers.js" path="C:\Users\User\OneDrive\Documents\GitHub\SOEN-_390-Q-QD\ConcordiaMaps\components\MapMarkers.js">
+      <file name="MapMarkers.js" path="/Users/mohamedgueye/Documents/Concordia/Winter 2025/SOEN 390/SOEN-_390-Q-QD/ConcordiaMaps/components/MapMarkers.js">
         <metrics statements="18" coveredstatements="16" conditionals="4" coveredconditionals="4" methods="5" coveredmethods="4"/>
         <line num="7" count="3" type="stmt"/>
         <line num="9" count="3" type="stmt"/>
@@ -255,22 +255,22 @@
         <line num="91" count="3" type="stmt"/>
         <line num="729" count="3" type="stmt"/>
       </file>
-      <file name="NavBar.js" path="C:\Users\User\OneDrive\Documents\GitHub\SOEN-_390-Q-QD\ConcordiaMaps\components\NavBar.js">
+      <file name="NavBar.js" path="/Users/mohamedgueye/Documents/Concordia/Winter 2025/SOEN 390/SOEN-_390-Q-QD/ConcordiaMaps/components/NavBar.js">
         <metrics statements="20" coveredstatements="19" conditionals="4" coveredconditionals="3" methods="10" coveredmethods="9"/>
-        <line num="9" count="49" type="stmt"/>
-        <line num="10" count="49" type="stmt"/>
-        <line num="11" count="49" type="stmt"/>
-        <line num="12" count="49" type="stmt"/>
-        <line num="14" count="49" type="stmt"/>
+        <line num="9" count="50" type="stmt"/>
+        <line num="10" count="50" type="stmt"/>
+        <line num="11" count="50" type="stmt"/>
+        <line num="12" count="50" type="stmt"/>
+        <line num="14" count="50" type="stmt"/>
         <line num="15" count="1" type="cond" truecount="1" falsecount="1"/>
         <line num="16" count="1" type="stmt"/>
         <line num="20" count="1" type="stmt"/>
-        <line num="23" count="49" type="stmt"/>
+        <line num="23" count="50" type="stmt"/>
         <line num="24" count="4" type="cond" truecount="2" falsecount="0"/>
         <line num="25" count="2" type="stmt"/>
         <line num="27" count="2" type="stmt"/>
-        <line num="31" count="49" type="stmt"/>
-        <line num="36" count="49" type="stmt"/>
+        <line num="31" count="50" type="stmt"/>
+        <line num="36" count="50" type="stmt"/>
         <line num="49" count="1" type="stmt"/>
         <line num="52" count="2" type="stmt"/>
         <line num="56" count="0" type="stmt"/>
@@ -278,65 +278,65 @@
         <line num="64" count="2" type="stmt"/>
         <line num="74" count="1" type="stmt"/>
       </file>
-      <file name="PopupModal.js" path="C:\Users\User\OneDrive\Documents\GitHub\SOEN-_390-Q-QD\ConcordiaMaps\components\PopupModal.js">
+      <file name="PopupModal.js" path="/Users/mohamedgueye/Documents/Concordia/Winter 2025/SOEN 390/SOEN-_390-Q-QD/ConcordiaMaps/components/PopupModal.js">
         <metrics statements="4" coveredstatements="4" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="2"/>
         <line num="13" count="2" type="stmt"/>
         <line num="14" count="4" type="stmt"/>
         <line num="35" count="1" type="stmt"/>
         <line num="47" count="2" type="stmt"/>
       </file>
-      <file name="ShuttleSchedule.js" path="C:\Users\User\OneDrive\Documents\GitHub\SOEN-_390-Q-QD\ConcordiaMaps\components\ShuttleSchedule.js">
-        <metrics statements="48" coveredstatements="44" conditionals="40" coveredconditionals="34" methods="10" coveredmethods="9"/>
+      <file name="ShuttleSchedule.js" path="/Users/mohamedgueye/Documents/Concordia/Winter 2025/SOEN 390/SOEN-_390-Q-QD/ConcordiaMaps/components/ShuttleSchedule.js">
+        <metrics statements="48" coveredstatements="45" conditionals="40" coveredconditionals="34" methods="10" coveredmethods="10"/>
         <line num="6" count="4" type="stmt"/>
         <line num="134" count="4" type="stmt"/>
-        <line num="135" count="42" type="stmt"/>
-        <line num="136" count="42" type="stmt"/>
-        <line num="138" count="42" type="stmt"/>
-        <line num="139" count="1170" type="stmt"/>
-        <line num="141" count="1170" type="stmt"/>
-        <line num="144" count="1170" type="cond" truecount="1" falsecount="1"/>
-        <line num="146" count="1170" type="stmt"/>
-        <line num="147" count="1170" type="stmt"/>
-        <line num="148" count="1170" type="stmt"/>
-        <line num="151" count="1170" type="cond" truecount="1" falsecount="1"/>
+        <line num="135" count="43" type="stmt"/>
+        <line num="136" count="43" type="stmt"/>
+        <line num="138" count="43" type="stmt"/>
+        <line num="139" count="1203" type="stmt"/>
+        <line num="141" count="1203" type="stmt"/>
+        <line num="144" count="1203" type="cond" truecount="1" falsecount="1"/>
+        <line num="146" count="1203" type="stmt"/>
+        <line num="147" count="1203" type="stmt"/>
+        <line num="148" count="1203" type="stmt"/>
+        <line num="151" count="1203" type="cond" truecount="1" falsecount="1"/>
         <line num="159" count="0" type="stmt"/>
-        <line num="163" count="1170" type="cond" truecount="2" falsecount="2"/>
-        <line num="164" count="1170" type="cond" truecount="2" falsecount="2"/>
-        <line num="166" count="1170" type="stmt"/>
-        <line num="168" count="1170" type="cond" truecount="2" falsecount="0"/>
+        <line num="163" count="1203" type="cond" truecount="2" falsecount="2"/>
+        <line num="164" count="1203" type="cond" truecount="2" falsecount="2"/>
+        <line num="166" count="1203" type="stmt"/>
+        <line num="168" count="1203" type="cond" truecount="2" falsecount="0"/>
         <line num="171" count="0" type="stmt"/>
         <line num="172" count="0" type="stmt"/>
-        <line num="176" count="35" type="stmt"/>
-        <line num="180" count="109" type="stmt"/>
-        <line num="181" count="109" type="stmt"/>
-        <line num="182" count="109" type="stmt"/>
-        <line num="184" count="109" type="stmt"/>
-        <line num="185" count="43" type="stmt"/>
-        <line num="186" count="43" type="stmt"/>
-        <line num="189" count="43" type="cond" truecount="4" falsecount="0"/>
+        <line num="176" count="36" type="stmt"/>
+        <line num="180" count="113" type="stmt"/>
+        <line num="181" count="113" type="stmt"/>
+        <line num="182" count="113" type="stmt"/>
+        <line num="184" count="113" type="stmt"/>
+        <line num="185" count="44" type="stmt"/>
+        <line num="186" count="44" type="stmt"/>
+        <line num="189" count="44" type="cond" truecount="4" falsecount="0"/>
         <line num="190" count="1" type="stmt"/>
         <line num="191" count="1" type="stmt"/>
-        <line num="195" count="42" type="stmt"/>
-        <line num="196" count="42" type="cond" truecount="2" falsecount="0"/>
-        <line num="199" count="42" type="cond" truecount="2" falsecount="0"/>
+        <line num="195" count="43" type="stmt"/>
+        <line num="196" count="43" type="cond" truecount="2" falsecount="0"/>
+        <line num="199" count="43" type="cond" truecount="2" falsecount="0"/>
         <line num="200" count="4" type="stmt"/>
-        <line num="204" count="42" type="stmt"/>
-        <line num="210" count="43" type="stmt"/>
-        <line num="214" count="109" type="stmt"/>
-        <line num="217" count="109" type="stmt"/>
-        <line num="218" count="109" type="stmt"/>
-        <line num="219" count="1182" type="stmt"/>
-        <line num="222" count="109" type="stmt"/>
-        <line num="244" count="0" type="stmt"/>
+        <line num="204" count="43" type="stmt"/>
+        <line num="210" count="44" type="stmt"/>
+        <line num="214" count="113" type="stmt"/>
+        <line num="217" count="113" type="stmt"/>
+        <line num="218" count="113" type="stmt"/>
+        <line num="219" count="1226" type="stmt"/>
+        <line num="222" count="113" type="stmt"/>
+        <line num="244" count="1" type="stmt"/>
         <line num="253" count="2" type="stmt"/>
         <line num="267" count="1" type="stmt"/>
         <line num="276" count="3" type="stmt"/>
-        <line num="287" count="1182" type="stmt"/>
-        <line num="289" count="3525" type="stmt"/>
+        <line num="287" count="1226" type="stmt"/>
+        <line num="289" count="3657" type="stmt"/>
         <line num="317" count="4" type="stmt"/>
         <line num="407" count="4" type="stmt"/>
       </file>
-      <file name="ShuttleStop.js" path="C:\Users\User\OneDrive\Documents\GitHub\SOEN-_390-Q-QD\ConcordiaMaps\components\ShuttleStop.js">
+      <file name="ShuttleStop.js" path="/Users/mohamedgueye/Documents/Concordia/Winter 2025/SOEN 390/SOEN-_390-Q-QD/ConcordiaMaps/components/ShuttleStop.js">
         <metrics statements="6" coveredstatements="6" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="2"/>
         <line num="5" count="3" type="stmt"/>
         <line num="8" count="3" type="stmt"/>
@@ -345,7 +345,7 @@
         <line num="21" count="12" type="stmt"/>
         <line num="32" count="3" type="stmt"/>
       </file>
-      <file name="buildingColoring.js" path="C:\Users\User\OneDrive\Documents\GitHub\SOEN-_390-Q-QD\ConcordiaMaps\components\buildingColoring.js">
+      <file name="buildingColoring.js" path="/Users/mohamedgueye/Documents/Concordia/Winter 2025/SOEN 390/SOEN-_390-Q-QD/ConcordiaMaps/components/buildingColoring.js">
         <metrics statements="9" coveredstatements="8" conditionals="4" coveredconditionals="3" methods="3" coveredmethods="3"/>
         <line num="5" count="3" type="stmt"/>
         <line num="6" count="6" type="stmt"/>
@@ -360,12 +360,12 @@
     </package>
     <package name="ConcordiaMaps.contexts">
       <metrics statements="14" coveredstatements="14" conditionals="2" coveredconditionals="2" methods="3" coveredmethods="3"/>
-      <file name="LocationContext.js" path="C:\Users\User\OneDrive\Documents\GitHub\SOEN-_390-Q-QD\ConcordiaMaps\contexts\LocationContext.js">
+      <file name="LocationContext.js" path="/Users/mohamedgueye/Documents/Concordia/Winter 2025/SOEN 390/SOEN-_390-Q-QD/ConcordiaMaps/contexts/LocationContext.js">
         <metrics statements="14" coveredstatements="14" conditionals="2" coveredconditionals="2" methods="3" coveredmethods="3"/>
         <line num="6" count="4" type="stmt"/>
         <line num="8" count="4" type="stmt"/>
-        <line num="9" count="22" type="stmt"/>
-        <line num="11" count="22" type="stmt"/>
+        <line num="9" count="21" type="stmt"/>
+        <line num="11" count="21" type="stmt"/>
         <line num="12" count="11" type="stmt"/>
         <line num="13" count="11" type="stmt"/>
         <line num="14" count="11" type="cond" truecount="2" falsecount="0"/>
@@ -374,20 +374,20 @@
         <line num="22" count="10" type="stmt"/>
         <line num="23" count="10" type="stmt"/>
         <line num="26" count="11" type="stmt"/>
-        <line num="29" count="22" type="stmt"/>
+        <line num="29" count="21" type="stmt"/>
         <line num="36" count="4" type="stmt"/>
       </file>
     </package>
     <package name="ConcordiaMaps.data">
       <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
-      <file name="coloringData.js" path="C:\Users\User\OneDrive\Documents\GitHub\SOEN-_390-Q-QD\ConcordiaMaps\data\coloringData.js">
+      <file name="coloringData.js" path="/Users/mohamedgueye/Documents/Concordia/Winter 2025/SOEN 390/SOEN-_390-Q-QD/ConcordiaMaps/data/coloringData.js">
         <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
         <line num="1" count="2" type="stmt"/>
       </file>
     </package>
     <package name="ConcordiaMaps.hooks">
       <metrics statements="60" coveredstatements="47" conditionals="39" coveredconditionals="31" methods="7" coveredmethods="7"/>
-      <file name="useGoogleMapDirections.js" path="C:\Users\User\OneDrive\Documents\GitHub\SOEN-_390-Q-QD\ConcordiaMaps\hooks\useGoogleMapDirections.js">
+      <file name="useGoogleMapDirections.js" path="/Users/mohamedgueye/Documents/Concordia/Winter 2025/SOEN 390/SOEN-_390-Q-QD/ConcordiaMaps/hooks/useGoogleMapDirections.js">
         <metrics statements="60" coveredstatements="47" conditionals="39" coveredconditionals="31" methods="7" coveredmethods="7"/>
         <line num="1" count="4" type="stmt"/>
         <line num="4" count="4" type="stmt"/>
@@ -453,58 +453,58 @@
     </package>
     <package name="ConcordiaMaps.screen">
       <metrics statements="53" coveredstatements="43" conditionals="22" coveredconditionals="19" methods="13" coveredmethods="10"/>
-      <file name="HomeScreen.js" path="C:\Users\User\OneDrive\Documents\GitHub\SOEN-_390-Q-QD\ConcordiaMaps\screen\HomeScreen.js">
+      <file name="HomeScreen.js" path="/Users/mohamedgueye/Documents/Concordia/Winter 2025/SOEN 390/SOEN-_390-Q-QD/ConcordiaMaps/screen/HomeScreen.js">
         <metrics statements="53" coveredstatements="43" conditionals="22" coveredconditionals="19" methods="13" coveredmethods="10"/>
         <line num="18" count="2" type="stmt"/>
-        <line num="21" count="42" type="stmt"/>
-        <line num="22" count="42" type="stmt"/>
-        <line num="23" count="42" type="stmt"/>
-        <line num="25" count="42" type="stmt"/>
-        <line num="26" count="41" type="stmt"/>
-        <line num="28" count="41" type="stmt"/>
-        <line num="29" count="41" type="stmt"/>
-        <line num="30" count="41" type="stmt"/>
-        <line num="31" count="41" type="stmt"/>
-        <line num="32" count="41" type="stmt"/>
-        <line num="34" count="41" type="stmt"/>
-        <line num="36" count="41" type="stmt"/>
+        <line num="21" count="43" type="stmt"/>
+        <line num="22" count="43" type="stmt"/>
+        <line num="23" count="43" type="stmt"/>
+        <line num="25" count="43" type="stmt"/>
+        <line num="26" count="42" type="stmt"/>
+        <line num="28" count="42" type="stmt"/>
+        <line num="29" count="42" type="stmt"/>
+        <line num="30" count="42" type="stmt"/>
+        <line num="31" count="42" type="stmt"/>
+        <line num="32" count="42" type="stmt"/>
+        <line num="34" count="42" type="stmt"/>
+        <line num="36" count="42" type="stmt"/>
         <line num="37" count="14" type="stmt"/>
         <line num="38" count="14" type="stmt"/>
-        <line num="41" count="12" type="stmt"/>
-        <line num="43" count="12" type="cond" truecount="2" falsecount="0"/>
+        <line num="41" count="9" type="stmt"/>
+        <line num="43" count="9" type="cond" truecount="2" falsecount="0"/>
         <line num="44" count="4" type="cond" truecount="2" falsecount="0"/>
         <line num="45" count="3" type="stmt"/>
         <line num="46" count="3" type="stmt"/>
         <line num="47" count="3" type="stmt"/>
         <line num="49" count="1" type="stmt"/>
         <line num="50" count="1" type="stmt"/>
-        <line num="53" count="8" type="stmt"/>
-        <line num="54" count="8" type="stmt"/>
+        <line num="53" count="5" type="stmt"/>
+        <line num="54" count="5" type="stmt"/>
         <line num="57" count="0" type="stmt"/>
         <line num="58" count="0" type="stmt"/>
         <line num="59" count="0" type="stmt"/>
-        <line num="63" count="41" type="stmt"/>
+        <line num="63" count="42" type="stmt"/>
         <line num="64" count="23" type="cond" truecount="2" falsecount="0"/>
         <line num="65" count="14" type="stmt"/>
-        <line num="74" count="41" type="stmt"/>
+        <line num="74" count="42" type="stmt"/>
         <line num="75" count="17" type="cond" truecount="4" falsecount="0"/>
         <line num="76" count="3" type="stmt"/>
-        <line num="88" count="41" type="stmt"/>
+        <line num="88" count="42" type="stmt"/>
         <line num="89" count="14" type="stmt"/>
-        <line num="92" count="41" type="stmt"/>
+        <line num="92" count="42" type="stmt"/>
         <line num="93" count="1" type="stmt"/>
         <line num="94" count="1" type="cond" truecount="1" falsecount="1"/>
-        <line num="98" count="41" type="stmt"/>
+        <line num="98" count="42" type="stmt"/>
         <line num="99" count="0" type="stmt"/>
         <line num="100" count="0" type="stmt"/>
         <line num="106" count="0" type="stmt"/>
         <line num="107" count="0" type="stmt"/>
         <line num="108" count="0" type="stmt"/>
         <line num="109" count="0" type="stmt"/>
-        <line num="114" count="41" type="stmt"/>
+        <line num="114" count="42" type="stmt"/>
         <line num="115" count="1" type="stmt"/>
         <line num="121" count="1" type="stmt"/>
-        <line num="124" count="41" type="stmt"/>
+        <line num="124" count="42" type="stmt"/>
         <line num="155" count="0" type="stmt"/>
         <line num="158" count="210" type="stmt"/>
         <line num="165" count="1" type="stmt"/>
@@ -512,7 +512,7 @@
     </package>
     <package name="ConcordiaMaps.styles">
       <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
-      <file name="DirectionBox.style.js" path="C:\Users\User\OneDrive\Documents\GitHub\SOEN-_390-Q-QD\ConcordiaMaps\styles\DirectionBox.style.js">
+      <file name="DirectionBox.style.js" path="/Users/mohamedgueye/Documents/Concordia/Winter 2025/SOEN 390/SOEN-_390-Q-QD/ConcordiaMaps/styles/DirectionBox.style.js">
         <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
         <line num="3" count="4" type="stmt"/>
       </file>

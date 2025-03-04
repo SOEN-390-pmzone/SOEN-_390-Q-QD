@@ -1,8 +1,9 @@
 import React from "react";
 import { render, fireEvent, waitFor } from "@testing-library/react-native";
-import ShuttleSchedule from "../../components/ShuttleSchedule";
+import ShuttleSchedule, { getNextShuttle } from "../../components/ShuttleSchedule";
 
 jest.useFakeTimers().setSystemTime(new Date("2025-02-06T15:00:00Z")); // Mock current time
+
 
 describe("ShuttleSchedule Component", () => {
   it("updates next shuttle time when campus is switched", async () => {
@@ -290,3 +291,18 @@ it("handles edge case times correctly", () => {
   );
   expect(getByText(/Next Shuttle/i)).toBeTruthy();
 });
+
+
+
+it("updates selected campus when SGW button is pressed", async () => {
+  const { getByText } = render(
+    <ShuttleSchedule visible={true} onClose={jest.fn()} />
+  );
+
+  fireEvent.press(getByText("SGW Campus"));
+
+  await waitFor(() => {
+    expect(getByText(/Next Shuttle from SGW:/i)).toBeTruthy();
+  });
+});
+
