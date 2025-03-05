@@ -6,8 +6,8 @@ import { findShortestPath } from './PathFinder';
 import FloorPlanService from '../services/FloorPlanService';
 
 const IndoorNavigation = ({ route, navigation }) => {
-  const [startPoint, setStartPoint] = useState('H831');
-  const [endPoint, setEndPoint] = useState('H833');
+  const [startPoint, setStartPoint] = useState('');
+  const [endPoint, setEndPoint] = useState('');
   const [path, setPath] = useState([]);
   const [allNodes, setAllNodes] = useState([]);
   const [floorPlan, setFloorPlan] = useState('');
@@ -29,7 +29,6 @@ const IndoorNavigation = ({ route, navigation }) => {
 
     // Get all available nodes from the graph
     const graph = getHallGraphData(floor);
-    console.log('Graph data:', graph);
     setAllNodes(Object.keys(graph));
 
     // Load the SVG floor plan dynamically
@@ -40,7 +39,6 @@ const IndoorNavigation = ({ route, navigation }) => {
     try {
       console.log('Loading floor plan for floor:', floor);
       const svgContent = await FloorPlanService.getFloorPlan(floor);
-      console.log('SVG content loaded:', svgContent);
       setFloorPlan(svgContent);
     } catch (error) {
       console.error('Error loading floor plan:', error);
@@ -51,106 +49,129 @@ const IndoorNavigation = ({ route, navigation }) => {
 
   const calculatePath = () => {
     try {
+      console.log('Calculating path for floor:', floor);
       const graph = getHallGraphData(floor);
-      console.log('Calculating path with graph:', graph);
       const shortestPath = findShortestPath(graph, startPoint, endPoint);
       console.log('Shortest path found:', shortestPath);
-
+  
       if (shortestPath.length === 0) {
         setPath(['No path found']);
       } else {
         setPath(shortestPath);
-
+  
         // Inject the visualizePath function into WebView
         if (webViewRef.current) {
           const coordinates = getHallRoomData(floor);
           console.log('Coordinates data:', coordinates);
-
+  
           // Convert coordinates to a JSON string for injection
           const coordinatesJSON = JSON.stringify(coordinates);
-
+  
           // Create the JavaScript to execute in the WebView
           const js = `
-            (function() {
-              // Function to visualize the path
-              function visualizePath(path, coordinates, svgElement) {
-                // Clear any existing paths
-                const existingPaths = document.querySelectorAll('.navigation-path');
-                existingPaths.forEach(p => p.remove());
-
-                // Don't draw anything if path is empty
-                if (!path || path.length < 2) return;
-
-                // Create SVG path element
-                const svgNS = "http://www.w3.org/2000/svg";
-                const pathElement = document.createElementNS(svgNS, "path");
-                pathElement.classList.add('navigation-path');
-
-                // Build the path data string
-                let pathData = '';
-
-                for (let i = 0; i < path.length; i++) {
-                  const nodeName = path[i];
-                  if (!coordinates[nodeName] || !coordinates[nodeName].nearestPoint) {
-                    console.error('Missing coordinates for node:', nodeName);
-                    continue;
-                  }
-                  const point = coordinates[nodeName].nearestPoint;
-
-                  if (i === 0) {
-                    // Move to the first point
-                    pathData += \`M \${point.x} \${point.y} \`;
-                  } else {
-                    // Line to subsequent points
-                    pathData += \`L \${point.x} \${point.y} \`;
-                  }
+          (function() {
+            // Function to visualize the path
+            function visualizePath(path, coordinates, svgElement) {
+              // Clear any existing paths
+              const existingPaths = document.querySelectorAll('.navigation-path, .navigation-button, .navigation-marker');
+              existingPaths.forEach(p => p.remove());
+        
+              // Don't draw anything if path is empty
+              if (!path || path.length < 2) return;
+        
+              // Create SVG path element
+              const svgNS = "http://www.w3.org/2000/svg";
+              const pathElement = document.createElementNS(svgNS, "path");
+              pathElement.classList.add('navigation-path');
+        
+              // Build the path data string
+              let pathData = '';
+        
+              for (let i = 0; i < path.length; i++) {
+                const nodeName = path[i];
+                if (!coordinates[nodeName] || !coordinates[nodeName].nearestPoint) {
+                  console.error('Missing coordinates for node:', nodeName);
+                  continue;
                 }
-
-                // Set path attributes
-                pathElement.setAttribute('d', pathData);
-                pathElement.setAttribute('fill', 'none');
-                pathElement.setAttribute('stroke', '#3498db');
-                pathElement.setAttribute('stroke-width', '5');
-                pathElement.setAttribute('stroke-linecap', 'round');
-                pathElement.setAttribute('stroke-linejoin', 'round');
-                pathElement.setAttribute('stroke-dasharray', '10,5');
-
-                // Add animation for dash array
-                const animateElement = document.createElementNS(svgNS, "animate");
-                animateElement.setAttribute('attributeName', 'stroke-dashoffset');
-                animateElement.setAttribute('from', '0');
-                animateElement.setAttribute('to', '30');
-                animateElement.setAttribute('dur', '1s');
-                animateElement.setAttribute('repeatCount', 'indefinite');
-                pathElement.appendChild(animateElement);
-
-                // Add the path to the SVG
-                svgElement.appendChild(pathElement);
-
-                console.log('Path visualization completed');
+                const point = coordinates[nodeName].nearestPoint;
+        
+                if (i === 0) {
+                  // Move to the first point
+                  pathData += \`M \${point.x} \${point.y} \`;
+                } else {
+                  // Line to subsequent points
+                  pathData += \`L \${point.x} \${point.y} \`;
+                }
               }
+        
+              // Set path attributes
+              pathElement.setAttribute('d', pathData);
+              pathElement.setAttribute('fill', 'none');
+              pathElement.setAttribute('stroke', '#3498db');
+              pathElement.setAttribute('stroke-width', '5');
+              pathElement.setAttribute('stroke-linecap', 'round');
+              pathElement.setAttribute('stroke-linejoin', 'round');
+              pathElement.setAttribute('stroke-dasharray', '10,5');
+        
+              // Add animation for dash array
+              const animateElement = document.createElementNS(svgNS, "animate");
+              animateElement.setAttribute('attributeName', 'stroke-dashoffset');
+              animateElement.setAttribute('from', '0');
+              animateElement.setAttribute('to', '30');
+              animateElement.setAttribute('dur', '1s');
+              animateElement.setAttribute('repeatCount', 'indefinite');
+              pathElement.appendChild(animateElement);
+        
+              // Add the path to the SVG
+              svgElement.appendChild(pathElement);
+        
+              // Add start navigation button (circle)
+              const startButton = document.createElementNS(svgNS, "circle");
+              const startPoint = coordinates[path[0]].nearestPoint;
+              startButton.setAttribute('cx', startPoint.x);
+              startButton.setAttribute('cy', startPoint.y);
+              startButton.setAttribute('r', '10');
+              startButton.setAttribute('fill', 'green');
+              startButton.classList.add('navigation-button');
+              startButton.addEventListener('click', () => {
+                alert('Start Navigation');
+              });
+              svgElement.appendChild(startButton);
+        
+              // Simple blue circle for endpoint 
+              const endPoint = coordinates[path[path.length - 1]].nearestPoint;
+              const endMarker = document.createElementNS(svgNS, "circle");
+              endMarker.setAttribute('cx', endPoint.x);
+              endMarker.setAttribute('cy', endPoint.y);
+              endMarker.setAttribute('r', '10');
+              endMarker.setAttribute('fill', 'blue');
+              endMarker.classList.add('navigation-marker');
+              svgElement.appendChild(endMarker);
 
-              // Get the SVG element
-              const svgElement = document.querySelector('svg');
-              if (!svgElement) {
-                console.error('SVG element not found');
-                return;
-              }
-
-              // Parse the coordinates from JSON
-              const coordinates = ${coordinatesJSON};
-
-              // The path to visualize
-              const path = ${JSON.stringify(shortestPath)};
-
-              // Call the visualization function
-              visualizePath(path, coordinates, svgElement);
-
-              // Return true to indicate successful execution
-              return true;
-            })();
-          `;
-
+              console.log('Path visualization completed');
+            }
+        
+            // Get the SVG element
+            const svgElement = document.querySelector('svg');
+            if (!svgElement) {
+              console.error('SVG element not found');
+              return;
+            }
+        
+            // Parse the coordinates from JSON
+            const coordinates = ${coordinatesJSON};
+        
+            // The path to visualize
+            const path = ${JSON.stringify(shortestPath)};
+        
+            // Call the visualization function
+            visualizePath(path, coordinates, svgElement);
+        
+            // Return true to indicate successful execution
+            return true;
+          })();
+        `;
+  
           webViewRef.current.injectJavaScript(js);
         }
       }
@@ -346,15 +367,14 @@ const IndoorNavigation = ({ route, navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Indoor Navigation - H Building 8th Floor</Text>
-
+      <Text style={styles.title}>Indoor Navigation - H Building {floor}th Floor</Text>
       {/* SVG Floor Plan in WebView */}
       <View style={styles.webViewContainer}>
         <WebView
           ref={webViewRef}
           source={{ html: generateHtmlContent() }}
           style={styles.webView}
-          onLoad={calculatePath}
+          // onLoad={calculatePath} Commenting this because I dont think its necessary
         />
       </View>
 
