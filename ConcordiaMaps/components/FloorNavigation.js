@@ -1,5 +1,5 @@
 import { ClassGraph } from './constants/ClassGraph';
-import { HallXCoordinates } from './constants/HallXCoordinates';
+import { getHallRoomData } from './constants/FloorData';
 import { findShortestPath } from './PathFinder';
 import { visualizePath } from './PathVisualizer';
 
@@ -8,7 +8,7 @@ export class FloorNavigation {
     this.svgElement = svgElement;
     this.floorNumber = floorNumber;
     this.graph = ClassGraph();
-    this.coordinates = HallXCoordinates(floorNumber);
+    this.coordinates = getHallRoomData(floorNumber);
     this.highlightedRooms = [];
     
     // Add click handlers to rooms in SVG

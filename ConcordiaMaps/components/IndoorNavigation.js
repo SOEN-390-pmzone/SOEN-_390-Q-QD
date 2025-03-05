@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { WebView } from 'react-native-webview';
-import { ClassGraph } from '../constants/ClassGraph';
-import { HallXCoordinates } from '../constants/HallXCoordinates';
+import {  getHallRoomData, getHallGraphData  } from '../constants/FloorData';
 import { findShortestPath } from './PathFinder';
 import { visualizePath } from './PathVisualizer';
 import FloorPlanService from '../services/FloorPlanService';
@@ -14,7 +13,8 @@ const IndoorNavigation = ({ route, navigation }) => {
   const [allNodes, setAllNodes] = useState([]);
   const [floorPlan, setFloorPlan] = useState('');
   const webViewRef = useRef(null);
-  
+  const { floor } = route.params;
+
   useEffect(() => {
     // Set up navigation header
     navigation.setOptions({
@@ -29,27 +29,26 @@ const IndoorNavigation = ({ route, navigation }) => {
     });
     
     // Get all available nodes from the graph
-    const graph = ClassGraph();
+    const graph = getHallGraphData(floor);
     setAllNodes(Object.keys(graph));
     
     // Load the SVG floor plan dynamically
     loadFloorPlan();
   }, [navigation]);
 
-  const loadFloorPlan = async () => {
-    try {
-      const floor = startPoint.substring(1, 2);
-      const svgContent = await FloorPlanService.getFloorPlan(floor);
-      setFloorPlan(svgContent);
-    } catch (error) {
-      console.error('Error loading floor plan:', error);
-      // Set a default message or placeholder when SVG fails to load
-      setFloorPlan('<div>Error loading floor plan</div>');
-    }
-  };
+const loadFloorPlan = async () => {
+  try {
+    const svgContent = await FloorPlanService.getFloorPlan(floor);
+    setFloorPlan(svgContent);
+  } catch (error) {
+    console.error('Error loading floor plan:', error);
+    // Set a default message or placeholder when SVG fails to load
+    setFloorPlan('<div>Error loading floor plan</div>');
+  }
+};
   
   const calculatePath = () => {
-    const graph = ClassGraph();
+    const graph = getHallGraphData(floor);
     const shortestPath = findShortestPath(graph, startPoint, endPoint);
     
     if (shortestPath.length === 0) {
@@ -59,7 +58,7 @@ const IndoorNavigation = ({ route, navigation }) => {
       
       // Inject the visualizePath function into WebView
       if (webViewRef.current) {
-        const coordinates = HallXCoordinates();
+        const coordinates = getHallRoomData(floor);
         
         // Convert coordinates to a JSON string for injection
         const coordinatesJSON = JSON.stringify(coordinates);

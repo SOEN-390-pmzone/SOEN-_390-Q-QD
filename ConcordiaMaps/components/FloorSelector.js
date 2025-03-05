@@ -58,8 +58,9 @@ const FloorSelector = () => {
 
   const handleFloorSelect = (floorId) => {
     // For Hall Building 8th floor
-    if (buildingType === 'HallBuilding' && floorId === '8') {
-      navigation.navigate('IndoorNavigation');
+    if (buildingType === 'HallBuilding') {
+      //Pass the floorID to the navigation component. For Hall 8, the id '8' would be passed.
+      navigation.navigate('IndoorNavigation',{ floor: floorId });
     } 
     // For JMSB (you can add specific floor conditions here)
     else if (buildingType === 'JMSB') {
