@@ -136,41 +136,41 @@ const getNextShuttle = (schedule) => {
   const currentTime = now.getHours() * 60 + now.getMinutes();
 
   for (let time of schedule) {
-    try {
-      // Use a safer, more explicit regex pattern with limits
-      const timeMatch = time.match(/^(\d{1,2}):(\d{2})\s(AM|PM)$/);
-
-      // Skip invalid formats
-      if (!timeMatch) continue;
-
-      const [hour, minute, period] = timeMatch;
-      let shuttleHour = parseInt(hour, 10);
-      const shuttleMinute = parseInt(minute, 10);
-
-      // Validate parsed values
-      if (
-        isNaN(shuttleHour) ||
-        isNaN(shuttleMinute) ||
-        shuttleHour < 1 ||
-        shuttleHour > 12 ||
-        shuttleMinute < 0 ||
-        shuttleMinute > 59
-      ) {
-        continue;
-      }
-
-      // Convert to 24-hour format
-      if (period === "PM" && shuttleHour !== 12) shuttleHour += 12;
-      if (period === "AM" && shuttleHour === 12) shuttleHour = 0;
-
-      const shuttleTime = shuttleHour * 60 + shuttleMinute;
-
-      if (shuttleTime > currentTime) return time;
-    } catch (error) {
-      // Log error but continue with next time
-      console.error(`Error parsing shuttle time: ${time}`, error);
+    // Skip null or invalid values
+    if (time === null || typeof time !== "string") {
+      console.error(`Error parsing shuttle time: ${time}`);
       continue;
     }
+
+    // Use a safer, more explicit regex pattern with limits
+    const timeMatch = time.match(/^(\d{1,2}):(\d{2})\s(AM|PM)$/);
+
+    // Skip invalid formats
+    if (!timeMatch) continue;
+
+    const [, hour, minute, period] = timeMatch;
+    let shuttleHour = parseInt(hour, 10);
+    const shuttleMinute = parseInt(minute, 10);
+
+    // Validate parsed values
+    if (
+      isNaN(shuttleHour) ||
+      isNaN(shuttleMinute) ||
+      shuttleHour < 1 ||
+      shuttleHour > 12 ||
+      shuttleMinute < 0 ||
+      shuttleMinute > 59
+    ) {
+      continue;
+    }
+
+    // Convert to 24-hour format
+    if (period === "PM" && shuttleHour !== 12) shuttleHour += 12;
+    if (period === "AM" && shuttleHour === 12) shuttleHour = 0;
+
+    const shuttleTime = shuttleHour * 60 + shuttleMinute;
+
+    if (shuttleTime > currentTime) return time;
   }
 
   return "No more shuttles today";
@@ -410,3 +410,4 @@ ShuttleSchedule.propTypes = {
 };
 
 export default ShuttleSchedule;
+export { getNextShuttle };
