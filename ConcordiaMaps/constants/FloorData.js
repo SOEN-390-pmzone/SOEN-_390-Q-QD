@@ -12,7 +12,6 @@ export function getHallRoomData(floorNumber) {
 
   switch (floorNumber) {
     case 8:
-      console.log("8 is equal to 8")
       return Floor8Rooms;
     case 9:
       return Floor9Rooms;
