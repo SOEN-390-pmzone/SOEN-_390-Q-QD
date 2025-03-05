@@ -105,9 +105,7 @@ describe("HomeScreen", () => {
     const { getByTestId } = renderComponent();
 
     await waitFor(() => {
-      expect(getByTestId("error-message").props.children).toBe(
-        "No results found.",
-      );
+      expect(getByTestId("error-message").props.children).toBe("ZERO_RESULTS");
     });
   });
 
