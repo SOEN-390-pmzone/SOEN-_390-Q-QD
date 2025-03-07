@@ -203,7 +203,7 @@ function ShuttleSchedule({ visible, onClose }) {
 
       // Calculate next shuttle
       setNextShuttle(
-        getNextShuttle(schedules[selectedCampus][currentScheduleType])
+        getNextShuttle(schedules[selectedCampus][currentScheduleType]),
       );
     };
 
