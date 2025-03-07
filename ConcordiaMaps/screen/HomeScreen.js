@@ -98,14 +98,14 @@ function HomeScreen({ asyncKey = "Campus" }) {
           latitudeDelta: 0.01,
           longitudeDelta: 0.01,
         },
-        2500
+        2500,
       ); // Duration of the animation in milliseconds
     }
   }, [coordinates]);
 
   const handleChangeCampuses = () => {
     setPostalCode((prevPostalCode) =>
-      prevPostalCode === sgwPostalCode ? loyolaPostalCode : sgwPostalCode
+      prevPostalCode === sgwPostalCode ? loyolaPostalCode : sgwPostalCode,
     );
   };
 
