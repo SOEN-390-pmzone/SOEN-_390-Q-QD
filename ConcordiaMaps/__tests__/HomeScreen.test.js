@@ -108,7 +108,36 @@ describe("HomeScreen", () => {
       expect(getByTestId("error-message").props.children).toBe("ZERO_RESULTS");
     });
   });
+  it("the Temporary modal should hide the modal after 10 seconds", async () => {
+    jest.useFakeTimers(); // Mock the timers
 
+    const mockResponse = {
+      data: {
+        results: [
+          {
+            geometry: { location: { lat: 45.4973, lng: -73.5789 } },
+          },
+        ],
+        status: "OK",
+      },
+    };
+    axios.get.mockResolvedValueOnce(mockResponse);
+
+    const { getByTestId} = renderComponent();
+
+    //expect(getByText("Press the button to switch campuses")).toBeTruthy();
+    expect(getByTestId("toggleModal")).toBeTruthy();
+
+    // Fast-forward time by 3 seconds
+    act(() => {
+      jest.advanceTimersByTime(10000);
+    });
+
+    // Check if the modal is no longer visible
+    expect(getByTestId("toggleModal")).toBeNull();
+
+    jest.useRealTimers(); // Restore real timers
+  });
   it("handles change campuses event", async () => {
     const mockResponse = {
       data: {
