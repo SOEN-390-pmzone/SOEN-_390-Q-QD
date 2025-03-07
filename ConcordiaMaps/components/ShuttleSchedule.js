@@ -179,7 +179,7 @@ const getNextShuttle = (schedule) => {
 function ShuttleSchedule({ visible, onClose }) {
   const [nextShuttle, setNextShuttle] = useState(""); //NOSONAR
   const [selectedCampus, setSelectedCampus] = useState("SGW"); //NOSONAR
-  const [selectedSchedule, setSelectedSchedule] = useState("weekday"); //NOSONAR
+  const [selectedSchedule, setSelectedSchedule] = useState("weekday");
 
   useEffect(() => {
     //NOSONAR
@@ -209,7 +209,7 @@ function ShuttleSchedule({ visible, onClose }) {
 
     // Call the function immediately
     updateScheduleAndShuttle();
-  }, [visible, selectedCampus]); // Only re-run when modal visibility or campus changes
+  }, [visible, selectedCampus]); // Only re-run when modal visibility or campus changes //NOSONAR
 
   // Rest of the component remains unchanged
   const schedule = schedules[selectedCampus][selectedSchedule];
