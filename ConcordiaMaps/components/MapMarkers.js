@@ -7,10 +7,10 @@ import PopupModal from "./PopupModal";
 const customMarkerImage = require("../assets/PinLogo.png");
 
 const MapMarkers = ({ markers }) => {
-  if (!markers || markers.length === 0) return null;
-
   const [popupVisible, setPopupVisible] = useState(false);
   const [popupData, setPopupData] = useState(null);
+
+  if (!markers || markers.length === 0) return null;
 
   const handleMarkerPress = (marker) => {
     setPopupData(marker);
@@ -24,9 +24,9 @@ const MapMarkers = ({ markers }) => {
 
   return (
     <>
-      {markers.map((marker, index) => (
+      {markers.map((marker) => (
         <Marker
-          key={index}
+          key={`${marker.name}-${marker.coordinate.latitude}-${marker.coordinate.longitude}`}
           coordinate={marker.coordinate}
           title={marker.name}
           address={marker.address}

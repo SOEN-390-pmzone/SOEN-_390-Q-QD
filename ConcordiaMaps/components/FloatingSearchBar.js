@@ -24,12 +24,18 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
 
   // Generate a new session token when component mounts
   useEffect(() => {
-    // Create a more secure random token
-    const array = new Uint8Array(16);
-    window.crypto.getRandomValues(array);
-    const token = Array.from(array)
-      .map((b) => b.toString(16).padStart(2, "0"))
-      .join("");
+    // Create a random token without using window.crypto (not available in React Native)
+    const generateRandomToken = () => {
+      const chars =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+      let result = "";
+      for (let i = 0; i < 16; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return result;
+    };
+
+    const token = generateRandomToken();
     sessionTokenRef.current = token;
 
     return () => {
@@ -107,14 +113,18 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
         setSearchQuery("");
         setPredictions([]);
 
-        // Generate a new session token after selection is complete
-        // (as recommended by Google Places API docs)
-        const array = new Uint8Array(16);
-        window.crypto.getRandomValues(array);
-        const token = Array.from(array)
-          .map((b) => b.toString(16).padStart(2, "0"))
-          .join("");
-        sessionTokenRef.current = token;
+        // Generate a new session token without using window.crypto
+        const generateRandomToken = () => {
+          const chars =
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+          let result = "";
+          for (let i = 0; i < 16; i++) {
+            result += chars.charAt(Math.floor(Math.random() * chars.length));
+          }
+          return result;
+        };
+
+        sessionTokenRef.current = generateRandomToken();
       }
     } catch (error) {
       console.error("Error fetching place details:", error);

@@ -8,6 +8,12 @@ const BuildingColoring = () => {
       {coloringData.features.map((feature, index) => {
         const { geometry, properties } = feature;
 
+        // Create a unique key using properties if available, or fallback to a composite key
+        const uniqueKey =
+          properties.id ||
+          properties.name ||
+          `${geometry.type}-${properties.code || ""}-${index}`;
+
         if (geometry.type === "Polygon") {
           const coordinates = geometry.coordinates[0].map((coord) => ({
             latitude: coord[1],
@@ -16,7 +22,7 @@ const BuildingColoring = () => {
 
           return (
             <Polygon
-              key={index}
+              key={uniqueKey}
               coordinates={coordinates}
               fillColor="rgba(255, 0, 0, 0.5)"
               strokeColor="rgba(255, 0, 0, 1)"
@@ -28,7 +34,7 @@ const BuildingColoring = () => {
         if (geometry.type === "Point") {
           return (
             <Marker
-              key={index}
+              key={uniqueKey}
               coordinate={{
                 latitude: geometry.coordinates[1],
                 longitude: geometry.coordinates[0],

@@ -33,13 +33,7 @@ export const useGoogleMapDirections = () => {
     try {
       const data = await getDirections(origin, destination);
 
-      if (
-        !data ||
-        !data.routes ||
-        !data.routes[0] ||
-        !data.routes[0].legs ||
-        !data.routes[0].legs[0]
-      ) {
+      if (!data?.routes?.[0]?.legs?.[0]) {
         throw new Error("Invalid directions data structure");
       }
 

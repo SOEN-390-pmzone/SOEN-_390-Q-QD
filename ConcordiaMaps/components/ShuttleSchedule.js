@@ -195,12 +195,10 @@ function ShuttleSchedule({ visible, onClose }) {
       const isFriday = day === 5;
       const currentScheduleType = isFriday ? "friday" : "weekday";
 
-      // Update schedule type if needed (without triggering another effect)
-      if (selectedSchedule !== currentScheduleType) {
-        setSelectedSchedule(currentScheduleType);
-      }
+      // Update schedule type
+      setSelectedSchedule(currentScheduleType);
 
-      // Always calculate next shuttle
+      // Calculate next shuttle
       setNextShuttle(
         getNextShuttle(schedules[selectedCampus][currentScheduleType]),
       );
@@ -208,7 +206,13 @@ function ShuttleSchedule({ visible, onClose }) {
 
     // Call the function immediately
     updateScheduleAndShuttle();
-  }, [visible, selectedCampus]); // Only re-run when modal visibility or campus changes
+
+    // Set up interval to update the next shuttle time regularly
+    const intervalId = setInterval(updateScheduleAndShuttle, 60000); // Update every minute
+
+    // Clean up interval on unmount or when dependencies change
+    return () => clearInterval(intervalId);
+  }, [selectedCampus]); // Only re-run when campus changes
 
   // Rest of the component remains unchanged
   const schedule = schedules[selectedCampus][selectedSchedule];
@@ -283,11 +287,14 @@ function ShuttleSchedule({ visible, onClose }) {
           <View style={styles.scheduleContainer}>
             <View style={styles.table}>
               {/* Schedule Rows */}
-              {scheduleChunks.map((chunk, index) => (
-                <View key={index} style={styles.tableRow}>
-                  {chunk.map((time, i) => (
+              {scheduleChunks.map((chunk, rowIndex) => (
+                <View
+                  key={`row-${rowIndex}-${chunk.join("-")}`}
+                  style={styles.tableRow}
+                >
+                  {chunk.map((time, columnIndex) => (
                     <Text
-                      key={i}
+                      key={`${time}-${rowIndex}-${columnIndex}`}
                       style={[
                         styles.tableCell,
                         time === nextShuttle && styles.nextShuttleCell,
