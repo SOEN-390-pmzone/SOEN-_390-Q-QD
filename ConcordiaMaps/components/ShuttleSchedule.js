@@ -176,9 +176,6 @@ const getNextShuttle = (schedule) => {
   return "No more shuttles today";
 };
 
-//sonarqube keeps flagging this line as a code smell, but it's necessary for the function to work and is not
-//a security risk or a bug. It's a false positive.
-// sonarqube:ignore:next-line
 function ShuttleSchedule({ visible, onClose }) {
   const [nextShuttle, setNextShuttle] = useState("");
   const [selectedCampus, setSelectedCampus] = useState("SGW");
@@ -188,34 +185,29 @@ function ShuttleSchedule({ visible, onClose }) {
     const updateScheduleAndShuttle = () => {
       const day = new Date().getDay();
 
-      // Handle weekends
       if (day === 0 || day === 6) {
         setNextShuttle("No shuttle service on weekends");
         return;
       }
 
-      // Determine if it's Friday
       const isFriday = day === 5;
       const currentScheduleType = isFriday ? "friday" : "weekday";
 
-      // Update schedule type
-      setSelectedSchedule(currentScheduleType);
+      // Avoid unnecessary re-renders by checking if state is already set
+      setSelectedSchedule((prev) =>
+        prev !== currentScheduleType ? currentScheduleType : prev,
+      );
 
-      // Calculate next shuttle
       setNextShuttle(
         getNextShuttle(schedules[selectedCampus][currentScheduleType]),
       );
     };
 
-    // Call the function immediately
     updateScheduleAndShuttle();
+    const intervalId = setInterval(updateScheduleAndShuttle, 60000);
 
-    // Set up interval to update the next shuttle time regularly
-    const intervalId = setInterval(updateScheduleAndShuttle, 60000); // Update every minute
-
-    // Clean up interval on unmount or when dependencies change
     return () => clearInterval(intervalId);
-  }, [selectedCampus]); // Only re-run when campus changes
+  }, [selectedCampus]);
 
   // Rest of the component remains unchanged
   const schedule = schedules[selectedCampus][selectedSchedule];
