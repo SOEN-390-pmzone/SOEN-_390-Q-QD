@@ -22,19 +22,18 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
   const [userLocation, setUserLocation] = useState(null);
   const sessionTokenRef = useRef("");
 
+  const generateRandomToken = () => {
+    const chars =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let result = "";
+    for (let i = 0; i < 16; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  };
+
   // Generate a new session token when component mounts
   useEffect(() => {
-    // Create a random token without using window.crypto (not available in React Native)
-    const generateRandomToken = () => {
-      const chars =
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-      let result = "";
-      for (let i = 0; i < 16; i++) {
-        result += chars.charAt(Math.floor(Math.random() * chars.length));
-      }
-      return result;
-    };
-
     const token = generateRandomToken();
     sessionTokenRef.current = token;
 
@@ -113,17 +112,7 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
         setSearchQuery("");
         setPredictions([]);
 
-        // Generate a new session token without using window.crypto
-        const generateRandomToken = () => {
-          const chars =
-            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-          let result = "";
-          for (let i = 0; i < 16; i++) {
-            result += chars.charAt(Math.floor(Math.random() * chars.length));
-          }
-          return result;
-        };
-
+        // Use the function defined above
         sessionTokenRef.current = generateRandomToken();
       }
     } catch (error) {

@@ -287,14 +287,11 @@ function ShuttleSchedule({ visible, onClose }) {
           <View style={styles.scheduleContainer}>
             <View style={styles.table}>
               {/* Schedule Rows */}
-              {scheduleChunks.map((chunk, rowIndex) => (
-                <View
-                  key={`row-${rowIndex}-${chunk.join("-")}`}
-                  style={styles.tableRow}
-                >
-                  {chunk.map((time, columnIndex) => (
+              {scheduleChunks.map((chunk, index) => (
+                <View key={index} style={styles.tableRow}>
+                  {chunk.map((time, i) => (
                     <Text
-                      key={`${time}-${rowIndex}-${columnIndex}`}
+                      key={i}
                       style={[
                         styles.tableCell,
                         time === nextShuttle && styles.nextShuttleCell,
