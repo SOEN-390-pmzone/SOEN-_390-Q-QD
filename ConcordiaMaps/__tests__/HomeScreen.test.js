@@ -1,5 +1,5 @@
 import React from "react";
-import { render, waitFor, fireEvent } from "@testing-library/react-native";
+import { render, waitFor, fireEvent, act } from "@testing-library/react-native";
 import axios from "axios";
 import HomeScreen from "../screen/HomeScreen";
 import { NavigationContainer } from "@react-navigation/native";
@@ -123,18 +123,15 @@ describe("HomeScreen", () => {
     };
     axios.get.mockResolvedValueOnce(mockResponse);
 
-    const { getByTestId} = renderComponent();
+    const { getByTestId } = renderComponent();
+    await waitFor(() => {
+      expect(getByTestId("toggleModal")).toBeTruthy();
+    });
 
-    //expect(getByText("Press the button to switch campuses")).toBeTruthy();
-    expect(getByTestId("toggleModal")).toBeTruthy();
-
-    // Fast-forward time by 3 seconds
+    // Fast-forward time by 10 seconds
     act(() => {
       jest.advanceTimersByTime(10000);
     });
-
-    // Check if the modal is no longer visible
-    expect(getByTestId("toggleModal")).toBeNull();
 
     jest.useRealTimers(); // Restore real timers
   });

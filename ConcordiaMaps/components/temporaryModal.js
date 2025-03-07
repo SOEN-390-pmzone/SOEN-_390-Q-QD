@@ -8,11 +8,17 @@ import {
 import React from "react";
 import styles from "../styles.js";
 import PropTypes from "prop-types";
-export default function TemporaryModal({ text, modalState, onRequestClose, TestID }) {
-  
+export default function TemporaryModal({
+  text,
+  modalState,
+  onRequestClose,
+  TestID,
+}) {
   TemporaryModal.propTypes = {
     text: PropTypes.string.isRequired,
-    time: PropTypes.string.isRequired, // Validate that `text` is a required string
+    modalState: PropTypes.bool.isRequired,
+    TestID: PropTypes.string.isRequired,
+    onRequestClose: PropTypes.func.isRequired, // Validate that `text` is a required string
   };
   return (
     <View>
@@ -20,10 +26,9 @@ export default function TemporaryModal({ text, modalState, onRequestClose, TestI
         animationType="fade"
         transparent={true}
         visible={modalState}
-        testID = {TestID}
+        testID={TestID}
       >
-        <TouchableWithoutFeedback onPress={onRequestClose}
-        >
+        <TouchableWithoutFeedback onPress={onRequestClose}>
           <View style={styles.centeredView}>
             <View style={styles.modalView}>
               <Text style={styles.modalText}>{text}</Text>

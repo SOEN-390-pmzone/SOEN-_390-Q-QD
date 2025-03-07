@@ -1,11 +1,5 @@
 import React, { useState, useEffect, useRef, useContext } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Image,
-  TouchableWithoutFeedback,
-} from "react-native";
+import { View, Text, TouchableOpacity, Image } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import NavBar from "../components/NavBar";
 import Header from "../components/Header";
@@ -154,7 +148,7 @@ function HomeScreen({ asyncKey = "Campus" }) {
             time={toggleModalTime}
             modalState={modalState}
             onRequestClose={() => setModalState(false)}
-            TestID = "toggleModal"
+            TestID="toggleModal"
           />
 
           <MapView
