@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   TextInput,
@@ -20,6 +20,23 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
   const [loading, setLoading] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState("");
   const [userLocation, setUserLocation] = useState(null);
+  const sessionTokenRef = useRef("");
+
+  // Generate a new session token when component mounts
+  useEffect(() => {
+    // Create a more secure random token
+    const array = new Uint8Array(16);
+    window.crypto.getRandomValues(array);
+    const token = Array.from(array)
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+    sessionTokenRef.current = token;
+
+    return () => {
+      // Clear session token on unmount
+      sessionTokenRef.current = "";
+    };
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -58,14 +75,13 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
         locationParam = `&location=${userLocation.latitude},${userLocation.longitude}&radius=5000`;
       } else {
         console.warn(
-          "User location not available. Searching without location bias.",
+          "User location not available. Searching without location bias."
         );
       }
 
-      const sessionToken = Math.random().toString(36).substring(2, 15);
-
+      //use the session token to prevent caching of search results
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_MAPS_API_KEY}&components=country:ca${locationParam}&sessiontoken=${sessionToken}`,
+        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_MAPS_API_KEY}&components=country:ca${locationParam}&sessiontoken=${sessionTokenRef.current}`
       );
 
       const { predictions } = await response.json();
@@ -80,7 +96,7 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
   const handleSelection = async (placeId) => {
     try {
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry&key=${GOOGLE_MAPS_API_KEY}`,
+        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry&key=${GOOGLE_MAPS_API_KEY}&sessiontoken=${sessionTokenRef.current}`
       );
       const { result } = await response.json();
       if (result?.geometry?.location) {
@@ -90,6 +106,15 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
         });
         setSearchQuery("");
         setPredictions([]);
+
+        // Generate a new session token after selection is complete
+        // (as recommended by Google Places API docs)
+        const array = new Uint8Array(16);
+        window.crypto.getRandomValues(array);
+        const token = Array.from(array)
+          .map((b) => b.toString(16).padStart(2, "0"))
+          .join("");
+        sessionTokenRef.current = token;
       }
     } catch (error) {
       console.error("Error fetching place details:", error);
@@ -128,7 +153,7 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
           style={[styles.list, { marginTop: 5 }]}
           renderItem={({ item }) => (
             <TouchableOpacity
-              onPress={() => handleSelection(item.place_id, item.description)}
+              onPress={() => handleSelection(item.place_id)}
               style={styles.item}
             >
               <Ionicons
