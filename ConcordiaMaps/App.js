@@ -1,4 +1,4 @@
-import React, { useState, createContext } from "react";
+import React, { useState, createContext, useMemo } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import HomeScreen from "./screen/HomeScreen";
@@ -6,7 +6,6 @@ import { LocationProvider } from "./contexts/LocationContext";
 import PopupModal from "./components/PopupModal"; // Import the PopupModal
 import styles from "./styles";
 import GetDirections from "./components/GetDirections";
-//import MapMarkers from "./components/MapMarkers"; // Ensure this import exists
 
 // Create Context for modal data and visibility
 export const ModalContext = createContext();
@@ -24,12 +23,16 @@ export default function App() {
     setModalVisible(!isModalVisible);
   };
 
+  // Memoize the context value
+  const modalContextValue = useMemo(
+    () => ({ isModalVisible, modalData, toggleModal, setModalData }),
+    [isModalVisible, modalData],
+  );
+
   return (
     <LocationProvider>
       {/* Provide the modal context to all components */}
-      <ModalContext.Provider
-        value={{ isModalVisible, modalData, toggleModal, setModalData }}
-      >
+      <ModalContext.Provider value={modalContextValue}>
         <NavigationContainer>
           <Stack.Navigator screenOptions={{ headerShown: false }}>
             <Stack.Screen

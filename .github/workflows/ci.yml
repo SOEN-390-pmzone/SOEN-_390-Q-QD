@@ -14,7 +14,7 @@ jobs:
 
       - name: Install Dependencies
         working-directory: ./ConcordiaMaps
-        run: npm install
+        run: npm ci
 
       - name: Lint Code
         working-directory: ./ConcordiaMaps
@@ -24,10 +24,6 @@ jobs:
         working-directory: ./ConcordiaMaps
         run: npx prettier --check .
 
-      - name: Run Jest Tests
-        working-directory: ./ConcordiaMaps
-        run: npm run test -- --coverage
-
   test:
     runs-on: ubuntu-latest
     steps:
@@ -36,7 +32,7 @@ jobs:
 
       - name: Install Dependencies
         working-directory: ./ConcordiaMaps
-        run: npm install
+        run: npm ci
 
       - name: Lint Code
         working-directory: ./ConcordiaMaps

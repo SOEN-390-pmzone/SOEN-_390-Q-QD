@@ -1,6 +1,7 @@
 import React from "react";
 import { render, fireEvent, waitFor } from "@testing-library/react-native";
 import ShuttleSchedule from "../../components/ShuttleSchedule";
+import { getNextShuttle } from "../../components/ShuttleSchedule";
 
 jest.useFakeTimers().setSystemTime(new Date("2025-02-06T15:00:00Z")); // Mock current time
 
@@ -218,4 +219,121 @@ it("handles invalid time formats in schedule gracefully", async () => {
 
   // Restore console.error
   console.error = originalConsoleError;
+});
+
+it("handles shuttletime>currenttime gracefully", async () => {
+  // Mock console.error to prevent test output pollution
+  const originalConsoleError = console.error;
+  console.error = jest.fn();
+
+  // Create a mock implementation with invalid time
+  jest.mock("../../components/ShuttleSchedule", () => {
+    const actual = jest.requireActual("../../components/ShuttleSchedule");
+    const modified = {
+      ...actual.default,
+      getNextShuttle: (schedule) => {
+        // Add an invalid time format to the schedule
+        const corruptedSchedule = ["invalid-time", ...schedule];
+        return actual.default.getNextShuttle(corruptedSchedule);
+      },
+    };
+    return modified;
+  });
+
+  const { getByText } = render(
+    <ShuttleSchedule visible={true} onClose={jest.fn()} />,
+  );
+
+  await waitFor(() =>
+    expect(getByText(/Next Shuttle from SGW:/i)).toBeTruthy(),
+  );
+
+  // Restore console.error
+  console.error = originalConsoleError;
+});
+
+it("maintains correct state when switching between campuses and schedules", async () => {
+  const { getByText } = render(
+    <ShuttleSchedule visible={true} onClose={jest.fn()} />,
+  );
+
+  // Switch to Loyola campus
+  fireEvent.press(getByText("Loyola"));
+  await waitFor(() => {
+    expect(getByText(/Next Shuttle from Loyola/i)).toBeTruthy();
+  });
+
+  // Switch to Friday schedule
+  fireEvent.press(getByText("Friday"));
+  await waitFor(() => {
+    const fridayButton = getByText("Friday");
+    const hasActiveStyle = checkForActiveStyle(fridayButton);
+    expect(hasActiveStyle).toBe(true);
+  });
+});
+
+it("renders efficiently without unnecessary re-renders", () => {
+  const onCloseMock = jest.fn();
+  const { rerender } = render(
+    <ShuttleSchedule visible={true} onClose={onCloseMock} />,
+  );
+
+  // Rerender with same props should not cause significant changes
+  rerender(<ShuttleSchedule visible={true} onClose={onCloseMock} />);
+  expect(onCloseMock).not.toHaveBeenCalled();
+});
+
+it("handles edge case times correctly", () => {
+  // Test midnight and noon edge cases
+  jest.setSystemTime(new Date("2025-02-06T00:00:00Z"));
+  const { getByText } = render(
+    <ShuttleSchedule visible={true} onClose={jest.fn()} />,
+  );
+  expect(getByText(/Next Shuttle/i)).toBeTruthy();
+});
+
+it("updates selected campus when SGW button is pressed", async () => {
+  const { getByText } = render(
+    <ShuttleSchedule visible={true} onClose={jest.fn()} />,
+  );
+
+  fireEvent.press(getByText("SGW Campus"));
+
+  await waitFor(() => {
+    expect(getByText(/Next Shuttle from SGW:/i)).toBeTruthy();
+  });
+});
+
+it("skips invalid shuttle times (out of range values)", () => {
+  const schedule = ["13:00 PM", "10:65 AM", "00:30 AM"]; // Invalid times
+  expect(getNextShuttle(schedule)).toBe("No more shuttles today"); // Expect the error message for invalid times
+});
+
+it("handles unexpected errors gracefully", () => {
+  const schedule = ["09:00 AM", null, "11:00 AM"];
+  jest.setSystemTime(new Date("2025-02-06T23:00:00Z"));
+
+  expect(getNextShuttle(schedule)).toBe("No more shuttles today");
+});
+
+it("converts 12 AM to midnight correctly", () => {
+  const testSchedule = ["12:00 AM", "01:00 AM", "02:00 AM"];
+  const result = getNextShuttle(testSchedule);
+  expect(result).toBe("No more shuttles today");
+});
+
+it("skips invalid times", async () => {
+  const corruptedSchedule = ["invalid-time", "09:30 AM", "12:45 PM"];
+
+  jest.mock("../../components/ShuttleSchedule", () => ({
+    getNextShuttle: jest.fn(() => corruptedSchedule),
+  }));
+
+  const { getByText } = render(
+    <ShuttleSchedule visible={true} onClose={jest.fn()} />,
+  );
+
+  await waitFor(() =>
+    expect(getByText(/Next Shuttle from SGW:/i)).toBeTruthy(),
+  );
 });

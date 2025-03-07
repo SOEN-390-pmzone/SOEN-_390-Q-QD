@@ -1,0 +1,5 @@
+#Ignore android build file
+android/app/build/**
+
+#Ignore coverage folder
+coverage/**

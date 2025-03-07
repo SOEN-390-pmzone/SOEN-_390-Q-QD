@@ -175,15 +175,15 @@ function HomeScreen({ asyncKey = "Campus" }) {
             watchUserLocation={true}
             onRegionChangeComplete={(region) => setMapRegion(region)}
           >
-            {Building.map((building, index) => (
+            {Building.map((building) => (
               <Marker
-                key={index}
-                testID={`marker-${index}`}
+                key={building.name || building.address}
+                testID={`marker-${building.name?.toLowerCase().replace(/\s+/g, "-") || building.id}`}
                 coordinate={building.coordinate}
                 title={building.name}
                 address={building.address}
                 fullBuildingName={building.fullBuildingName}
-                onPress={() => handleMarkerPress(building)} // Add onPress handler
+                onPress={() => handleMarkerPress(building)}
               >
                 <Image
                   source={customMarkerImage}
