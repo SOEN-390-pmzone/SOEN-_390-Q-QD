@@ -17,7 +17,7 @@ const IndoorNavigation = ({ route, navigation }) => {
   const { floor } = route.params;
 
   useEffect(() => {
-    // Set up navigation header
+    // Set up navigation healder
     navigation.setOptions({
       headerTitle: 'Indoor Navigation',
       headerStyle: {
@@ -72,11 +72,57 @@ const IndoorNavigation = ({ route, navigation }) => {
           // Create the JavaScript to execute in the WebView
           const js = `
           (function() {
+            // Function to clear all highlights and paths
+            function clearAllHighlights() {
+              const existingElements = document.querySelectorAll('.navigation-path, .navigation-button, .navigation-marker, .room-highlight');
+              existingElements.forEach(p => p.remove());
+            }
+
+            // Function to highlight a room
+            function highlightRoom(roomId, coordinates, color) {
+              if (!coordinates[roomId]) {
+                console.error('No coordinates found for room:', roomId);
+                return;
+              }
+
+              const roomData = coordinates[roomId];
+              const svgNS = "http://www.w3.org/2000/svg";
+              
+              // Create a rectangle for the room highlight
+              const highlight = document.createElementNS(svgNS, "rect");
+              highlight.classList.add('room-highlight');
+              
+              // Set position and size (making it slightly larger than the point for visibility)
+              const x = parseInt(roomData.x || roomData.nearestPoint.x) - 20;
+              const y = parseInt(roomData.y || roomData.nearestPoint.y) - 20;
+              highlight.setAttribute('x', x);
+              highlight.setAttribute('y', y);
+              highlight.setAttribute('width', '40');
+              highlight.setAttribute('height', '40');
+              highlight.setAttribute('fill', color);
+              highlight.setAttribute('fill-opacity', '0.5');
+              highlight.setAttribute('stroke', color);
+              highlight.setAttribute('stroke-width', '2');
+              
+              // Add animation
+              const animate = document.createElementNS(svgNS, "animate");
+              animate.setAttribute('attributeName', 'fill-opacity');
+              animate.setAttribute('values', '0.5;0.2;0.5');
+              animate.setAttribute('dur', '2s');
+              animate.setAttribute('repeatCount', 'indefinite');
+              highlight.appendChild(animate);
+
+              // Add to SVG
+              const svgElement = document.querySelector('svg');
+              if (svgElement) {
+                svgElement.appendChild(highlight);
+              }
+            }
+
             // Function to visualize the path
             function visualizePath(path, coordinates, svgElement) {
-              // Clear any existing paths
-              const existingPaths = document.querySelectorAll('.navigation-path, .navigation-button, .navigation-marker');
-              existingPaths.forEach(p => p.remove());
+              // Clear any existing paths and highlights
+              clearAllHighlights();
         
               // Don't draw anything if path is empty
               if (!path || path.length < 2) return;
@@ -149,6 +195,10 @@ const IndoorNavigation = ({ route, navigation }) => {
               endMarker.setAttribute('fill', 'blue');
               endMarker.classList.add('navigation-marker');
               svgElement.appendChild(endMarker);
+
+              // Highlight start and end rooms
+              highlightRoom(path[0], coordinates, '#4CAF50');  // Green for start
+              highlightRoom(path[path.length - 1], coordinates, '#2196F3');  // Blue for end
 
               console.log('Path visualization completed');
             }
@@ -367,6 +417,72 @@ const IndoorNavigation = ({ route, navigation }) => {
     `;
   };
 
+  // Add this new function to highlight rooms when selected
+  const highlightSelectedRooms = () => {
+    if (!webViewRef.current) return;
+
+    const coordinates = getHallRoomData(floor);
+    const coordinatesJSON = JSON.stringify(coordinates);
+
+    const js = `
+    (function() {
+      // Clear existing highlights
+      const existingHighlights = document.querySelectorAll('.room-highlight');
+      existingHighlights.forEach(h => h.remove());
+
+      // Function to highlight a room
+      function highlightRoom(roomId, coordinates, color) {
+        if (!coordinates[roomId]) {
+          console.error('No coordinates found for room:', roomId);
+          return;
+        }
+
+        const roomData = coordinates[roomId];
+        const svgNS = "http://www.w3.org/2000/svg";
+        
+        const highlight = document.createElementNS(svgNS, "rect");
+        highlight.classList.add('room-highlight');
+        
+        const x = parseInt(roomData.x || roomData.nearestPoint.x) - 20;
+        const y = parseInt(roomData.y || roomData.nearestPoint.y) - 20;
+        highlight.setAttribute('x', x);
+        highlight.setAttribute('y', y);
+        highlight.setAttribute('width', '40');
+        highlight.setAttribute('height', '40');
+        highlight.setAttribute('fill', color);
+        highlight.setAttribute('fill-opacity', '0.5');
+        highlight.setAttribute('stroke', color);
+        highlight.setAttribute('stroke-width', '2');
+        
+        const animate = document.createElementNS(svgNS, "animate");
+        animate.setAttribute('attributeName', 'fill-opacity');
+        animate.setAttribute('values', '0.5;0.2;0.5');
+        animate.setAttribute('dur', '2s');
+        animate.setAttribute('repeatCount', 'indefinite');
+        highlight.appendChild(animate);
+
+        const svgElement = document.querySelector('svg');
+        if (svgElement) {
+          svgElement.appendChild(highlight);
+        }
+      }
+
+      const coordinates = ${coordinatesJSON};
+      const startPoint = "${startPoint}";
+      const endPoint = "${endPoint}";
+
+      if (startPoint) {
+        highlightRoom(startPoint, coordinates, '#4CAF50');  // Green for start
+      }
+      if (endPoint) {
+        highlightRoom(endPoint, coordinates, '#2196F3');  // Blue for end
+      }
+    })();
+    `;
+
+    webViewRef.current.injectJavaScript(js);
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Indoor Navigation - H Building {floor}th Floor</Text>
@@ -388,7 +504,10 @@ const IndoorNavigation = ({ route, navigation }) => {
               <TouchableOpacity 
                 key={node} 
                 style={[styles.option, startPoint === node && styles.selectedOption]}
-                onPress={() => setStartPoint(node)}
+                onPress={() => {
+                  setStartPoint(node);
+                  highlightSelectedRooms();
+                }}
               >
                 <Text style={styles.optionText}>{node}</Text>
               </TouchableOpacity>
@@ -403,7 +522,10 @@ const IndoorNavigation = ({ route, navigation }) => {
               <TouchableOpacity 
                 key={node} 
                 style={[styles.option, endPoint === node && styles.selectedOption]}
-                onPress={() => setEndPoint(node)}
+                onPress={() => {
+                  setEndPoint(node);
+                  highlightSelectedRooms();
+                }}
               >
                 <Text style={styles.optionText}>{node}</Text>
               </TouchableOpacity>
