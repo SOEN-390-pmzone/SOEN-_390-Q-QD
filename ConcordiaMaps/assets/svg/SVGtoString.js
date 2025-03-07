@@ -1490,5 +1490,6 @@ const floor9SVG= `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
     </g>
   </g>
 </svg>
+
 `
 export default { floor8SVG, floor9SVG };
