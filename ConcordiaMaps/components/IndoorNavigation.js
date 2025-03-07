@@ -4,6 +4,7 @@ import { WebView } from 'react-native-webview';
 import { getHallRoomData, getHallGraphData } from '../constants/FloorData';
 import { findShortestPath } from './PathFinder';
 import FloorPlanService from '../services/FloorPlanService';
+import InterFloorNavigation from './InterFloorNavigation';
 
 const IndoorNavigation = ({ route, navigation }) => {
   const [startPoint, setStartPoint] = useState('');
@@ -11,6 +12,7 @@ const IndoorNavigation = ({ route, navigation }) => {
   const [path, setPath] = useState([]);
   const [allNodes, setAllNodes] = useState([]);
   const [floorPlan, setFloorPlan] = useState('');
+  const [isInterFloorModalVisible, setIsInterFloorModalVisible] = useState(false);
   const webViewRef = useRef(null);
   const { floor } = route.params;
 
@@ -414,6 +416,13 @@ const IndoorNavigation = ({ route, navigation }) => {
         <Text style={styles.buttonText}>Find Path</Text>
       </TouchableOpacity>
 
+      <TouchableOpacity 
+        style={[styles.button, { marginTop: 10, backgroundColor: '#666' }]} 
+        onPress={() => setIsInterFloorModalVisible(true)}
+      >
+        <Text style={styles.buttonText}>Inter-Floor Navigation</Text>
+      </TouchableOpacity>
+
       <View style={styles.resultContainerWrapper}>
         <Text style={styles.resultTitle}>Navigation Path:</Text>
         <ScrollView style={styles.resultContainer}>
@@ -433,6 +442,16 @@ const IndoorNavigation = ({ route, navigation }) => {
           )}
         </ScrollView>
       </View>
+
+      <InterFloorNavigation
+        isVisible={isInterFloorModalVisible}
+        onClose={() => setIsInterFloorModalVisible(false)}
+        startFloor={floor}
+        endFloor={floor === 8 ? 9 : 8}
+        onPathCalculated={(pathData) => {
+          console.log('Inter-floor path calculated:', pathData);
+        }}
+      />
     </View>
   );
 };

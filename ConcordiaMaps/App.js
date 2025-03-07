@@ -9,6 +9,7 @@ import GetDirections from "./components/GetDirections";
 import IndoorNavigation from "./components/IndoorNavigation";
 import FloorSelector from "./components/FloorSelector";
 import BuildingSelector from "./components/BuildingSelector";
+import FloorNavigationSelector from "./components/FloorNavigationSelector";
 // import MapMarkers from "./components/MapMarkers"; // Ensure this import exists
 
 // Create Context for modal data and visibility
@@ -57,6 +58,7 @@ export default function App() {
             <Stack.Screen name="BuildingSelector" component={BuildingSelector} />
             <Stack.Screen name="FloorSelector" component={FloorSelector} />
             <Stack.Screen name="IndoorNavigation" component={IndoorNavigation} />
+            <Stack.Screen name="FloorNavigationSelector" component={FloorNavigationSelector} />
           </Stack.Navigator>
 
           <PopupModalWrapper
