@@ -185,29 +185,28 @@ function ShuttleSchedule({ visible, onClose }) {
     const updateScheduleAndShuttle = () => {
       const day = new Date().getDay();
 
+      // Handle weekends
       if (day === 0 || day === 6) {
         setNextShuttle("No shuttle service on weekends");
         return;
       }
 
+      // Determine if it's Friday
       const isFriday = day === 5;
-      const currentScheduleType = isFriday ? "friday" : "weekday";
+      const defaultScheduleType = isFriday ? "friday" : "weekday";
 
-      // Avoid unnecessary re-renders by checking if state is already set
       setSelectedSchedule((prev) =>
-        prev !== currentScheduleType ? currentScheduleType : prev,
+        prev !== "weekday" && prev !== "friday" ? defaultScheduleType : prev,
       );
 
+      // Update next shuttle time
       setNextShuttle(
-        getNextShuttle(schedules[selectedCampus][currentScheduleType]),
+        getNextShuttle(schedules[selectedCampus][selectedSchedule]),
       );
     };
 
     updateScheduleAndShuttle();
-    const intervalId = setInterval(updateScheduleAndShuttle, 60000);
-
-    return () => clearInterval(intervalId);
-  }, [selectedCampus]);
+  }, [visible, selectedCampus]);
 
   // Rest of the component remains unchanged
   const schedule = schedules[selectedCampus][selectedSchedule];
