@@ -183,25 +183,20 @@ function ShuttleSchedule({ visible, onClose }) {
 
   useEffect(() => {
     const updateScheduleAndShuttle = () => {
-      const day = new Date().getDay();
+      const now = new Date();
+      const day = now.getDay();
 
-      // Handle weekends
       if (day === 0 || day === 6) {
         setNextShuttle("No shuttle service on weekends");
         return;
       }
 
-      // Determine if it's Friday
-      const isFriday = day === 5;
-      const defaultScheduleType = isFriday ? "friday" : "weekday";
+      // Determine default schedule type (weekday or friday)
+      const defaultScheduleType = day === 5 ? "friday" : "weekday";
 
-      setSelectedSchedule((prev) =>
-        prev !== "weekday" && prev !== "friday" ? defaultScheduleType : prev,
-      );
-
-      // Update next shuttle time
+      // Get next shuttle
       setNextShuttle(
-        getNextShuttle(schedules[selectedCampus][selectedSchedule]),
+        getNextShuttle(schedules[selectedCampus][defaultScheduleType]),
       );
     };
 
