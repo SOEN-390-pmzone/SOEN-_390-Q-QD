@@ -176,6 +176,8 @@ const getNextShuttle = (schedule) => {
   return "No more shuttles today";
 };
 
+//sonarqube keeps flagging this line as a code smell, but it's necessary for the function to work and is not
+//a security risk or a bug. It's a false positive.
 // sonarqube:ignore:next-line
 function ShuttleSchedule({ visible, onClose }) {
   const [nextShuttle, setNextShuttle] = useState("");
@@ -201,7 +203,7 @@ function ShuttleSchedule({ visible, onClose }) {
 
       // Calculate next shuttle
       setNextShuttle(
-        getNextShuttle(schedules[selectedCampus][currentScheduleType]),
+        getNextShuttle(schedules[selectedCampus][currentScheduleType])
       );
     };
 
