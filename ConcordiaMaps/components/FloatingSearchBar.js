@@ -11,6 +11,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import * as Location from "expo-location";
 import styles from "../styles";
 import PropTypes from "prop-types";
+import * as Crypto from "expo-crypto";
 
 const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
   const GOOGLE_MAPS_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
@@ -22,14 +23,25 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
   const [userLocation, setUserLocation] = useState(null);
   const sessionTokenRef = useRef("");
 
-  const generateRandomToken = () => {
-    const chars =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    let result = "";
-    for (let i = 0; i < 16; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length));
+  const generateRandomToken = async () => {
+    try {
+      // Generate random bytes
+      const randomBytes = await Crypto.getRandomBytesAsync(16);
+
+      // Convert to base64 string
+      let base64 = "";
+      for (let i = 0; i < randomBytes.length; i++) {
+        base64 += String.fromCharCode(randomBytes[i]);
+      }
+      base64 = btoa(base64);
+
+      // Remove non-alphanumeric characters and trim to length
+      return base64.replace(/[+/=]/g, "").substring(0, 16);
+    } catch (error) {
+      console.error("Error generating random token:", error);
+      // Fallback to less secure but functional method
+      return Math.random().toString(36).substring(2, 18);
     }
-    return result;
   };
 
   // Generate a new session token when component mounts

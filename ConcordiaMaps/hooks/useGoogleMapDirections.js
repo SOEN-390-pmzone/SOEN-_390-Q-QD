@@ -107,10 +107,7 @@ export const useGoogleMapDirections = () => {
         return [];
       }
 
-      if (
-        !data.routes[0].overview_polyline ||
-        !data.routes[0].overview_polyline.points
-      ) {
+      if (!data?.routes?.[0]?.overview_polyline?.points) {
         console.error(
           "Error fetching polyline: No overview_polyline.points found",
           data,
