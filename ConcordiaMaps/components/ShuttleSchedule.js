@@ -176,10 +176,29 @@ const getNextShuttle = (schedule) => {
   return "No more shuttles today";
 };
 
-function ShuttleSchedule({ visible, onClose }) {
+const useShuttleState = () => {
   const [nextShuttle, setNextShuttle] = useState("");
   const [selectedCampus, setSelectedCampus] = useState("SGW");
   const [selectedSchedule, setSelectedSchedule] = useState("weekday");
+
+  return {
+    nextShuttle,
+    setNextShuttle,
+    selectedCampus,
+    setSelectedCampus,
+    selectedSchedule,
+    setSelectedSchedule,
+  };
+};
+function ShuttleSchedule({ visible, onClose }) {
+  const {
+    nextShuttle,
+    setNextShuttle,
+    selectedCampus,
+    setSelectedCampus,
+    selectedSchedule,
+    setSelectedSchedule,
+  } = useShuttleState();
 
   useEffect(() => {
     const updateScheduleAndShuttle = () => {
@@ -196,7 +215,7 @@ function ShuttleSchedule({ visible, onClose }) {
 
       // Get next shuttle
       setNextShuttle(
-        getNextShuttle(schedules[selectedCampus][defaultScheduleType]),
+        getNextShuttle(schedules[selectedCampus][defaultScheduleType])
       );
     };
 
