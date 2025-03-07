@@ -1,8 +1,7 @@
 import React, { useState } from "react";
-import { View, TouchableOpacity, Text, Animated } from "react-native";
+import { View, TouchableOpacity, Text, Animated, Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import styles from "../styles";
-import { Alert } from "react-native";
 import ShuttleSchedule from "./ShuttleSchedule";
 
 function NavBar() {
