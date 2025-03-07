@@ -215,7 +215,7 @@ function ShuttleSchedule({ visible, onClose }) {
 
       // Get next shuttle
       setNextShuttle(
-        getNextShuttle(schedules[selectedCampus][defaultScheduleType])
+        getNextShuttle(schedules[selectedCampus][defaultScheduleType]),
       );
     };
 
