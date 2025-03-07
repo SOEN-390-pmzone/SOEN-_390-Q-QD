@@ -93,7 +93,6 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0.0"
-        manifestPlaceholders = [GOOGLE_MAPS_API_KEY: "$process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY"] // for the Google Maps API key
     }
     signingConfigs {
         debug {

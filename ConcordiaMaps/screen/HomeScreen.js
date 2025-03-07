@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import React, { useState, useEffect, useRef, useContext } from "react";
 import { View, Text, TouchableOpacity, Image } from "react-native";
 import MapView, { Marker } from "react-native-maps";
@@ -99,14 +98,14 @@ function HomeScreen({ asyncKey = "Campus" }) {
           latitudeDelta: 0.01,
           longitudeDelta: 0.01,
         },
-        2500,
+        2500
       ); // Duration of the animation in milliseconds
     }
   }, [coordinates]);
 
   const handleChangeCampuses = () => {
     setPostalCode((prevPostalCode) =>
-      prevPostalCode === sgwPostalCode ? loyolaPostalCode : sgwPostalCode,
+      prevPostalCode === sgwPostalCode ? loyolaPostalCode : sgwPostalCode
     );
   };
 
@@ -136,19 +135,9 @@ function HomeScreen({ asyncKey = "Campus" }) {
     toggleModal(); // Show modal
   };
 
-=======
-import React from "react";
-import { View, StyleSheet } from "react-native";
-import MapView from "react-native-maps";
-import NavBar from "../components/NavBar";
-import Header from "../components/Header";
-function HomeScreen() {
->>>>>>> main
   return (
-    <View style={styles.container}>
-      {/* Add Header and NavBar in the HomeScreen */}
+    <View style={styles.container} testID="home-screen">
       <Header />
-<<<<<<< HEAD
       <NavBar />
       <FloatingSearchBar onPlaceSelect={handlePlaceSelect} />
       {error ? <Text testID="error-message">{error}</Text> : null}
@@ -244,23 +233,4 @@ function HomeScreen() {
 HomeScreen.propTypes = {
   asyncKey: PropTypes.string,
 };
-=======
-      <NavBar /> {/* This is the navigation bar */}
-      {/* Map view */}
-      <MapView style={styles.map} />
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#912338",
-  },
-  map: {
-    flex: 1,
-  },
-});
-
->>>>>>> main
 export default HomeScreen;
