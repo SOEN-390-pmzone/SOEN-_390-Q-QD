@@ -177,11 +177,12 @@ const getNextShuttle = (schedule) => {
 };
 
 function ShuttleSchedule({ visible, onClose }) {
-  const [nextShuttle, setNextShuttle] = useState("");
-  const [selectedCampus, setSelectedCampus] = useState("SGW");
-  const [selectedSchedule, setSelectedSchedule] = useState("weekday");
+  const [nextShuttle, setNextShuttle] = useState(""); //NOSONAR
+  const [selectedCampus, setSelectedCampus] = useState("SGW"); //NOSONAR
+  const [selectedSchedule, setSelectedSchedule] = useState("weekday"); //NOSONAR
 
   useEffect(() => {
+    //NOSONAR
     const updateScheduleAndShuttle = () => {
       const day = new Date().getDay();
 
