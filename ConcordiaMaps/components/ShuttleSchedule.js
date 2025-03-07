@@ -176,51 +176,39 @@ const getNextShuttle = (schedule) => {
   return "No more shuttles today";
 };
 
-const useShuttleState = () => {
+function ShuttleSchedule({ visible, onClose }) {
   const [nextShuttle, setNextShuttle] = useState("");
   const [selectedCampus, setSelectedCampus] = useState("SGW");
   const [selectedSchedule, setSelectedSchedule] = useState("weekday");
 
-  return {
-    nextShuttle,
-    setNextShuttle,
-    selectedCampus,
-    setSelectedCampus,
-    selectedSchedule,
-    setSelectedSchedule,
-  };
-};
-function ShuttleSchedule({ visible, onClose }) {
-  const {
-    nextShuttle,
-    setNextShuttle,
-    selectedCampus,
-    setSelectedCampus,
-    selectedSchedule,
-    setSelectedSchedule,
-  } = useShuttleState();
-
   useEffect(() => {
     const updateScheduleAndShuttle = () => {
-      const now = new Date();
-      const day = now.getDay();
+      const day = new Date().getDay();
 
+      // Handle weekends
       if (day === 0 || day === 6) {
         setNextShuttle("No shuttle service on weekends");
         return;
       }
 
-      // Determine default schedule type (weekday or friday)
-      const defaultScheduleType = day === 5 ? "friday" : "weekday";
+      // Determine if it's Friday
+      const isFriday = day === 5;
+      const currentScheduleType = isFriday ? "friday" : "weekday";
 
-      // Get next shuttle
+      // Update schedule type if needed (without triggering another effect)
+      if (selectedSchedule !== currentScheduleType) {
+        setSelectedSchedule(currentScheduleType);
+      }
+
+      // Always calculate next shuttle
       setNextShuttle(
-        getNextShuttle(schedules[selectedCampus][defaultScheduleType]),
+        getNextShuttle(schedules[selectedCampus][currentScheduleType]),
       );
     };
 
+    // Call the function immediately
     updateScheduleAndShuttle();
-  }, [visible, selectedCampus]);
+  }, [visible, selectedCampus]); // Only re-run when modal visibility or campus changes
 
   // Rest of the component remains unchanged
   const schedule = schedules[selectedCampus][selectedSchedule];
@@ -295,11 +283,11 @@ function ShuttleSchedule({ visible, onClose }) {
           <View style={styles.scheduleContainer}>
             <View style={styles.table}>
               {/* Schedule Rows */}
-              {scheduleChunks.map((chunk) => (
-                <View key={`row-${chunk.join("-")}`} style={styles.tableRow}>
-                  {chunk.map((time) => (
+              {scheduleChunks.map((chunk, index) => (
+                <View key={index} style={styles.tableRow}>
+                  {chunk.map((time, i) => (
                     <Text
-                      key={`time-${time}`}
+                      key={i}
                       style={[
                         styles.tableCell,
                         time === nextShuttle && styles.nextShuttleCell,
