@@ -4,6 +4,8 @@ import { WebView } from 'react-native-webview';
 import FloorPlanService from '../services/FloorPlanService';
 import { getHallRoomData, getHallGraphData } from '../constants/FloorData';
 import { findShortestPath } from './PathFinder';
+import Header from './Header';
+import NavBar from './NavBar';
 
 const FloorNavigationSelector = () => {
   const [startFloor, setStartFloor] = useState('');
@@ -250,99 +252,107 @@ const FloorNavigationSelector = () => {
   );
 
   return (
-    <ScrollView 
-      style={styles.container}
-      nestedScrollEnabled={true}
-    >
-      <Text style={styles.title}>Floor Navigation</Text>
-      
-      <View style={styles.selectionContainer}>
-        {renderFloorSelector('Start Floor', startFloor, true)}
-        {renderFloorSelector('Destination Floor', endFloor, false)}
-      </View>
-
-      {startFloor && endFloor && (
+    <View style={styles.container}>
+      <Header />
+      <NavBar />
+      <ScrollView style={styles.scrollContainer}>
         <View style={styles.contentContainer}>
-          <View style={styles.roomSelectionContainer}>
-            {renderRoomSelector(
-              `Select Start Room (Floor ${startFloor})`,
-              getHallRoomData(startFloor),
-              selectedStartRoom,
-              setSelectedStartRoom
-            )}
-            
-            {renderRoomSelector(
-              `Select Destination Room (Floor ${endFloor})`,
-              getHallRoomData(endFloor),
-              selectedEndRoom,
-              setSelectedEndRoom
-            )}
+          <Text style={styles.title}>InterFloor Navigation</Text>
+          
+          <View style={styles.selectionContainer}>
+            {renderFloorSelector('Start Floor', startFloor, true)}
+            {renderFloorSelector('Destination Floor', endFloor, false)}
           </View>
 
-          <TouchableOpacity
-            style={[
-              styles.button, 
-              styles.calculateButton,
-              (!selectedStartRoom || !selectedEndRoom) && styles.disabledButton
-            ]}
-            onPress={calculatePath}
-            disabled={!selectedStartRoom || !selectedEndRoom}
-          >
-            <Text style={styles.buttonText}>Calculate Path</Text>
-          </TouchableOpacity>
-
-          <View style={styles.floorPlansContainer}>
-            <View style={styles.floorPlanWrapper}>
-              <Text style={styles.floorPlanTitle}>Floor {startFloor}</Text>
-              <View style={styles.webViewContainer}>
-                <WebView
-                  source={{ 
-                    html: generateHtmlContent(
-                      startFloorPlan, 
-                      startFloorPath.map(node => getHallRoomData(startFloor)[node])
-                    )
-                  }}
-                  style={styles.webView}
-                  scrollEnabled={false}
-                  onMessage={(event) => console.log('WebView message:', event.nativeEvent.data)}
-                />
+          {startFloor && endFloor && (
+            <>
+              <View style={styles.roomSelectionContainer}>
+                {renderRoomSelector(
+                  `Select Start Room (Floor ${startFloor})`,
+                  getHallRoomData(startFloor),
+                  selectedStartRoom,
+                  setSelectedStartRoom
+                )}
+                
+                {renderRoomSelector(
+                  `Select Destination Room (Floor ${endFloor})`,
+                  getHallRoomData(endFloor),
+                  selectedEndRoom,
+                  setSelectedEndRoom
+                )}
               </View>
-            </View>
 
-            <View style={styles.floorPlanWrapper}>
-              <Text style={styles.floorPlanTitle}>Floor {endFloor}</Text>
-              <View style={styles.webViewContainer}>
-                <WebView
-                  source={{ 
-                    html: generateHtmlContent(
-                      endFloorPlan, 
-                      endFloorPath.map(node => getHallRoomData(endFloor)[node])
-                    )
-                  }}
-                  style={styles.webView}
-                  scrollEnabled={false}
-                  onMessage={(event) => console.log('WebView message:', event.nativeEvent.data)}
-                />
-              </View>
-            </View>
-          </View>
+              <TouchableOpacity
+                style={[
+                  styles.button, 
+                  styles.calculateButton,
+                  (!selectedStartRoom || !selectedEndRoom) && styles.disabledButton
+                ]}
+                onPress={calculatePath}
+                disabled={!selectedStartRoom || !selectedEndRoom}
+              >
+                <Text style={styles.buttonText}>Calculate Path</Text>
+              </TouchableOpacity>
 
-          {navigationSteps.length > 0 && (
-            <View style={styles.navigationStepsContainer}>
-              <Text style={styles.stepsTitle}>Navigation Steps:</Text>
-              <ScrollView style={styles.navigationSteps}>
-                {navigationSteps.map((step, index) => (
-                  <View key={index} style={styles.stepItem}>
-                    <Text style={styles.stepNumber}>{index + 1}.</Text>
-                    <Text style={styles.stepText}>{step.text}</Text>
+              <View style={styles.floorPlansContainer}>
+                <View style={styles.floorPlanWrapper}>
+                  <Text style={styles.floorPlanTitle}>Floor {startFloor}</Text>
+                  <View style={styles.webViewContainer}>
+                    <WebView
+                      source={{ 
+                        html: generateHtmlContent(
+                          startFloorPlan, 
+                          startFloorPath.map(node => getHallRoomData(startFloor)[node])
+                        )
+                      }}
+                      style={styles.webView}
+                      scrollEnabled={false}
+                      onMessage={(event) => console.log('WebView message:', event.nativeEvent.data)}
+                    />
                   </View>
-                ))}
-              </ScrollView>
-            </View>
+                </View>
+
+                <View style={styles.floorPlanWrapper}>
+                  <Text style={styles.floorPlanTitle}>Floor {endFloor}</Text>
+                  <View style={styles.webViewContainer}>
+                    <WebView
+                      source={{ 
+                        html: generateHtmlContent(
+                          endFloorPlan, 
+                          endFloorPath.map(node => getHallRoomData(endFloor)[node])
+                        )
+                      }}
+                      style={styles.webView}
+                      scrollEnabled={false}
+                      onMessage={(event) => console.log('WebView message:', event.nativeEvent.data)}
+                    />
+                  </View>
+                </View>
+              </View>
+
+              {navigationSteps.length > 0 && (
+                <View style={styles.navigationStepsContainer}>
+                  <Text style={styles.stepsTitle}>Navigation Steps:</Text>
+                  <View style={styles.navigationStepsScrollContainer}>
+                    <ScrollView 
+                      style={styles.navigationSteps}
+                      nestedScrollEnabled={true}
+                    >
+                      {navigationSteps.map((step, index) => (
+                        <View key={index} style={styles.stepItem}>
+                          <Text style={styles.stepNumber}>{index + 1}.</Text>
+                          <Text style={styles.stepText}>{step.text}</Text>
+                        </View>
+                      ))}
+                    </ScrollView>
+                  </View>
+                </View>
+              )}
+            </>
           )}
         </View>
-      )}
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 };
 
@@ -351,8 +361,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
+  scrollContainer: {
+    flex: 1,
+  },
   contentContainer: {
-    padding: 20,
+    padding: 16,
   },
   title: {
     fontSize: 24,
@@ -363,7 +376,6 @@ const styles = StyleSheet.create({
   },
   selectionContainer: {
     marginBottom: 20,
-    paddingHorizontal: 20,
   },
   selectorContainer: {
     marginBottom: 15,
@@ -469,11 +481,14 @@ const styles = StyleSheet.create({
   },
   navigationStepsContainer: {
     marginTop: 20,
+    marginBottom: 20,
+  },
+  navigationStepsScrollContainer: {
+    maxHeight: 200,
+    borderRadius: 8,
+    backgroundColor: '#f5f5f5',
   },
   navigationSteps: {
-    maxHeight: 200,
-    backgroundColor: '#f5f5f5',
-    borderRadius: 8,
     padding: 10,
   },
   stepsTitle: {

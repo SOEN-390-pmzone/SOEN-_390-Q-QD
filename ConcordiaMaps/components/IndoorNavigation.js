@@ -5,6 +5,8 @@ import { getHallRoomData, getHallGraphData } from '../constants/FloorData';
 import { findShortestPath } from './PathFinder';
 import FloorPlanService from '../services/FloorPlanService';
 import InterFloorNavigation from './InterFloorNavigation';
+import Header from './Header';
+import NavBar from './NavBar';
 
 const IndoorNavigation = ({ route, navigation }) => {
   const [startPoint, setStartPoint] = useState('');
@@ -485,6 +487,8 @@ const IndoorNavigation = ({ route, navigation }) => {
 
   return (
     <View style={styles.container}>
+      <Header />
+      <NavBar />
       <Text style={styles.title}>Indoor Navigation - H Building {floor}th Floor</Text>
       {/* SVG Floor Plan in WebView */}
       <View style={styles.webViewContainer}>

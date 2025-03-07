@@ -1,6 +1,8 @@
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import Header from './Header';
+import NavBar from './NavBar';
 
 const BUILDINGS_DATA = {
   HallBuilding: {
@@ -20,7 +22,7 @@ const BUILDINGS_DATA = {
       { id: '3', name: '3rd Floor', description: 'Floor description placeholder' },
       { id: '2', name: '2nd Floor', description: 'Floor description placeholder' },
       { id: '1', name: '1st Floor', description: 'Floor description placeholder' },
-      { id: 'T', name: 'Tunnel', description: 'Floor description placeholder' },
+      { id: 'T', name: 'Tunnel', description: 'Underground tunnel connecting multiple buildings' },
     ]
   },
   JMSB: {
@@ -41,8 +43,42 @@ const BUILDINGS_DATA = {
       { id: '4', name: '4th Floor', description: 'Floor description placeholder' },
       { id: '3', name: '3rd Floor', description: 'Floor description placeholder' },
       { id: '2', name: '2nd Floor', description: 'Floor description placeholder' },
-      { id: 'S2', name: 'S2 Level', description: 'Floor description placeholder' },
+      { id: '1', name: '1st Floor', description: 'Floor description placeholder' },
       { id: 'S1', name: 'S1 Level', description: 'Floor description placeholder' },
+      { id: 'S2', name: 'S2 Level', description: 'Floor description placeholder' },
+      { id: 'T', name: 'Tunnel', description: 'Underground tunnel connecting multiple buildings' },
+    ]
+  },
+  EVBuilding: {
+    name: 'EV Building',
+    code: 'EV',
+    floors: [
+      { id: '13', name: '13th Floor', description: 'Floor description placeholder' },
+      { id: '12', name: '12th Floor', description: 'Floor description placeholder' },
+      { id: '11', name: '11th Floor', description: 'Floor description placeholder' },
+      { id: '10', name: '10th Floor', description: 'Floor description placeholder' },
+      { id: '9', name: '9th Floor', description: 'Floor description placeholder' },
+      { id: '8', name: '8th Floor', description: 'Floor description placeholder' },
+      { id: '7', name: '7th Floor', description: 'Floor description placeholder' },
+      { id: '6', name: '6th Floor', description: 'Floor description placeholder' },
+      { id: '5', name: '5th Floor', description: 'Floor description placeholder' },
+      { id: '4', name: '4th Floor', description: 'Floor description placeholder' },
+      { id: '3', name: '3rd Floor', description: 'Floor description placeholder' },
+      { id: '2', name: '2nd Floor', description: 'Floor description placeholder' },
+      { id: '1', name: '1st Floor', description: 'Floor description placeholder' },
+      { id: 'T', name: 'Tunnel', description: 'Underground tunnel connecting multiple buildings' },
+    ]
+  },
+  Library: {
+    name: 'Webster Library',
+    code: 'LB',
+    floors: [
+      { id: '5', name: '5th Floor', description: 'Floor description placeholder' },
+      { id: '4', name: '4th Floor', description: 'Floor description placeholder' },
+      { id: '3', name: '3rd Floor', description: 'Floor description placeholder' },
+      { id: '2', name: '2nd Floor', description: 'Floor description placeholder' },
+      { id: '1', name: '1st Floor', description: 'Floor description placeholder' },
+      { id: 'T', name: 'Tunnel', description: 'Underground tunnel connecting multiple buildings' },
     ]
   }
 };
@@ -57,12 +93,17 @@ const FloorSelector = () => {
   const building = BUILDINGS_DATA[buildingType];
 
   const handleFloorSelect = (floorId) => {
+    // Check if the selected floor is a tunnel level
+    if (floorId === 'T') {
+      navigation.navigate('TunnelNavigation');
+      return;
+    }
+
     // For Hall Building 8th floor
     if (buildingType === 'HallBuilding') {
-      //Pass the floorID to the navigation component. For Hall 8, the id '8' would be passed.
-      navigation.navigate('IndoorNavigation',{ floor: floorId });
+      navigation.navigate('IndoorNavigation', { floor: floorId });
     } 
-    // For JMSB (you can add specific floor conditions here)
+    // For JMSB
     else if (buildingType === 'JMSB') {
       // Add JMSB specific navigation logic here
       alert('JMSB indoor navigation coming soon!');
@@ -74,6 +115,8 @@ const FloorSelector = () => {
 
   return (
     <View style={styles.container}>
+      <Header />
+      <NavBar />
       <Text style={styles.title}>{building.name} Floors</Text>
       <Text style={styles.subtitle}>{building.code} Building</Text>
       <ScrollView

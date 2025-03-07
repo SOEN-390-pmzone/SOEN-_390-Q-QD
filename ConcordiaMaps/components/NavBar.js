@@ -27,7 +27,7 @@ function NavBar() {
       navigation.navigate("GetDirections");
     } else if (item === "Indoor Navigation") {
       navigation.navigate("BuildingSelector");
-    } else if (item === "Floor Navigation") {
+    } else if (item === "InterFloor Navigation") {
       navigation.navigate("FloorNavigationSelector");
     } else {
       Alert.alert(`You clicked: ${item}`);
@@ -57,8 +57,8 @@ function NavBar() {
         <TouchableOpacity onPress={() => handlePress("Indoor Navigation")}>
           <Text style={styles.menuItem}>Indoor Navigation</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => handlePress("Floor Navigation")}>
-          <Text style={styles.menuItem}>Floor Navigation</Text>
+        <TouchableOpacity onPress={() => handlePress("InterFloor Navigation")}>
+          <Text style={styles.menuItem}>InterFloor Navigation</Text>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => handlePress("Outdoor Points of Interest")}

@@ -1,45 +1,77 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Header from './Header';
 import NavBar from './NavBar';
 
-const BUILDINGS = [
+const TUNNEL_BUILDINGS = [
+  {
+    id: 'ev',
+    name: 'EV Building',
+    code: 'EV',
+    description: 'Engineering, Computer Science and Visual Arts Integrated Complex',
+    address: '1515 St. Catherine W.'
+  },
+  {
+    id: 'library',
+    name: 'Webster Library',
+    code: 'LB',
+    description: 'Webster Library',
+    address: '1400 De Maisonneuve Blvd. W.'
+  },
   {
     id: 'hall',
     name: 'Hall Building',
     code: 'H',
-    description: 'Main academic building',
-    address: '1455 De Maisonneuve Blvd. W.',
+    description: 'Henry F. Hall Building',
+    address: '1455 De Maisonneuve Blvd. W.'
   },
   {
     id: 'jmsb',
-    name: 'John Molson Building',
+    name: 'JMSB',
     code: 'MB',
-    description: 'Business school building',
-    address: '1450 Guy Street',
+    description: 'John Molson School of Business',
+    address: '1450 Guy Street'
   }
 ];
 
-const BuildingSelector = () => {
+const TunnelNavigation = () => {
   const navigation = useNavigation();
 
-  const handleBuildingSelect = (buildingId) => {
-    navigation.navigate('FloorSelector', { buildingId });
+  const handleBuildingSelect = (building) => {
+    // Navigate to FloorSelector with the appropriate building type
+    let buildingType;
+    switch (building.id) {
+      case 'hall':
+        buildingType = 'HallBuilding';
+        break;
+      case 'jmsb':
+        buildingType = 'JMSB';
+        break;
+      case 'ev':
+        buildingType = 'EVBuilding';
+        break;
+      case 'library':
+        buildingType = 'Library';
+        break;
+    }
+    navigation.navigate('FloorSelector', { buildingType });
   };
 
   return (
     <View style={styles.container}>
       <Header />
       <NavBar />
-      <View style={styles.contentContainer}>
-        <Text style={styles.title}>Select Building</Text>
-        <View style={styles.buildingsContainer}>
-          {BUILDINGS.map((building) => (
+      <ScrollView style={styles.scrollContainer}>
+        <Text style={styles.title}>Tunnel Navigation</Text>
+        <Text style={styles.subtitle}>Select a building to view its floors</Text>
+        
+        <View style={styles.buildingsGrid}>
+          {TUNNEL_BUILDINGS.map((building) => (
             <TouchableOpacity
               key={building.id}
               style={styles.buildingCard}
-              onPress={() => handleBuildingSelect(building.id)}
+              onPress={() => handleBuildingSelect(building)}
             >
               <View style={styles.buildingContent}>
                 <View style={styles.textContainer}>
@@ -52,7 +84,7 @@ const BuildingSelector = () => {
             </TouchableOpacity>
           ))}
         </View>
-      </View>
+      </ScrollView>
     </View>
   );
 };
@@ -61,9 +93,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-  },
-  contentContainer: {
-    flex: 1,
     padding: 16,
   },
   title: {
@@ -73,7 +102,13 @@ const styles = StyleSheet.create({
     marginVertical: 20,
     color: '#912338',
   },
-  buildingsContainer: {
+  subtitle: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  buildingsGrid: {
     flex: 1,
     gap: 20,
   },
@@ -113,17 +148,9 @@ const styles = StyleSheet.create({
     color: '#888',
     marginTop: 4,
   },
-  availableTag: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-    backgroundColor: '#912338',
-    color: '#fff',
-    padding: 8,
-    borderRadius: 12,
-    fontSize: 12,
-    fontWeight: 'bold',
+  scrollContainer: {
+    flex: 1,
   },
 });
 
-export default BuildingSelector; 
+export default TunnelNavigation; 
