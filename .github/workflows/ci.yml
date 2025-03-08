@@ -14,7 +14,7 @@ jobs:
 
       - name: Install Dependencies
         working-directory: ./ConcordiaMaps
-        run: npm install
+        run: npm ci
 
       - name: Lint Code
         working-directory: ./ConcordiaMaps
@@ -23,10 +23,6 @@ jobs:
       - name: Format Code
         working-directory: ./ConcordiaMaps
         run: npx prettier --check .
-
-      - name: Run Jest Tests
-        working-directory: ./ConcordiaMaps
-        run: npm run test -- --coverage
 
   test:
     runs-on: ubuntu-latest
@@ -36,7 +32,7 @@ jobs:
 
       - name: Install Dependencies
         working-directory: ./ConcordiaMaps
-        run: npm install
+        run: npm ci
 
       - name: Lint Code
         working-directory: ./ConcordiaMaps
@@ -46,15 +42,12 @@ jobs:
         working-directory: ./ConcordiaMaps
         run: npx prettier --check .
 
-      - name: Run Jest Tests
+      - name: Run Jest Tests with Coverage
         working-directory: ./ConcordiaMaps
         run: npm run test -- --coverage
-      
-      # - name: Run Jest Coverage?
-      #   working-directory: ./ConcordiaMaps
-      #   run: npm jest --coverage
 
       - name: Run SonarQube analysis
+        working-directory: ./ConcordiaMaps
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
@@ -63,9 +56,8 @@ jobs:
             -Dsonar.organization=soen-390-pmzone \
             -Dsonar.sources=. \
             -Dsonar.exclusions=**/node_modules/**,**/*.test.js \
-            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+            -Dsonar.javascript.lcov.reportPaths=./coverage/lcov.info \
             -Dsonar.host.url=https://sonarcloud.io
-      
 
   deploy:
     runs-on: ubuntu-latest

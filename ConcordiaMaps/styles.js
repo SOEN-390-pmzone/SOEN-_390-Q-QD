@@ -35,7 +35,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#912338",
     padding: 10,
     position: "relative",
-    zIndex: 1, // Ensures the logo appears on top
+    zIndex: 1,
   },
   logo: {
     width: 50,
@@ -57,7 +57,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderBottomLeftRadius: 10,
     borderBottomRightRadius: 10,
-    zIndex: 1,
+    zIndex: 2,
     position: "absolute",
     top: 60,
     left: 20,
@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
   hamburgerLine: {
     width: 30,
     height: 4,
-    backgroundColor: "#fff", // White color for hamburger lines
+    backgroundColor: "#fff",
     marginVertical: 4,
   },
   menu: {
@@ -80,14 +80,14 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 50,
     left: -21,
-    minHeight: 737, // Adjust height as needed
+    minHeight: 737,
     zIndex: 10,
   },
   menuItem: {
     fontSize: 20,
     padding: 8,
     width: "100%",
-    color: "white", // Red color for menu items
+    color: "white",
     fontWeight: "bold",
   },
   customMarkerImage: {
@@ -107,13 +107,13 @@ const styles = StyleSheet.create({
   },
   searchBarContainer: {
     position: "absolute",
-    top: 100,
-    width: "100%",
-    zIndex: 2,
-    paddingHorizontal: 20,
+    top: 120,
+    left: 20,
+    right: 20,
+    zIndex: 1,
+    width: "70%",
   },
   searchBar: {
-    top: 20,
     flexDirection: "row",
     backgroundColor: "white",
     padding: 10,
@@ -135,17 +135,13 @@ const styles = StyleSheet.create({
   list: {
     backgroundColor: "white",
     maxHeight: 200,
+    marginTop: 5,
     borderRadius: 10,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
-    position: "absolute",
-    top: "100%",
-    left: 0,
-    right: 0,
-    zIndex: 3,
   },
   item: {
     flexDirection: "row",
@@ -163,7 +159,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   label: {
-    fontSize: 14,
+    fontSize: 12,
   },
   title: {
     fontWeight: "bold",
@@ -174,11 +170,16 @@ const styles = StyleSheet.create({
     top: 720,
     right: 210,
     backgroundColor: "rgba(255, 255, 255, 0.8)",
-    padding: 2,
-    borderRadius: 5,
+    padding: 1,
     opacity: 0.8,
   },
-
+  toggleView: {
+    position: "absolute",
+    bottom: 60,
+    right: 20,
+    width: 50,
+    height: 50,
+  },
   modes: {
     flexDirection: "row",
     alignItems: "center",
@@ -192,9 +193,48 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
   },
+
+  centeredView: {
+    position: "absolute",
+    bottom: 100, // Adjust this value to position the modal above the button
+    right: 20,
+    width: 200, // Adjust the width as needed
+    height: 150, // Adjust the height as needed
+    justifyContent: "center",
+    alignItems: "center",
+  },
   buttonImage: {
-    width: "100%",
-    height: "100%",
+    width: "100%", // Make the image take the full width of the parent view
+    height: "100%", // Make the image take the full height of the parent view
+    borderRadius: 10, // Optional: Add rounded corners to the image
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 20, // Adjust padding to fit content
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalText: {
+    marginBottom: 15,
+    fontFamily: "Times New Roman",
+    textAlign: "center",
+    flexShrink: 1,
+  },
+
+  textStyle: {
+    color: "white",
+    fontFamily: "Times New Roman",
+    fontWeight: "bold",
+    textAlign: "center",
   },
 });
 
