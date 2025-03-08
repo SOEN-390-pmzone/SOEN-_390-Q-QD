@@ -44,7 +44,6 @@ const IndoorNavigation = ({ route, navigation }) => {
 
   const loadFloorPlan = async () => {
     try {
-      console.log(`Loading floor plan for ${buildingType} floor ${floor}`);
       const svgContent = await FloorRegistry.getFloorPlan(buildingType, floor);
       setFloorPlan(svgContent);
     } catch (error) {
@@ -56,10 +55,8 @@ const IndoorNavigation = ({ route, navigation }) => {
 
   const calculatePath = () => {
     try {
-      console.log(`Calculating path for ${buildingType} floor ${floor}`);
       const graph = FloorRegistry.getGraph(buildingType, floor);
       const shortestPath = findShortestPath(graph, startPoint, endPoint);
-      console.log('Shortest path found:', shortestPath);
   
       if (shortestPath.length === 0) {
         setPath(['No path found']);
@@ -69,7 +66,6 @@ const IndoorNavigation = ({ route, navigation }) => {
         // Inject the visualizePath function into WebView
         if (webViewRef.current) {
           const coordinates = FloorRegistry.getRooms(buildingType, floor);
-          console.log('Coordinates data:', coordinates);
   
           // Convert coordinates to a JSON string for injection
           const coordinatesJSON = JSON.stringify(coordinates);

@@ -1,9 +1,16 @@
 // FloorRegistry.js
+//Hall
 import { rooms as Floor1Rooms, graph as Floor1Graph } from '../constants/coordinates/h1';
 import { rooms as Floor8Rooms, graph as Floor8Graph } from '../constants/coordinates/h8';
 import { rooms as Floor9Rooms, graph as Floor9Graph } from '../constants/coordinates/h9';
+//JMSB
 import { rooms as JMSB1Rooms, graph as JMSB1Graph } from '../constants/coordinates/msb1';
+import {rooms as JMSB2Rooms, graph as JMSB2Graph } from '../constants/coordinates/msb2';
+
+//Loyola
 import { rooms as VE2Rooms, graph as VE2graph } from '../constants/coordinates/ve2';
+import {rooms as VE1Rooms, graph as VE1graph } from '../constants/coordinates/ve1';
+import {rooms as VL1Rooms, graph as VL1graph } from '../constants/coordinates/vl1';
 
 import SVGs from '../assets/svg/SVGtoString';
 
@@ -55,7 +62,15 @@ class FloorRegistry {
           description: 'First floor of JMSB',
           rooms: JMSB1Rooms,
           graph: JMSB1Graph,
-          getSVG: () => SVGs.MBfloor1SVG // Replace with actual SVG when available
+          getSVG: () => SVGs.MBfloor1SVG 
+        },
+        '2': {
+          id: '2',
+          name: 'MSB 2',
+          description: 'Second floor of JMSB',
+          rooms: JMSB2Rooms,
+          graph: JMSB2Graph,
+          getSVG: () => SVGs.MBfloor2SVG 
         }
       }
     },
@@ -66,9 +81,17 @@ class FloorRegistry {
       description: 'Loyola Vanier Extension',
       address: '7141 Sherbrooke St W',
       floors: {
+        '1': {
+          id: '1',
+          name: 'VE 1',
+          description: 'First floor of Vanier Extension',
+          rooms: VE1Rooms,
+          graph: VE1graph,
+          getSVG: () => SVGs.VEfloor1SVG 
+        },
         '2': {
           id: '2',
-          name: 'VE 1',
+          name: 'VE 2',
           description: 'Second floor of Vanier Extension',
           rooms: VE2Rooms,
           graph: VE2graph,
@@ -109,6 +132,24 @@ class FloorRegistry {
           rooms: {}, // Add Library room data when available
           graph: {},
           getSVG: () => null // Replace with actual SVG when available
+        }
+      }
+    },
+    // Add Webster Library
+    VanierLibrary: {
+      id: 'vanierlibrary',
+      name: 'Vanier Library',
+      code: 'VL',
+      description: 'Vanier Library',
+      address: '7141 Sherbrooke St W',
+      floors: {
+        '1': {
+          id: '1',
+          name: 'VL 1st Floor',
+          description: 'Main floor of the Vanier Library',
+          rooms: VL1Rooms,
+          graph: VL1graph,
+          getSVG: () => SVGs.VLfloor1SVG
         }
       }
     }

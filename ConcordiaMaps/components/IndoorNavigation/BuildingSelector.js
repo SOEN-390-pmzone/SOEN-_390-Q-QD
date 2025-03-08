@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Header from '../Header';
 import NavBar from '../NavBar';
@@ -30,7 +30,10 @@ const BuildingSelector = () => {
       <NavBar />
       <View style={styles.contentContainer}>
         <Text style={styles.title}>Select Building</Text>
-        <View style={styles.buildingsContainer}>
+        <ScrollView 
+          style={styles.buildingsContainer}
+          showsVerticalScrollIndicator={true}
+        >
           {BUILDINGS.map((building) => (
             <TouchableOpacity
               key={building.id}
@@ -47,7 +50,7 @@ const BuildingSelector = () => {
               </View>
             </TouchableOpacity>
           ))}
-        </View>
+        </ScrollView>
       </View>
     </View>
   );
@@ -122,4 +125,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default BuildingSelector; 
+export default BuildingSelector;
