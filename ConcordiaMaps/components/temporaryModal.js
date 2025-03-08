@@ -37,7 +37,7 @@ export default function TemporaryModal({
                   backgroundColor: "#912338",
                   borderRadius: 20,
                   paddingHorizontal: 30,
-                  paddingVertical: 2,
+                  paddingVertical: 1,
                 }}
                 onPress={onRequestClose}
               >
