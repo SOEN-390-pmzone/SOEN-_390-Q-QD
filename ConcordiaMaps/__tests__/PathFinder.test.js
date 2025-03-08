@@ -1,5 +1,5 @@
 import { findShortestPath } from '../components/IndoorNavigation/PathFinder';
-import { graph } from '../constants/coordinates/floor8';
+import { graph } from '../constants/coordinates/h8';
 
 describe('PathFinder', () => {
   test('finds shortest path between two directly connected nodes', () => {

@@ -1,7 +1,9 @@
 // FloorRegistry.js
-import { rooms as Floor1Rooms, graph as Floor1Graph } from '../constants/coordinates/floor1';
-import { rooms as Floor8Rooms, graph as Floor8Graph } from '../constants/coordinates/floor8';
-import { rooms as Floor9Rooms, graph as Floor9Graph } from '../constants/coordinates/floor9';
+import { rooms as Floor1Rooms, graph as Floor1Graph } from '../constants/coordinates/h1';
+import { rooms as Floor8Rooms, graph as Floor8Graph } from '../constants/coordinates/h8';
+import { rooms as Floor9Rooms, graph as Floor9Graph } from '../constants/coordinates/h9';
+import { rooms as JMSB1Rooms, graph as JMSB1Graph } from '../constants/coordinates/msb1';
+
 import SVGs from '../assets/svg/SVGtoString';
 
 class FloorRegistry {
@@ -50,8 +52,8 @@ class FloorRegistry {
           id: '1',
           name: 'MSB 1',
           description: 'First floor of JMSB',
-          rooms: {}, // Add JMSB room data when available
-          graph: {},
+          rooms: JMSB1Rooms,
+          graph: JMSB1Graph,
           getSVG: () => SVGs.MBfloor1SVG // Replace with actual SVG when available
         }
       }
