@@ -16,7 +16,7 @@ function DirectionsBox({ directions = [] }) {
         // Define the shape of each direction object
         html_instructions: PropTypes.string.isRequired,
         distance: PropTypes.string.isRequired,
-      }),
+      })
     ).isRequired,
   };
   //? ANIMATION ONLY
@@ -31,6 +31,16 @@ function DirectionsBox({ directions = [] }) {
       useNativeDriver: true,
     }).start();
   }, []);
+
+  useEffect(() => {
+    if (directions.length > 0) {
+      Animated.timing(animation, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }).start(() => setIsCollapsed(false));
+    }
+  }, [directions, animation]);
 
   const toggleCollapse = () => {
     Animated.timing(animation, {
@@ -51,7 +61,7 @@ function DirectionsBox({ directions = [] }) {
       part
         .replace(/<div[^>]*>/gi, "")
         .replace(/<\/div>/gi, "")
-        .replace(/<wbr[^>]*>/gi, ""),
+        .replace(/<wbr[^>]*>/gi, "")
     );
     return parts.map((part, index) => (
       <Text
