@@ -16,7 +16,7 @@ function DirectionsBox({ directions = [] }) {
         // Define the shape of each direction object
         html_instructions: PropTypes.string.isRequired,
         distance: PropTypes.string.isRequired,
-      })
+      }),
     ).isRequired,
   };
   //? ANIMATION ONLY
@@ -61,7 +61,7 @@ function DirectionsBox({ directions = [] }) {
       part
         .replace(/<div[^>]*>/gi, "")
         .replace(/<\/div>/gi, "")
-        .replace(/<wbr[^>]*>/gi, "")
+        .replace(/<wbr[^>]*>/gi, ""),
     );
     return parts.map((part, index) => (
       <Text
