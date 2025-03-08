@@ -3,6 +3,7 @@ import { rooms as Floor1Rooms, graph as Floor1Graph } from '../constants/coordin
 import { rooms as Floor8Rooms, graph as Floor8Graph } from '../constants/coordinates/h8';
 import { rooms as Floor9Rooms, graph as Floor9Graph } from '../constants/coordinates/h9';
 import { rooms as JMSB1Rooms, graph as JMSB1Graph } from '../constants/coordinates/msb1';
+import { rooms as VE2Rooms, graph as VE2graph } from '../constants/coordinates/ve2';
 
 import SVGs from '../assets/svg/SVGtoString';
 
@@ -69,8 +70,8 @@ class FloorRegistry {
           id: '2',
           name: 'VE 1',
           description: 'Second floor of Vanier Extension',
-          rooms: {}, // Add Vanier room data when available
-          graph: {},
+          rooms: VE2Rooms,
+          graph: VE2graph,
           getSVG: () => SVGs.VEfloor2SVG 
         }
       }
