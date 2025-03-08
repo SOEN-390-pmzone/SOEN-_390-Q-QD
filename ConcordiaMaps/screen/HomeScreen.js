@@ -34,9 +34,9 @@ function HomeScreen({ asyncKey = "Campus" }) {
   const [error, setError] = useState("");
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [, setMapRegion] = useState(null);
-  const [modalState, setModalState] = useState(true);
-  const [borderColor, setBorderColor] = useState("#912338"); // Initial border color (red)
+  const borderColor = "#912338"; // Initial border color (red)
   const mapRef = useRef(null);
+  const toggleModalTime = "10000";
 
   useEffect(() => {
     const fetchLastCampus = async () => {
@@ -66,17 +66,6 @@ function HomeScreen({ asyncKey = "Campus" }) {
     };
     saveCurrentCampus(asyncKey, postalCode);
   }, [postalCode]);
-
-  useEffect(() => {
-    if (modalState) {
-      const timer = setTimeout(() => {
-        setBorderColor("#ffffff");
-        setModalState(false);
-      }, 3000); // Modal will disappear after 3 seconds
-
-      return () => clearTimeout(timer); // Cleanup the timer if the component unmounts
-    }
-  }, [modalState]);
 
   useEffect(() => {
     if (location) {
@@ -135,6 +124,16 @@ function HomeScreen({ asyncKey = "Campus" }) {
     toggleModal(); // Show modal
   };
 
+  const [modalState, setModalState] = useState(true);
+  useEffect(() => {
+    if (modalState) {
+      const timer = setTimeout(() => {
+        setModalState(false);
+      }, toggleModalTime); // Modal will disappear after 3 seconds
+
+      return () => clearTimeout(timer); // Cleanup the timer if the component unmounts
+    }
+  }, [modalState]);
   return (
     <View style={styles.container} testID="home-screen">
       <Header />
@@ -146,9 +145,12 @@ function HomeScreen({ asyncKey = "Campus" }) {
         <>
           <TemporaryModal
             text="Press the button to switch campuses"
-            my_state={modalState}
-            time="3000"
+            time={toggleModalTime}
+            modalState={modalState}
+            onRequestClose={() => setModalState(false)}
+            TestID="toggleModal"
           />
+
           <MapView
             testID="map-view"
             style={styles.map}

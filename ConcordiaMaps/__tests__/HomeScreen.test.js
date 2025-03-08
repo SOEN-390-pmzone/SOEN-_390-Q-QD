@@ -1,5 +1,5 @@
 import React from "react";
-import { render, waitFor, fireEvent } from "@testing-library/react-native";
+import { render, waitFor, fireEvent, act } from "@testing-library/react-native";
 import axios from "axios";
 import HomeScreen from "../screen/HomeScreen";
 import { NavigationContainer } from "@react-navigation/native";
@@ -111,7 +111,33 @@ describe("HomeScreen", () => {
       expect(getByTestId("error-message").props.children).toBe("ZERO_RESULTS");
     });
   });
+  it("the Temporary modal should hide the modal after 10 seconds", async () => {
+    jest.useFakeTimers(); // Mock the timers
 
+    const mockResponse = {
+      data: {
+        results: [
+          {
+            geometry: { location: { lat: 45.4973, lng: -73.5789 } },
+          },
+        ],
+        status: "OK",
+      },
+    };
+    axios.get.mockResolvedValueOnce(mockResponse);
+
+    const { getByTestId } = renderComponent();
+    await waitFor(() => {
+      expect(getByTestId("toggleModal")).toBeTruthy();
+    });
+
+    // Fast-forward time by 10 seconds
+    act(() => {
+      jest.advanceTimersByTime(10000);
+    });
+
+    jest.useRealTimers(); // Restore real timers
+  });
   it("handles change campuses event", async () => {
     const mockResponse = {
       data: {
