@@ -1,12 +1,5 @@
 import React from "react";
-import {
-  Modal,
-  View,
-  Text,
-  // StyleSheet,
-  TouchableOpacity,
-  Alert,
-} from "react-native";
+import { Modal, View, Text, TouchableOpacity, Alert } from "react-native";
 import PropTypes from "prop-types";
 import styles from "../styles/DirectionBox.style";
 
@@ -38,6 +31,17 @@ const PopupModal = ({ isVisible, data, onClose }) => {
               <Text style={styles.getDirectionsButtonText}>Get Directions</Text>
             </TouchableOpacity>
           </View>
+
+          <TouchableOpacity
+            style={styles.getDirectionsButton1}
+            onPress={() =>
+              Alert.alert("Get Inner Directions", "Inner directions pressed")
+            }
+          >
+            <Text style={styles.getDirectionsButtonText}>
+              Get in Building Directions
+            </Text>
+          </TouchableOpacity>
         </View>
       </View>
     </Modal>
@@ -49,9 +53,9 @@ PopupModal.propTypes = {
   data: PropTypes.shape({
     name: PropTypes.string.isRequired,
     coordinate: PropTypes.shape({
-      latitude: PropTypes.number.isRequired,
-      longitude: PropTypes.number.isRequired,
-    }).isRequired,
+      latitude: PropTypes.number,
+      longitude: PropTypes.number,
+    }),
     address: PropTypes.string,
     fullBuildingName: PropTypes.string,
   }),

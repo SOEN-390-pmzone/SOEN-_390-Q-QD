@@ -199,7 +199,7 @@ export const Building = [
     fullBuildingName: "Faubourg Tower",
   },
   {
-    name: "Faubourg Building",
+    name: "FG Building",
     coordinate: {
       latitude: 45.494381,
       longitude: -73.578425,
@@ -244,7 +244,7 @@ export const Building = [
     fullBuildingName: "Grey Sisters Building",
   },
   {
-    name: "Henry F. Hall",
+    name: "H Building",
     coordinate: {
       latitude: 45.497092,
       longitude: -73.5788,
@@ -253,7 +253,7 @@ export const Building = [
     fullBuildingName: "Henry F. Hall Building",
   },
   {
-    name: "K Annex",
+    name: "K Building",
     coordinate: {
       latitude: 45.497803,
       longitude: -73.579357,
@@ -298,7 +298,7 @@ export const Building = [
     fullBuildingName: "Mackay Annex",
   },
   {
-    name: "John Molson School Of Business",
+    name: "JMSB",
     coordinate: {
       latitude: 45.495304,
       longitude: -73.579044,
@@ -343,7 +343,7 @@ export const Building = [
     fullBuildingName: "Montreal North Annex",
   },
   {
-    name: "Montefiore Building, MT",
+    name: "MT Building",
     coordinate: {
       latitude: 45.494442,
       longitude: -73.576108,
@@ -460,7 +460,7 @@ export const Building = [
     fullBuildingName: "Visual Arts Building",
   },
   {
-    name: "X Annex",
+    name: "X Building",
     coordinate: {
       latitude: 45.49694,
       longitude: -73.579593,
@@ -469,7 +469,7 @@ export const Building = [
     fullBuildingName: "X Annex",
   },
   {
-    name: "Z Annex",
+    name: "Z Building",
     coordinate: {
       latitude: 45.496981,
       longitude: -73.579705,
@@ -534,7 +534,7 @@ export const Building = [
     fullBuildingName: "Stinger Dome",
   },
   {
-    name: "F.C. Smith Building",
+    name: "F.C. Building",
     coordinate: {
       latitude: 45.458493,
       longitude: -73.639287,
@@ -552,7 +552,7 @@ export const Building = [
     fullBuildingName: "Centre for Structural and Functional Genomics",
   },
   {
-    name: "Hingston Hall, wing HA",
+    name: "Hingston Hall",
     coordinate: {
       latitude: 45.459356,
       longitude: -73.64127,
@@ -561,7 +561,7 @@ export const Building = [
     fullBuildingName: "Hingston Hall - Wing HA",
   },
   {
-    name: "Hingston Hall, wing HB",
+    name: "Hingston Hall",
     coordinate: {
       latitude: 45.459162,
       longitude: -73.641962,
@@ -570,7 +570,7 @@ export const Building = [
     fullBuildingName: "Hingston Hall - Wing HB",
   },
   {
-    name: "Hingston Hall, wing HC",
+    name: "Hingston Hall",
     coordinate: {
       latitude: 45.458504,
       longitude: -73.643225,
@@ -670,7 +670,7 @@ export const Building = [
     fullBuildingName: "Student Center",
   },
   {
-    name: "Solar House, SH Building",
+    name: "SH Building",
     coordinate: {
       latitude: 45.459298,
       longitude: -73.642478,
@@ -679,7 +679,7 @@ export const Building = [
     fullBuildingName: "Solar House",
   },
   {
-    name: "Terrebonne Building, TA Building",
+    name: "TA Building",
     coordinate: {
       latitude: 45.460051,
       longitude: -73.640842,
