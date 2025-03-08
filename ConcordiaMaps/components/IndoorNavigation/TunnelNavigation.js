@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-nati
 import { useNavigation } from '@react-navigation/native';
 import Header from '../Header';
 import NavBar from '../NavBar';
-import FloorRegistry from './FloorRegistry';
+import FloorRegistry from '../../services/BuildingDataService';
 
 const TunnelNavigation = () => {
   const navigation = useNavigation();

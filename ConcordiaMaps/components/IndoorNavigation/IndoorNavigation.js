@@ -1,13 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { WebView } from 'react-native-webview';
-import { getHallRoomData, getHallGraphData } from '../../constants/FloorData';
 import { findShortestPath } from './PathFinder';
-import FloorPlanService from '../../services/FloorPlanService';
 import InterFloorNavigation from './InterFloorNavigation';
 import Header from '../Header';
 import NavBar from '../NavBar';
-import FloorRegistry from './FloorRegistry';
+import FloorRegistry from '../../services/BuildingDataService';
 
 const IndoorNavigation = ({ route, navigation }) => {
   const [startPoint, setStartPoint] = useState('');

@@ -4,7 +4,7 @@ import { WebView } from 'react-native-webview';
 import { findShortestPath } from './PathFinder';
 import Header from '../Header';
 import NavBar from '../NavBar';
-import FloorRegistry from './FloorRegistry';
+import FloorRegistry from '../../services/BuildingDataService';
 
 const FloorNavigationSelector = () => {
   const [buildingType, setBuildingType] = useState('HallBuilding');

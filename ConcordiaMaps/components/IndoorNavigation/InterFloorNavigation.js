@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Modal, View, Text, TouchableOpacity, StyleSheet, ScrollView, Dimensions } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { findShortestPath } from './PathFinder';
-import FloorRegistry from './FloorRegistry';
+import FloorRegistry from '../../services/BuildingDataService';
 
 const InterFloorNavigation = ({ isVisible, onClose, startFloor, endFloor, buildingType = 'HallBuilding', onPathCalculated }) => {
   const [selectedStartRoom, setSelectedStartRoom] = useState('');

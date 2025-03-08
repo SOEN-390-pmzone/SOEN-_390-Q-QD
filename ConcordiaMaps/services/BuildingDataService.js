@@ -1,8 +1,8 @@
 // FloorRegistry.js
-import { rooms as Floor1Rooms, graph as Floor1Graph } from '../../constants/coordinates/floor1';
-import { rooms as Floor8Rooms, graph as Floor8Graph } from '../../constants/coordinates/floor8';
-import { rooms as Floor9Rooms, graph as Floor9Graph } from '../../constants/coordinates/floor9';
-import SVGs from '../../assets/svg/SVGtoString';
+import { rooms as Floor1Rooms, graph as Floor1Graph } from '../constants/coordinates/floor1';
+import { rooms as Floor8Rooms, graph as Floor8Graph } from '../constants/coordinates/floor8';
+import { rooms as Floor9Rooms, graph as Floor9Graph } from '../constants/coordinates/floor9';
+import SVGs from '../assets/svg/SVGtoString';
 
 class FloorRegistry {
   static #buildings = {
