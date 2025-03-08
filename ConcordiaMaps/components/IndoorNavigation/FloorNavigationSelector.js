@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { findShortestPath } from './PathFinder';
@@ -18,6 +18,9 @@ const FloorNavigationSelector = () => {
   const [startFloorPath, setStartFloorPath] = useState([]);
   const [endFloorPath, setEndFloorPath] = useState([]);
   const [availableBuildings, setAvailableBuildings] = useState([]);
+  
+  const startFloorWebViewRef = useRef(null);
+  const endFloorWebViewRef = useRef(null);
 
   // Get available buildings on component mount
   useEffect(() => {
@@ -81,38 +84,54 @@ const FloorNavigationSelector = () => {
       return;
     }
 
-    const startFloorGraph = FloorRegistry.getGraph(buildingType, startFloor);
-    const endFloorGraph = FloorRegistry.getGraph(buildingType, endFloor);
-    const building = FloorRegistry.getBuilding(buildingType);
+    try {
+      const startFloorGraph = FloorRegistry.getGraph(buildingType, startFloor);
+      const endFloorGraph = FloorRegistry.getGraph(buildingType, endFloor);
+      const startFloorRooms = FloorRegistry.getRooms(buildingType, startFloor);
+      const endFloorRooms = FloorRegistry.getRooms(buildingType, endFloor);
+      const building = FloorRegistry.getBuilding(buildingType);
 
-    // Calculate path from start room to escalator on start floor
-    const startFloorEscalatorPath = findShortestPath(startFloorGraph, selectedStartRoom, 'escalator');
-    setStartFloorPath(startFloorEscalatorPath);
+      // Calculate path from start room to escalator on start floor
+      const startFloorEscalatorPath = findShortestPath(startFloorGraph, selectedStartRoom, 'escalator');
+      
+      // Calculate path from escalator to end room on end floor
+      const endFloorEscalatorPath = findShortestPath(endFloorGraph, 'escalator', selectedEndRoom);
 
-    // Calculate path from escalator to end room on end floor
-    const endFloorEscalatorPath = findShortestPath(endFloorGraph, 'escalator', selectedEndRoom);
-    setEndFloorPath(endFloorEscalatorPath);
+      // Update the paths with room coordinates
+      setStartFloorPath(startFloorEscalatorPath);
+      setEndFloorPath(endFloorEscalatorPath);
 
-    // Create detailed navigation steps
-    const steps = [
-      { type: 'start', text: `Start at room ${selectedStartRoom} on floor ${startFloor} of ${building.name}` },
-      ...startFloorEscalatorPath.map((node, index) => ({
-        type: 'walk',
-        text: index === startFloorEscalatorPath.length - 1 
-          ? `Arrive at escalator on floor ${startFloor}`
-          : `Go to ${node}`
-      })),
-      { type: 'escalator', text: `Take escalator to floor ${endFloor}` },
-      ...endFloorEscalatorPath.map((node, index) => ({
-        type: 'walk',
-        text: index === 0 
-          ? `Start from escalator on floor ${endFloor}`
-          : `Go to ${node}`
-      })),
-      { type: 'end', text: `Arrive at destination: ${selectedEndRoom}` }
-    ];
+      // Create detailed navigation steps
+      const steps = [
+        { type: 'start', text: `Start at room ${selectedStartRoom} on floor ${startFloor} of ${building.name}` },
+        ...startFloorEscalatorPath.map((node, index) => ({
+          type: 'walk',
+          text: index === startFloorEscalatorPath.length - 1 
+            ? `Arrive at escalator on floor ${startFloor}`
+            : `Go to ${node}`
+        })),
+        { type: 'escalator', text: `Take escalator to floor ${endFloor}` },
+        ...endFloorEscalatorPath.map((node, index) => ({
+          type: 'walk',
+          text: index === 0 
+            ? `Start from escalator on floor ${endFloor}`
+            : `Go to ${node}`
+        })),
+        { type: 'end', text: `Arrive at destination: ${selectedEndRoom}` }
+      ];
 
-    setNavigationSteps(steps);
+      setNavigationSteps(steps);
+
+      // Force WebView updates
+      if (startFloorWebViewRef.current) {
+        startFloorWebViewRef.current.reload();
+      }
+      if (endFloorWebViewRef.current) {
+        endFloorWebViewRef.current.reload();
+      }
+    } catch (error) {
+      console.error('Error calculating path:', error);
+    }
   };
 
   const generateHtmlContent = (floorPlan, pathCoordinates = []) => {
@@ -207,11 +226,11 @@ const FloorNavigationSelector = () => {
         </head>
         <body>
           <div id="svg-container">
-            ${floorPlan}
+            ${floorPlan || ''}
           </div>
           <script>
             // Set coordinates in window object
-            window.pathCoordinates = ${JSON.stringify(pathCoordinates)};
+            window.pathCoordinates = ${JSON.stringify(pathCoordinates || [])};
           </script>
         </body>
       </html>
@@ -363,6 +382,7 @@ const FloorNavigationSelector = () => {
                       style={styles.webView}
                       scrollEnabled={false}
                       onMessage={(event) => console.log('WebView message:', event.nativeEvent.data)}
+                      ref={startFloorWebViewRef}
                     />
                   </View>
                 </View>
@@ -380,6 +400,7 @@ const FloorNavigationSelector = () => {
                       style={styles.webView}
                       scrollEnabled={false}
                       onMessage={(event) => console.log('WebView message:', event.nativeEvent.data)}
+                      ref={endFloorWebViewRef}
                     />
                   </View>
                 </View>

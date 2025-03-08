@@ -553,10 +553,12 @@ const IndoorNavigation = ({ route, navigation }) => {
         <Text style={styles.buttonText}>Inter-Floor Navigation</Text>
       </TouchableOpacity>
 
-      {/* Rest of component remains the same */}
       <View style={styles.resultContainerWrapper}>
         <Text style={styles.resultTitle}>Navigation Path:</Text>
-        <ScrollView style={styles.resultContainer}>
+        <ScrollView 
+          style={styles.resultContainer}
+          nestedScrollEnabled={true}
+        >
           {path.length > 0 ? (
             <View style={styles.pathContainer}>
               {path.map((node, index) => (
@@ -590,20 +592,21 @@ const IndoorNavigation = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
     backgroundColor: 'white',
   },
   title: {
     fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 16,
+    marginVertical: 16,
     textAlign: 'center',
     color: '#912338',
+    paddingHorizontal: 16,
   },
   selectorsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 16,
+    paddingHorizontal: 16,
   },
   selectorWrapper: {
     flex: 1,
@@ -636,7 +639,8 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 4,
     alignItems: 'center',
-    marginVertical: 16,
+    marginVertical: 8,
+    marginHorizontal: 16,
   },
   buttonText: {
     color: 'white',
@@ -646,6 +650,7 @@ const styles = StyleSheet.create({
   resultContainerWrapper: {
     flex: 1,
     marginBottom: 10,
+    paddingHorizontal: 16,
   },
   resultTitle: {
     fontSize: 16,
@@ -658,6 +663,7 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     borderRadius: 4,
     padding: 16,
+    maxHeight: 200,
   },
   pathContainer: {
     paddingHorizontal: 16,
@@ -680,6 +686,7 @@ const styles = StyleSheet.create({
   webViewContainer: {
     height: 300,
     marginVertical: 10,
+    marginHorizontal: 16,
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 4,
