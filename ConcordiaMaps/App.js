@@ -6,11 +6,11 @@ import { LocationProvider } from "./contexts/LocationContext";
 import PopupModal from "./components/PopupModal";
 import styles from "./styles";
 import GetDirections from "./components/GetDirections";
-import IndoorNavigation from "./components/IndoorNavigation";
-import FloorSelector from "./components/FloorSelector";
-import BuildingSelector from "./components/BuildingSelector";
-import FloorNavigationSelector from "./components/FloorNavigationSelector";
-import TunnelNavigation from "./components/TunnelNavigation";
+import IndoorNavigation from "./components/IndoorNavigation/IndoorNavigation";
+import FloorSelector from "./components/IndoorNavigation/FloorSelector";
+import BuildingSelector from "./components/IndoorNavigation/BuildingSelector";
+import FloorNavigationSelector from "./components/IndoorNavigation/FloorNavigationSelector";
+import TunnelNavigation from "./components/IndoorNavigation/TunnelNavigation";
 // import MapMarkers from "./components/MapMarkers"; // Ensure this import exists
 
 // Create Context for modal data and visibility

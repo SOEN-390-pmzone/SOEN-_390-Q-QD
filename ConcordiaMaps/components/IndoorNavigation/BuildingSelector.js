@@ -1,31 +1,27 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import Header from './Header';
-import NavBar from './NavBar';
+import Header from '../Header';
+import NavBar from '../NavBar';
+import FloorRegistry from './FloorRegistry';
 
-const BUILDINGS = [
-  {
-    id: 'hall',
-    name: 'Hall Building',
-    code: 'H',
-    description: 'Main academic building',
-    address: '1455 De Maisonneuve Blvd. W.',
-  },
-  {
-    id: 'jmsb',
-    name: 'John Molson Building',
-    code: 'MB',
-    description: 'Business school building',
-    address: '1450 Guy Street',
-  }
-];
+
 
 const BuildingSelector = () => {
   const navigation = useNavigation();
+  //To get the data from the list of all available buildings
+  const BUILDINGS = FloorRegistry.getBuildings();
 
   const handleBuildingSelect = (buildingId) => {
-    navigation.navigate('FloorSelector', { buildingId });
+    // Find the corresponding key in the FloorRegistry by matching the building data
+    const buildingTypes = Object.keys(FloorRegistry.getAllBuildings());
+    const buildingType = buildingTypes.find(key => 
+      FloorRegistry.getBuilding(key).id === buildingId
+    );
+    
+    if (buildingType) {
+      navigation.navigate('FloorSelector', { buildingType });
+    }
   };
 
   return (

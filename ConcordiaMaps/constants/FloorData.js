@@ -1,5 +1,6 @@
 import { rooms as Floor8Rooms, graph as Floor8Graph } from './coordinates/floor8';
 import { rooms as Floor9Rooms, graph as Floor9Graph } from './coordinates/floor9';
+import { rooms as Floor1Rooms, graph as Floor1Graph } from './coordinates/floor1';
 
 /**
  * Function that returns the coordinates of the different classes & 
@@ -11,6 +12,8 @@ export function getHallRoomData(floorNumber) {
   floorNumber = parseInt(floorNumber, 10); // Ensure floorNumber is a number
 
   switch (floorNumber) {
+    case 1:
+      return Floor1Rooms;
     case 8:
       return Floor8Rooms;
     case 9:
@@ -28,6 +31,8 @@ export function getHallRoomData(floorNumber) {
 export function getHallGraphData(floorNumber) {
   floorNumber = parseInt(floorNumber, 10); // Ensure floorNumber is a number
   switch (floorNumber) {
+    case 1:
+      return Floor1Graph;
     case 8:
       return Floor8Graph;
     case 9:

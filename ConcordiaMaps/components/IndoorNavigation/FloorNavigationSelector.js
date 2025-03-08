@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
 import { WebView } from 'react-native-webview';
-import FloorPlanService from '../services/FloorPlanService';
-import { getHallRoomData, getHallGraphData } from '../constants/FloorData';
 import { findShortestPath } from './PathFinder';
-import Header from './Header';
-import NavBar from './NavBar';
+import Header from '../Header';
+import NavBar from '../NavBar';
+import FloorRegistry from './FloorRegistry';
 
 const FloorNavigationSelector = () => {
+  const [buildingType, setBuildingType] = useState('HallBuilding');
   const [startFloor, setStartFloor] = useState('');
   const [endFloor, setEndFloor] = useState('');
   const [startFloorPlan, setStartFloorPlan] = useState('');
@@ -17,15 +17,22 @@ const FloorNavigationSelector = () => {
   const [navigationSteps, setNavigationSteps] = useState([]);
   const [startFloorPath, setStartFloorPath] = useState([]);
   const [endFloorPath, setEndFloorPath] = useState([]);
+  const [availableBuildings, setAvailableBuildings] = useState([]);
 
-  // Available floors
-  const availableFloors = ['8', '9']; // Add more floors as they become available
+  // Get available buildings on component mount
+  useEffect(() => {
+    setAvailableBuildings(FloorRegistry.getBuildings());
+  }, []);
+
+  // Get available floors for the selected building
+  const availableFloors = buildingType ? 
+    Object.values(FloorRegistry.getBuilding(buildingType)?.floors || {}).map(f => f.id) : [];
 
   const loadFloorPlans = async (start, end) => {
     try {
       const [startSvg, endSvg] = await Promise.all([
-        FloorPlanService.getFloorPlan(start),
-        FloorPlanService.getFloorPlan(end)
+        FloorRegistry.getFloorPlan(buildingType, start),
+        FloorRegistry.getFloorPlan(buildingType, end)
       ]);
       setStartFloorPlan(startSvg);
       setEndFloorPlan(endSvg);
@@ -39,6 +46,20 @@ const FloorNavigationSelector = () => {
     } catch (error) {
       console.error('Error loading floor plans:', error);
     }
+  };
+
+  const handleBuildingChange = (newBuildingType) => {
+    setBuildingType(newBuildingType);
+    // Reset selections when building changes
+    setStartFloor('');
+    setEndFloor('');
+    setStartFloorPlan('');
+    setEndFloorPlan('');
+    setSelectedStartRoom('');
+    setSelectedEndRoom('');
+    setNavigationSteps([]);
+    setStartFloorPath([]);
+    setEndFloorPath([]);
   };
 
   const handleFloorSelection = (floor, isStart) => {
@@ -60,8 +81,9 @@ const FloorNavigationSelector = () => {
       return;
     }
 
-    const startFloorGraph = getHallGraphData(startFloor);
-    const endFloorGraph = getHallGraphData(endFloor);
+    const startFloorGraph = FloorRegistry.getGraph(buildingType, startFloor);
+    const endFloorGraph = FloorRegistry.getGraph(buildingType, endFloor);
+    const building = FloorRegistry.getBuilding(buildingType);
 
     // Calculate path from start room to escalator on start floor
     const startFloorEscalatorPath = findShortestPath(startFloorGraph, selectedStartRoom, 'escalator');
@@ -73,7 +95,7 @@ const FloorNavigationSelector = () => {
 
     // Create detailed navigation steps
     const steps = [
-      { type: 'start', text: `Start at room ${selectedStartRoom} on floor ${startFloor}` },
+      { type: 'start', text: `Start at room ${selectedStartRoom} on floor ${startFloor} of ${building.name}` },
       ...startFloorEscalatorPath.map((node, index) => ({
         type: 'walk',
         text: index === startFloorEscalatorPath.length - 1 
@@ -196,35 +218,64 @@ const FloorNavigationSelector = () => {
     `;
   };
 
-  const renderRoomSelector = (title, rooms, selectedRoom, onSelect) => (
+  const renderBuildingSelector = () => (
     <View style={styles.selectorContainer}>
-      <Text style={styles.selectorTitle}>{title}</Text>
-      <View style={styles.roomListContainer}>
-        <ScrollView 
-          style={styles.roomList}
-          nestedScrollEnabled={true}
-        >
-          {Object.keys(rooms).sort().map((roomId) => (
-            <TouchableOpacity
-              key={roomId}
-              style={[
-                styles.roomItem,
-                selectedRoom === roomId && styles.selectedRoom
-              ]}
-              onPress={() => onSelect(roomId)}
-            >
-              <Text style={[
-                styles.roomText,
-                selectedRoom === roomId && styles.selectedRoomText
-              ]}>
-                {roomId}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </View>
+      <Text style={styles.selectorTitle}>Select Building</Text>
+      <ScrollView horizontal style={styles.floorList}>
+        {availableBuildings.map((building) => (
+          <TouchableOpacity
+            key={building.id}
+            style={[
+              styles.floorItem,
+              styles.buildingItem,
+              buildingType === building.id && styles.selectedFloor
+            ]}
+            onPress={() => handleBuildingChange(building.id)}
+          >
+            <Text style={[
+              styles.floorText,
+              buildingType === building.id && styles.selectedFloorText
+            ]}>
+              {building.name} ({building.code})
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
     </View>
   );
+
+  const renderRoomSelector = (title, floorId, selectedRoom, onSelect) => {
+    const rooms = FloorRegistry.getRooms(buildingType, floorId);
+    return (
+      <View style={styles.selectorContainer}>
+        <Text style={styles.selectorTitle}>{title}</Text>
+        <View style={styles.roomListContainer}>
+          <ScrollView 
+            style={styles.roomList}
+            nestedScrollEnabled={true}
+          >
+            {Object.keys(rooms).sort().map((roomId) => (
+              <TouchableOpacity
+                key={roomId}
+                style={[
+                  styles.roomItem,
+                  selectedRoom === roomId && styles.selectedRoom
+                ]}
+                onPress={() => onSelect(roomId)}
+              >
+                <Text style={[
+                  styles.roomText,
+                  selectedRoom === roomId && styles.selectedRoomText
+                ]}>
+                  {roomId}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+      </View>
+    );
+  };
 
   const renderFloorSelector = (title, selectedFloor, isStart) => (
     <View style={styles.selectorContainer}>
@@ -251,6 +302,8 @@ const FloorNavigationSelector = () => {
     </View>
   );
 
+  const building = FloorRegistry.getBuilding(buildingType);
+  
   return (
     <View style={styles.container}>
       <Header />
@@ -258,6 +311,8 @@ const FloorNavigationSelector = () => {
       <ScrollView style={styles.scrollContainer}>
         <View style={styles.contentContainer}>
           <Text style={styles.title}>InterFloor Navigation</Text>
+          
+          {renderBuildingSelector()}
           
           <View style={styles.selectionContainer}>
             {renderFloorSelector('Start Floor', startFloor, true)}
@@ -268,15 +323,15 @@ const FloorNavigationSelector = () => {
             <>
               <View style={styles.roomSelectionContainer}>
                 {renderRoomSelector(
-                  `Select Start Room (Floor ${startFloor})`,
-                  getHallRoomData(startFloor),
+                  `Select Start Room (${building.code} ${startFloor})`,
+                  startFloor,
                   selectedStartRoom,
                   setSelectedStartRoom
                 )}
                 
                 {renderRoomSelector(
-                  `Select Destination Room (Floor ${endFloor})`,
-                  getHallRoomData(endFloor),
+                  `Select Destination Room (${building.code} ${endFloor})`,
+                  endFloor,
                   selectedEndRoom,
                   setSelectedEndRoom
                 )}
@@ -296,13 +351,13 @@ const FloorNavigationSelector = () => {
 
               <View style={styles.floorPlansContainer}>
                 <View style={styles.floorPlanWrapper}>
-                  <Text style={styles.floorPlanTitle}>Floor {startFloor}</Text>
+                  <Text style={styles.floorPlanTitle}>{building.code} Floor {startFloor}</Text>
                   <View style={styles.webViewContainer}>
                     <WebView
                       source={{ 
                         html: generateHtmlContent(
                           startFloorPlan, 
-                          startFloorPath.map(node => getHallRoomData(startFloor)[node])
+                          startFloorPath.map(node => FloorRegistry.getRooms(buildingType, startFloor)[node])
                         )
                       }}
                       style={styles.webView}
@@ -313,13 +368,13 @@ const FloorNavigationSelector = () => {
                 </View>
 
                 <View style={styles.floorPlanWrapper}>
-                  <Text style={styles.floorPlanTitle}>Floor {endFloor}</Text>
+                  <Text style={styles.floorPlanTitle}>{building.code} Floor {endFloor}</Text>
                   <View style={styles.webViewContainer}>
                     <WebView
                       source={{ 
                         html: generateHtmlContent(
                           endFloorPlan, 
-                          endFloorPath.map(node => getHallRoomData(endFloor)[node])
+                          endFloorPath.map(node => FloorRegistry.getRooms(buildingType, endFloor)[node])
                         )
                       }}
                       style={styles.webView}
@@ -357,6 +412,7 @@ const FloorNavigationSelector = () => {
 };
 
 const styles = StyleSheet.create({
+  // Keep existing styles
   container: {
     flex: 1,
     backgroundColor: '#fff',
@@ -397,6 +453,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f0f0',
     minWidth: 80,
     alignItems: 'center',
+  },
+  buildingItem: {
+    minWidth: 150,
   },
   selectedFloor: {
     backgroundColor: '#912338',
@@ -515,4 +574,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default FloorNavigationSelector; 
+export default FloorNavigationSelector;

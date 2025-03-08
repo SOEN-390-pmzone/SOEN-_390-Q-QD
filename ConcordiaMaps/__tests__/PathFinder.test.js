@@ -1,4 +1,4 @@
-import { findShortestPath } from '../components/PathFinder';
+import { findShortestPath } from '../components/IndoorNavigation/PathFinder';
 import { graph } from '../constants/coordinates/floor8';
 
 describe('PathFinder', () => {

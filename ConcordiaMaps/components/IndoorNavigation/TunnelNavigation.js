@@ -1,61 +1,25 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import Header from './Header';
-import NavBar from './NavBar';
-
-const TUNNEL_BUILDINGS = [
-  {
-    id: 'ev',
-    name: 'EV Building',
-    code: 'EV',
-    description: 'Engineering, Computer Science and Visual Arts Integrated Complex',
-    address: '1515 St. Catherine W.'
-  },
-  {
-    id: 'library',
-    name: 'Webster Library',
-    code: 'LB',
-    description: 'Webster Library',
-    address: '1400 De Maisonneuve Blvd. W.'
-  },
-  {
-    id: 'hall',
-    name: 'Hall Building',
-    code: 'H',
-    description: 'Henry F. Hall Building',
-    address: '1455 De Maisonneuve Blvd. W.'
-  },
-  {
-    id: 'jmsb',
-    name: 'JMSB',
-    code: 'MB',
-    description: 'John Molson School of Business',
-    address: '1450 Guy Street'
-  }
-];
+import Header from '../Header';
+import NavBar from '../NavBar';
+import FloorRegistry from './FloorRegistry';
 
 const TunnelNavigation = () => {
   const navigation = useNavigation();
+  // Get buildings from FloorRegistry instead of hardcoded array
+  const buildings = FloorRegistry.getBuildings();
 
   const handleBuildingSelect = (building) => {
-    // Navigate to FloorSelector with the appropriate building type
-    let buildingType;
-    switch (building.id) {
-      case 'hall':
-        buildingType = 'HallBuilding';
-        break;
-      case 'jmsb':
-        buildingType = 'JMSB';
-        break;
-      case 'ev':
-        buildingType = 'EVBuilding';
-        break;
-      case 'library':
-        buildingType = 'Library';
-        break;
+    // Get the buildingType key directly from FloorRegistry
+    const buildingTypes = Object.keys(FloorRegistry.getAllBuildings());
+    const buildingType = buildingTypes.find(key => 
+      FloorRegistry.getBuilding(key).id === building.id
+    );
+    
+    if (buildingType) {
+      navigation.navigate('FloorSelector', { buildingType });
     }
-    navigation.navigate('FloorSelector', { buildingType });
   };
 
   return (
@@ -67,7 +31,7 @@ const TunnelNavigation = () => {
         <Text style={styles.subtitle}>Select a building to view its floors</Text>
         
         <View style={styles.buildingsGrid}>
-          {TUNNEL_BUILDINGS.map((building) => (
+          {buildings.map((building) => (
             <TouchableOpacity
               key={building.id}
               style={styles.buildingCard}

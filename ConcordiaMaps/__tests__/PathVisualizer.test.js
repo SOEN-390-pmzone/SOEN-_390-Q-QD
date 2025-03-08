@@ -1,4 +1,4 @@
-import { visualizePath } from '../components/PathVisualizer';
+import { visualizePath } from '../components/IndoorNavigation/PathVisualizer';
 import { rooms } from '../constants/coordinates/floor8';
 
 describe('PathVisualizer', () => {

@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { WebView } from 'react-native-webview';
-import { getHallRoomData, getHallGraphData } from '../constants/FloorData';
+import { getHallRoomData, getHallGraphData } from '../../constants/FloorData';
 import { findShortestPath } from './PathFinder';
-import FloorPlanService from '../services/FloorPlanService';
+import FloorPlanService from '../../services/FloorPlanService';
 import InterFloorNavigation from './InterFloorNavigation';
-import Header from './Header';
-import NavBar from './NavBar';
+import Header from '../Header';
+import NavBar from '../NavBar';
+import FloorRegistry from './FloorRegistry';
 
 const IndoorNavigation = ({ route, navigation }) => {
   const [startPoint, setStartPoint] = useState('');
@@ -16,7 +17,11 @@ const IndoorNavigation = ({ route, navigation }) => {
   const [floorPlan, setFloorPlan] = useState('');
   const [isInterFloorModalVisible, setIsInterFloorModalVisible] = useState(false);
   const webViewRef = useRef(null);
-  const { floor } = route.params;
+
+  // Get both buildingType and floor from route params, default to hall
+  const { buildingType = 'HallBuilding', floor } = route.params;
+   // Get building information
+   const building = FloorRegistry.getBuilding(buildingType);
 
   useEffect(() => {
     // Set up navigation healder
@@ -32,17 +37,17 @@ const IndoorNavigation = ({ route, navigation }) => {
     });
 
     // Get all available nodes from the graph
-    const graph = getHallGraphData(floor);
+    const graph = FloorRegistry.getGraph(buildingType, floor);
     setAllNodes(Object.keys(graph));
 
     // Load the SVG floor plan dynamically
     loadFloorPlan();
-  }, [navigation]);
+  }, [navigation, buildingType, floor]);
 
   const loadFloorPlan = async () => {
     try {
-      console.log('Loading floor plan for floor:', floor);
-      const svgContent = await FloorPlanService.getFloorPlan(floor);
+      console.log(`Loading floor plan for ${buildingType} floor ${floor}`);
+      const svgContent = await FloorRegistry.getFloorPlan(buildingType, floor);
       setFloorPlan(svgContent);
     } catch (error) {
       console.error('Error loading floor plan:', error);
@@ -53,8 +58,8 @@ const IndoorNavigation = ({ route, navigation }) => {
 
   const calculatePath = () => {
     try {
-      console.log('Calculating path for floor:', floor);
-      const graph = getHallGraphData(floor);
+      console.log(`Calculating path for ${buildingType} floor ${floor}`);
+      const graph = FloorRegistry.getGraph(buildingType, floor);
       const shortestPath = findShortestPath(graph, startPoint, endPoint);
       console.log('Shortest path found:', shortestPath);
   
@@ -65,7 +70,7 @@ const IndoorNavigation = ({ route, navigation }) => {
   
         // Inject the visualizePath function into WebView
         if (webViewRef.current) {
-          const coordinates = getHallRoomData(floor);
+          const coordinates = FloorRegistry.getRooms(buildingType, floor);
           console.log('Coordinates data:', coordinates);
   
           // Convert coordinates to a JSON string for injection
@@ -423,7 +428,7 @@ const IndoorNavigation = ({ route, navigation }) => {
   const highlightSelectedRooms = () => {
     if (!webViewRef.current) return;
 
-    const coordinates = getHallRoomData(floor);
+    const coordinates = FloorRegistry.getRooms(buildingType, floor);
     const coordinatesJSON = JSON.stringify(coordinates);
 
     const js = `
@@ -489,14 +494,15 @@ const IndoorNavigation = ({ route, navigation }) => {
     <View style={styles.container}>
       <Header />
       <NavBar />
-      <Text style={styles.title}>Indoor Navigation - H Building {floor}th Floor</Text>
-      {/* SVG Floor Plan in WebView */}
+      <Text style={styles.title}>
+        {building.name} - {building.code} {floor}{floor === '1' ? 'st' : (floor === '2' ? 'nd' : (floor === '3' ? 'rd' : 'th'))} Floor
+      </Text>
+      {/* SVG Floor Plan in WebView - generateHtmlContent remains the same */}
       <View style={styles.webViewContainer}>
         <WebView
           ref={webViewRef}
           source={{ html: generateHtmlContent() }}
           style={styles.webView}
-          // onLoad={calculatePath} Commenting this because I dont think its necessary
         />
       </View>
 
@@ -549,6 +555,7 @@ const IndoorNavigation = ({ route, navigation }) => {
         <Text style={styles.buttonText}>Inter-Floor Navigation</Text>
       </TouchableOpacity>
 
+      {/* Rest of component remains the same */}
       <View style={styles.resultContainerWrapper}>
         <Text style={styles.resultTitle}>Navigation Path:</Text>
         <ScrollView style={styles.resultContainer}>
@@ -573,7 +580,8 @@ const IndoorNavigation = ({ route, navigation }) => {
         isVisible={isInterFloorModalVisible}
         onClose={() => setIsInterFloorModalVisible(false)}
         startFloor={floor}
-        endFloor={floor === 8 ? 9 : 8}
+        endFloor={floor === '8' ? '9' : '8'}
+        buildingType={buildingType}
         onPathCalculated={(pathData) => {
           console.log('Inter-floor path calculated:', pathData);
         }}
@@ -581,7 +589,6 @@ const IndoorNavigation = ({ route, navigation }) => {
     </View>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,

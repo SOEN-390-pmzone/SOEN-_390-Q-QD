@@ -14,6 +14,12 @@ class FloorPlanService {
     try {
       let svgContent = '';
       switch (floorStr) {
+
+        case '1':
+          console.log('so Im fetching floor 1 svg')
+          svgContent= SVGs.floor1SVG;
+          console.log(svgContent)
+          break;
         case '8':
           svgContent = SVGs.floor8SVG;
           break;
@@ -24,8 +30,9 @@ class FloorPlanService {
         default:
           throw new Error(`Floor ${floorStr} not supported`);
       }
-      
+
       this.cache.set(floorStr, svgContent);
+
       return svgContent;
     } catch (error) {
       console.error(`Error loading floor plan for floor ${floorStr}:`, error);

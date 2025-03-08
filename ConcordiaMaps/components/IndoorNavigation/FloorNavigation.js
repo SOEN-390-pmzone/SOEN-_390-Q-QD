@@ -76,8 +76,8 @@ export class FloorNavigation {
     const path = findShortestPath(this.graph, start, end);
     visualizePath(path, this.coordinates, this.svgElement);
     
-    // Display info about the path (optional)
-    console.log(`Path from ${start} to ${end}:`, path);
+    // // Display info about the path (optional)
+    // console.log(`Path from ${start} to ${end}:`, path);
   }
   
   /**

@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { Modal, View, Text, TouchableOpacity, StyleSheet, ScrollView, Dimensions } from 'react-native';
 import { WebView } from 'react-native-webview';
-import { getHallRoomData, getHallGraphData } from '../constants/FloorData';
 import { findShortestPath } from './PathFinder';
-import FloorPlanService from '../services/FloorPlanService';
+import FloorRegistry from './FloorRegistry';
 
-const InterFloorNavigation = ({ isVisible, onClose, startFloor, endFloor, onPathCalculated }) => {
+const InterFloorNavigation = ({ isVisible, onClose, startFloor, endFloor, buildingType = 'HallBuilding', onPathCalculated }) => {
   const [selectedStartRoom, setSelectedStartRoom] = useState('');
   const [selectedEndRoom, setSelectedEndRoom] = useState('');
   const [navigationSteps, setNavigationSteps] = useState([]);
@@ -15,20 +14,19 @@ const InterFloorNavigation = ({ isVisible, onClose, startFloor, endFloor, onPath
   const [endFloorPath, setEndFloorPath] = useState([]);
   const [expandedFloor, setExpandedFloor] = useState(null);
 
-  const startFloorRooms = getHallRoomData(startFloor);
-  const endFloorRooms = getHallRoomData(endFloor);
-  const startFloorGraph = getHallGraphData(startFloor);
-  const endFloorGraph = getHallGraphData(endFloor);
-
-
+  // Use FloorRegistry instead of hardcoded data
+  const startFloorRooms = FloorRegistry.getRooms(buildingType, startFloor);
+  const endFloorRooms = FloorRegistry.getRooms(buildingType, endFloor);
+  const startFloorGraph = FloorRegistry.getGraph(buildingType, startFloor);
+  const endFloorGraph = FloorRegistry.getGraph(buildingType, endFloor);
 
   // Load floor plans when rooms are selected
   React.useEffect(() => {
     const loadFloorPlans = async () => {
       try {
         const [startSvg, endSvg] = await Promise.all([
-          FloorPlanService.getFloorPlan(startFloor),
-          FloorPlanService.getFloorPlan(endFloor)
+          FloorRegistry.getFloorPlan(buildingType, startFloor),
+          FloorRegistry.getFloorPlan(buildingType, endFloor)
         ]);
         setStartFloorPlan(startSvg);
         setEndFloorPlan(endSvg);
@@ -37,7 +35,7 @@ const InterFloorNavigation = ({ isVisible, onClose, startFloor, endFloor, onPath
       }
     };
     loadFloorPlans();
-  }, [startFloor, endFloor]);
+  }, [buildingType, startFloor, endFloor]);
 
   const calculatePath = () => {
     if (!selectedStartRoom || !selectedEndRoom) {
@@ -53,8 +51,11 @@ const InterFloorNavigation = ({ isVisible, onClose, startFloor, endFloor, onPath
     setEndFloorPath(endFloorEscalatorPath);
 
     // Create detailed navigation steps
+    const building = FloorRegistry.getBuilding(buildingType);
+    const buildingName = building ? building.name : '';
+    
     const steps = [
-      { type: 'start', text: `Start at room ${selectedStartRoom} on floor ${startFloor}` },
+      { type: 'start', text: `Start at room ${selectedStartRoom} on floor ${startFloor} of ${buildingName}` },
       ...startFloorEscalatorPath.map((node, index) => ({
         type: 'walk',
         text: index === startFloorEscalatorPath.length - 1 
@@ -81,6 +82,7 @@ const InterFloorNavigation = ({ isVisible, onClose, startFloor, endFloor, onPath
     }
   };
 
+  // Rest of the component remains the same
   const generateFloorHtml = (floorPlan, pathCoordinates, isExpanded = false) => {
     return `
       <!DOCTYPE html>
@@ -355,6 +357,7 @@ const InterFloorNavigation = ({ isVisible, onClose, startFloor, endFloor, onPath
   );
 };
 
+// Styles remain unchanged
 const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
@@ -545,4 +548,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default InterFloorNavigation; 
+export default InterFloorNavigation;

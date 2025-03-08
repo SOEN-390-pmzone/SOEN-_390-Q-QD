@@ -4,18 +4,30 @@
     <title>SVG Coordinate Extractor</title>
     <style>
         body { margin: 0; overflow: auto; }
-        #container { position: relative; }
+        #container { 
+            display: flex;
+            flex-direction: row;
+            width: 100%;
+            height: 100vh;
+        }
         #output { 
-            position: fixed; 
-            top: 10px; 
-            left: 10px; 
-            background: rgba(255,255,255,0.8); 
-            padding: 10px; 
-            z-index: 100;
-            max-width: 300px;
+            width: 300px;
+            padding: 10px;
+            background: rgba(255,255,255,0.8);
+            border-right: 1px solid #ccc;
+            box-sizing: border-box;
         }
         #jsonOutput { width: 100%; height: 200px; }
-        #svgContainer { width: 100%; }
+        #svgContainer { 
+            flex-grow: 1;
+            overflow-x: auto;
+            overflow-y: hidden;
+            white-space: nowrap;
+        }
+        #svgObject {
+            width: auto;
+            height: 100%;
+        }
     </style>
 </head>
 <body>
@@ -28,27 +40,35 @@
             <button id="clear">Clear</button>
             <textarea id="jsonOutput"></textarea>
         </div>
-        
         <div id="svgContainer">
             <!-- Replace with your SVG file -->
-            <object id="svgObject" type="image/svg+xml" data="../../assets/svg/VL-2.svg" width="100%"></object>
+            <object id="svgObject" type="image/svg+xml" data="Hall-1.svg"></object>
         </div>
     </div>
-
+            
+   
     <script>
         let currentRoom = null;
         let roomData = {};
         
         document.getElementById('svgObject').addEventListener('load', function() {
             const svgDoc = this.contentDocument;
+            const svgElement = svgDoc.documentElement;
+            
             svgDoc.addEventListener('click', function(e) {
-                // Get coordinates relative to the SVG, accounting for scroll position
-                const svgRect = document.getElementById('svgObject').getBoundingClientRect();
-                const scrollX = window.pageXOffset || document.documentElement.scrollLeft;
-                const scrollY = window.pageYOffset || document.documentElement.scrollTop;
+                // Create SVG point
+                const point = svgElement.createSVGPoint();
                 
-                const x = Math.round(e.clientX - svgRect.left + scrollX);
-                const y = Math.round(e.clientY - svgRect.top + scrollY);
+                // Set to click position in screen coordinates
+                point.x = e.clientX;
+                point.y = e.clientY;
+                
+                // Convert to SVG coordinate system
+                const svgPoint = point.matrixTransform(svgElement.getScreenCTM().inverse());
+                
+                // Round values for cleaner display
+                const x = Math.round(svgPoint.x);
+                const y = Math.round(svgPoint.y);
                 
                 document.getElementById('x').textContent = x;
                 document.getElementById('y').textContent = y;
