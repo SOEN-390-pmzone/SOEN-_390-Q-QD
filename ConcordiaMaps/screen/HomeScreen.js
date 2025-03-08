@@ -177,7 +177,7 @@ function HomeScreen({ asyncKey = "Campus" }) {
           >
             {Building.map((building) => (
               <Marker
-                key={building.name || building.address}
+                key={`${building.name}-${building.coordinate.latitude}-${building.coordinate.longitude}`}
                 testID={`marker-${building.name?.toLowerCase().replace(/\s+/g, "-") || building.id}`}
                 coordinate={building.coordinate}
                 title={building.name}
