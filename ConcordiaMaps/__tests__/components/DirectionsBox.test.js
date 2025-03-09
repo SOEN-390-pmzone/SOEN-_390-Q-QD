@@ -34,38 +34,48 @@ describe("DirectionsBox", () => {
   it("toggles collapse state on handle press", async () => {
     const { getByTestId } = render(<DirectionsBox directions={directions} />);
     const handle = getByTestId("handle");
+
+    // Open the directions box
     fireEvent.press(handle);
     await waitFor(() => {
       expect(getByTestId("directionsBox")).toHaveStyle({
         transform: [{ translateY: 0 }],
       });
     });
+
+    // Close the directions box
     fireEvent.press(handle);
     await waitFor(() => {
+      expect(() => getByTestId("directionsBox")).not.toThrow(); // Ensure it's still mounted
       expect(getByTestId("directionsBox")).toHaveStyle({
         transform: [{ translateY: 300 }],
       });
     });
   });
 
-  it("opens the directions box when the handle is pressed", () => {
+  it("opens the directions box when the handle is pressed", async () => {
     const { getByTestId } = render(<DirectionsBox directions={directions} />);
     const handle = getByTestId("handle");
     fireEvent.press(handle);
-    expect(getByTestId("directionsBox")).toBeTruthy();
+    await waitFor(() => {
+      expect(getByTestId("directionsBox")).toBeTruthy();
+    });
   });
 
   it("closes the directions box when the handle is pressed twice", async () => {
     const { getByTestId } = render(<DirectionsBox directions={directions} />);
     const handle = getByTestId("handle");
+
     fireEvent.press(handle);
     await waitFor(() => {
       expect(getByTestId("directionsBox")).toHaveStyle({
         transform: [{ translateY: 0 }],
       });
     });
+
     fireEvent.press(handle);
     await waitFor(() => {
+      expect(() => getByTestId("directionsBox")).not.toThrow(); // Ensure it's still mounted
       expect(getByTestId("directionsBox")).toHaveStyle({
         transform: [{ translateY: 300 }],
       });
