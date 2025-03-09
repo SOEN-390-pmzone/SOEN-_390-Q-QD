@@ -38,7 +38,7 @@ const PopupModal = ({ isVisible, data, onClose }) => {
             </TouchableOpacity>
           </View>
 
-          {["H Building", "JMSB", "Vanier Library", "Central Building"].includes(name) && (
+          {["H Building", "JMSB", "Vanier Library", "Central Building", "Vanier Extension" ].includes(name) && (
   <TouchableOpacity
     style={styles.getDirectionsButton1}
     onPress={() => Alert.alert("Get Inner Directions", "Inner directions pressed")}
