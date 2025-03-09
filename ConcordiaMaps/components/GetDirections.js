@@ -160,11 +160,12 @@ const GetDirections = () => {
           setOrigin(newOrigin);
 
           // Update both polyline and directions
+          if (isInNavigationMode && destination) {
           const [newDirections, newPolyline] = await Promise.all([
             getStepsInHTML(newOrigin, destination, mode),
             getPolyline(newOrigin, destination, mode),
           ]);
-
+        }
           setDirections(newDirections);
           setRoute(newPolyline);
           console.log("Route and directions updated with new location");
