@@ -10,6 +10,8 @@ import PropTypes from "prop-types";
 import styles from "../styles/DirectionBox.style";
 
 const PopupModal = ({ isVisible, data, onClose }) => {
+  const { name, fullBuildingName, address } = data;
+
   return (
     <Modal
       transparent
@@ -19,9 +21,9 @@ const PopupModal = ({ isVisible, data, onClose }) => {
     >
       <View style={styles.modalOverlay}>
         <View style={styles.modalContainer}>
-          <Text style={styles.modalTitle}>{data.name}</Text>
-          <Text style={styles.modalText1}>•••{data.fullBuildingName}•••</Text>
-          <Text style={styles.modalText}>{data.address}</Text>
+          <Text style={styles.modalTitle}>{name || "Building Name"}</Text>
+          <Text style={styles.modalText1}>{fullBuildingName || "Full Building Name"}</Text>
+          <Text style={styles.modalText}>{address || "Address not available"}</Text>
 
           <View style={styles.buttonsContainer}>
             <TouchableOpacity style={styles.closeButton} onPress={onClose}>
@@ -35,13 +37,16 @@ const PopupModal = ({ isVisible, data, onClose }) => {
               <Text style={styles.getDirectionsButtonText}>Get Directions</Text>
             </TouchableOpacity>
           </View>
-          
-          <TouchableOpacity
-            style={styles.getDirectionsButton1}
-            onPress={() => Alert.alert("Get Inner Directions", "Inner directions pressed")}
-          >
-            <Text style={styles.getDirectionsButtonText}>Get in Building Directions</Text>
-          </TouchableOpacity>
+
+          {/* Conditionally render the Get in Building Directions button */}
+          {name === "H Building" && (
+            <TouchableOpacity
+              style={styles.getDirectionsButton1}
+              onPress={() => Alert.alert("Get Inner Directions", "Inner directions pressed")}
+            >
+              <Text style={styles.getDirectionsButtonText}>Get in Building Directions</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     </Modal>
@@ -52,13 +57,9 @@ PopupModal.propTypes = {
   isVisible: PropTypes.bool.isRequired,
   data: PropTypes.shape({
     name: PropTypes.string.isRequired,
-    coordinate: PropTypes.shape({
-      latitude: PropTypes.number,
-      longitude: PropTypes.number,
-    }),
-    address: PropTypes.string,
     fullBuildingName: PropTypes.string,
-  }),
+    address: PropTypes.string,
+  }).isRequired,
   onClose: PropTypes.func.isRequired,
 };
 
