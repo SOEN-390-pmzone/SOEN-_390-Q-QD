@@ -38,15 +38,15 @@ const PopupModal = ({ isVisible, data, onClose }) => {
             </TouchableOpacity>
           </View>
 
-          {/* Conditionally render the Get in Building Directions button */}
-          {name === "H Building" && (
-            <TouchableOpacity
-              style={styles.getDirectionsButton1}
-              onPress={() => Alert.alert("Get Inner Directions", "Inner directions pressed")}
-            >
-              <Text style={styles.getDirectionsButtonText}>Get in Building Directions</Text>
-            </TouchableOpacity>
-          )}
+          {["H Building", "JMSB", "Vanier Library", "Central Building"].includes(name) && (
+  <TouchableOpacity
+    style={styles.getDirectionsButton1}
+    onPress={() => Alert.alert("Get Inner Directions", "Inner directions pressed")}
+  >
+    <Text style={styles.getDirectionsButtonText}>Get in Building Directions</Text>
+  </TouchableOpacity>
+)}
+
         </View>
       </View>
     </Modal>
