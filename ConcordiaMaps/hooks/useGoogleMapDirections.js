@@ -33,13 +33,7 @@ export const useGoogleMapDirections = () => {
     try {
       const data = await getDirections(origin, destination, mode);
 
-      if (
-        !data ||
-        !data.routes ||
-        !data.routes[0] ||
-        !data.routes[0].legs ||
-        !data.routes[0].legs[0]
-      ) {
+      if (!data?.routes?.[0]?.legs?.[0]) {
         throw new Error("Invalid directions data structure");
       }
 
@@ -113,10 +107,7 @@ export const useGoogleMapDirections = () => {
         return [];
       }
 
-      if (
-        !data.routes[0].overview_polyline ||
-        !data.routes[0].overview_polyline.points
-      ) {
+      if (!data?.routes?.[0]?.overview_polyline?.points) {
         console.error(
           "Error fetching polyline: No overview_polyline.points found",
           data,

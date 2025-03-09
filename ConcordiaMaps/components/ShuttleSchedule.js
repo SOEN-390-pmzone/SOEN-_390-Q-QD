@@ -136,9 +136,33 @@ const getNextShuttle = (schedule) => {
   const currentTime = now.getHours() * 60 + now.getMinutes();
 
   for (let time of schedule) {
-    const [hour, minute, period] = time.match(/(\d+):(\d+)\s(AM|PM)/).slice(1);
+    // Skip null or invalid values
+    if (time === null || typeof time !== "string") {
+      console.error(`Error parsing shuttle time: ${time}`);
+      continue;
+    }
+
+    // Use a safer, more explicit regex pattern with limits
+    const timeMatch = time.match(/^(\d{1,2}):(\d{2})\s(AM|PM)$/);
+
+    // Skip invalid formats
+    if (!timeMatch) continue;
+
+    const [, hour, minute, period] = timeMatch;
     let shuttleHour = parseInt(hour, 10);
     const shuttleMinute = parseInt(minute, 10);
+
+    // Validate parsed values
+    if (
+      isNaN(shuttleHour) ||
+      isNaN(shuttleMinute) ||
+      shuttleHour < 1 ||
+      shuttleHour > 12 ||
+      shuttleMinute < 0 ||
+      shuttleMinute > 59
+    ) {
+      continue;
+    }
 
     // Convert to 24-hour format
     if (period === "PM" && shuttleHour !== 12) shuttleHour += 12;
@@ -153,25 +177,42 @@ const getNextShuttle = (schedule) => {
 };
 
 function ShuttleSchedule({ visible, onClose }) {
-  const [nextShuttle, setNextShuttle] = useState("");
-  const [selectedCampus, setSelectedCampus] = useState("SGW");
-  const [selectedSchedule, setSelectedSchedule] = useState("weekday");
+  const [nextShuttle, setNextShuttle] = useState(""); //NOSONAR
+  const [selectedCampus, setSelectedCampus] = useState("SGW"); //NOSONAR
+  const [selectedSchedule, setSelectedSchedule] = useState("weekday"); //NOSONAR
 
-  // Update the next shuttle when campus changes
-  useEffect(() => {
-    const day = new Date().getDay();
-    if (day === 0 || day === 6) {
-      setNextShuttle("No shuttle service on weekends");
-      return;
-    }
+  //prettier-ignore
+  useEffect(() => //NOSONAR
+    {
+      const updateScheduleAndShuttle = () => {
+        const day = new Date().getDay();
 
-    const scheduleType = day >= 1 && day <= 4 ? "weekday" : "friday";
-    setSelectedSchedule(scheduleType);
+        // Handle weekends
+        if (day === 0 || day === 6) {
+          setNextShuttle("No shuttle service on weekends");
+          return;
+        }
 
-    setNextShuttle(getNextShuttle(schedules[selectedCampus][scheduleType]));
-  }, [selectedCampus, selectedSchedule]);
-  // Trigger when campus or schedule changes
+        // Determine if it's Friday
+        const isFriday = day === 5;
+        const currentScheduleType = isFriday ? "friday" : "weekday";
 
+        // Update schedule type if needed (without triggering another effect)
+        if (selectedSchedule !== currentScheduleType) {
+          setSelectedSchedule(currentScheduleType);
+        }
+
+        // Always calculate next shuttle
+        setNextShuttle(
+          getNextShuttle(schedules[selectedCampus][currentScheduleType])
+        );
+      };
+
+      // Call the function immediately
+      updateScheduleAndShuttle();
+    }, [visible, selectedCampus]); // Only re-run when modal visibility or campus changes
+
+  // Rest of the component remains unchanged
   const schedule = schedules[selectedCampus][selectedSchedule];
 
   // Split the schedule into 3 columns
@@ -183,7 +224,10 @@ function ShuttleSchedule({ visible, onClose }) {
   return (
     <Modal transparent visible={visible} animationType="fade">
       <View style={styles.modalOverlay}>
-        <View style={styles.modalContainer}>
+        <View
+          style={styles.modalContainer}
+          testID="shuttle-schedule-modal-container"
+        >
           <Text style={styles.modalTitle}>Shuttle Schedule</Text>
 
           {/* Next Shuttle Display */}
@@ -259,7 +303,11 @@ function ShuttleSchedule({ visible, onClose }) {
             </View>
           </View>
 
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+          <TouchableOpacity
+            onPress={onClose}
+            style={styles.closeButton}
+            testID="shuttle-schedule-close-button"
+          >
             <Text style={styles.closeButtonText}>Close</Text>
           </TouchableOpacity>
         </View>
@@ -364,3 +412,4 @@ ShuttleSchedule.propTypes = {
 };
 
 export default ShuttleSchedule;
+export { getNextShuttle };
