@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Modal, View, Text, TouchableOpacity, StyleSheet, ScrollView, Dimensions } from 'react-native';
+import { Modal, View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { findShortestPath } from './PathFinder';
 import FloorRegistry from '../../services/BuildingDataService';
-
+import PropTypes
+ from 'prop-types';
 const InterFloorNavigation = ({ isVisible, onClose, startFloor, endFloor, buildingType = 'HallBuilding', onPathCalculated }) => {
   const [selectedStartRoom, setSelectedStartRoom] = useState('');
   const [selectedEndRoom, setSelectedEndRoom] = useState('');
@@ -547,5 +548,19 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 });
+// Add PropTypes validation
+InterFloorNavigation.propTypes = {
+  isVisible: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  startFloor: PropTypes.string.isRequired,
+  endFloor: PropTypes.string.isRequired,
+  buildingType: PropTypes.string,
+  onPathCalculated: PropTypes.func
+};
+// Optional default props
+InterFloorNavigation.defaultProps = {
+  buildingType: 'HallBuilding',
+  onPathCalculated: null
+};
 
 export default InterFloorNavigation;

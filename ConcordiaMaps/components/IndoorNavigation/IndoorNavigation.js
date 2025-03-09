@@ -6,6 +6,7 @@ import InterFloorNavigation from './InterFloorNavigation';
 import Header from '../Header';
 import NavBar from '../NavBar';
 import FloorRegistry from '../../services/BuildingDataService';
+import PropTypes from 'prop-types';
 
 const IndoorNavigation = ({ route, navigation }) => {
   const [startPoint, setStartPoint] = useState('');
@@ -567,7 +568,7 @@ const IndoorNavigation = ({ route, navigation }) => {
               ))}
             </View>
           ) : (
-            <Text style={styles.noPath}>Press "Find Path" to calculate the route</Text>
+            <Text style={styles.noPath}>Press &apos;Find Path&apos; to calculate the route</Text>
           )}
         </ScrollView>
       </View>
@@ -693,4 +694,15 @@ const styles = StyleSheet.create({
   }
 });
 
+IndoorNavigation.propTypes = {
+  route: PropTypes.shape({
+    params: PropTypes.shape({
+      buildingType: PropTypes.string,
+      floor: PropTypes.string
+    })
+  }),
+  navigation: PropTypes.shape({
+    setOptions: PropTypes.func.isRequired
+  }).isRequired
+};
 export default IndoorNavigation;

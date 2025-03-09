@@ -12,6 +12,8 @@ import BuildingSelector from "./components/IndoorNavigation/BuildingSelector";
 import FloorNavigationSelector from "./components/IndoorNavigation/FloorNavigationSelector";
 import RoomToRoomNavigation from "./components/IndoorNavigation/RoomToRoomNavigation";
 import TunnelNavigation from "./components/IndoorNavigation/TunnelNavigation";
+import PropTypes from 'prop-types'; 
+
 // import MapMarkers from "./components/MapMarkers"; // Ensure this import exists
 
 // Create Context for modal data and visibility
@@ -31,7 +33,11 @@ const PopupModalWrapper = ({ isVisible, data, onClose }) => {
     />
   );
 };
-
+PopupModalWrapper.propTypes = {
+  isVisible: PropTypes.bool.isRequired,
+  data: PropTypes.object.isRequired,
+  onClose: PropTypes.func.isRequired
+};
 export default function App() {
   const [isModalVisible, setModalVisible] = useState(false);
   const [modalData, setModalData] = useState({

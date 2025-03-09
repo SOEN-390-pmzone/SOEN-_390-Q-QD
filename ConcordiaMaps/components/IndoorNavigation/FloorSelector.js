@@ -15,8 +15,6 @@ const FloorSelector = () => {
   const buildingType = route.params?.buildingType || 'HallBuilding';
    // Get building data from FloorRegistry
    const building = FloorRegistry.getBuilding(buildingType);
-     // Get floors array for this building
-  const floors = FloorRegistry.getFloors(buildingType);
 
   const handleFloorSelect = (floorId) => {
     // Check if the selected floor is a tunnel level

@@ -3237,7 +3237,6 @@ const VEfloor2SVG=`<?xml version="1.0" encoding="UTF-8" standalone="no"?>
    version="1.1"
    inkscape:version="1.4 (86a8ad7, 2024-10-11)"
    sodipodi:docname="VE-2.svg"
-   inkscape:export-filename="G:\SOEN 390 Floorplans\VL-2.png"
    inkscape:export-xdpi="90"
    inkscape:export-ydpi="90"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"

@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Modal, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Modal } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { findShortestPath } from './PathFinder';
 import FloorRegistry from '../../services/BuildingDataService';
 
-const RoomToRoomNavigation = ({ navigation }) => {
+const RoomToRoomNavigation = () => {
   // State for building and floor selection
   const [selectedBuilding, setSelectedBuilding] = useState('');
   const [buildingType, setBuildingType] = useState('');
@@ -307,7 +307,6 @@ const RoomToRoomNavigation = ({ navigation }) => {
     
     // Serialize path data for safe injection into HTML
     const pathDataJson = JSON.stringify(pathCoordinates);
-    const roomsJson = JSON.stringify(rooms);
     
     return `
       <!DOCTYPE html>

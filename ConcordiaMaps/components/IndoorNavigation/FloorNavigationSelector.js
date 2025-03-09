@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { findShortestPath } from './PathFinder';
 import Header from '../Header';
@@ -87,8 +87,6 @@ const FloorNavigationSelector = () => {
     try {
       const startFloorGraph = FloorRegistry.getGraph(buildingType, startFloor);
       const endFloorGraph = FloorRegistry.getGraph(buildingType, endFloor);
-      const startFloorRooms = FloorRegistry.getRooms(buildingType, startFloor);
-      const endFloorRooms = FloorRegistry.getRooms(buildingType, endFloor);
       const building = FloorRegistry.getBuilding(buildingType);
 
       // Calculate path from start room to escalator on start floor
