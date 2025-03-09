@@ -56,22 +56,16 @@ describe("DirectionsBox", () => {
   });
 
   it("closes the directions box when the handle is pressed twice", async () => {
-    const { getByTestId, queryByTestId } = render(
-      <DirectionsBox directions={directions} />,
-    );
+    const { getByTestId } = render(<DirectionsBox directions={directions} />);
     const handle = getByTestId("handle");
-
     fireEvent.press(handle);
     await waitFor(() => {
-      expect(queryByTestId("directionsBox")).not.toBeNull();
       expect(getByTestId("directionsBox")).toHaveStyle({
         transform: [{ translateY: 0 }],
       });
     });
-
     fireEvent.press(handle);
     await waitFor(() => {
-      expect(queryByTestId("directionsBox")).not.toBeNull();
       expect(getByTestId("directionsBox")).toHaveStyle({
         transform: [{ translateY: 300 }],
       });

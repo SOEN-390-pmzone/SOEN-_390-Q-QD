@@ -118,14 +118,14 @@ describe("RoomToRoomNavigation", () => {
 
   // Test floor selection screen rendering
   it("renders floor selection screen after building selection", async () => {
-    const { getByText } = renderWithNavigation(<RoomToRoomNavigation />);
+    const { getByText, findByText } = renderWithNavigation(
+      <RoomToRoomNavigation />,
+    );
 
     // Press the Hall Building button to navigate to floor selection
     fireEvent.press(getByText("Hall Building"));
 
-    await waitFor(() =>
-      expect(getByText("Select Floors in Hall Building")).toBeTruthy(),
-    );
+    await findByText("Select Floors in Hall Building");
 
     // Verify start/end floor sections are present
     expect(getByText("Start Floor")).toBeTruthy();
