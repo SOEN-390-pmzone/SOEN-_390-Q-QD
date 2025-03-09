@@ -143,6 +143,7 @@ const GetDirections = () => {
 
     const updateLocation = async () => {
       try {
+        // Only proceed if using current location
         if (!useCurrentLocation) return;
 
         const newLocation = await Location.getCurrentPositionAsync({
@@ -154,22 +155,23 @@ const GetDirections = () => {
           longitude: newLocation.coords.longitude,
         };
 
+        // Only update state if location has changed
         if (
           origin?.latitude !== newOrigin.latitude ||
           origin?.longitude !== newOrigin.longitude
         ) {
           setOrigin(newOrigin);
 
+          // Update both polyline and directions
           if (isInNavigationMode && destination) {
-            const [updatedDirections, updatedPolyline] = await Promise.all([
+            const [newDirections, newPolyline] = await Promise.all([
               getStepsInHTML(newOrigin, destination, mode),
               getPolyline(newOrigin, destination, mode),
             ]);
-
-            setDirections(updatedDirections);
-            setRoute(updatedPolyline);
-            console.log("Route and directions updated with new location");
           }
+          setDirections(newDirections);
+          setRoute(newPolyline);
+          console.log("Route and directions updated with new location");
         }
       } catch (error) {
         console.error("Error updating location" + error);

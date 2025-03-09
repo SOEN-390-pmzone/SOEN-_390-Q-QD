@@ -1,12 +1,12 @@
-import React, { useState, createContext, useMemo, useEffect } from "react";
+import React, { useState, createContext, useMemo } from "react";
+
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import HomeScreen from "./screen/HomeScreen";
 import { LocationProvider } from "./contexts/LocationContext";
-import PopupModal from "./components/PopupModal";
+import PopupModal from "./components/PopupModal"; // Import the PopupModal
 import styles from "./styles";
 import GetDirections from "./components/GetDirections";
-import * as Amplitude from "expo-analytics-amplitude";
 
 // Create Context for modal data and visibility
 export const ModalContext = createContext();
@@ -29,12 +29,6 @@ export default function App() {
     () => ({ isModalVisible, modalData, toggleModal, setModalData }),
     [isModalVisible, modalData],
   );
-
-  // Initialize Amplitude
-  useEffect(() => {
-    Amplitude.initializeAsync("3f731a5aff252dc984bf309ee6228f44"); // Replace with your API key
-    Amplitude.logEventAsync("App Opened");
-  }, []);
 
   return (
     <LocationProvider>
