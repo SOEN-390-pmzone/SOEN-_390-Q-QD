@@ -1,5 +1,11 @@
 import React from "react";
-import { render, fireEvent, act, waitFor } from "@testing-library/react-native";
+import {
+  render,
+  fireEvent,
+  act,
+  waitFor,
+  cleanup,
+} from "@testing-library/react-native";
 import GetDirections from "../../components/GetDirections";
 import { useGoogleMapDirections } from "../../hooks/useGoogleMapDirections";
 import { LocationContext } from "../../contexts/LocationContext";
@@ -119,7 +125,7 @@ describe("GetDirections", () => {
     return render(
       <LocationContext.Provider value={mockLocation}>
         {component}
-      </LocationContext.Provider>,
+      </LocationContext.Provider>
     );
   };
 
@@ -306,7 +312,7 @@ describe("GetDirections", () => {
     mockGetPolyline.mockRejectedValueOnce(new Error("Some error"));
 
     const { getByText, getByTestId, queryByText } = renderWithContext(
-      <GetDirections />,
+      <GetDirections />
     );
 
     const destination = {
@@ -468,7 +474,7 @@ describe("GetDirections", () => {
   it("handles location errors gracefully", async () => {
     // Simulate a location error
     mockGetCurrentPositionAsync.mockRejectedValueOnce(
-      new Error("Location service unavailable"),
+      new Error("Location service unavailable")
     );
 
     // Spy on console
@@ -506,7 +512,7 @@ describe("GetDirections", () => {
 
     // Replace with error-throwing mock
     mockGetCurrentPositionAsync.mockRejectedValueOnce(
-      new Error("Tracking Error"),
+      new Error("Tracking Error")
     );
 
     const { getByText, getByTestId } = renderWithContext(<GetDirections />);
@@ -544,10 +550,10 @@ describe("GetDirections", () => {
 
     // Simulate failure of getStepsInHTML and getPolyline
     mockGetStepsInHTML.mockRejectedValueOnce(
-      new Error("Steps generation failed"),
+      new Error("Steps generation failed")
     );
     mockGetPolyline.mockRejectedValueOnce(
-      new Error("Polyline generation failed"),
+      new Error("Polyline generation failed")
     );
 
     const { getByText, getByTestId } = renderWithContext(<GetDirections />);
@@ -601,7 +607,7 @@ describe("GetDirections", () => {
     mockGetPolyline.mockResolvedValueOnce([]);
 
     const { getByText, getByTestId, queryByText } = renderWithContext(
-      <GetDirections />,
+      <GetDirections />
     );
 
     // Set destination
@@ -668,7 +674,7 @@ describe("GetDirections Additional Coverage Tests", () => {
     return render(
       <LocationContext.Provider value={mockLocation}>
         {component}
-      </LocationContext.Provider>,
+      </LocationContext.Provider>
     );
   };
 
@@ -699,7 +705,7 @@ describe("GetDirections Additional Coverage Tests", () => {
 
     // Initially using current location
     const initialOriginSearchBar = getByTestId(
-      "search-bar-Using Current Location",
+      "search-bar-Using Current Location"
     );
 
     // Manually select a location to disable current location
@@ -719,7 +725,7 @@ describe("GetDirections Additional Coverage Tests", () => {
     const { getByTestId } = render(
       <LocationContext.Provider value={null}>
         <GetDirections />
-      </LocationContext.Provider>,
+      </LocationContext.Provider>
     );
 
     // Verify initial render uses default coordinates
@@ -816,7 +822,7 @@ describe("GetDirections Additional Coverage Tests", () => {
     const { rerender, getByText } = render(
       <LocationContext.Provider value={mockLocation}>
         <GetDirections />
-      </LocationContext.Provider>,
+      </LocationContext.Provider>
     );
 
     // Set destination to trigger navigation mode
@@ -831,7 +837,7 @@ describe("GetDirections Additional Coverage Tests", () => {
           value={{ latitude: 45.499, longitude: -73.58 }}
         >
           <GetDirections />
-        </LocationContext.Provider>,
+        </LocationContext.Provider>
       );
     });
 
@@ -877,5 +883,137 @@ describe("GetDirections Additional Coverage Tests", () => {
 
     // Verify the component rendered successfully
     expect(getByText("Get Directions")).toBeTruthy();
+  });
+});
+
+describe("GetDirections - Transport Mode Tests", () => {
+  afterEach(() => {
+    cleanup(); // Ensures a fresh render for each test
+  });
+  const mockLocation = {
+    latitude: 45.4973,
+    longitude: -73.5789,
+  };
+
+  const mockGetStepsInHTML = jest.fn();
+  const mockGetPolyline = jest.fn();
+
+  const renderWithContext = (component) => {
+    return render(
+      <LocationContext.Provider value={mockLocation}>
+        {component}
+      </LocationContext.Provider>
+    );
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    mockGetStepsInHTML.mockResolvedValue(["Step 1", "Step 2"]);
+    mockGetPolyline.mockResolvedValue([
+      { latitude: 45.4973, longitude: -73.5789 },
+      { latitude: 45.4974, longitude: -73.579 },
+    ]);
+
+    useGoogleMapDirections.mockReturnValue({
+      getStepsInHTML: mockGetStepsInHTML,
+      getPolyline: mockGetPolyline,
+    });
+  });
+
+  it("sets mode to walking and fetches walking directions", async () => {
+    const { getByText } = renderWithContext(<GetDirections />);
+    await act(async () => {
+      fireEvent.press(getByText("Walking"));
+      fireEvent.press(getByText("Get Directions"));
+    });
+
+    await waitFor(() => {
+      expect(mockGetStepsInHTML).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.any(Object),
+        "walking"
+      );
+    });
+  });
+
+  it("sets mode to driving and fetches driving directions", async () => {
+    const { getByText } = renderWithContext(<GetDirections />);
+
+    // Press the mode button and wait for re-render
+    await act(async () => {
+      fireEvent.press(getByText("Car"));
+    });
+    await waitFor(() => {
+      // optionally check for something that indicates mode changed
+    });
+
+    // Now press "Get Directions"
+    await act(async () => {
+      fireEvent.press(getByText("Get Directions"));
+    });
+
+    // Finally, expect the mode to be "driving"
+    await waitFor(() => {
+      expect(mockGetStepsInHTML).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.any(Object),
+        "driving"
+      );
+    });
+  });
+
+  it("sets mode to transit and fetches transit directions", async () => {
+    const { getByText } = renderWithContext(<GetDirections />);
+
+    // Press "Transit" first
+    await act(async () => {
+      fireEvent.press(getByText("Transit"));
+    });
+
+    // Wait for mode to change (optionally check UI or state)
+    await waitFor(() => {
+      // e.g. expect some UI text or state indicating transit mode
+    });
+
+    // Now press "Get Directions"
+    await act(async () => {
+      fireEvent.press(getByText("Get Directions"));
+    });
+
+    await waitFor(() => {
+      expect(mockGetStepsInHTML).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.any(Object),
+        "transit"
+      );
+    });
+  });
+
+  it("sets mode to biking and fetches biking directions", async () => {
+    const { getByText } = renderWithContext(<GetDirections />);
+
+    // Press "Biking" first
+    await act(async () => {
+      fireEvent.press(getByText("Biking"));
+    });
+
+    // Wait for mode to change (optionally check UI or state)
+    await waitFor(() => {
+      // e.g. expect some UI text or state indicating biking mode
+    });
+
+    // Now press "Get Directions"
+    await act(async () => {
+      fireEvent.press(getByText("Get Directions"));
+    });
+
+    await waitFor(() => {
+      expect(mockGetStepsInHTML).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.any(Object),
+        "biking"
+      );
+    });
   });
 });
