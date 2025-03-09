@@ -3,7 +3,6 @@ import { Modal, View, Text, TouchableOpacity, Alert } from "react-native";
 import PropTypes from "prop-types";
 import styles from "../styles/DirectionBox.style";
 
-
 // Building to floor selector mapping
 const INDOOR_NAVIGATION_BUILDINGS = {
   "Henry F. Hall": "HallBuilding",
@@ -23,7 +22,6 @@ const PopupModal = ({ isVisible, data, onClose, navigation }) => {
   // Check if the building has indoor navigation available
   const hasIndoorNavigation = data && data.name in INDOOR_NAVIGATION_BUILDINGS;
 
-
   return (
     <Modal
       transparent
@@ -33,11 +31,9 @@ const PopupModal = ({ isVisible, data, onClose, navigation }) => {
     >
       <View style={styles.modalOverlay}>
         <View style={styles.modalContainer}>
-
           <Text style={styles.modalTitle}>{data?.name}</Text>
           <Text style={styles.modalText1}>•••{data?.fullBuildingName}•••</Text>
           <Text style={styles.modalText}>{data?.address}</Text>
-
 
           <View style={styles.buttonsContainer}>
             <TouchableOpacity style={styles.closeButton} onPress={onClose}>

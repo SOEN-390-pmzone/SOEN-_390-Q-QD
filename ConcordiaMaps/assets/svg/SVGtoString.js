@@ -685,8 +685,8 @@ const floor8SVG = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
     </g>
   </g>
 </svg>
-`
-const floor9SVG= `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+`;
+const floor9SVG = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
@@ -1491,8 +1491,8 @@ const floor9SVG= `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
   </g>
 </svg>
 
-`
-const floor1SVG=`<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+`;
+const floor1SVG = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
@@ -1571,8 +1571,8 @@ const floor1SVG=`<?xml version="1.0" encoding="UTF-8" standalone="no"?>
          id="tspan4">Escalator</tspan></text>
   </g>
 </svg>
-`
-const MBfloor1SVG=`<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+`;
+const MBfloor1SVG = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
@@ -2561,7 +2561,7 @@ const MBfloor1SVG=`<?xml version="1.0" encoding="UTF-8" standalone="no"?>
          id="tspan41">Elevator</tspan></text>
   </g>
 </svg>
-`
+`;
 const MBfloor2SVG = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
@@ -3225,8 +3225,8 @@ const MBfloor2SVG = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
            y="512.86731"
            style="stroke-width:1.84252">Elevators</tspan></text></g></g></svg>
 
-`
-const VEfloor2SVG=`<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+`;
+const VEfloor2SVG = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
@@ -4082,7 +4082,7 @@ const VEfloor2SVG=`<?xml version="1.0" encoding="UTF-8" standalone="no"?>
          id="tspan72">216</tspan></text>
   </g>
 </svg>
-`
+`;
 const VEfloor1SVG = `
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
@@ -4184,7 +4184,7 @@ const VEfloor1SVG = `
 
 
 
-`
+`;
 const VLfloor1SVG = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
@@ -5254,5 +5254,14 @@ const VLfloor1SVG = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
          style="stroke-width:0.877028"
          x="225.12508"
          y="60.381062">X</tspan></text></g></svg>
-`
-export default { floor8SVG, floor9SVG, floor1SVG,MBfloor1SVG,MBfloor2SVG, VEfloor1SVG,VEfloor2SVG,VLfloor1SVG};
+`;
+export default {
+  floor8SVG,
+  floor9SVG,
+  floor1SVG,
+  MBfloor1SVG,
+  MBfloor2SVG,
+  VEfloor1SVG,
+  VEfloor2SVG,
+  VLfloor1SVG,
+};

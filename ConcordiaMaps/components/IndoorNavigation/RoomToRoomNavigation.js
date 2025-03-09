@@ -1,33 +1,40 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Modal } from 'react-native';
-import { WebView } from 'react-native-webview';
-import { findShortestPath } from './PathFinder';
-import FloorRegistry from '../../services/BuildingDataService';
+import React, { useState, useEffect, useRef } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  Modal,
+} from "react-native";
+import { WebView } from "react-native-webview";
+import { findShortestPath } from "./PathFinder";
+import FloorRegistry from "../../services/BuildingDataService";
 
 const RoomToRoomNavigation = () => {
   // State for building and floor selection
-  const [selectedBuilding, setSelectedBuilding] = useState('');
-  const [buildingType, setBuildingType] = useState('');
-  const [startFloor, setStartFloor] = useState('');
-  const [endFloor, setEndFloor] = useState('');
-  
+  const [selectedBuilding, setSelectedBuilding] = useState("");
+  const [buildingType, setBuildingType] = useState("");
+  const [startFloor, setStartFloor] = useState("");
+  const [endFloor, setEndFloor] = useState("");
+
   // State for room selection
   const [startFloorRooms, setStartFloorRooms] = useState({});
   const [endFloorRooms, setEndFloorRooms] = useState({});
-  const [selectedStartRoom, setSelectedStartRoom] = useState('');
-  const [selectedEndRoom, setSelectedEndRoom] = useState('');
-  
+  const [selectedStartRoom, setSelectedStartRoom] = useState("");
+  const [selectedEndRoom, setSelectedEndRoom] = useState("");
+
   // State for floor plans and navigation
-  const [startFloorPlan, setStartFloorPlan] = useState('');
-  const [endFloorPlan, setEndFloorPlan] = useState('');
+  const [startFloorPlan, setStartFloorPlan] = useState("");
+  const [endFloorPlan, setEndFloorPlan] = useState("");
   const [startFloorPath, setStartFloorPath] = useState([]);
   const [endFloorPath, setEndFloorPath] = useState([]);
   const [navigationSteps, setNavigationSteps] = useState([]);
-  
+
   // State for UI management
   const [expandedFloor, setExpandedFloor] = useState(null);
-  const [step, setStep] = useState('building'); // Possible values: 'building', 'floors', 'rooms', 'navigation'
-  
+  const [step, setStep] = useState("building"); // Possible values: 'building', 'floors', 'rooms', 'navigation'
+
   // Available buildings
   const buildings = FloorRegistry.getBuildings();
 
@@ -39,65 +46,82 @@ const RoomToRoomNavigation = () => {
   const handleBuildingSelect = (buildingId) => {
     // Find the corresponding key in the FloorRegistry by matching the building data
     const buildingTypes = Object.keys(FloorRegistry.getAllBuildings());
-    console.log('Available building types:', buildingTypes);
-    
-    const type = buildingTypes.find(key => 
-      FloorRegistry.getBuilding(key).id === buildingId
+    console.log("Available building types:", buildingTypes);
+
+    const type = buildingTypes.find(
+      (key) => FloorRegistry.getBuilding(key).id === buildingId,
     );
-    
+
     if (type) {
       console.log(`Selected building type: ${type}`);
       setBuildingType(type);
       setSelectedBuilding(buildingId);
-      
+
       // List available floors for debugging
       const building = FloorRegistry.getBuilding(type);
-      console.log('Available floors:', Object.keys(building.floors));
-      
+      console.log("Available floors:", Object.keys(building.floors));
+
       // Reset other selections when building changes
-      setStartFloor('');
-      setEndFloor('');
-      setSelectedStartRoom('');
-      setSelectedEndRoom('');
+      setStartFloor("");
+      setEndFloor("");
+      setSelectedStartRoom("");
+      setSelectedEndRoom("");
       setStartFloorRooms({});
       setEndFloorRooms({});
-      setStartFloorPlan('');
-      setEndFloorPlan('');
+      setStartFloorPlan("");
+      setEndFloorPlan("");
       setNavigationSteps([]);
       setStartFloorPath([]);
       setEndFloorPath([]);
-      
+
       // Move to floor selection step
-      setStep('floors');
+      setStep("floors");
     }
   };
 
   // Load floor plans when both floors are selected
   const loadFloorPlans = async () => {
     if (!startFloor || !endFloor) return;
-    
+
     try {
-      console.log(`Loading floor plans for ${buildingType} - floors ${startFloor} and ${endFloor}...`);
-      
+      console.log(
+        `Loading floor plans for ${buildingType} - floors ${startFloor} and ${endFloor}...`,
+      );
+
       // Loading floor plans using the FloorRegistry
-      const startSvg = await FloorRegistry.getFloorPlan(buildingType, startFloor);
-      console.log('Start floor SVG loaded:', startSvg ? `${startSvg.substring(0, 50)}...` : 'Empty');
-      setStartFloorPlan(startSvg || '<div style="color:red">Failed to load SVG</div>');
-      
+      const startSvg = await FloorRegistry.getFloorPlan(
+        buildingType,
+        startFloor,
+      );
+      console.log(
+        "Start floor SVG loaded:",
+        startSvg ? `${startSvg.substring(0, 50)}...` : "Empty",
+      );
+      setStartFloorPlan(
+        startSvg || '<div style="color:red">Failed to load SVG</div>',
+      );
+
       if (startFloor !== endFloor) {
         const endSvg = await FloorRegistry.getFloorPlan(buildingType, endFloor);
-        console.log('End floor SVG loaded:', endSvg ? `${endSvg.substring(0, 50)}...` : 'Empty');
-        setEndFloorPlan(endSvg || '<div style="color:red">Failed to load SVG</div>');
+        console.log(
+          "End floor SVG loaded:",
+          endSvg ? `${endSvg.substring(0, 50)}...` : "Empty",
+        );
+        setEndFloorPlan(
+          endSvg || '<div style="color:red">Failed to load SVG</div>',
+        );
       }
     } catch (error) {
-      console.error('Error loading floor plans:', error);
+      console.error("Error loading floor plans:", error);
     }
   };
 
   // Add useEffect to load floor plans when floors change
   useEffect(() => {
     if (startFloor && endFloor) {
-      console.log(`Floor selection changed: ${startFloor} and ${endFloor}. Loading floor plans...`);
+      console.log(
+        `Floor selection changed: ${startFloor} and ${endFloor}. Loading floor plans...`,
+      );
       loadFloorPlans();
     }
   }, [startFloor, endFloor, buildingType]);
@@ -105,12 +129,12 @@ const RoomToRoomNavigation = () => {
   // Add useEffect to reload WebViews when floor plans change
   useEffect(() => {
     if (startFloorPlan && startFloorWebViewRef.current) {
-      console.log('Reloading start floor WebView...');
+      console.log("Reloading start floor WebView...");
       startFloorWebViewRef.current.reload();
     }
-    
+
     if (endFloorPlan && endFloorWebViewRef.current) {
-      console.log('Reloading end floor WebView...');
+      console.log("Reloading end floor WebView...");
       endFloorWebViewRef.current.reload();
     }
   }, [startFloorPlan, endFloorPlan]);
@@ -130,10 +154,10 @@ const RoomToRoomNavigation = () => {
       console.log(`Rooms available on floor ${floorId}:`, Object.keys(rooms));
       setEndFloorRooms(rooms);
     }
-    
+
     // If both floors are selected, move to room selection
     if ((isStartFloor && endFloor) || (!isStartFloor && startFloor)) {
-      setStep('rooms');
+      setStep("rooms");
       // Don't call loadFloorPlans here - it will be triggered by the useEffect
     }
   };
@@ -145,141 +169,207 @@ const RoomToRoomNavigation = () => {
     }
 
     try {
-      console.log(`Calculating path from ${selectedStartRoom} on floor ${startFloor} to ${selectedEndRoom} on floor ${endFloor}`);
-      
+      console.log(
+        `Calculating path from ${selectedStartRoom} on floor ${startFloor} to ${selectedEndRoom} on floor ${endFloor}`,
+      );
+
       const startFloorGraph = FloorRegistry.getGraph(buildingType, startFloor);
       const endFloorGraph = FloorRegistry.getGraph(buildingType, endFloor);
       const building = FloorRegistry.getBuilding(buildingType);
-      
+
       // Check if graphs are loaded
-      console.log(`Start floor graph has ${Object.keys(startFloorGraph).length} nodes`);
-      console.log(`End floor graph has ${Object.keys(endFloorGraph).length} nodes`);
-      
+      console.log(
+        `Start floor graph has ${Object.keys(startFloorGraph).length} nodes`,
+      );
+      console.log(
+        `End floor graph has ${Object.keys(endFloorGraph).length} nodes`,
+      );
+
       // Check if the selected rooms exist in the graph
       if (!startFloorGraph[selectedStartRoom]) {
         console.error(`Start room ${selectedStartRoom} not found in graph`);
-        alert(`Start room ${selectedStartRoom} not found in navigation graph. Please select another room.`);
+        alert(
+          `Start room ${selectedStartRoom} not found in navigation graph. Please select another room.`,
+        );
         return;
       }
-      
+
       if (!endFloorGraph[selectedEndRoom]) {
         console.error(`End room ${selectedEndRoom} not found in graph`);
-        alert(`End room ${selectedEndRoom} not found in navigation graph. Please select another room.`);
+        alert(
+          `End room ${selectedEndRoom} not found in navigation graph. Please select another room.`,
+        );
         return;
       }
 
       // If same floor, calculate direct path
       if (startFloor === endFloor) {
         console.log(`Same floor navigation (floor ${startFloor})`);
-        const directPath = findShortestPath(startFloorGraph, selectedStartRoom, selectedEndRoom);
-        console.log(`Direct path calculated: ${directPath.join(' → ')}`);
-        
+        const directPath = findShortestPath(
+          startFloorGraph,
+          selectedStartRoom,
+          selectedEndRoom,
+        );
+        console.log(`Direct path calculated: ${directPath.join(" → ")}`);
+
         if (directPath.length < 2) {
-          console.error('Failed to find a valid path between rooms on the same floor');
-          alert('Could not find a path between these rooms. Please try different rooms.');
+          console.error(
+            "Failed to find a valid path between rooms on the same floor",
+          );
+          alert(
+            "Could not find a path between these rooms. Please try different rooms.",
+          );
           return;
         }
-        
+
         setStartFloorPath(directPath);
         setEndFloorPath([]);
-        
+
         // Create navigation steps
         const steps = [
-          { type: 'start', text: `Start at room ${selectedStartRoom} on floor ${startFloor} of ${building.name}` },
+          {
+            type: "start",
+            text: `Start at room ${selectedStartRoom} on floor ${startFloor} of ${building.name}`,
+          },
           ...directPath.map((node, index) => ({
-            type: 'walk',
-            text: index === directPath.length - 1 
-              ? `Arrive at destination: ${selectedEndRoom}`
-              : `Go to ${node}`
-          }))
+            type: "walk",
+            text:
+              index === directPath.length - 1
+                ? `Arrive at destination: ${selectedEndRoom}`
+                : `Go to ${node}`,
+          })),
         ];
-        
+
         setNavigationSteps(steps);
       } else {
-        console.log(`Inter-floor navigation (floor ${startFloor} to ${endFloor})`);
-        
+        console.log(
+          `Inter-floor navigation (floor ${startFloor} to ${endFloor})`,
+        );
+
         // Find vertical transportation (escalator or elevator)
         // First check which vertical transportation methods are available on both floors
-        const startHasEscalator = Object.keys(startFloorGraph).includes('escalator');
-        const startHasElevator = Object.keys(startFloorGraph).includes('elevator');
-        const endHasEscalator = Object.keys(endFloorGraph).includes('escalator');
-        const endHasElevator = Object.keys(endFloorGraph).includes('elevator');
-        
-        console.log(`Transportation availability - Start floor: escalator=${startHasEscalator}, elevator=${startHasElevator}; End floor: escalator=${endHasEscalator}, elevator=${endHasElevator}`);
-        
+        const startHasEscalator =
+          Object.keys(startFloorGraph).includes("escalator");
+        const startHasElevator =
+          Object.keys(startFloorGraph).includes("elevator");
+        const endHasEscalator =
+          Object.keys(endFloorGraph).includes("escalator");
+        const endHasElevator = Object.keys(endFloorGraph).includes("elevator");
+
+        console.log(
+          `Transportation availability - Start floor: escalator=${startHasEscalator}, elevator=${startHasElevator}; End floor: escalator=${endHasEscalator}, elevator=${endHasElevator}`,
+        );
+
         // Determine which transportation method to use
         let transportMethod = null;
-        let transportName = '';
-        
+        let transportName = "";
+
         if (startHasEscalator && endHasEscalator) {
-          transportMethod = 'escalator';
-          transportName = 'escalator';
+          transportMethod = "escalator";
+          transportName = "escalator";
         } else if (startHasElevator && endHasElevator) {
-          transportMethod = 'elevator';
-          transportName = 'elevator';
+          transportMethod = "elevator";
+          transportName = "elevator";
         } else {
           // Try to find any other common transportation node
           const startNodes = new Set(Object.keys(startFloorGraph));
           const endNodes = new Set(Object.keys(endFloorGraph));
-          const commonNodes = [...startNodes].filter(node => 
-            endNodes.has(node) && 
-            (node.includes('elevator') || node.includes('escalator') || node.includes('stairs'))
+          const commonNodes = [...startNodes].filter(
+            (node) =>
+              endNodes.has(node) &&
+              (node.includes("elevator") ||
+                node.includes("escalator") ||
+                node.includes("stairs")),
           );
-          
+
           if (commonNodes.length > 0) {
             transportMethod = commonNodes[0];
-            transportName = transportMethod.includes('elevator') ? 'elevator' : 
-                           transportMethod.includes('escalator') ? 'escalator' : 'stairs';
+            transportName = transportMethod.includes("elevator")
+              ? "elevator"
+              : transportMethod.includes("escalator")
+                ? "escalator"
+                : "stairs";
           }
         }
-        
+
         if (!transportMethod) {
-          console.error('No common vertical transportation found between floors');
-          alert(`Cannot navigate between floors ${startFloor} and ${endFloor}. No escalator, elevator, or stairs found on both floors.`);
+          console.error(
+            "No common vertical transportation found between floors",
+          );
+          alert(
+            `Cannot navigate between floors ${startFloor} and ${endFloor}. No escalator, elevator, or stairs found on both floors.`,
+          );
           return;
         }
-        
-        console.log(`Using ${transportName} (node: ${transportMethod}) for inter-floor navigation`);
-        
+
+        console.log(
+          `Using ${transportName} (node: ${transportMethod}) for inter-floor navigation`,
+        );
+
         // Calculate path from start room to transportation on start floor
-        const startFloorTransportPath = findShortestPath(startFloorGraph, selectedStartRoom, transportMethod);
-        console.log(`Start floor path to ${transportName}: ${startFloorTransportPath.join(' → ')}`);
-        
+        const startFloorTransportPath = findShortestPath(
+          startFloorGraph,
+          selectedStartRoom,
+          transportMethod,
+        );
+        console.log(
+          `Start floor path to ${transportName}: ${startFloorTransportPath.join(" → ")}`,
+        );
+
         // Calculate path from transportation to end room on end floor
-        const endFloorTransportPath = findShortestPath(endFloorGraph, transportMethod, selectedEndRoom);
-        console.log(`End floor path from ${transportName}: ${endFloorTransportPath.join(' → ')}`);
-        
-        if (startFloorTransportPath.length < 2 || endFloorTransportPath.length < 2) {
+        const endFloorTransportPath = findShortestPath(
+          endFloorGraph,
+          transportMethod,
+          selectedEndRoom,
+        );
+        console.log(
+          `End floor path from ${transportName}: ${endFloorTransportPath.join(" → ")}`,
+        );
+
+        if (
+          startFloorTransportPath.length < 2 ||
+          endFloorTransportPath.length < 2
+        ) {
           console.error(`Failed to find a valid path to/from ${transportName}`);
-          alert(`Could not find a complete path between these rooms. Please try different rooms.`);
+          alert(
+            `Could not find a complete path between these rooms. Please try different rooms.`,
+          );
           return;
         }
-        
+
         setStartFloorPath(startFloorTransportPath);
         setEndFloorPath(endFloorTransportPath);
-        
+
         // Create navigation steps
         const steps = [
-          { type: 'start', text: `Start at room ${selectedStartRoom} on floor ${startFloor} of ${building.name}` },
+          {
+            type: "start",
+            text: `Start at room ${selectedStartRoom} on floor ${startFloor} of ${building.name}`,
+          },
           ...startFloorTransportPath.map((node, index) => ({
-            type: 'walk',
-            text: index === startFloorTransportPath.length - 1 
-              ? `Arrive at ${transportName} on floor ${startFloor}`
-              : `Go to ${node}`
+            type: "walk",
+            text:
+              index === startFloorTransportPath.length - 1
+                ? `Arrive at ${transportName} on floor ${startFloor}`
+                : `Go to ${node}`,
           })),
-          { type: transportName, text: `Take ${transportName} to floor ${endFloor}` },
+          {
+            type: transportName,
+            text: `Take ${transportName} to floor ${endFloor}`,
+          },
           ...endFloorTransportPath.map((node, index) => ({
-            type: 'walk',
-            text: index === 0 
-              ? `Start from ${transportName} on floor ${endFloor}`
-              : `Go to ${node}`
+            type: "walk",
+            text:
+              index === 0
+                ? `Start from ${transportName} on floor ${endFloor}`
+                : `Go to ${node}`,
           })),
-          { type: 'end', text: `Arrive at destination: ${selectedEndRoom}` }
+          { type: "end", text: `Arrive at destination: ${selectedEndRoom}` },
         ];
-        
+
         setNavigationSteps(steps);
       }
-      
+
       // Force reload WebViews with new data
       setTimeout(() => {
         if (startFloorWebViewRef.current) {
@@ -289,11 +379,11 @@ const RoomToRoomNavigation = () => {
           endFloorWebViewRef.current.reload();
         }
       }, 500);
-      
+
       // Move to navigation step
-      setStep('navigation');
+      setStep("navigation");
     } catch (error) {
-      console.error('Error calculating path:', error);
+      console.error("Error calculating path:", error);
       alert(`Error calculating path: ${error.message}`);
     }
   };
@@ -301,13 +391,13 @@ const RoomToRoomNavigation = () => {
   // Generate HTML for floor visualization with path
   const generateFloorHtml = (floorPlan, pathNodes = [], rooms = {}) => {
     // Prepare path data by converting node names to coordinates
-    const pathCoordinates = pathNodes.map(node => 
-      rooms[node] ? rooms[node] : null
-    ).filter(coord => coord !== null);
-    
+    const pathCoordinates = pathNodes
+      .map((node) => (rooms[node] ? rooms[node] : null))
+      .filter((coord) => coord !== null);
+
     // Serialize path data for safe injection into HTML
     const pathDataJson = JSON.stringify(pathCoordinates);
-    
+
     return `
       <!DOCTYPE html>
       <html>
@@ -446,13 +536,15 @@ const RoomToRoomNavigation = () => {
             key={building.id}
             style={[
               styles.card,
-              selectedBuilding === building.id && styles.selectedCard
+              selectedBuilding === building.id && styles.selectedCard,
             ]}
             onPress={() => handleBuildingSelect(building.id)}
           >
             <Text style={styles.buildingName}>{building.name}</Text>
             <Text style={styles.buildingCode}>{building.code}</Text>
-            <Text style={styles.buildingDescription}>{building.description}</Text>
+            <Text style={styles.buildingDescription}>
+              {building.description}
+            </Text>
           </TouchableOpacity>
         ))}
       </ScrollView>
@@ -463,11 +555,13 @@ const RoomToRoomNavigation = () => {
   const renderFloorSelection = () => {
     const building = FloorRegistry.getBuilding(buildingType);
     const floors = building ? Object.values(building.floors) : [];
-    
+
     return (
       <View style={styles.sectionContainer}>
-        <Text style={styles.sectionTitle}>Select Floors in {building?.name}</Text>
-        
+        <Text style={styles.sectionTitle}>
+          Select Floors in {building?.name}
+        </Text>
+
         <View style={styles.floorsContainer}>
           <View style={styles.floorColumn}>
             <Text style={styles.floorColumnTitle}>Start Floor</Text>
@@ -477,7 +571,7 @@ const RoomToRoomNavigation = () => {
                   key={`start-${floor.id}`}
                   style={[
                     styles.floorCard,
-                    startFloor === floor.id && styles.selectedCard
+                    startFloor === floor.id && styles.selectedCard,
                   ]}
                   onPress={() => handleFloorSelect(floor.id, true)}
                 >
@@ -487,7 +581,7 @@ const RoomToRoomNavigation = () => {
               ))}
             </ScrollView>
           </View>
-          
+
           <View style={styles.floorColumn}>
             <Text style={styles.floorColumnTitle}>End Floor</Text>
             <ScrollView style={styles.scrollContainer}>
@@ -496,7 +590,7 @@ const RoomToRoomNavigation = () => {
                   key={`end-${floor.id}`}
                   style={[
                     styles.floorCard,
-                    endFloor === floor.id && styles.selectedCard
+                    endFloor === floor.id && styles.selectedCard,
                   ]}
                   onPress={() => handleFloorSelect(floor.id, false)}
                 >
@@ -507,21 +601,21 @@ const RoomToRoomNavigation = () => {
             </ScrollView>
           </View>
         </View>
-        
+
         <TouchableOpacity
           style={[
             styles.button,
-            (!startFloor || !endFloor) && styles.disabledButton
+            (!startFloor || !endFloor) && styles.disabledButton,
           ]}
           disabled={!startFloor || !endFloor}
-          onPress={() => setStep('rooms')}
+          onPress={() => setStep("rooms")}
         >
           <Text style={styles.buttonText}>Next</Text>
         </TouchableOpacity>
-        
+
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => setStep('building')}
+          onPress={() => setStep("building")}
         >
           <Text style={styles.backButtonText}>Back to Building Selection</Text>
         </TouchableOpacity>
@@ -533,59 +627,67 @@ const RoomToRoomNavigation = () => {
   const renderRoomSelection = () => (
     <View style={styles.sectionContainer}>
       <Text style={styles.sectionTitle}>Select Rooms</Text>
-      
+
       <View style={styles.floorsContainer}>
         <View style={styles.floorColumn}>
-          <Text style={styles.floorColumnTitle}>Start Room (Floor {startFloor})</Text>
+          <Text style={styles.floorColumnTitle}>
+            Start Room (Floor {startFloor})
+          </Text>
           <ScrollView style={styles.scrollContainer}>
-            {Object.keys(startFloorRooms).sort().map((roomId) => (
-              <TouchableOpacity
-                key={`start-${roomId}`}
-                style={[
-                  styles.roomCard,
-                  selectedStartRoom === roomId && styles.selectedCard
-                ]}
-                onPress={() => setSelectedStartRoom(roomId)}
-              >
-                <Text style={styles.roomText}>{roomId}</Text>
-              </TouchableOpacity>
-            ))}
+            {Object.keys(startFloorRooms)
+              .sort()
+              .map((roomId) => (
+                <TouchableOpacity
+                  key={`start-${roomId}`}
+                  style={[
+                    styles.roomCard,
+                    selectedStartRoom === roomId && styles.selectedCard,
+                  ]}
+                  onPress={() => setSelectedStartRoom(roomId)}
+                >
+                  <Text style={styles.roomText}>{roomId}</Text>
+                </TouchableOpacity>
+              ))}
           </ScrollView>
         </View>
-        
+
         <View style={styles.floorColumn}>
-          <Text style={styles.floorColumnTitle}>End Room (Floor {endFloor})</Text>
+          <Text style={styles.floorColumnTitle}>
+            End Room (Floor {endFloor})
+          </Text>
           <ScrollView style={styles.scrollContainer}>
-            {Object.keys(endFloorRooms).sort().map((roomId) => (
-              <TouchableOpacity
-                key={`end-${roomId}`}
-                style={[
-                  styles.roomCard,
-                  selectedEndRoom === roomId && styles.selectedCard
-                ]}
-                onPress={() => setSelectedEndRoom(roomId)}
-              >
-                <Text style={styles.roomText}>{roomId}</Text>
-              </TouchableOpacity>
-            ))}
+            {Object.keys(endFloorRooms)
+              .sort()
+              .map((roomId) => (
+                <TouchableOpacity
+                  key={`end-${roomId}`}
+                  style={[
+                    styles.roomCard,
+                    selectedEndRoom === roomId && styles.selectedCard,
+                  ]}
+                  onPress={() => setSelectedEndRoom(roomId)}
+                >
+                  <Text style={styles.roomText}>{roomId}</Text>
+                </TouchableOpacity>
+              ))}
           </ScrollView>
         </View>
       </View>
-      
+
       <TouchableOpacity
         style={[
           styles.button,
-          (!selectedStartRoom || !selectedEndRoom) && styles.disabledButton
+          (!selectedStartRoom || !selectedEndRoom) && styles.disabledButton,
         ]}
         disabled={!selectedStartRoom || !selectedEndRoom}
         onPress={calculatePath}
       >
         <Text style={styles.buttonText}>Find Path</Text>
       </TouchableOpacity>
-      
+
       <TouchableOpacity
         style={styles.backButton}
-        onPress={() => setStep('floors')}
+        onPress={() => setStep("floors")}
       >
         <Text style={styles.backButtonText}>Back to Floor Selection</Text>
       </TouchableOpacity>
@@ -597,12 +699,12 @@ const RoomToRoomNavigation = () => {
     return (
       <View style={styles.sectionContainer}>
         <Text style={styles.sectionTitle}>Navigation</Text>
-        
+
         <View style={styles.navigationContainer}>
           <View style={styles.floorsContainer}>
             <View style={styles.floorPlanContainer}>
               <Text style={styles.floorColumnTitle}>Floor {startFloor}</Text>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.expandButton}
                 onPress={() => setExpandedFloor(startFloor)}
               >
@@ -611,26 +713,28 @@ const RoomToRoomNavigation = () => {
               <View style={styles.floorPlanWrapper}>
                 <WebView
                   ref={startFloorWebViewRef}
-                  originWhitelist={['*']}
-                  source={{ 
+                  originWhitelist={["*"]}
+                  source={{
                     html: generateFloorHtml(
-                      startFloorPlan, 
+                      startFloorPlan,
                       startFloorPath,
-                      startFloorRooms
-                    ) 
+                      startFloorRooms,
+                    ),
                   }}
                   style={styles.floorPlan}
                   scrollEnabled={false}
-                  onError={(e) => console.error('WebView error:', e.nativeEvent)}
-                  onLoadEnd={() => console.log('WebView loaded')}
+                  onError={(e) =>
+                    console.error("WebView error:", e.nativeEvent)
+                  }
+                  onLoadEnd={() => console.log("WebView loaded")}
                 />
               </View>
             </View>
-            
+
             {startFloor !== endFloor && (
               <View style={styles.floorPlanContainer}>
                 <Text style={styles.floorColumnTitle}>Floor {endFloor}</Text>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.expandButton}
                   onPress={() => setExpandedFloor(endFloor)}
                 >
@@ -639,40 +743,47 @@ const RoomToRoomNavigation = () => {
                 <View style={styles.floorPlanWrapper}>
                   <WebView
                     ref={endFloorWebViewRef}
-                    originWhitelist={['*']}
-                    source={{ 
+                    originWhitelist={["*"]}
+                    source={{
                       html: generateFloorHtml(
                         endFloorPlan,
                         endFloorPath,
-                        endFloorRooms
-                      ) 
+                        endFloorRooms,
+                      ),
                     }}
                     style={styles.floorPlan}
                     scrollEnabled={false}
-                    onError={(e) => console.error('WebView error:', e.nativeEvent)}
-                    onLoadEnd={() => console.log('WebView loaded')}
+                    onError={(e) =>
+                      console.error("WebView error:", e.nativeEvent)
+                    }
+                    onLoadEnd={() => console.log("WebView loaded")}
                   />
                 </View>
               </View>
             )}
           </View>
-          
+
           <View style={styles.stepsContainer}>
             <Text style={styles.stepsTitle}>Navigation Steps</Text>
             <ScrollView style={styles.stepsList}>
               {navigationSteps.map((step, index) => (
                 <View key={index} style={styles.stepItem}>
-                  <View style={[styles.stepDot, { backgroundColor: getStepColor(step.type) }]} />
+                  <View
+                    style={[
+                      styles.stepDot,
+                      { backgroundColor: getStepColor(step.type) },
+                    ]}
+                  />
                   <Text style={styles.stepText}>{step.text}</Text>
                 </View>
               ))}
             </ScrollView>
           </View>
         </View>
-        
+
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => setStep('rooms')}
+          onPress={() => setStep("rooms")}
         >
           <Text style={styles.backButtonText}>Back to Room Selection</Text>
         </TouchableOpacity>
@@ -683,12 +794,12 @@ const RoomToRoomNavigation = () => {
   // Render expanded floor plan modal
   const renderExpandedFloorPlan = () => {
     if (!expandedFloor) return null;
-    
+
     const isStartFloor = expandedFloor === startFloor;
     const floorPlan = isStartFloor ? startFloorPlan : endFloorPlan;
     const pathNodes = isStartFloor ? startFloorPath : endFloorPath;
     const rooms = isStartFloor ? startFloorRooms : endFloorRooms;
-    
+
     return (
       <Modal
         visible={!!expandedFloor}
@@ -709,18 +820,16 @@ const RoomToRoomNavigation = () => {
             </View>
             <View style={styles.expandedWebViewContainer}>
               <WebView
-                originWhitelist={['*']}
-                source={{ 
-                  html: generateFloorHtml(
-                    floorPlan,
-                    pathNodes,
-                    rooms
-                  ) 
+                originWhitelist={["*"]}
+                source={{
+                  html: generateFloorHtml(floorPlan, pathNodes, rooms),
                 }}
                 style={styles.expandedWebView}
                 scrollEnabled={false}
-                onError={(e) => console.error('WebView error in modal:', e.nativeEvent)}
-                onLoadEnd={() => console.log('Modal WebView loaded')}
+                onError={(e) =>
+                  console.error("WebView error in modal:", e.nativeEvent)
+                }
+                onLoadEnd={() => console.log("Modal WebView loaded")}
               />
             </View>
           </View>
@@ -732,22 +841,28 @@ const RoomToRoomNavigation = () => {
   // Helper function to get color for navigation step type
   const getStepColor = (type) => {
     switch (type) {
-      case 'start': return '#4CAF50'; // Green
-      case 'end': return '#F44336'; // Red
-      case 'escalator': return '#2196F3'; // Blue
-      case 'elevator': return '#9C27B0'; // Purple
-      case 'stairs': return '#FF9800'; // Orange
-      default: return '#912338'; // Maroon
+      case "start":
+        return "#4CAF50"; // Green
+      case "end":
+        return "#F44336"; // Red
+      case "escalator":
+        return "#2196F3"; // Blue
+      case "elevator":
+        return "#9C27B0"; // Purple
+      case "stairs":
+        return "#FF9800"; // Orange
+      default:
+        return "#912338"; // Maroon
     }
   };
 
   // Main render method
   return (
     <View style={styles.container}>
-      {step === 'building' && renderBuildingSelection()}
-      {step === 'floors' && renderFloorSelection()}
-      {step === 'rooms' && renderRoomSelection()}
-      {step === 'navigation' && renderNavigation()}
+      {step === "building" && renderBuildingSelection()}
+      {step === "floors" && renderFloorSelection()}
+      {step === "rooms" && renderRoomSelection()}
+      {step === "navigation" && renderNavigation()}
       {renderExpandedFloorPlan()}
     </View>
   );
@@ -756,7 +871,7 @@ const RoomToRoomNavigation = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: "#f5f5f5",
   },
   sectionContainer: {
     flex: 1,
@@ -764,49 +879,49 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: "bold",
+    textAlign: "center",
     marginVertical: 16,
-    color: '#912338',
+    color: "#912338",
   },
   scrollContainer: {
     flex: 1,
   },
   card: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 10,
     padding: 16,
     marginBottom: 12,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
   },
   selectedCard: {
-    borderColor: '#912338',
+    borderColor: "#912338",
     borderWidth: 2,
-    backgroundColor: '#f9f0f2',
+    backgroundColor: "#f9f0f2",
   },
   buildingName: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
   },
   buildingCode: {
     fontSize: 16,
-    fontWeight: '500',
-    color: '#912338',
+    fontWeight: "500",
+    color: "#912338",
     marginTop: 4,
   },
   buildingDescription: {
     fontSize: 14,
-    color: '#666',
+    color: "#666",
     marginTop: 8,
   },
   floorsContainer: {
     flex: 1,
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 12,
   },
   floorColumn: {
@@ -814,17 +929,17 @@ const styles = StyleSheet.create({
   },
   floorColumnTitle: {
     fontSize: 16,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: "bold",
+    textAlign: "center",
     marginBottom: 8,
-    color: '#444',
+    color: "#444",
   },
   floorCard: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 10,
     padding: 12,
     marginBottom: 8,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
@@ -832,20 +947,20 @@ const styles = StyleSheet.create({
   },
   floorText: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
   },
   floorDescription: {
     fontSize: 14,
-    color: '#666',
+    color: "#666",
     marginTop: 4,
   },
   roomCard: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 10,
     padding: 12,
     marginBottom: 8,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
@@ -853,31 +968,31 @@ const styles = StyleSheet.create({
   },
   roomText: {
     fontSize: 16,
-    textAlign: 'center',
-    color: '#333',
+    textAlign: "center",
+    color: "#333",
   },
   button: {
-    backgroundColor: '#912338',
+    backgroundColor: "#912338",
     borderRadius: 10,
     padding: 16,
     marginTop: 16,
-    alignItems: 'center',
+    alignItems: "center",
   },
   buttonText: {
-    color: 'white',
+    color: "white",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   disabledButton: {
-    backgroundColor: '#cccccc',
+    backgroundColor: "#cccccc",
   },
   backButton: {
     marginTop: 12,
     padding: 8,
-    alignItems: 'center',
+    alignItems: "center",
   },
   backButtonText: {
-    color: '#666',
+    color: "#666",
     fontSize: 14,
   },
   navigationContainer: {
@@ -885,55 +1000,55 @@ const styles = StyleSheet.create({
   },
   floorPlanContainer: {
     flex: 1,
-    position: 'relative',
+    position: "relative",
     marginBottom: 16,
   },
   expandButton: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     right: 0,
-    backgroundColor: '#912338',
+    backgroundColor: "#912338",
     borderRadius: 4,
     padding: 4,
     zIndex: 10,
   },
   expandButtonText: {
-    color: 'white',
+    color: "white",
     fontSize: 12,
   },
   floorPlanWrapper: {
     flex: 1,
     borderRadius: 10,
-    overflow: 'hidden',
+    overflow: "hidden",
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: "#ddd",
     marginTop: 8,
   },
   floorPlan: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: "white",
   },
   stepsContainer: {
     marginTop: 16,
   },
   stepsTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 8,
-    color: '#333',
+    color: "#333",
   },
   stepsList: {
     maxHeight: 200,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 10,
     padding: 12,
   },
   stepItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: "#f0f0f0",
   },
   stepDot: {
     width: 12,
@@ -943,44 +1058,44 @@ const styles = StyleSheet.create({
   },
   stepText: {
     fontSize: 14,
-    color: '#444',
+    color: "#444",
     flex: 1,
   },
   expandedModalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   expandedModalContent: {
-    width: '90%',
-    height: '80%',
-    backgroundColor: 'white',
+    width: "90%",
+    height: "80%",
+    backgroundColor: "white",
     borderRadius: 10,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   expandedHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: "#eee",
   },
   expandedTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
   },
   closeExpandedButton: {
     width: 30,
     height: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   closeExpandedText: {
     fontSize: 24,
-    color: '#666',
+    color: "#666",
   },
   expandedWebViewContainer: {
     flex: 1,

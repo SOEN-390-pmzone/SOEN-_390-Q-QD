@@ -1,36 +1,42 @@
-import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
-import { useNavigation, useRoute } from '@react-navigation/native';
-import Header from '../Header';
-import NavBar from '../NavBar';
-import FloorRegistry from '../../services/BuildingDataService';
-
+import React from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  StyleSheet,
+  Dimensions,
+} from "react-native";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import Header from "../Header";
+import NavBar from "../NavBar";
+import FloorRegistry from "../../services/BuildingDataService";
 
 const FloorSelector = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const windowHeight = Dimensions.get('window').height;
-  
+  const windowHeight = Dimensions.get("window").height;
+
   // Get buildingType from route params, default to HallBuilding if not specified
-  const buildingType = route.params?.buildingType || 'HallBuilding';
-   // Get building data from FloorRegistry
-   const building = FloorRegistry.getBuilding(buildingType);
+  const buildingType = route.params?.buildingType || "HallBuilding";
+  // Get building data from FloorRegistry
+  const building = FloorRegistry.getBuilding(buildingType);
 
   const handleFloorSelect = (floorId) => {
     // Check if the selected floor is a tunnel level
-    if (floorId === 'T') {
-      navigation.navigate('TunnelNavigation');
+    if (floorId === "T") {
+      navigation.navigate("TunnelNavigation");
       return;
     }
 
-     // Check if floor has navigation data
-     if (FloorRegistry.supportsNavigation(buildingType, floorId)) {
-      navigation.navigate('IndoorNavigation', { 
+    // Check if floor has navigation data
+    if (FloorRegistry.supportsNavigation(buildingType, floorId)) {
+      navigation.navigate("IndoorNavigation", {
         buildingType: buildingType,
-        floor: floorId 
+        floor: floorId,
       });
     } else {
-      alert('Indoor navigation for this floor is coming soon!');
+      alert("Indoor navigation for this floor is coming soon!");
     }
   };
 
@@ -52,7 +58,8 @@ const FloorSelector = () => {
             style={[
               styles.floorCard,
               { height: windowHeight * 0.25 },
-              FloorRegistry.supportsNavigation(buildingType, floor.id) && styles.activeFloor
+              FloorRegistry.supportsNavigation(buildingType, floor.id) &&
+                styles.activeFloor,
             ]}
             onPress={() => handleFloorSelect(floor.id)}
           >
@@ -69,20 +76,20 @@ const FloorSelector = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: "bold",
+    textAlign: "center",
     marginTop: 16,
-    color: '#912338',
+    color: "#912338",
   },
   subtitle: {
     fontSize: 18,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: 16,
-    color: '#666',
+    color: "#666",
   },
   carousel: {
     flex: 1,
@@ -90,35 +97,35 @@ const styles = StyleSheet.create({
   floorCard: {
     margin: 10,
     padding: 20,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: "#f5f5f5",
     borderRadius: 12,
     elevation: 3,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
   },
   activeFloor: {
-    backgroundColor: '#e6f3ff',
-    borderColor: '#912338',
+    backgroundColor: "#e6f3ff",
+    borderColor: "#912338",
     borderWidth: 2,
   },
   floorNumber: {
     fontSize: 28,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 8,
-    color: '#333',
+    color: "#333",
   },
   floorName: {
     fontSize: 20,
-    fontWeight: '600',
+    fontWeight: "600",
     marginBottom: 8,
-    color: '#444',
+    color: "#444",
   },
   floorDescription: {
     fontSize: 16,
-    color: '#666',
+    color: "#666",
   },
 });
 
-export default FloorSelector; 
+export default FloorSelector;
