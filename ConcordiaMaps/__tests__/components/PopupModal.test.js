@@ -59,4 +59,20 @@ describe("PopupModal Component", () => {
       "Directions pressed",
     );
   });
+
+  test("triggers alert when get inner directions button is pressed", () => {
+    render(
+      <PopupModal isVisible={true} data={mockData} onClose={mockOnClose} />,
+    );
+
+    const getInnerDirectionsButton = screen.getByText(
+      "Get in Building Directions",
+    );
+    fireEvent.press(getInnerDirectionsButton);
+
+    expect(Alert.alert).toHaveBeenCalledWith(
+      "Get Inner Directions",
+      "Inner directions pressed",
+    );
+  });
 });
