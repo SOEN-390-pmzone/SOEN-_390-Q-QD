@@ -137,6 +137,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: "center",
   },
+  scrollViewContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 20,
+  },
 });
 
 export default styles;
