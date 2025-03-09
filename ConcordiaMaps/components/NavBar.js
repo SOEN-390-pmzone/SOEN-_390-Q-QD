@@ -27,8 +27,6 @@ function NavBar() {
       navigation.navigate("GetDirections");
     } else if (item === "Indoor Navigation") {
       navigation.navigate("BuildingSelector");
-    } else if (item === "Floor Navigation (Legacy)") {
-      navigation.navigate("FloorNavigationSelector");
     } else if (item === "Room-to-Room Navigation") {
       navigation.navigate("RoomToRoomNavigation");
     } else {
@@ -58,9 +56,6 @@ function NavBar() {
         </TouchableOpacity>
         <TouchableOpacity onPress={() => handlePress("Indoor Navigation")}>
           <Text style={styles.menuItem}>Indoor Navigation</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => handlePress("Floor Navigation (Legacy)")}>
-          <Text style={styles.menuItem}>Floor Navigation (Legacy)</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => handlePress("Room-to-Room Navigation")}>
           <Text style={styles.menuItem}>Room-to-Room Navigation</Text>
