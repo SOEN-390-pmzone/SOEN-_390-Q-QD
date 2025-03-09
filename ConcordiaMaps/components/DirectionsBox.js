@@ -32,6 +32,16 @@ function DirectionsBox({ directions = [] }) {
     }).start();
   }, []);
 
+  useEffect(() => {
+    if (directions.length > 0) {
+      Animated.timing(animation, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }).start(() => setIsCollapsed(false));
+    }
+  }, [directions, animation]);
+
   const toggleCollapse = () => {
     Animated.timing(animation, {
       toValue: isCollapsed ? 0 : 1,
@@ -47,7 +57,6 @@ function DirectionsBox({ directions = [] }) {
 
   // The google Maps API returns the directions with html syntax. It needs to be removed and added but parsed differently
   const parseHtmlInstructions = (htmlString) => {
-    // Split the HTML string by <b> tags while keeping the content
     const parts = htmlString.split(/<\/?b>/).map((part) =>
       part
         .replace(/<div[^>]*>/gi, "")
@@ -56,7 +65,7 @@ function DirectionsBox({ directions = [] }) {
     );
     return parts.map((part, index) => (
       <Text
-        key={index}
+        key={`instruction-part-${index}-${part.substring(0, 10)}`}
         style={index % 2 === 1 ? styles.boldText : styles.normalText}
       >
         {part}
@@ -65,14 +74,24 @@ function DirectionsBox({ directions = [] }) {
   };
 
   return (
-    <Animated.View style={[styles.container, { transform: [{ translateY }] }]}>
-      <TouchableOpacity onPress={toggleCollapse} style={styles.handle}>
+    <Animated.View
+      style={[styles.container, { transform: [{ translateY }] }]}
+      testID="directionsBox"
+    >
+      <TouchableOpacity
+        onPress={toggleCollapse}
+        style={styles.handle}
+        testID="handle"
+      >
         <View style={styles.handleBar} />
       </TouchableOpacity>
       <ScrollView style={styles.scrollView}>
         {directions.length > 0 ? (
           directions.map((direction, index) => (
-            <View key={index} style={styles.directionItem}>
+            <View
+              key={`direction-${index}-${direction.html_instructions.substring(0, 15)}`}
+              style={styles.directionItem}
+            >
               <View style={styles.instructionContainer}>
                 {parseHtmlInstructions(direction.html_instructions)}
               </View>

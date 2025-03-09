@@ -173,6 +173,13 @@ const styles = StyleSheet.create({
     padding: 1,
     opacity: 0.8,
   },
+  toggleView: {
+    position: "absolute",
+    bottom: 60,
+    right: 20,
+    width: 50,
+    height: 50,
+  },
   modes: {
     flexDirection: "row",
     alignItems: "center",
@@ -186,9 +193,48 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
   },
+
+  centeredView: {
+    position: "absolute",
+    bottom: 100, // Adjust this value to position the modal above the button
+    right: 20,
+    width: 200, // Adjust the width as needed
+    height: 150, // Adjust the height as needed
+    justifyContent: "center",
+    alignItems: "center",
+  },
   buttonImage: {
-    width: "100%",
-    height: "100%",
+    width: "100%", // Make the image take the full width of the parent view
+    height: "100%", // Make the image take the full height of the parent view
+    borderRadius: 10, // Optional: Add rounded corners to the image
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 20, // Adjust padding to fit content
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalText: {
+    marginBottom: 15,
+    fontFamily: "Times New Roman",
+    textAlign: "center",
+    flexShrink: 1,
+  },
+
+  textStyle: {
+    color: "white",
+    fontFamily: "Times New Roman",
+    fontWeight: "bold",
+    textAlign: "center",
   },
 });
 

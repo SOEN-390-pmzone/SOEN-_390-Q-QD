@@ -41,7 +41,11 @@ function NavBar() {
 
   return (
     <View style={styles.navbar}>
-      <TouchableOpacity onPress={toggleMenu} style={styles.hamburger}>
+      <TouchableOpacity
+        onPress={toggleMenu}
+        style={styles.hamburger}
+        testID="hamburger-button"
+      >
         <View style={styles.hamburgerLine}></View>
         <View style={styles.hamburgerLine}></View>
         <View style={styles.hamburgerLine}></View>
@@ -70,7 +74,10 @@ function NavBar() {
         <TouchableOpacity onPress={() => handlePress("Smart Planner")}>
           <Text style={styles.menuItem}>Smart Planner</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => setIsScheduleVisible(true)}>
+        <TouchableOpacity
+          onPress={() => setIsScheduleVisible(true)}
+          testID="shuttle-schedule-modal"
+        >
           <Text style={styles.menuItem}>Shuttle Schedule</Text>
         </TouchableOpacity>
       </Animated.View>

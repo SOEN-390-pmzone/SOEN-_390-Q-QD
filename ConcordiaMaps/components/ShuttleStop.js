@@ -17,12 +17,12 @@ export const busStops = [
 ];
 
 const ShuttleStop = () => {
-  return busStops.map((stop, index) => (
+  return busStops.map((stop) => (
     <Marker
-      key={index}
+      key={stop.name} // Using the stop name as a unique key instead of index
       coordinate={stop.coordinate}
       title={stop.name}
-      testID={`shuttle-stop-marker-${index}`}
+      testID={`shuttle-stop-marker-${stop.name.replace(/\s+/g, "-").toLowerCase()}`}
     >
       <Image source={customMarkerImage} style={styles.markerImage} />
     </Marker>

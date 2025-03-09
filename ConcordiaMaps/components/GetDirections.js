@@ -143,6 +143,9 @@ const GetDirections = () => {
 
     const updateLocation = async () => {
       try {
+        // Only proceed if using current location
+        if (!useCurrentLocation) return;
+
         const newLocation = await Location.getCurrentPositionAsync({
           accuracy: Location.Accuracy.High,
         });
@@ -159,15 +162,18 @@ const GetDirections = () => {
         ) {
           setOrigin(newOrigin);
 
-          // Update both polyline and directions
-          const [newDirections, newPolyline] = await Promise.all([
-            getStepsInHTML(newOrigin, destination),
-            getPolyline(newOrigin, destination),
-          ]);
+          // Only update route if in navigation mode with a destination
+          if (isInNavigationMode && destination) {
+            // Update both polyline and directions
+            const [newDirections, newPolyline] = await Promise.all([
+              getStepsInHTML(newOrigin, destination),
+              getPolyline(newOrigin, destination),
+            ]);
 
-          setDirections(newDirections);
-          setRoute(newPolyline);
-          console.log("Route and directions updated with new location");
+            setDirections(newDirections);
+            setRoute(newPolyline);
+            console.log("Route and directions updated with new location");
+          }
         }
       } catch (error) {
         console.error("Error updating location" + error);
@@ -184,7 +190,14 @@ const GetDirections = () => {
         clearInterval(intervalId);
       }
     };
-  }, [isInNavigationMode, destination, getPolyline, getStepsInHTML, origin]);
+  }, [
+    isInNavigationMode,
+    destination,
+    getPolyline,
+    getStepsInHTML,
+    origin,
+    useCurrentLocation,
+  ]);
 
   useEffect(() => {
     if (location && useCurrentLocation) {

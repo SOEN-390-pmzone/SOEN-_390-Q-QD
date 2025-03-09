@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   TextInput,
@@ -11,6 +11,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import * as Location from "expo-location";
 import styles from "../styles";
 import PropTypes from "prop-types";
+import * as Crypto from "expo-crypto";
 
 const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
   const GOOGLE_MAPS_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
@@ -20,6 +21,37 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
   const [loading, setLoading] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState("");
   const [userLocation, setUserLocation] = useState(null);
+  const sessionTokenRef = useRef("");
+
+  const generateRandomToken = async () => {
+    try {
+      // Generate random bytes
+      const randomBytes = await Crypto.getRandomBytesAsync(16);
+
+      // Convert to base64 string
+      let base64 = "";
+      for (let i = 0; i < randomBytes.length; i++) {
+        base64 += String.fromCharCode(randomBytes[i]);
+      }
+      base64 = btoa(base64);
+
+      // Remove non-alphanumeric characters and trim to length
+      return base64.replace(/[+/=]/g, "").substring(0, 16);
+    } catch (error) {
+      console.error("Error generating random token:", error);
+    }
+  };
+
+  // Generate a new session token when component mounts
+  useEffect(() => {
+    const token = generateRandomToken();
+    sessionTokenRef.current = token;
+
+    return () => {
+      // Clear session token on unmount
+      sessionTokenRef.current = "";
+    };
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -62,10 +94,9 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
         );
       }
 
-      const sessionToken = Math.random().toString(36).substring(2, 15);
-
+      //use the session token to prevent caching of search results
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_MAPS_API_KEY}&components=country:ca${locationParam}&sessiontoken=${sessionToken}`,
+        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_MAPS_API_KEY}&components=country:ca${locationParam}&sessiontoken=${sessionTokenRef.current}`,
       );
 
       const { predictions } = await response.json();
@@ -80,7 +111,7 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
   const handleSelection = async (placeId) => {
     try {
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry&key=${GOOGLE_MAPS_API_KEY}`,
+        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry&key=${GOOGLE_MAPS_API_KEY}&sessiontoken=${sessionTokenRef.current}`,
       );
       const { result } = await response.json();
       if (result?.geometry?.location) {
@@ -90,6 +121,9 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
         });
         setSearchQuery("");
         setPredictions([]);
+
+        // Use the function defined above
+        sessionTokenRef.current = generateRandomToken();
       }
     } catch (error) {
       console.error("Error fetching place details:", error);
@@ -128,7 +162,7 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
           style={[styles.list, { marginTop: 5 }]}
           renderItem={({ item }) => (
             <TouchableOpacity
-              onPress={() => handleSelection(item.place_id, item.description)}
+              onPress={() => handleSelection(item.place_id)}
               style={styles.item}
             >
               <Ionicons
