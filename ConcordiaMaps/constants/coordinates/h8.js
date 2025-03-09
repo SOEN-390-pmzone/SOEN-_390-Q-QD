@@ -1,444 +1,68 @@
+const createRoom = (x, y, nearestX, nearestY) => ({
+  x: x.toString(),
+  y: y.toString(),
+  nearestPoint: {
+    x: nearestX ? nearestX.toString() : "",
+    y: nearestY ? nearestY.toString() : "",
+  },
+});
+
 const rooms = {
-  elevator: {
-    x: "361",
-    y: "365",
-    nearestPoint: {
-      x: "362",
-      y: "415",
-    },
-  },
-  exit: {
-    x: "555",
-    y: "70",
-    nearestPoint: {
-      x: "555",
-      y: "120",
-    },
-  },
-  H801: {
-    x: "195",
-    y: "175",
-    nearestPoint: {
-      x: "195",
-      y: "217",
-    },
-  },
-  H803: {
-    x: "281",
-    y: "155",
-    nearestPoint: {
-      x: "281",
-      y: "217",
-    },
-  },
-  H805: {
-    x: "385",
-    y: "155",
-    nearestPoint: {
-      x: "385",
-      y: "217",
-    },
-  },
-  women_washroom: {
-    x: "385",
-    y: "267",
-    nearestPoint: {
-      x: "385",
-      y: "217",
-    },
-  },
-  H807: {
-    x: "471",
-    y: "155",
-    nearestPoint: {
-      x: "472",
-      y: "217",
-    },
-  },
-  checkpoint1: {
-    x: "",
-    y: "",
-    nearestPoint: {
-      x: "550",
-      y: "217",
-    },
-  },
-  H806: {
-    x: "493",
-    y: "314",
-    nearestPoint: {
-      x: "553",
-      y: "309",
-    },
-  },
-  H811: {
-    x: "654",
-    y: "155",
-    nearestPoint: {
-      x: "654",
-      y: "216",
-    },
-  },
-  men_washroom: {
-    x: "654",
-    y: "256",
-    nearestPoint: {
-      x: "654",
-      y: "216",
-    },
-  },
-  H813: {
-    x: "736",
-    y: "155",
-    nearestPoint: {
-      x: "736",
-      y: "216",
-    },
-  },
-  H815: {
-    x: "840",
-    y: "155",
-    nearestPoint: {
-      x: "840",
-      y: "216",
-    },
-  },
-  H817: {
-    x: "891",
-    y: "169",
-    nearestPoint: {
-      x: "840",
-      y: "216",
-    },
-  },
-  H819: {
-    x: "894",
-    y: "216",
-    nearestPoint: {
-      x: "840",
-      y: "216",
-    },
-  },
-  H820: {
-    x: "627",
-    y: "468",
-    nearestPoint: {
-      x: "840",
-      y: "468",
-    },
-  },
-  H822: {
-    x: "804",
-    y: "617",
-    nearestPoint: {
-      x: "840",
-      y: "617",
-    },
-  },
-  H821: {
-    x: "899",
-    y: "329",
-    nearestPoint: {
-      x: "848",
-      y: "329",
-    },
-  },
-  H823: {
-    x: "899",
-    y: "427",
-    nearestPoint: {
-      x: "848",
-      y: "427",
-    },
-  },
-  H825: {
-    x: "899",
-    y: "511",
-    nearestPoint: {
-      x: "850",
-      y: "511",
-    },
-  },
-  H827: {
-    x: "899",
-    y: "606",
-    nearestPoint: {
-      x: "850",
-      y: "606",
-    },
-  },
-  H828: {
-    x: "899",
-    y: "692",
-    nearestPoint: {
-      x: "850",
-      y: "692",
-    },
-  },
-  H829: {
-    x: "901",
-    y: "799",
-    nearestPoint: {
-      x: "850",
-      y: "802",
-    },
-  },
-  H831: {
-    x: "891",
-    y: "844",
-    nearestPoint: {
-      x: "850",
-      y: "802",
-    },
-  },
-  H833: {
-    x: "833",
-    y: "844",
-    nearestPoint: {
-      x: "850",
-      y: "802",
-    },
-  },
-  H835: {
-    x: "737",
-    y: "844",
-    nearestPoint: {
-      x: "737",
-      y: "802",
-    },
-  },
-  H837: {
-    x: "648",
-    y: "866",
-    nearestPoint: {
-      x: "646",
-      y: "802",
-    },
-  },
-  H832: {
-    x: "648",
-    y: "717",
-    nearestPoint: {
-      x: "648",
-      y: "802",
-    },
-  },
-  H838: {
-    x: "627",
-    y: "717",
-    nearestPoint: {
-      x: "550",
-      y: "750",
-    },
-  },
-  checkpoint2: {
-    x: "",
-    y: "",
-    nearestPoint: {
-      x: "557",
-      y: "804",
-    },
-  },
-  H841: {
-    x: "472",
-    y: "845",
-    nearestPoint: {
-      x: "472",
-      y: "802",
-    },
-  },
-  H843: {
-    x: "380",
-    y: "845",
-    nearestPoint: {
-      x: "380",
-      y: "802",
-    },
-  },
-  H845: {
-    x: "287",
-    y: "845",
-    nearestPoint: {
-      x: "287",
-      y: "802",
-    },
-  },
-  H847: {
-    x: "197",
-    y: "845",
-    nearestPoint: {
-      x: "200",
-      y: "802",
-    },
-  },
-  H849: {
-    x: "128",
-    y: "845",
-    nearestPoint: {
-      x: "183",
-      y: "802",
-    },
-  },
-  H851: {
-    x: "77",
-    y: "808",
-    nearestPoint: {
-      x: "183",
-      y: "802",
-    },
-  },
-  H853: {
-    x: "127",
-    y: "691",
-    nearestPoint: {
-      x: "183",
-      y: "691",
-    },
-  },
-  H854: {
-    x: "227",
-    y: "598",
-    nearestPoint: {
-      x: "183",
-      y: "598",
-    },
-  },
-  H855: {
-    x: "127",
-    y: "601",
-    nearestPoint: {
-      x: "183",
-      y: "601",
-    },
-  },
-  H857: {
-    x: "127",
-    y: "512",
-    nearestPoint: {
-      x: "183",
-      y: "512",
-    },
-  },
-  H859: {
-    x: "127",
-    y: "426",
-    nearestPoint: {
-      x: "183",
-      y: "415",
-    },
-  },
-  checkpoint3: {
-    x: "",
-    y: "",
-    nearestPoint: {
-      x: "183",
-      y: "410",
-    },
-  },
-  H860: {
-    x: "241",
-    y: "447",
-    nearestPoint: {
-      x: "274",
-      y: "399",
-    },
-  },
-  H861: {
-    x: "127",
-    y: "332",
-    nearestPoint: {
-      x: "183",
-      y: "330",
-    },
-  },
-  H862: {
-    x: "379",
-    y: "445",
-    nearestPoint: {
-      x: "381",
-      y: "399",
-    },
-  },
-  H863: {
-    x: "127",
-    y: "244",
-    nearestPoint: {
-      x: "183",
-      y: "217",
-    },
-  },
-  H867: {
-    x: "122",
-    y: "128",
-    nearestPoint: {
-      x: "180",
-      y: "215",
-    },
-  },
-  checkpoint4: {
-    x: "",
-    y: "",
-    nearestPoint: {
-      x: "553",
-      y: "401",
-    },
-  },
-  water_foutain_S: {
-    x: "622",
-    y: "252",
-    nearestPoint: {
-      x: "622",
-      y: "216",
-    },
-  },
-  water_foutain_N: {
-    x: "784",
-    y: "760",
-    nearestPoint: {
-      x: "784",
-      y: "802",
-    },
-  },
-  stairs_NE: {
-    x: "306",
-    y: "757",
-    nearestPoint: {
-      x: "306",
-      y: "802",
-    },
-  },
-  stairs_NW: {
-    x: "722",
-    y: "757",
-    nearestPoint: {
-      x: "722",
-      y: "802",
-    },
-  },
-  stairs_SE: {
-    x: "269",
-    y: "362",
-    nearestPoint: {
-      x: "269",
-      y: "410",
-    },
-  },
-  stairs_SW: {
-    x: "722",
-    y: "258",
-    nearestPoint: {
-      x: "722",
-      y: "216",
-    },
-  },
-  escalator: {
-    x: "486",
-    y: "528",
-    nearestPoint: {
-      x: "555",
-      y: "528",
-    },
-  },
+  elevator: createRoom(361, 365, 362, 415),
+  exit: createRoom(555, 70, 555, 120),
+  H801: createRoom(195, 175, 195, 217),
+  H803: createRoom(281, 155, 281, 217),
+  H805: createRoom(385, 155, 385, 217),
+  women_washroom: createRoom(385, 267, 385, 217),
+  H807: createRoom(471, 155, 472, 217),
+  checkpoint1: createRoom("", "", 550, 217),
+  H806: createRoom(493, 314, 553, 309),
+  H811: createRoom(654, 155, 654, 216),
+  men_washroom: createRoom(654, 256, 654, 216),
+  H813: createRoom(736, 155, 736, 216),
+  H815: createRoom(840, 155, 840, 216),
+  H817: createRoom(891, 169, 840, 216),
+  H819: createRoom(894, 216, 840, 216),
+  H820: createRoom(627, 468, 840, 468),
+  H822: createRoom(804, 617, 840, 617),
+  H821: createRoom(899, 329, 848, 329),
+  H823: createRoom(899, 427, 848, 427),
+  H825: createRoom(899, 511, 850, 511),
+  H827: createRoom(899, 606, 850, 606),
+  H828: createRoom(899, 692, 850, 692),
+  H829: createRoom(901, 799, 850, 802),
+  H831: createRoom(891, 844, 850, 802),
+  H833: createRoom(833, 844, 850, 802),
+  H835: createRoom(737, 844, 737, 802),
+  H837: createRoom(648, 866, 646, 802),
+  H832: createRoom(648, 717, 648, 802),
+  H838: createRoom(627, 717, 550, 750),
+  checkpoint2: createRoom("", "", 557, 804),
+  H841: createRoom(472, 845, 472, 802),
+  H843: createRoom(380, 845, 380, 802),
+  H845: createRoom(287, 845, 287, 802),
+  H847: createRoom(197, 845, 200, 802),
+  H849: createRoom(128, 845, 183, 802),
+  H851: createRoom(77, 808, 183, 802),
+  H853: createRoom(127, 691, 183, 691),
+  H854: createRoom(227, 598, 183, 598),
+  H855: createRoom(127, 601, 183, 601),
+  H857: createRoom(127, 512, 183, 512),
+  H859: createRoom(127, 426, 183, 415),
+  checkpoint3: createRoom("", "", 183, 410),
+  H860: createRoom(241, 447, 274, 399),
+  H861: createRoom(127, 332, 183, 330),
+  H862: createRoom(379, 445, 381, 399),
+  H863: createRoom(127, 244, 183, 217),
+  H867: createRoom(122, 128, 180, 215),
+  checkpoint4: createRoom("", "", 553, 401),
+  water_foutain_S: createRoom(622, 252, 622, 216),
+  water_foutain_N: createRoom(784, 760, 784, 802),
+  stairs_NE: createRoom(306, 757, 306, 802),
+  stairs_NW: createRoom(722, 757, 722, 802),
+  stairs_SE: createRoom(269, 362, 269, 410),
+  stairs_SW: createRoom(722, 258, 722, 216),
+  escalator: createRoom(486, 528, 555, 528),
 };
 
 const graph = {

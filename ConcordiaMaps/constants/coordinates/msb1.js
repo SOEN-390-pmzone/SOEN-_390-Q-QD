@@ -1,3 +1,36 @@
+const createRoom = (x, y, nearestX, nearestY) => ({
+  x: x.toString(),
+  y: y.toString(),
+  nearestPoint: {
+    x: nearestX ? nearestX.toString() : "",
+    y: nearestY ? nearestY.toString() : "",
+  },
+});
+
+const rooms = {
+  1.293: createRoom(410, 118, 468, 125),
+  1.294: createRoom(575, 132, 532, 214),
+  "1.350": createRoom(687, 224, 687, 253),
+  1.265: createRoom(681, 152, 647, 201),
+  1.345: createRoom(738, 202, 738, 254),
+  "1.340": createRoom(779, 261, 741, 259),
+  elevator: createRoom(666, 602, 606, 603),
+  "1.310": createRoom(662, 532, 586, 544),
+  "main hall": createRoom(481, 374, 483, 385),
+  1.309: createRoom(775, 595, 743, 603),
+  1.424: createRoom(676, 695, 565, 694),
+  1.134: createRoom(644, 733, 562, 733),
+  "1.130": createRoom(608, 836, 560, 833),
+  1.132: createRoom(670, 822, 677, 863),
+  "1.410": createRoom(708, 786, 717, 860),
+  1.426: createRoom(754, 787, 756, 843),
+  "1.430": createRoom(782, 804, 783, 845),
+  1.433: createRoom(744, 866, 745, 853),
+  1.494: createRoom(830, 890, 827, 855),
+  1.115: createRoom(803, 980, 673, 953),
+  1.437: createRoom(873, 752, 882, 845),
+};
+
 const graph = {
   1.293: {
     1.294: 1,
@@ -84,176 +117,6 @@ const graph = {
   },
   1.437: {
     1.494: 0.5,
-  },
-};
-const rooms = {
-  1.293: {
-    x: "410",
-    y: "118",
-    nearestPoint: {
-      x: "468",
-      y: "125",
-    },
-  },
-  1.294: {
-    x: "575",
-    y: "132",
-    nearestPoint: {
-      x: "532",
-      y: "214",
-    },
-  },
-  "1.350": {
-    x: "687",
-    y: "224",
-    nearestPoint: {
-      x: "687",
-      y: "253",
-    },
-  },
-  1.265: {
-    x: "681",
-    y: "152",
-    nearestPoint: {
-      x: "647",
-      y: "201",
-    },
-  },
-  1.345: {
-    x: "738",
-    y: "202",
-    nearestPoint: {
-      x: "738",
-      y: "254",
-    },
-  },
-  "1.340": {
-    x: "779",
-    y: "261",
-    nearestPoint: {
-      x: "741",
-      y: "259",
-    },
-  },
-  elevator: {
-    x: "666",
-    y: "602",
-    nearestPoint: {
-      x: "606",
-      y: "603",
-    },
-  },
-  "1.310": {
-    x: "662",
-    y: "532",
-    nearestPoint: {
-      x: "586",
-      y: "544",
-    },
-  },
-  "main hall": {
-    x: "481",
-    y: "374",
-    nearestPoint: {
-      x: "483",
-      y: "385",
-    },
-  },
-  1.309: {
-    x: "775",
-    y: "595",
-    nearestPoint: {
-      x: "743",
-      y: "603",
-    },
-  },
-  1.424: {
-    x: "676",
-    y: "695",
-    nearestPoint: {
-      x: "565",
-      y: "694",
-    },
-  },
-  1.134: {
-    x: "644",
-    y: "733",
-    nearestPoint: {
-      x: "562",
-      y: "733",
-    },
-  },
-  "1.130": {
-    x: "608",
-    y: "836",
-    nearestPoint: {
-      x: "560",
-      y: "833",
-    },
-  },
-  1.132: {
-    x: "670",
-    y: "822",
-    nearestPoint: {
-      x: "677",
-      y: "863",
-    },
-  },
-  "1.410": {
-    x: "708",
-    y: "786",
-    nearestPoint: {
-      x: "717",
-      y: "860",
-    },
-  },
-  1.426: {
-    x: "754",
-    y: "787",
-    nearestPoint: {
-      x: "756",
-      y: "843",
-    },
-  },
-  "1.430": {
-    x: "782",
-    y: "804",
-    nearestPoint: {
-      x: "783",
-      y: "845",
-    },
-  },
-  1.433: {
-    x: "744",
-    y: "866",
-    nearestPoint: {
-      x: "745",
-      y: "853",
-    },
-  },
-  1.494: {
-    x: "830",
-    y: "890",
-    nearestPoint: {
-      x: "827",
-      y: "855",
-    },
-  },
-  1.115: {
-    x: "803",
-    y: "980",
-    nearestPoint: {
-      x: "673",
-      y: "953",
-    },
-  },
-  1.437: {
-    x: "873",
-    y: "752",
-    nearestPoint: {
-      x: "882",
-      y: "845",
-    },
   },
 };
 
