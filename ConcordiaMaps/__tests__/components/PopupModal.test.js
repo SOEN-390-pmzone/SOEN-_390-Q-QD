@@ -23,6 +23,7 @@ describe("PopupModal Component", () => {
 
     // Check if modal content is displayed
     expect(screen.getByText(mockData.name)).toBeTruthy();
+    expect(screen.getByText(`${mockData.fullBuildingName}`)).toBeTruthy();
     expect(screen.getByText(mockData.address)).toBeTruthy();
   });
 
