@@ -1,5 +1,11 @@
 import React from "react";
-import { render, fireEvent, act, waitFor } from "@testing-library/react-native";
+import {
+  render,
+  fireEvent,
+  act,
+  waitFor,
+  cleanup,
+} from "@testing-library/react-native";
 import GetDirections from "../../components/GetDirections";
 import { useGoogleMapDirections } from "../../hooks/useGoogleMapDirections";
 import { LocationContext } from "../../contexts/LocationContext";
@@ -877,5 +883,137 @@ describe("GetDirections Additional Coverage Tests", () => {
 
     // Verify the component rendered successfully
     expect(getByText("Get Directions")).toBeTruthy();
+  });
+});
+
+describe("GetDirections - Transport Mode Tests", () => {
+  afterEach(() => {
+    cleanup(); // Ensures a fresh render for each test
+  });
+  const mockLocation = {
+    latitude: 45.4973,
+    longitude: -73.5789,
+  };
+
+  const mockGetStepsInHTML = jest.fn();
+  const mockGetPolyline = jest.fn();
+
+  const renderWithContext = (component) => {
+    return render(
+      <LocationContext.Provider value={mockLocation}>
+        {component}
+      </LocationContext.Provider>,
+    );
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    mockGetStepsInHTML.mockResolvedValue(["Step 1", "Step 2"]);
+    mockGetPolyline.mockResolvedValue([
+      { latitude: 45.4973, longitude: -73.5789 },
+      { latitude: 45.4974, longitude: -73.579 },
+    ]);
+
+    useGoogleMapDirections.mockReturnValue({
+      getStepsInHTML: mockGetStepsInHTML,
+      getPolyline: mockGetPolyline,
+    });
+  });
+
+  it("sets mode to walking and fetches walking directions", async () => {
+    const { getByText } = renderWithContext(<GetDirections />);
+    await act(async () => {
+      fireEvent.press(getByText("Walking"));
+      fireEvent.press(getByText("Get Directions"));
+    });
+
+    await waitFor(() => {
+      expect(mockGetStepsInHTML).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.any(Object),
+        "walking",
+      );
+    });
+  });
+
+  it("sets mode to driving and fetches driving directions", async () => {
+    const { getByText } = renderWithContext(<GetDirections />);
+
+    // Press the mode button and wait for re-render
+    await act(async () => {
+      fireEvent.press(getByText("Car"));
+    });
+    await waitFor(() => {
+      // optionally check for something that indicates mode changed
+    });
+
+    // Now press "Get Directions"
+    await act(async () => {
+      fireEvent.press(getByText("Get Directions"));
+    });
+
+    // Finally, expect the mode to be "driving"
+    await waitFor(() => {
+      expect(mockGetStepsInHTML).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.any(Object),
+        "driving",
+      );
+    });
+  });
+
+  it("sets mode to transit and fetches transit directions", async () => {
+    const { getByText } = renderWithContext(<GetDirections />);
+
+    // Press "Transit" first
+    await act(async () => {
+      fireEvent.press(getByText("Transit"));
+    });
+
+    // Wait for mode to change (optionally check UI or state)
+    await waitFor(() => {
+      // e.g. expect some UI text or state indicating transit mode
+    });
+
+    // Now press "Get Directions"
+    await act(async () => {
+      fireEvent.press(getByText("Get Directions"));
+    });
+
+    await waitFor(() => {
+      expect(mockGetStepsInHTML).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.any(Object),
+        "transit",
+      );
+    });
+  });
+
+  it("sets mode to biking and fetches biking directions", async () => {
+    const { getByText } = renderWithContext(<GetDirections />);
+
+    // Press "Biking" first
+    await act(async () => {
+      fireEvent.press(getByText("Biking"));
+    });
+
+    // Wait for mode to change (optionally check UI or state)
+    await waitFor(() => {
+      // e.g. expect some UI text or state indicating biking mode
+    });
+
+    // Now press "Get Directions"
+    await act(async () => {
+      fireEvent.press(getByText("Get Directions"));
+    });
+
+    await waitFor(() => {
+      expect(mockGetStepsInHTML).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.any(Object),
+        "biking",
+      );
+    });
   });
 });

@@ -8,10 +8,10 @@ jest.spyOn(Alert, "alert").mockImplementation(() => {});
 
 describe("PopupModal Component", () => {
   const mockData = {
-    name: "Building A",
-    fullBuildingName: "Full Building Name A",
-    address: "123 Street, City",
-    coordinate: { latitude: 37.7749, longitude: -122.4194 },
+    name: "H Building",
+    fullBuildingName: "Henry F. Hall Building",
+    address: "1455 DeMaisonneuve W",
+    coordinate: { latitude: 45.497092, longitude: -73.5788 },
   };
 
   const mockOnClose = jest.fn();
@@ -23,7 +23,7 @@ describe("PopupModal Component", () => {
 
     // Check if modal content is displayed
     expect(screen.getByText(mockData.name)).toBeTruthy();
-    expect(screen.getByText(`•••${mockData.fullBuildingName}•••`)).toBeTruthy();
+    expect(screen.getByText(`${mockData.fullBuildingName}`)).toBeTruthy();
     expect(screen.getByText(mockData.address)).toBeTruthy();
   });
 
@@ -58,6 +58,22 @@ describe("PopupModal Component", () => {
     expect(Alert.alert).toHaveBeenCalledWith(
       "Get Directions",
       "Directions pressed",
+    );
+  });
+
+  test("triggers alert when get inner directions button is pressed", () => {
+    render(
+      <PopupModal isVisible={true} data={mockData} onClose={mockOnClose} />,
+    );
+
+    const getInnerDirectionsButton = screen.getByText(
+      "Get in Building Directions",
+    );
+    fireEvent.press(getInnerDirectionsButton);
+
+    expect(Alert.alert).toHaveBeenCalledWith(
+      "Get Inner Directions",
+      "Inner directions pressed",
     );
   });
 });
