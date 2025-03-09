@@ -13,16 +13,16 @@ import styles from "../styles/DirectionBox.style";
 // Building to floor selector mapping
 const INDOOR_NAVIGATION_BUILDINGS = {
   "Henry F. Hall": "HallBuilding",
-  "John Molson School Of Business": "JMSB"
+  "John Molson School Of Business": "JMSB",
 };
 
 const PopupModal = ({ isVisible, data, onClose, navigation }) => {
   const handleFloorSelector = () => {
     onClose(); // Close the modal first
     const buildingType = INDOOR_NAVIGATION_BUILDINGS[data.name];
-    navigation.navigate("FloorSelector", { 
+    navigation.navigate("FloorSelector", {
       buildingName: data.name,
-      buildingType: buildingType 
+      buildingType: buildingType,
     });
   };
 
@@ -61,7 +61,9 @@ const PopupModal = ({ isVisible, data, onClose, navigation }) => {
                 style={styles.getDirectionsButton}
                 onPress={handleFloorSelector}
               >
-                <Text style={styles.getDirectionsButtonText}>Floor Selector</Text>
+                <Text style={styles.getDirectionsButtonText}>
+                  Floor Selector
+                </Text>
               </TouchableOpacity>
             )}
           </View>

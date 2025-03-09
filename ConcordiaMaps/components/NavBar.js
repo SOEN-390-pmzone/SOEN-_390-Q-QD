@@ -57,7 +57,9 @@ function NavBar() {
         <TouchableOpacity onPress={() => handlePress("Indoor Navigation")}>
           <Text style={styles.menuItem}>Indoor Navigation</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => handlePress("Room-to-Room Navigation")}>
+        <TouchableOpacity
+          onPress={() => handlePress("Room-to-Room Navigation")}
+        >
           <Text style={styles.menuItem}>Room-to-Room Navigation</Text>
         </TouchableOpacity>
         <TouchableOpacity
