@@ -1,11 +1,5 @@
 import React from "react";
-import {
-  Modal,
-  View,
-  Text,
-  TouchableOpacity,
-  Alert,
-} from "react-native";
+import { Modal, View, Text, TouchableOpacity, Alert } from "react-native";
 import PropTypes from "prop-types";
 import styles from "../styles/DirectionBox.style";
 
@@ -22,8 +16,12 @@ const PopupModal = ({ isVisible, data, onClose }) => {
       <View style={styles.modalOverlay}>
         <View style={styles.modalContainer}>
           <Text style={styles.modalTitle}>{name || "Building Name"}</Text>
-          <Text style={styles.modalText1}>{fullBuildingName || "Full Building Name"}</Text>
-          <Text style={styles.modalText}>{address || "Address not available"}</Text>
+          <Text style={styles.modalText1}>
+            {fullBuildingName || "Full Building Name"}
+          </Text>
+          <Text style={styles.modalText}>
+            {address || "Address not available"}
+          </Text>
 
           <View style={styles.buttonsContainer}>
             <TouchableOpacity style={styles.closeButton} onPress={onClose}>
@@ -32,21 +30,32 @@ const PopupModal = ({ isVisible, data, onClose }) => {
 
             <TouchableOpacity
               style={styles.getDirectionsButton}
-              onPress={() => Alert.alert("Get Directions", "Directions pressed")}
+              onPress={() =>
+                Alert.alert("Get Directions", "Directions pressed")
+              }
             >
               <Text style={styles.getDirectionsButtonText}>Get Directions</Text>
             </TouchableOpacity>
           </View>
 
-          {["H Building", "JMSB", "Vanier Library", "Central Building", "Vanier Extension" ].includes(name) && (
-  <TouchableOpacity
-    style={styles.getDirectionsButton1}
-    onPress={() => Alert.alert("Get Inner Directions", "Inner directions pressed")}
-  >
-    <Text style={styles.getDirectionsButtonText}>Get in Building Directions</Text>
-  </TouchableOpacity>
-)}
-
+          {[
+            "H Building",
+            "JMSB",
+            "Vanier Library",
+            "Central Building",
+            "Vanier Extension",
+          ].includes(name) && (
+            <TouchableOpacity
+              style={styles.getDirectionsButton1}
+              onPress={() =>
+                Alert.alert("Get Inner Directions", "Inner directions pressed")
+              }
+            >
+              <Text style={styles.getDirectionsButtonText}>
+                Get in Building Directions
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     </Modal>
