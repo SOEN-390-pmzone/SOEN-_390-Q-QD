@@ -145,7 +145,7 @@ describe('RoomToRoomNavigation', () => {
 
   // Test next button is initially present but disabled
   it('renders Next button after building selection', () => {
-    const { getByText, queryByAccessibilityState } = renderWithNavigation(<RoomToRoomNavigation />);
+    const { getByText } = renderWithNavigation(<RoomToRoomNavigation />);
     
     // Press the Hall Building button to navigate to floor selection
     fireEvent.press(getByText('Hall Building'));
