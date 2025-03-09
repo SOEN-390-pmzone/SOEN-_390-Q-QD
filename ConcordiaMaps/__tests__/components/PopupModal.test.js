@@ -8,10 +8,10 @@ jest.spyOn(Alert, "alert").mockImplementation(() => {});
 
 describe("PopupModal Component", () => {
   const mockData = {
-    name: "Building A",
-    fullBuildingName: "Full Building Name A",
-    address: "123 Street, City",
-    coordinate: { latitude: 37.7749, longitude: -122.4194 },
+    name: "H Building",
+    fullBuildingName: "Henry F. Hall Building",
+    address: "1455 DeMaisonneuve W",
+    coordinate: { latitude: 45.497092, longitude: -73.5788 },
   };
 
   const mockOnClose = jest.fn();
