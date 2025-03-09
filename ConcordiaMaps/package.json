@@ -39,6 +39,7 @@
     "denodeify": "^1.2.1",
     "dotenv": "^16.4.7",
     "expo": "~52.0.27",
+    "expo-analytics-amplitude": "^11.2.0",
     "expo-auth-session": "~6.0.3",
     "expo-crypto": "^14.0.2",
     "expo-location": "^18.0.5",
