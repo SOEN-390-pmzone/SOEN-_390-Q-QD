@@ -59,7 +59,7 @@ LocationMarkers.propTypes = {
 const GetDirections = () => {
   const mapRef = useRef(null);
   const location = useContext(LocationContext);
-
+  const [mode, setMode] = useState("walking");
   const [origin, setOrigin] = useState(null);
   const [destination, setDestination] = useState(null);
   const [directions, setDirections] = useState([]);
@@ -120,9 +120,9 @@ const GetDirections = () => {
 
   const onAddressSubmit = async () => {
     try {
-      const result = await getStepsInHTML(origin, destination);
+      const result = await getStepsInHTML(origin, destination, mode);
       setDirections(result);
-      const polyline = await getPolyline(origin, destination);
+      const polyline = await getPolyline(origin, destination, mode);
       setRoute(polyline);
       setIsInNavigationMode(true);
       setIsDirectionsBoxCollapsed(false);
@@ -143,7 +143,6 @@ const GetDirections = () => {
 
     const updateLocation = async () => {
       try {
-        // Only proceed if using current location
         if (!useCurrentLocation) return;
 
         const newLocation = await Location.getCurrentPositionAsync({
@@ -155,23 +154,20 @@ const GetDirections = () => {
           longitude: newLocation.coords.longitude,
         };
 
-        // Only update state if location has changed
         if (
           origin?.latitude !== newOrigin.latitude ||
           origin?.longitude !== newOrigin.longitude
         ) {
           setOrigin(newOrigin);
 
-          // Only update route if in navigation mode with a destination
           if (isInNavigationMode && destination) {
-            // Update both polyline and directions
-            const [newDirections, newPolyline] = await Promise.all([
-              getStepsInHTML(newOrigin, destination),
-              getPolyline(newOrigin, destination),
+            const [updatedDirections, updatedPolyline] = await Promise.all([
+              getStepsInHTML(newOrigin, destination, mode),
+              getPolyline(newOrigin, destination, mode),
             ]);
 
-            setDirections(newDirections);
-            setRoute(newPolyline);
+            setDirections(updatedDirections);
+            setRoute(updatedPolyline);
             console.log("Route and directions updated with new location");
           }
         }
@@ -238,8 +234,31 @@ const GetDirections = () => {
               placeholder="Enter Destination"
               style={[styles.searchBar, { marginTop: 10 }]}
             />
+            <View style={styles.modes}>
+              <Button
+                title="Walking"
+                onPress={() => setMode("walking")}
+                color={mode === "walking" ? "#1E90FF" : "#D3D3D3"}
+              />
+              <Button
+                title="Car"
+                onPress={() => setMode("driving")}
+                color={mode === "driving" ? "#1E90FF" : "#D3D3D3"}
+              />
+              <Button
+                title="Transit"
+                onPress={() => setMode("transit")}
+                color={mode === "transit" ? "#1E90FF" : "#D3D3D3"}
+              />
+              <Button
+                title="Biking"
+                onPress={() => setMode("biking")}
+                color={mode === "biking" ? "#1E90FF" : "#D3D3D3"}
+              />
+            </View>
           </View>
         )}
+
         <View style={styles.buttonContainer}>
           <Button
             title={isInNavigationMode ? "Change Directions" : "Get Directions"}
