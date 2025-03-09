@@ -15,6 +15,10 @@ jest.mock("expo-location", () => ({
   }),
 }));
 
+jest.mock("react-native-webview", () => ({
+  WebView: () => null,
+}));
+
 jest.mock("expo-font", () => ({
   isLoaded: jest.fn().mockReturnValue(true),
 }));
