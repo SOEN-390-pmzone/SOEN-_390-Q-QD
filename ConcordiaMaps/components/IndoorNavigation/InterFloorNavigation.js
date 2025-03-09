@@ -213,7 +213,12 @@ const InterFloorNavigation = ({
       <Text style={styles.selectorTitle}>{title}</Text>
       <ScrollView style={styles.roomList}>
         {Object.keys(rooms)
-          .sort()
+          .sort((a, b) =>
+            a.localeCompare(b, undefined, {
+              numeric: true,
+              sensitivity: "base",
+            }),
+          )
           .map((roomId) => (
             <TouchableOpacity
               key={roomId}
@@ -362,7 +367,10 @@ const InterFloorNavigation = ({
                 <Text style={styles.stepsTitle}>Navigation Steps:</Text>
                 <ScrollView style={styles.navigationSteps}>
                   {navigationSteps.map((step, index) => (
-                    <View key={index} style={styles.stepItem}>
+                    <View
+                      key={`${step.type}-${step.text}`}
+                      style={styles.stepItem}
+                    >
                       <Text style={styles.stepNumber}>{index + 1}.</Text>
                       <Text style={styles.stepText}>{step.text}</Text>
                     </View>
