@@ -29,9 +29,9 @@ export const useGoogleMapDirections = () => {
   };
 
   //? Returns only the array of steps in html elements
-  const getStepsInHTML = async (origin, destination) => {
+  const getStepsInHTML = async (origin, destination, mode) => {
     try {
-      const data = await getDirections(origin, destination);
+      const data = await getDirections(origin, destination, mode);
 
       if (!data?.routes?.[0]?.legs?.[0]) {
         throw new Error("Invalid directions data structure");
@@ -54,7 +54,7 @@ export const useGoogleMapDirections = () => {
   };
 
   //? Returns the entire API result when calling the direction between two points
-  const getDirections = async (o, d) => {
+  const getDirections = async (o, d, mode) => {
     console.log("GETTING DIRECTIONS");
     try {
       if (!o || !d) {
@@ -62,7 +62,7 @@ export const useGoogleMapDirections = () => {
       }
 
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/directions/json?origin=${o.latitude},${o.longitude}&destination=${d.latitude},${d.longitude}&mode=walking&key=${GOOGLE_MAPS_API_KEY}`,
+        `https://maps.googleapis.com/maps/api/directions/json?origin=${o.latitude},${o.longitude}&destination=${d.latitude},${d.longitude}&mode=${mode}&key=${GOOGLE_MAPS_API_KEY}`,
       );
 
       if (!response.ok) {
@@ -88,10 +88,10 @@ export const useGoogleMapDirections = () => {
     }
   };
 
-  const getPolyline = async (origin, destination) => {
+  const getPolyline = async (origin, destination, mode) => {
     try {
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&mode=walking&key=${GOOGLE_MAPS_API_KEY}`,
+        `https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&mode=${mode}&key=${GOOGLE_MAPS_API_KEY}`,
       );
       const data = await response.json();
 
