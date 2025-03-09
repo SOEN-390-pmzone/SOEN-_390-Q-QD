@@ -7,8 +7,10 @@ import FloorRegistry from '../../services/BuildingDataService';
 
 const TunnelNavigation = () => {
   const navigation = useNavigation();
-  // Get buildings from FloorRegistry instead of hardcoded array
-  const buildings = FloorRegistry.getBuildings();
+  // Filter only buildings with tunnel access
+  const buildings = FloorRegistry.getBuildings().filter(building => 
+    ['hall', 'jmsb', 'ev', 'library'].includes(building.id)
+  );
 
   const handleBuildingSelect = (building) => {
     // Get the buildingType key directly from FloorRegistry

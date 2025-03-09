@@ -23,6 +23,14 @@ class FloorRegistry {
       description: 'Main academic building',
       address: '1455 De Maisonneuve Blvd. W.',
       floors: {
+        'T': {
+          id: 'T',
+          name: 'Tunnel Level',
+          description: 'Underground tunnel level',
+          rooms: {},
+          graph: {},
+          getSVG: () => null
+        },
         '1': {
           id: '1',
           name: '1st Floor',
@@ -56,6 +64,14 @@ class FloorRegistry {
       description: 'Business school building',
       address: '1450 Guy Street',
       floors: {
+        'T': {
+          id: 'T',
+          name: 'Tunnel Level',
+          description: 'Underground tunnel level',
+          rooms: {},
+          graph: {},
+          getSVG: () => null
+        },
         '1': {
           id: '1',
           name: 'MSB 1',
@@ -107,6 +123,14 @@ class FloorRegistry {
       description: 'Engineering, Computer Science and Visual Arts Integrated Complex',
       address: '1515 St. Catherine W.',
       floors: {
+        'T': {
+          id: 'T',
+          name: 'Tunnel Level',
+          description: 'Underground tunnel level',
+          rooms: {},
+          graph: {},
+          getSVG: () => null
+        },
         '1': {
           id: '1',
           name: 'EV Ground Floor',
@@ -125,6 +149,14 @@ class FloorRegistry {
       description: 'Webster Library',
       address: '1400 De Maisonneuve Blvd. W.',
       floors: {
+        'T': {
+          id: 'T',
+          name: 'Tunnel Level',
+          description: 'Underground tunnel level',
+          rooms: {},
+          graph: {},
+          getSVG: () => null
+        },
         '1': {
           id: '1',
           name: 'LB 1st Floor',

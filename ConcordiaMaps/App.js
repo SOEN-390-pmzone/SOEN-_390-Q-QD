@@ -10,6 +10,7 @@ import IndoorNavigation from "./components/IndoorNavigation/IndoorNavigation";
 import FloorSelector from "./components/IndoorNavigation/FloorSelector";
 import BuildingSelector from "./components/IndoorNavigation/BuildingSelector";
 import FloorNavigationSelector from "./components/IndoorNavigation/FloorNavigationSelector";
+import RoomToRoomNavigation from "./components/IndoorNavigation/RoomToRoomNavigation";
 import TunnelNavigation from "./components/IndoorNavigation/TunnelNavigation";
 // import MapMarkers from "./components/MapMarkers"; // Ensure this import exists
 
@@ -60,6 +61,7 @@ export default function App() {
             <Stack.Screen name="FloorSelector" component={FloorSelector} />
             <Stack.Screen name="IndoorNavigation" component={IndoorNavigation} />
             <Stack.Screen name="FloorNavigationSelector" component={FloorNavigationSelector} />
+            <Stack.Screen name="RoomToRoomNavigation" component={RoomToRoomNavigation} />
             <Stack.Screen name="TunnelNavigation" component={TunnelNavigation} />
           </Stack.Navigator>
 
