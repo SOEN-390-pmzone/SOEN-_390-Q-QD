@@ -39,7 +39,7 @@
        id="layer2"
        inkscape:label="S2 vec"
        style="display:inline"
-       transform="matrix(0.26458333,0,0,0.26458333,-56.279945,6.4726999)"><path
+       transform="scale(1)"><path
          style="fill:#f7d6d6;fill-opacity:1;stroke:#000000;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          d="m 33.571429,450.42857 360.000001,-30 -47.14286,-325 H 405 V 8.2857132 h 26.42857 V 95.42857 H 862.14286 V 651.25371 H 983.88858 V 1002.7868 H 467.70063 L 404.06102,515.89327 37.375644,547.208 Z"
          id="path3765"

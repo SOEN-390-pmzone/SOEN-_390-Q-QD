@@ -2,9 +2,9 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="210mm"
-   height="297mm"
-   viewBox="0 0 210 297"
+   width="1024px"
+   height="1024px"
+   viewBox="0 0 1024 1024"
    version="1.1"
    id="svg1"
    xml:space="preserve"
@@ -39,7 +39,7 @@
        style="display:inline"
        inkscape:label="VL1 vec copy"
        id="g4499"
-       transform="matrix(0.20294186,0,0,0.22576122,2.3592732,42.296876)"><path
+       transform="scale(1)"><path
          inkscape:connector-curvature="0"
          id="path4501"
          d="M 208.0918,17.888672 V 119.71484 h -19.51953 v 51.42774 h 17.14257 v 161.42969 h -18.57226 v 48.57031 H 200 v 75.71484 h -45.71484 v 55.71485 h -51.42774 v 55.71289 H 54.285156 v 61.42968 H 31.427734 V 856.85742 H 60 V 924 H 30 v 41.42773 H 355.71484 V 924 856.85742 805.80664 h 37.23438 v 20.20313 H 830.3457 851.78516 V 566.14258 h 83.92968 12.5 27.5 v -40.71485 h -27.5 V 350.78516 h -12.5 v -5.35743 H 863.57227 V 91.857422 H 847.14258 V 122.57227 H 830.3457 V 17.888672 H 355.71484 Z"

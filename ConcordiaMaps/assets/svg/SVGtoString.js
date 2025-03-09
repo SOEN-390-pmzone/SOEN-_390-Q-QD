@@ -2603,7 +2603,7 @@ const MBfloor2SVG = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
        id="layer2"
        inkscape:label="S2 vec"
        style="display:inline"
-       transform="matrix(0.26458333,0,0,0.26458333,-56.279945,6.4726999)"><path
+       transform="scale(1)"><path
          style="fill:#f7d6d6;fill-opacity:1;stroke:#000000;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          d="m 33.571429,450.42857 360.000001,-30 -47.14286,-325 H 405 V 8.2857132 h 26.42857 V 95.42857 H 862.14286 V 651.25371 H 983.88858 V 1002.7868 H 467.70063 L 404.06102,515.89327 37.375644,547.208 Z"
          id="path3765"
@@ -3224,6 +3224,7 @@ const MBfloor2SVG = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
            x="806.02887"
            y="512.86731"
            style="stroke-width:1.84252">Elevators</tspan></text></g></g></svg>
+
 `
 const VEfloor2SVG=`<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
@@ -4083,13 +4084,15 @@ const VEfloor2SVG=`<?xml version="1.0" encoding="UTF-8" standalone="no"?>
   </g>
 </svg>
 `
-const VEfloor1SVG = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+const VEfloor1SVG = `
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="210mm"
-   height="297mm"
-   viewBox="0 0 210 297"
+   width="1024px"
+   height="1024px"
+   viewBox="0 0 1024 1024"
+   preserveAspectRatio="xMidYMid meet"
    version="1.1"
    id="svg1"
    xml:space="preserve"
@@ -4120,7 +4123,8 @@ const VEfloor1SVG = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
      id="defs1" /><g
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
-     id="layer1"><g
+     id="layer1"
+     transform="scale(4.87619, 3.44781)"><g
        style="display:inline"
        inkscape:label="VE1 vec copy"
        id="g4664"
@@ -4178,14 +4182,17 @@ const VEfloor1SVG = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
          style="stroke-width:3.99241"
          x="32.915146"
          y="259.49188">X</tspan></text></g></svg>
+
+
+
 `
 const VLfloor1SVG = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="210mm"
-   height="297mm"
-   viewBox="0 0 210 297"
+   width="1024px"
+   height="1024px"
+   viewBox="0 0 1024 1024"
    version="1.1"
    id="svg1"
    xml:space="preserve"
@@ -4220,7 +4227,7 @@ const VLfloor1SVG = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
        style="display:inline"
        inkscape:label="VL1 vec copy"
        id="g4499"
-       transform="matrix(0.20294186,0,0,0.22576122,2.3592732,42.296876)"><path
+       transform="scale(1)"><path
          inkscape:connector-curvature="0"
          id="path4501"
          d="M 208.0918,17.888672 V 119.71484 h -19.51953 v 51.42774 h 17.14257 v 161.42969 h -18.57226 v 48.57031 H 200 v 75.71484 h -45.71484 v 55.71485 h -51.42774 v 55.71289 H 54.285156 v 61.42968 H 31.427734 V 856.85742 H 60 V 924 H 30 v 41.42773 H 355.71484 V 924 856.85742 805.80664 h 37.23438 v 20.20313 H 830.3457 851.78516 V 566.14258 h 83.92968 12.5 27.5 v -40.71485 h -27.5 V 350.78516 h -12.5 v -5.35743 H 863.57227 V 91.857422 H 847.14258 V 122.57227 H 830.3457 V 17.888672 H 355.71484 Z"
@@ -5247,6 +5254,7 @@ const VLfloor1SVG = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
          id="tspan62-1"
          style="stroke-width:0.877028"
          x="225.12508"
-         y="60.381062">X</tspan></text></g></svg>
+
+
 `
 export default { floor8SVG, floor9SVG, floor1SVG,MBfloor1SVG,MBfloor2SVG, VEfloor1SVG,VEfloor2SVG,VLfloor1SVG};
