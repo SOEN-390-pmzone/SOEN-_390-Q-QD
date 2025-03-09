@@ -37,6 +37,7 @@ const BuildingSelector = () => {
         <ScrollView
           style={styles.buildingsContainer}
           showsVerticalScrollIndicator={true}
+          testID="buildings-scroll-view"
         >
           {BUILDINGS.map((building) => (
             <TouchableOpacity
