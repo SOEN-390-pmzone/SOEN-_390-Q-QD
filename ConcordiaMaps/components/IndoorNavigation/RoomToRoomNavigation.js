@@ -79,7 +79,7 @@ const RoomToRoomNavigation = ({ navigation }) => {
     try {
       console.log(`Loading floor plans for ${buildingType} - floors ${startFloor} and ${endFloor}...`);
       
-      // Using the exact same approach as FloorNavigationSelector
+      // Loading floor plans using the FloorRegistry
       const startSvg = await FloorRegistry.getFloorPlan(buildingType, startFloor);
       console.log('Start floor SVG loaded:', startSvg ? `${startSvg.substring(0, 50)}...` : 'Empty');
       setStartFloorPlan(startSvg || '<div style="color:red">Failed to load SVG</div>');
