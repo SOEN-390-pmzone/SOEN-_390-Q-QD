@@ -593,10 +593,5 @@ InterFloorNavigation.propTypes = {
   buildingType: PropTypes.string,
   onPathCalculated: PropTypes.func,
 };
-// Optional default props
-InterFloorNavigation.defaultProps = {
-  buildingType: "HallBuilding",
-  onPathCalculated: null,
-};
 
 export default InterFloorNavigation;

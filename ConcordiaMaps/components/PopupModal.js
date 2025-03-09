@@ -67,7 +67,7 @@ const PopupModal = ({ isVisible, data, onClose, navigation }) => {
             "Vanier Library",
             "Central Building",
             "Vanier Extension",
-          ].includes(name) && (
+          ].includes(data?.name) && (
             <TouchableOpacity
               style={styles.getDirectionsButton1}
               onPress={() =>
