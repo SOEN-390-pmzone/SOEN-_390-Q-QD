@@ -491,21 +491,25 @@ const IndoorNavigation = ({ route, navigation }) => {
 
     webViewRef.current.injectJavaScript(js);
   };
-
+  const getFloorSuffix = (floor) => {
+    switch (floor) {
+      case "1":
+        return "st";
+      case "2":
+        return "nd";
+      case "3":
+        return "rd";
+      default:
+        return "th";
+    }
+  };
   return (
     <View style={styles.container}>
       <Header />
       <NavBar />
       <Text style={styles.title}>
         {building.name} - {building.code} {floor}
-        {floor === "1"
-          ? "st"
-          : floor === "2"
-            ? "nd"
-            : floor === "3"
-              ? "rd"
-              : "th"}{" "}
-        Floor
+        {getFloorSuffix(floor)} Floor
       </Text>
       {/* SVG Floor Plan in WebView - generateHtmlContent remains the same */}
       <View style={styles.webViewContainer}>
@@ -576,12 +580,12 @@ const IndoorNavigation = ({ route, navigation }) => {
         <ScrollView style={styles.resultContainer} nestedScrollEnabled={true}>
           {path.length > 0 ? (
             <View style={styles.pathContainer}>
-              {path.map((node, index) => (
-                <View key={index} style={styles.pathStep}>
+              {path.map((node) => (
+                <View key={`path-step-${node}`} style={styles.pathStep}>
                   <Text style={styles.stepText}>
-                    {index + 1}. {node}
+                    {path.indexOf(node) + 1}. {node}
                   </Text>
-                  {index < path.length - 1 && (
+                  {path.indexOf(node) < path.length - 1 && (
                     <Text style={styles.arrow}>↓</Text>
                   )}
                 </View>

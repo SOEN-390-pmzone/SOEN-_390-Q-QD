@@ -15,8 +15,6 @@ import RoomToRoomNavigation from "./components/IndoorNavigation/RoomToRoomNaviga
 import TunnelNavigation from "./components/IndoorNavigation/TunnelNavigation";
 import PropTypes from "prop-types";
 
-// import MapMarkers from "./components/MapMarkers"; // Ensure this import exists
-
 // Create Context for modal data and visibility
 export const ModalContext = createContext();
 
