@@ -1,7 +1,7 @@
 import React from "react";
-import { render, fireEvent } from "@testing-library/react-native";
+import { render, fireEvent, waitFor } from "@testing-library/react-native";
 import { NavigationContainer } from "@react-navigation/native";
-import RoomToRoomNavigation from "../RoomToRoomNavigation";
+import RoomToRoomNavigation from "../../../components/IndoorNavigation/RoomToRoomNavigation";
 import FloorRegistry from "../../../services/BuildingDataService";
 
 // Mock the WebView component since it's not available in the test environment
@@ -23,18 +23,10 @@ jest.mock("../../../services/BuildingDataService", () => ({
 }));
 
 // Mock NavBar component since it might also use navigation
-jest.mock("../../NavBar", () => {
-  return function MockNavBar() {
-    return null;
-  };
-});
+jest.mock("../../../components/NavBar", () => () => null);
 
 // Mock Header component since it uses navigation
-jest.mock("../../Header", () => {
-  return function MockHeader() {
-    return null;
-  };
-});
+jest.mock("../../../components/Header", () => () => null);
 
 // Setup the navigation container wrapper
 const renderWithNavigation = (component) => {
@@ -90,7 +82,7 @@ describe("RoomToRoomNavigation", () => {
     });
   });
 
-  // Simple renders test - most basic test to verify the component renders
+  // Simple render test
   it("renders without crashing", () => {
     const { toJSON } = renderWithNavigation(<RoomToRoomNavigation />);
     expect(toJSON()).toBeTruthy();
@@ -125,14 +117,15 @@ describe("RoomToRoomNavigation", () => {
   });
 
   // Test floor selection screen rendering
-  it("renders floor selection screen after building selection", () => {
+  it("renders floor selection screen after building selection", async () => {
     const { getByText } = renderWithNavigation(<RoomToRoomNavigation />);
 
     // Press the Hall Building button to navigate to floor selection
     fireEvent.press(getByText("Hall Building"));
 
-    // Verify floor selection title is present
-    expect(getByText("Select Floors in Hall Building")).toBeTruthy();
+    await waitFor(() =>
+      expect(getByText("Select Floors in Hall Building")).toBeTruthy(),
+    );
 
     // Verify start/end floor sections are present
     expect(getByText("Start Floor")).toBeTruthy();
@@ -149,9 +142,13 @@ describe("RoomToRoomNavigation", () => {
     // Verify Next button exists
     const nextButton = getByText("Next");
     expect(nextButton).toBeTruthy();
+  });
 
-    // Just verify the Next button is present - more reliable than checking disabled state
-    // as the implementation of disabled state might vary
-    expect(nextButton).toBeTruthy();
+  // Test that floor plan is displayed when ready
+  it("displays the floor plan WebView when ready", async () => {
+    const { findByText } = renderWithNavigation(<RoomToRoomNavigation />);
+    fireEvent.press(await findByText("Hall Building"));
+    fireEvent.press(await findByText("Next"));
+    await waitFor(() => expect(findByText("Floor Plan")).toBeTruthy());
   });
 });
