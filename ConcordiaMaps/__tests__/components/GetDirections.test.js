@@ -125,7 +125,7 @@ describe("GetDirections", () => {
     return render(
       <LocationContext.Provider value={mockLocation}>
         {component}
-      </LocationContext.Provider>
+      </LocationContext.Provider>,
     );
   };
 
@@ -312,7 +312,7 @@ describe("GetDirections", () => {
     mockGetPolyline.mockRejectedValueOnce(new Error("Some error"));
 
     const { getByText, getByTestId, queryByText } = renderWithContext(
-      <GetDirections />
+      <GetDirections />,
     );
 
     const destination = {
@@ -474,7 +474,7 @@ describe("GetDirections", () => {
   it("handles location errors gracefully", async () => {
     // Simulate a location error
     mockGetCurrentPositionAsync.mockRejectedValueOnce(
-      new Error("Location service unavailable")
+      new Error("Location service unavailable"),
     );
 
     // Spy on console
@@ -512,7 +512,7 @@ describe("GetDirections", () => {
 
     // Replace with error-throwing mock
     mockGetCurrentPositionAsync.mockRejectedValueOnce(
-      new Error("Tracking Error")
+      new Error("Tracking Error"),
     );
 
     const { getByText, getByTestId } = renderWithContext(<GetDirections />);
@@ -550,10 +550,10 @@ describe("GetDirections", () => {
 
     // Simulate failure of getStepsInHTML and getPolyline
     mockGetStepsInHTML.mockRejectedValueOnce(
-      new Error("Steps generation failed")
+      new Error("Steps generation failed"),
     );
     mockGetPolyline.mockRejectedValueOnce(
-      new Error("Polyline generation failed")
+      new Error("Polyline generation failed"),
     );
 
     const { getByText, getByTestId } = renderWithContext(<GetDirections />);
@@ -607,7 +607,7 @@ describe("GetDirections", () => {
     mockGetPolyline.mockResolvedValueOnce([]);
 
     const { getByText, getByTestId, queryByText } = renderWithContext(
-      <GetDirections />
+      <GetDirections />,
     );
 
     // Set destination
@@ -674,7 +674,7 @@ describe("GetDirections Additional Coverage Tests", () => {
     return render(
       <LocationContext.Provider value={mockLocation}>
         {component}
-      </LocationContext.Provider>
+      </LocationContext.Provider>,
     );
   };
 
@@ -705,7 +705,7 @@ describe("GetDirections Additional Coverage Tests", () => {
 
     // Initially using current location
     const initialOriginSearchBar = getByTestId(
-      "search-bar-Using Current Location"
+      "search-bar-Using Current Location",
     );
 
     // Manually select a location to disable current location
@@ -725,7 +725,7 @@ describe("GetDirections Additional Coverage Tests", () => {
     const { getByTestId } = render(
       <LocationContext.Provider value={null}>
         <GetDirections />
-      </LocationContext.Provider>
+      </LocationContext.Provider>,
     );
 
     // Verify initial render uses default coordinates
@@ -822,7 +822,7 @@ describe("GetDirections Additional Coverage Tests", () => {
     const { rerender, getByText } = render(
       <LocationContext.Provider value={mockLocation}>
         <GetDirections />
-      </LocationContext.Provider>
+      </LocationContext.Provider>,
     );
 
     // Set destination to trigger navigation mode
@@ -837,7 +837,7 @@ describe("GetDirections Additional Coverage Tests", () => {
           value={{ latitude: 45.499, longitude: -73.58 }}
         >
           <GetDirections />
-        </LocationContext.Provider>
+        </LocationContext.Provider>,
       );
     });
 
@@ -902,7 +902,7 @@ describe("GetDirections - Transport Mode Tests", () => {
     return render(
       <LocationContext.Provider value={mockLocation}>
         {component}
-      </LocationContext.Provider>
+      </LocationContext.Provider>,
     );
   };
 
@@ -932,7 +932,7 @@ describe("GetDirections - Transport Mode Tests", () => {
       expect(mockGetStepsInHTML).toHaveBeenCalledWith(
         expect.any(Object),
         expect.any(Object),
-        "walking"
+        "walking",
       );
     });
   });
@@ -958,7 +958,7 @@ describe("GetDirections - Transport Mode Tests", () => {
       expect(mockGetStepsInHTML).toHaveBeenCalledWith(
         expect.any(Object),
         expect.any(Object),
-        "driving"
+        "driving",
       );
     });
   });
@@ -985,7 +985,7 @@ describe("GetDirections - Transport Mode Tests", () => {
       expect(mockGetStepsInHTML).toHaveBeenCalledWith(
         expect.any(Object),
         expect.any(Object),
-        "transit"
+        "transit",
       );
     });
   });
@@ -1012,7 +1012,7 @@ describe("GetDirections - Transport Mode Tests", () => {
       expect(mockGetStepsInHTML).toHaveBeenCalledWith(
         expect.any(Object),
         expect.any(Object),
-        "biking"
+        "biking",
       );
     });
   });
