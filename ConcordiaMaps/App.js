@@ -1,31 +1,57 @@
-import * as React from "react";
-import { StyleSheet } from "react-native";
-// import { Text} from 'react-native';
+import React, { useState, createContext, useMemo } from "react";
 
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import HomeScreen from "./screen/HomeScreen";
+import { LocationProvider } from "./contexts/LocationContext";
+import PopupModal from "./components/PopupModal"; // Import the PopupModal
+import styles from "./styles";
+import GetDirections from "./components/GetDirections";
+
+// Create Context for modal data and visibility
+export const ModalContext = createContext();
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [modalData, setModalData] = useState({
+    name: "",
+    coordinate: { latitude: 0, longitude: 0 },
+  });
+
+  const toggleModal = () => {
+    setModalVisible(!isModalVisible);
+  };
+
+  // Memoize the context value
+  const modalContextValue = useMemo(
+    () => ({ isModalVisible, modalData, toggleModal, setModalData }),
+    [isModalVisible, modalData],
+  );
+
   return (
-    <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen
-          style={styles.container}
-          name="Home"
-          component={HomeScreen}
+    <LocationProvider>
+      {/* Provide the modal context to all components */}
+      <ModalContext.Provider value={modalContextValue}>
+        <NavigationContainer>
+          <Stack.Navigator screenOptions={{ headerShown: false }}>
+            <Stack.Screen
+              style={styles.container}
+              name="Home"
+              component={HomeScreen}
+            />
+            <Stack.Screen name="GetDirections" component={GetDirections} />
+          </Stack.Navigator>
+        </NavigationContainer>
+
+        {/* Add PopupModal here */}
+        <PopupModal
+          isVisible={isModalVisible}
+          data={modalData}
+          onClose={toggleModal}
         />
-      </Stack.Navigator>
-    </NavigationContainer>
+      </ModalContext.Provider>
+    </LocationProvider>
   );
 }
-const styles = StyleSheet.create({
-  container: {
-    width: "100%",
-    height: "100%",
-    backgroundColor: "#912338",
-    color: "blue",
-  },
-});

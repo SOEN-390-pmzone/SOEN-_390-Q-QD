@@ -14,7 +14,7 @@ jobs:
 
       - name: Install Dependencies
         working-directory: ./ConcordiaMaps
-        run: npm install
+        run: npm ci
 
       - name: Lint Code
         working-directory: ./ConcordiaMaps
@@ -29,10 +29,10 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-        
+
       - name: Install Dependencies
         working-directory: ./ConcordiaMaps
-        run: npm install
+        run: npm ci
 
       - name: Lint Code
         working-directory: ./ConcordiaMaps
@@ -41,6 +41,23 @@ jobs:
       - name: Format Code
         working-directory: ./ConcordiaMaps
         run: npx prettier --check .
+
+      - name: Run Jest Tests with Coverage
+        working-directory: ./ConcordiaMaps
+        run: npm run test -- --coverage
+
+      - name: Run SonarQube analysis
+        working-directory: ./ConcordiaMaps
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          npx sonarqube-scanner \
+            -Dsonar.projectKey=SOEN-390-pmzone_SOEN-_390-Q-QD \
+            -Dsonar.organization=soen-390-pmzone \
+            -Dsonar.sources=. \
+            -Dsonar.exclusions=**/node_modules/**,**/*.test.js \
+            -Dsonar.javascript.lcov.reportPaths=./coverage/lcov.info \
+            -Dsonar.host.url=https://sonarcloud.io
 
   deploy:
     runs-on: ubuntu-latest
