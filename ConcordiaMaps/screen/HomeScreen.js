@@ -7,7 +7,6 @@ import TemporaryModal from "../components/temporaryModal";
 import { LocationContext } from "../contexts/LocationContext";
 import Footer from "../components/Footer";
 import styles from "../styles";
-const customMarkerImage = require("../assets/PinLogo.png");
 import { Building } from "../components/MapMarkers";
 import { ModalContext } from "../App";
 import BuildingColoring from "../components/buildingColoring";
@@ -22,12 +21,66 @@ import {
 import convertToCoordinates from "../components/convertToCoordinates";
 import PropTypes from "prop-types";
 
+// Marker image assets for Restaurant and Cafe
+const restaurantMarker = require("../assets/restoICON.png");
+const cafeMarker = require("../assets/cafeICON.png");
+const customMarkerImage = require("../assets/PinLogo.png");
+
+// Example data for PointsOfInterest (you can adjust based on your use case)
+const PointsOfInterest = [
+  {
+    name: "Poulet Rouge",
+    coordinate: { latitude: 45.4947454, longitude: -73.5783503 }, // Coordinates for Poulet Rouge
+    address: "1623 Rue Sainte-Catherine, Montréal, QC H3H 1L8",
+    fullBuildingName: "Poulet Rouge",
+    markerImage: restaurantMarker, // Use restaurant marker for Poulet Rouge
+  },
+  {
+    name: "Marche Newon",
+    coordinate: { latitude: 45.4943362, longitude: -73.5785438 }, // Coordinates for Poulet Rouge
+    address: "1616 Rue Sainte-Catherine 302 unit, Montréal, QC H3H 1L7",
+    fullBuildingName: "Marche Newon",
+    markerImage: restaurantMarker, // Use restaurant marker for Poulet Rouge
+  },
+
+  {
+    name: "Tim Horton's",
+    coordinate: { latitude: 45.4948692, longitude: -73.5782373 }, // Coordinates for Poulet Rouge
+    address: "1611 Rue Sainte-Catherine , Montréal, QC H3H 1L8",
+    fullBuildingName: "Tim Horton's",
+    markerImage: cafeMarker, // Use restaurant marker for Poulet Rouge
+  },
+  {
+    name: "Subway",
+    coordinate: { latitude: 45.4960100, longitude: -73.5801927 }, // Coordinates for Poulet Rouge
+    address: "2144 guy st, Montréal, QC H3H 2N4",
+    fullBuildingName: "Subway",
+    markerImage: restaurantMarker, // Use restaurant marker for Poulet Rouge
+  },
+
+  {
+    name: "Second Cup",
+    coordinate: { latitude: 45.4992233, longitude: -73.5735757 }, // Coordinates for Poulet Rouge
+    address: "Rue Sainte-Catherine ST W Suite 1166 , Montréal, QC H3B 1K1",
+    fullBuildingName: "Second Cup",
+    markerImage: cafeMarker, // Use restaurant marker for Poulet Rouge
+  },
+
+  {
+    name: "Java U",
+    coordinate: { latitude: 45.4958331, longitude: -73.5791174 }, // Coordinates for Poulet Rouge
+    address: "1455 Guy St , Montréal, QC H3H 2L5",
+    fullBuildingName: "Java U",
+    markerImage: cafeMarker, // Use restaurant marker for Poulet Rouge
+  },
+];
+
 function HomeScreen({ asyncKey = "Campus" }) {
   const loyolaPostalCode = process.env.EXPO_PUBLIC_LOYOLA_POSTAL_CODE;
   const sgwPostalCode = process.env.EXPO_PUBLIC_SGW_POSTAL_CODE;
 
   const location = useContext(LocationContext);
-  const { toggleModal, setModalData } = useContext(ModalContext); // Access setModalData
+  const { toggleModal, setModalData } = useContext(ModalContext);
 
   const [postalCode, setPostalCode] = useState(null);
   const [coordinates, setCoordinates] = useState(null);
@@ -87,14 +140,14 @@ function HomeScreen({ asyncKey = "Campus" }) {
           latitudeDelta: 0.01,
           longitudeDelta: 0.01,
         },
-        2500,
+        2500
       ); // Duration of the animation in milliseconds
     }
   }, [coordinates]);
 
   const handleChangeCampuses = () => {
     setPostalCode((prevPostalCode) =>
-      prevPostalCode === sgwPostalCode ? loyolaPostalCode : sgwPostalCode,
+      prevPostalCode === sgwPostalCode ? loyolaPostalCode : sgwPostalCode
     );
   };
 
@@ -113,15 +166,14 @@ function HomeScreen({ asyncKey = "Campus" }) {
     }, 100);
   };
 
-  // Function to handle marker press and pass data to the modal
   const handleMarkerPress = (building) => {
     setModalData({
       name: building.name,
-      coordinate: building.coordinat,
+      coordinate: building.coordinate,
       address: building.address,
       fullBuildingName: building.fullBuildingName,
-    }); // Update modalData
-    toggleModal(); // Show modal
+    });
+    toggleModal();
   };
 
   const [modalState, setModalState] = useState(true);
@@ -129,11 +181,12 @@ function HomeScreen({ asyncKey = "Campus" }) {
     if (modalState) {
       const timer = setTimeout(() => {
         setModalState(false);
-      }, toggleModalTime); // Modal will disappear after 3 seconds
+      }, toggleModalTime);
 
-      return () => clearTimeout(timer); // Cleanup the timer if the component unmounts
+      return () => clearTimeout(timer);
     }
   }, [modalState]);
+
   return (
     <View style={styles.container} testID="home-screen">
       <Header />
@@ -164,7 +217,7 @@ function HomeScreen({ asyncKey = "Campus" }) {
                     longitudeDelta: 0.005,
                   }
                 : {
-                    latitude: coordinates.latitude, // Default center (SGW campus)
+                    latitude: coordinates.latitude,
                     longitude: coordinates.longitude,
                     latitudeDelta: 0.01,
                     longitudeDelta: 0.01,
@@ -185,10 +238,18 @@ function HomeScreen({ asyncKey = "Campus" }) {
                 fullBuildingName={building.fullBuildingName}
                 onPress={() => handleMarkerPress(building)}
               >
-                <Image
-                  source={customMarkerImage}
-                  style={styles.customMarkerImage}
-                />
+                <Image source={customMarkerImage} style={styles.customMarkerImage} />
+              </Marker>
+            ))}
+            {/* Add MapMarkers for PointsOfInterest */}
+            {PointsOfInterest.map((poi) => (
+              <Marker
+                key={poi.name}
+                coordinate={poi.coordinate}
+                title={poi.name}
+                description={poi.address}
+              >
+                <Image source={poi.markerImage} style={styles.customMarkerImage} />
               </Marker>
             ))}
             <BuildingColoring />
@@ -218,7 +279,7 @@ function HomeScreen({ asyncKey = "Campus" }) {
               <Image
                 style={styles.buttonImage}
                 source={require("../assets/ToggleButton.png")}
-                resizeMode={"cover"} // cover or contain its up to you view look
+                resizeMode={"cover"}
               />
             </TouchableOpacity>
           </View>
@@ -232,7 +293,9 @@ function HomeScreen({ asyncKey = "Campus" }) {
     </View>
   );
 }
+
 HomeScreen.propTypes = {
   asyncKey: PropTypes.string,
 };
+
 export default HomeScreen;
