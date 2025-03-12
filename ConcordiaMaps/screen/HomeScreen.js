@@ -52,7 +52,7 @@ const PointsOfInterest = [
   },
   {
     name: "Subway",
-    coordinate: { latitude: 45.4960100, longitude: -73.5801927 }, // Coordinates for Poulet Rouge
+    coordinate: { latitude: 45.49601, longitude: -73.5801927 }, // Coordinates for Poulet Rouge
     address: "2144 guy st, Montréal, QC H3H 2N4",
     fullBuildingName: "Subway",
     markerImage: restaurantMarker, // Use restaurant marker for Poulet Rouge
@@ -140,14 +140,14 @@ function HomeScreen({ asyncKey = "Campus" }) {
           latitudeDelta: 0.01,
           longitudeDelta: 0.01,
         },
-        2500
+        2500,
       ); // Duration of the animation in milliseconds
     }
   }, [coordinates]);
 
   const handleChangeCampuses = () => {
     setPostalCode((prevPostalCode) =>
-      prevPostalCode === sgwPostalCode ? loyolaPostalCode : sgwPostalCode
+      prevPostalCode === sgwPostalCode ? loyolaPostalCode : sgwPostalCode,
     );
   };
 
@@ -238,7 +238,10 @@ function HomeScreen({ asyncKey = "Campus" }) {
                 fullBuildingName={building.fullBuildingName}
                 onPress={() => handleMarkerPress(building)}
               >
-                <Image source={customMarkerImage} style={styles.customMarkerImage} />
+                <Image
+                  source={customMarkerImage}
+                  style={styles.customMarkerImage}
+                />
               </Marker>
             ))}
             {/* Add MapMarkers for PointsOfInterest */}
@@ -249,7 +252,10 @@ function HomeScreen({ asyncKey = "Campus" }) {
                 title={poi.name}
                 description={poi.address}
               >
-                <Image source={poi.markerImage} style={styles.customMarkerImage} />
+                <Image
+                  source={poi.markerImage}
+                  style={styles.customMarkerImage}
+                />
               </Marker>
             ))}
             <BuildingColoring />
