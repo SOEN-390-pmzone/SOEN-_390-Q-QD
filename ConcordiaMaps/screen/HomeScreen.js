@@ -20,58 +20,50 @@ import {
 } from "../components/AsyncPersistence";
 import convertToCoordinates from "../components/convertToCoordinates";
 import PropTypes from "prop-types";
+import PopupOPI from "../components/PopupPOI"; // Import the new popup component
 
 // Marker image assets for Restaurant and Cafe
 const restaurantMarker = require("../assets/restoICON.png");
 const cafeMarker = require("../assets/cafeICON.png");
 const customMarkerImage = require("../assets/PinLogo.png");
 
-// Example data for PointsOfInterest (you can adjust based on your use case)
+// Example data for PointsOfInterest
 const PointsOfInterest = [
   {
     name: "Poulet Rouge",
-    coordinate: { latitude: 45.4947454, longitude: -73.5783503 }, // Coordinates for Poulet Rouge
+    coordinate: { latitude: 45.4947454, longitude: -73.5783503 },
     address: "1623 Rue Sainte-Catherine, Montréal, QC H3H 1L8",
-    fullBuildingName: "Poulet Rouge",
-    markerImage: restaurantMarker, // Use restaurant marker for Poulet Rouge
+    markerImage: restaurantMarker,
   },
   {
     name: "Marche Newon",
-    coordinate: { latitude: 45.4943362, longitude: -73.5785438 }, // Coordinates for Poulet Rouge
+    coordinate: { latitude: 45.4943362, longitude: -73.5785438 },
     address: "1616 Rue Sainte-Catherine 302 unit, Montréal, QC H3H 1L7",
-    fullBuildingName: "Marche Newon",
-    markerImage: restaurantMarker, // Use restaurant marker for Poulet Rouge
+    markerImage: restaurantMarker,
   },
-
   {
     name: "Tim Horton's",
-    coordinate: { latitude: 45.4948692, longitude: -73.5782373 }, // Coordinates for Poulet Rouge
+    coordinate: { latitude: 45.4948692, longitude: -73.5782373 },
     address: "1611 Rue Sainte-Catherine , Montréal, QC H3H 1L8",
-    fullBuildingName: "Tim Horton's",
-    markerImage: cafeMarker, // Use restaurant marker for Poulet Rouge
+    markerImage: cafeMarker,
   },
   {
     name: "Subway",
-    coordinate: { latitude: 45.49601, longitude: -73.5801927 }, // Coordinates for Poulet Rouge
+    coordinate: { latitude: 45.49601, longitude: -73.5801927 },
     address: "2144 guy st, Montréal, QC H3H 2N4",
-    fullBuildingName: "Subway",
-    markerImage: restaurantMarker, // Use restaurant marker for Poulet Rouge
+    markerImage: restaurantMarker,
   },
-
   {
     name: "Second Cup",
-    coordinate: { latitude: 45.4992233, longitude: -73.5735757 }, // Coordinates for Poulet Rouge
+    coordinate: { latitude: 45.4992233, longitude: -73.5735757 },
     address: "Rue Sainte-Catherine ST W Suite 1166 , Montréal, QC H3B 1K1",
-    fullBuildingName: "Second Cup",
-    markerImage: cafeMarker, // Use restaurant marker for Poulet Rouge
+    markerImage: cafeMarker,
   },
-
   {
     name: "Java U",
-    coordinate: { latitude: 45.4958331, longitude: -73.5791174 }, // Coordinates for Poulet Rouge
+    coordinate: { latitude: 45.4958331, longitude: -73.5791174 },
     address: "1455 Guy St , Montréal, QC H3H 2L5",
-    fullBuildingName: "Java U",
-    markerImage: cafeMarker, // Use restaurant marker for Poulet Rouge
+    markerImage: cafeMarker,
   },
 ];
 
@@ -87,9 +79,13 @@ function HomeScreen({ asyncKey = "Campus" }) {
   const [error, setError] = useState("");
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [, setMapRegion] = useState(null);
-  const borderColor = "#912338"; // Initial border color (red)
+  const borderColor = "#912338";
   const mapRef = useRef(null);
   const toggleModalTime = "10000";
+
+  // State for OPI (Points of Interest) popup
+  const [opiPopupVisible, setOpiPopupVisible] = useState(false);
+  const [selectedOPI, setSelectedOPI] = useState(null);
 
   useEffect(() => {
     const fetchLastCampus = async () => {
@@ -141,7 +137,7 @@ function HomeScreen({ asyncKey = "Campus" }) {
           longitudeDelta: 0.01,
         },
         2500,
-      ); // Duration of the animation in milliseconds
+      );
     }
   }, [coordinates]);
 
@@ -174,6 +170,11 @@ function HomeScreen({ asyncKey = "Campus" }) {
       fullBuildingName: building.fullBuildingName,
     });
     toggleModal();
+  };
+
+  const handleOPIMarkerPress = (poi) => {
+    setSelectedOPI(poi);
+    setOpiPopupVisible(true);
   };
 
   const [modalState, setModalState] = useState(true);
@@ -244,13 +245,13 @@ function HomeScreen({ asyncKey = "Campus" }) {
                 />
               </Marker>
             ))}
-            {/* Add MapMarkers for PointsOfInterest */}
             {PointsOfInterest.map((poi) => (
               <Marker
                 key={poi.name}
                 coordinate={poi.coordinate}
                 title={poi.name}
                 description={poi.address}
+                onPress={() => handleOPIMarkerPress(poi)}
               >
                 <Image
                   source={poi.markerImage}
@@ -296,6 +297,13 @@ function HomeScreen({ asyncKey = "Campus" }) {
       )}
       {error ? <Text>Error: {error}</Text> : null}
       <Footer />
+
+      {/* OPI Popup */}
+      <PopupOPI
+        isVisible={opiPopupVisible}
+        data={selectedOPI || { name: "", address: "" }}
+        onClose={() => setOpiPopupVisible(false)}
+      />
     </View>
   );
 }
