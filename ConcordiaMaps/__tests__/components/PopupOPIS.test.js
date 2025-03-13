@@ -1,0 +1,57 @@
+import React from 'react';
+import { render, fireEvent } from '@testing-library/react-native';
+import PopupOPI from '../PopupOPI'; // adjust the path if needed
+import '@testing-library/jest-native/extend-expect';
+
+describe('<PopupOPI/>', () => {
+    const mockOnClose = jest.fn();
+    const mockOnGetDirections = jest.fn();
+//Creating mock data
+    const mockData={
+        name: "Test Cafe", 
+        address: "123 Test St.",
+    };
+    it('renders correctly when visible', () => { 
+        const { getByText } = render( 
+          <PopupOPI isVisible={true} data={mockData} onClose={mockOnClose} /> 
+        );
+    
+        expect(getByText('Test Cafe')).toBeTruthy(); 
+        expect(getByText('123 Test St.')).toBeTruthy(); 
+        expect(getByText('Close')).toBeTruthy(); 
+        expect(getByText('Get Directions')).toBeTruthy();
+      });
+    it('displays default test when data is missing', () => {
+
+        const { getByText } = render(
+          <PopupOPI isVisible={true} data={{}} onClose={mockOnClose} />
+        );
+    
+        expect(getByText('Cafe/Restaurant Name')).toBeTruthy();
+        expect(getByText('Address not available')).toBeTruthy();
+      });
+      it ('calls onClose when Close button is pressed', () => {
+        const { getByText } = render(
+          <PopupOPI isVisible={true} data={mockData} onClose={mockOnClose} />
+        );
+    
+        fireEvent.press(getByText('Close'));
+    
+        expect(mockOnClose).toHaveBeenCalled();
+      });
+      it('calls onGetDirections when Get Directions button is pressed', () => { 
+        const { getByText } = render( 
+          <PopupOPI isVisible={true} data={mockData} onClose={mockOnClose} />
+        );
+    
+        fireEvent.press(getByText('Get Directions')); 
+        expect(mockOnGetDirections).toHaveBeenCalledTimes(1);
+      });
+      it('displays the modal when visible is true', () => {
+        const { getByText } = render(
+            <PopupOPI isVisible={true} data={mockData} onClose={mockOnClose} />
+          );
+          expect(getByText('Test Cafe')).toBeTruthy(); 
+          expect(getByText('123 Test St.')).toBeTruthy();
+      });
+    });
