@@ -1,6 +1,6 @@
 import React from "react";
 import { render, fireEvent } from "@testing-library/react-native";
-import PopupOPI from "../../components/PopupOPI"; 
+import PopupOPI from "../../components/PopupOPI";
 import "@testing-library/jest-native/extend-expect";
 
 describe("<PopupOPI/>", () => {
