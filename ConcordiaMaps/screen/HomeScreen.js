@@ -20,7 +20,7 @@ import {
 } from "../components/AsyncPersistence";
 import convertToCoordinates from "../components/convertToCoordinates";
 import PropTypes from "prop-types";
-import PopupOPI from "../components/PopupPOI"; // Import the new popup component
+import PopupOPI from "../components/PopupOPI"; // Import the new popup component
 
 // Marker image assets for Restaurant and Cafe
 const restaurantMarker = require("../assets/restoICON.png");

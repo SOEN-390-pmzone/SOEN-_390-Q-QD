@@ -49,4 +49,4 @@ PopupOPI.propTypes = {
   onClose: PropTypes.func.isRequired,
 };
 
-export default PopupPOI;
+export default PopupOPI;
