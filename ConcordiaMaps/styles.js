@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
 const BuildingSelectorStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   contentContainer: {
     flex: 1,
@@ -250,21 +250,21 @@ const BuildingSelectorStyles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: "bold",
+    textAlign: "center",
     marginVertical: 20,
-    color: '#912338',
+    color: "#912338",
   },
   buildingsContainer: {
     flex: 1,
     gap: 20,
   },
   buildingCard: {
-    backgroundColor: '#f5f5f5',
+    backgroundColor: "#f5f5f5",
     borderRadius: 15,
-    overflow: 'hidden',
+    overflow: "hidden",
     elevation: 4,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
@@ -277,54 +277,54 @@ const BuildingSelectorStyles = StyleSheet.create({
   },
   buildingName: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
   },
   buildingCode: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#912338',
+    fontWeight: "600",
+    color: "#912338",
   },
   buildingDescription: {
     fontSize: 16,
-    color: '#666',
+    color: "#666",
     marginTop: 4,
   },
   buildingAddress: {
     fontSize: 14,
-    color: '#888',
+    color: "#888",
     marginTop: 4,
   },
   availableTag: {
-    position: 'absolute',
+    position: "absolute",
     top: 10,
     right: 10,
-    backgroundColor: '#912338',
-    color: '#fff',
+    backgroundColor: "#912338",
+    color: "#fff",
     padding: 8,
     borderRadius: 12,
     fontSize: 12,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
 });
 
 const floorSelectorStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: "bold",
+    textAlign: "center",
     marginTop: 16,
-    color: '#912338',
+    color: "#912338",
   },
   subtitle: {
     fontSize: 18,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: 16,
-    color: '#666',
+    color: "#666",
   },
   carousel: {
     flex: 1,
@@ -332,54 +332,54 @@ const floorSelectorStyles = StyleSheet.create({
   floorCard: {
     margin: 10,
     padding: 20,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: "#f5f5f5",
     borderRadius: 12,
     elevation: 3,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
   },
   activeFloor: {
-    backgroundColor: '#e6f3ff',
-    borderColor: '#912338',
+    backgroundColor: "#e6f3ff",
+    borderColor: "#912338",
     borderWidth: 2,
   },
   floorNumber: {
     fontSize: 28,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 8,
-    color: '#333',
+    color: "#333",
   },
   floorName: {
     fontSize: 20,
-    fontWeight: '600',
+    fontWeight: "600",
     marginBottom: 8,
-    color: '#444',
+    color: "#444",
   },
   floorDescription: {
     fontSize: 16,
-    color: '#666',
+    color: "#666",
   },
 });
 
 const tunnelNavigationStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     padding: 16,
   },
   title: {
     fontSize: 28,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: "bold",
+    textAlign: "center",
     marginVertical: 20,
-    color: '#912338',
+    color: "#912338",
   },
   subtitle: {
     fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
+    color: "#666",
+    textAlign: "center",
     marginBottom: 24,
   },
   buildingsGrid: {
@@ -387,11 +387,11 @@ const tunnelNavigationStyles = StyleSheet.create({
     gap: 20,
   },
   buildingCard: {
-    backgroundColor: '#f5f5f5',
+    backgroundColor: "#f5f5f5",
     borderRadius: 15,
-    overflow: 'hidden',
+    overflow: "hidden",
     elevation: 4,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
@@ -404,22 +404,22 @@ const tunnelNavigationStyles = StyleSheet.create({
   },
   buildingName: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
   },
   buildingCode: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#912338',
+    fontWeight: "600",
+    color: "#912338",
   },
   buildingDescription: {
     fontSize: 16,
-    color: '#666',
+    color: "#666",
     marginTop: 4,
   },
   buildingAddress: {
     fontSize: 14,
-    color: '#888',
+    color: "#888",
     marginTop: 4,
   },
   scrollContainer: {
@@ -427,4 +427,9 @@ const tunnelNavigationStyles = StyleSheet.create({
   },
 });
 
-export default {styles, BuildingSelectorStyles, floorSelectorStyles, tunnelNavigationStyles};
+export default {
+  styles,
+  BuildingSelectorStyles,
+  floorSelectorStyles,
+  tunnelNavigationStyles,
+};

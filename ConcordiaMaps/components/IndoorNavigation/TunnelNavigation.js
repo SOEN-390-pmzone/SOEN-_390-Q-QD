@@ -1,15 +1,10 @@
 import React from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
-} from "react-native";
+import { View, Text, TouchableOpacity, ScrollView } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Header from "../Header";
 import NavBar from "../NavBar";
 import FloorRegistry from "../../services/BuildingDataService";
-import {tunnelNavigationStyles} from '../../styles'
+import { tunnelNavigationStyles } from "../../styles";
 
 const TunnelNavigation = () => {
   const styles = tunnelNavigationStyles;
@@ -66,4 +61,4 @@ const TunnelNavigation = () => {
   );
 };
 
-export default TunnelNavigation; 
+export default TunnelNavigation;

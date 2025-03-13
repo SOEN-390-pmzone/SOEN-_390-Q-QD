@@ -10,7 +10,7 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import Header from "../Header";
 import NavBar from "../NavBar";
 import FloorRegistry from "../../services/BuildingDataService";
-import {floorSelectorStyles} from '../../styles'
+import { floorSelectorStyles } from "../../styles";
 
 const FloorSelector = () => {
   const styles = floorSelectorStyles;
@@ -74,4 +74,4 @@ const FloorSelector = () => {
   );
 };
 
-export default FloorSelector; 
+export default FloorSelector;

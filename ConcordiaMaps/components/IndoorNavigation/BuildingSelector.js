@@ -1,20 +1,14 @@
 import React from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
-} from "react-native";
+import { View, Text, TouchableOpacity, ScrollView } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Header from "../Header";
 import NavBar from "../NavBar";
 import FloorRegistry from "../../services/BuildingDataService";
-import {buildingSelectorStyles} from '../../styles'
+import { buildingSelectorStyles } from "../../styles";
 
 const BuildingSelector = () => {
-
   const styles = buildingSelectorStyles;
-  
+
   const navigation = useNavigation();
   //To get the data from the list of all available buildings
   const BUILDINGS = FloorRegistry.getBuildings();
@@ -65,6 +59,5 @@ const BuildingSelector = () => {
     </View>
   );
 };
-
 
 export default BuildingSelector;
