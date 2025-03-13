@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const BuildingSelectorStyles = StyleSheet.create({
+const buildingSelectorStyles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
@@ -429,7 +429,7 @@ const tunnelNavigationStyles = StyleSheet.create({
 
 export default {
   styles,
-  BuildingSelectorStyles,
+  buildingSelectorStyles,
   floorSelectorStyles,
   tunnelNavigationStyles,
 };

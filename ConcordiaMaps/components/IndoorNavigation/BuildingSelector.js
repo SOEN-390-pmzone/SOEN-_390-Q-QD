@@ -4,10 +4,10 @@ import { useNavigation } from "@react-navigation/native";
 import Header from "../Header";
 import NavBar from "../NavBar";
 import FloorRegistry from "../../services/BuildingDataService";
-import { buildingSelectorStyles } from "../../styles";
+import styleSheets from "../../styles";
 
 const BuildingSelector = () => {
-  const styles = buildingSelectorStyles;
+  const styles = styleSheets.buildingSelectorStyles;
 
   const navigation = useNavigation();
   //To get the data from the list of all available buildings

@@ -10,10 +10,10 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import Header from "../Header";
 import NavBar from "../NavBar";
 import FloorRegistry from "../../services/BuildingDataService";
-import { floorSelectorStyles } from "../../styles";
+import styleSheets from "../../styles";
 
 const FloorSelector = () => {
-  const styles = floorSelectorStyles;
+  const styles = styleSheets.floorSelectorStyles;
   const navigation = useNavigation();
   const route = useRoute();
   const windowHeight = Dimensions.get("window").height;
