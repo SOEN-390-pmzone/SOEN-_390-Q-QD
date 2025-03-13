@@ -1,17 +1,10 @@
 import React, { useState } from "react";
-import {
-  Modal,
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-} from "react-native";
+import { Modal, View, Text, TouchableOpacity, ScrollView } from "react-native";
 import { WebView } from "react-native-webview";
 import { findShortestPath } from "./PathFinder";
 import FloorRegistry from "../../services/BuildingDataService";
 import PropTypes from "prop-types";
-import styles from "../../styles/IndoorNavigation/InterfloorNavigationStyles"
+import styles from "../../styles/IndoorNavigation/InterfloorNavigationStyles";
 
 const InterFloorNavigation = ({
   isVisible,

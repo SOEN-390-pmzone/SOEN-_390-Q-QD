@@ -1,11 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-} from "react-native";
+import { View, Text, ScrollView, TouchableOpacity } from "react-native";
 import { WebView } from "react-native-webview";
 import { findShortestPath } from "./PathFinder";
 import InterFloorNavigation from "./InterFloorNavigation";
@@ -13,7 +7,7 @@ import Header from "../Header";
 import NavBar from "../NavBar";
 import FloorRegistry from "../../services/BuildingDataService";
 import PropTypes from "prop-types";
-import styles from "../../styles/IndoorNavigation/IndoorNavigationStyles"
+import styles from "../../styles/IndoorNavigation/IndoorNavigationStyles";
 
 const IndoorNavigation = ({ route, navigation }) => {
   const [startPoint, setStartPoint] = useState("");

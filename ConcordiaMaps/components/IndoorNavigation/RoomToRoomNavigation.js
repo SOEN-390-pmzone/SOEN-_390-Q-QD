@@ -1,18 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  Modal,
-} from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, Modal } from "react-native";
 import { WebView } from "react-native-webview";
 import { findShortestPath } from "./PathFinder";
 import FloorRegistry from "../../services/BuildingDataService";
 import Header from "../Header";
 import NavBar from "../NavBar";
-import styles from "../../styles/IndoorNavigation/RoomtoRoomNavigationStyles"
+import styles from "../../styles/IndoorNavigation/RoomtoRoomNavigationStyles";
 
 const RoomToRoomNavigation = () => {
   // State for building and floor selection
@@ -857,7 +850,5 @@ const RoomToRoomNavigation = () => {
     </View>
   );
 };
-
-
 
 export default RoomToRoomNavigation;
