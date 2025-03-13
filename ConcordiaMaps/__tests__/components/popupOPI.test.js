@@ -5,7 +5,6 @@ import "@testing-library/jest-native/extend-expect";
 
 describe("<PopupOPI/>", () => {
   const mockOnClose = jest.fn();
-  const mockOnGetDirections = jest.fn();
   //Creating mock data
   const mockData = {
     name: "Test Cafe",
