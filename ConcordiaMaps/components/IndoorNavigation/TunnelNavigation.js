@@ -4,10 +4,9 @@ import { useNavigation } from "@react-navigation/native";
 import Header from "../Header";
 import NavBar from "../NavBar";
 import FloorRegistry from "../../services/BuildingDataService";
-import styleSheets from "../../styles";
+import styles from "../../styles/IndoorNavigation/TunnelNavigationStyles";
 
 const TunnelNavigation = () => {
-  const styles = styleSheets.tunnelNavigationStyles;
   const navigation = useNavigation();
   // Filter only buildings with tunnel access
   const buildings = FloorRegistry.getBuildings().filter((building) =>
