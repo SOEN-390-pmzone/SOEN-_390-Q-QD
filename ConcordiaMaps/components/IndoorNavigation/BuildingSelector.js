@@ -3,7 +3,6 @@ import {
   View,
   Text,
   TouchableOpacity,
-  StyleSheet,
   ScrollView,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
