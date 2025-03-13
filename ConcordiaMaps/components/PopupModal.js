@@ -1,12 +1,5 @@
 import React from "react";
-import {
-  Modal,
-  View,
-  Text,
-  // StyleSheet,
-  TouchableOpacity,
-  Alert,
-} from "react-native";
+import { Modal, View, Text, TouchableOpacity, Alert } from "react-native";
 import PropTypes from "prop-types";
 import styles from "../styles/DirectionBox.style";
 
@@ -39,7 +32,7 @@ const PopupModal = ({ isVisible, data, onClose, navigation }) => {
       <View style={styles.modalOverlay}>
         <View style={styles.modalContainer}>
           <Text style={styles.modalTitle}>{data?.name}</Text>
-          <Text style={styles.modalText1}>•••{data?.fullBuildingName}•••</Text>
+          <Text style={styles.modalText1}>{data?.fullBuildingName}</Text>
           <Text style={styles.modalText}>{data?.address}</Text>
 
           <View style={styles.buttonsContainer}>
@@ -67,6 +60,25 @@ const PopupModal = ({ isVisible, data, onClose, navigation }) => {
               </TouchableOpacity>
             )}
           </View>
+
+          {[
+            "H Building",
+            "JMSB",
+            "Vanier Library",
+            "Central Building",
+            "Vanier Extension",
+          ].includes(data?.name) && (
+            <TouchableOpacity
+              style={styles.getDirectionsButton1}
+              onPress={() =>
+                Alert.alert("Get Inner Directions", "Inner directions pressed")
+              }
+            >
+              <Text style={styles.getDirectionsButtonText}>
+                Get in Building Directions
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     </Modal>
@@ -77,13 +89,9 @@ PopupModal.propTypes = {
   isVisible: PropTypes.bool.isRequired,
   data: PropTypes.shape({
     name: PropTypes.string.isRequired,
-    coordinate: PropTypes.shape({
-      latitude: PropTypes.number.isRequired,
-      longitude: PropTypes.number.isRequired,
-    }).isRequired,
-    address: PropTypes.string,
     fullBuildingName: PropTypes.string,
-  }),
+    address: PropTypes.string,
+  }).isRequired,
   onClose: PropTypes.func.isRequired,
   navigation: PropTypes.object.isRequired,
 };

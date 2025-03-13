@@ -1,19 +1,19 @@
-import React, { useState, createContext } from "react";
+import React, { useState, createContext, useMemo } from "react";
 import { NavigationContainer, useNavigation } from "@react-navigation/native";
+
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import HomeScreen from "./screen/HomeScreen";
 import { LocationProvider } from "./contexts/LocationContext";
 import PopupModal from "./components/PopupModal";
 import styles from "./styles";
 import GetDirections from "./components/GetDirections";
+
 import IndoorNavigation from "./components/IndoorNavigation/IndoorNavigation";
 import FloorSelector from "./components/IndoorNavigation/FloorSelector";
 import BuildingSelector from "./components/IndoorNavigation/BuildingSelector";
 import RoomToRoomNavigation from "./components/IndoorNavigation/RoomToRoomNavigation";
 import TunnelNavigation from "./components/IndoorNavigation/TunnelNavigation";
-import PropTypes from 'prop-types'; 
-
-// import MapMarkers from "./components/MapMarkers"; // Ensure this import exists
+import PropTypes from "prop-types";
 
 // Create Context for modal data and visibility
 export const ModalContext = createContext();
@@ -35,7 +35,7 @@ const PopupModalWrapper = ({ isVisible, data, onClose }) => {
 PopupModalWrapper.propTypes = {
   isVisible: PropTypes.bool.isRequired,
   data: PropTypes.object.isRequired,
-  onClose: PropTypes.func.isRequired
+  onClose: PropTypes.func.isRequired,
 };
 export default function App() {
   const [isModalVisible, setModalVisible] = useState(false);
@@ -48,12 +48,16 @@ export default function App() {
     setModalVisible(!isModalVisible);
   };
 
+  // Memoize the context value
+  const modalContextValue = useMemo(
+    () => ({ isModalVisible, modalData, toggleModal, setModalData }),
+    [isModalVisible, modalData],
+  );
+
   return (
     <LocationProvider>
       {/* Provide the modal context to all components */}
-      <ModalContext.Provider
-        value={{ isModalVisible, modalData, toggleModal, setModalData }}
-      >
+      <ModalContext.Provider value={modalContextValue}>
         <NavigationContainer>
           <Stack.Navigator screenOptions={{ headerShown: false }}>
             <Stack.Screen
@@ -62,11 +66,23 @@ export default function App() {
               component={HomeScreen}
             />
             <Stack.Screen name="GetDirections" component={GetDirections} />
-            <Stack.Screen name="BuildingSelector" component={BuildingSelector} />
+            <Stack.Screen
+              name="BuildingSelector"
+              component={BuildingSelector}
+            />
             <Stack.Screen name="FloorSelector" component={FloorSelector} />
-            <Stack.Screen name="IndoorNavigation" component={IndoorNavigation} />
-            <Stack.Screen name="RoomToRoomNavigation" component={RoomToRoomNavigation} />
-            <Stack.Screen name="TunnelNavigation" component={TunnelNavigation} />
+            <Stack.Screen
+              name="IndoorNavigation"
+              component={IndoorNavigation}
+            />
+            <Stack.Screen
+              name="RoomToRoomNavigation"
+              component={RoomToRoomNavigation}
+            />
+            <Stack.Screen
+              name="TunnelNavigation"
+              component={TunnelNavigation}
+            />
           </Stack.Navigator>
 
           <PopupModalWrapper

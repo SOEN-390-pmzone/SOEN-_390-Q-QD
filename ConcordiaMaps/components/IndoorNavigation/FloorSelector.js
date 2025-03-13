@@ -1,37 +1,44 @@
-import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
-import { useNavigation, useRoute } from '@react-navigation/native';
-import Header from '../Header';
-import NavBar from '../NavBar';
-import FloorRegistry from '../../services/BuildingDataService';
+import React from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  StyleSheet,
+  Dimensions,
+} from "react-native";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import Header from "../Header";
+import NavBar from "../NavBar";
+import FloorRegistry from "../../services/BuildingDataService";
 import {floorSelectorStyles} from '../../styles'
 
 const FloorSelector = () => {
   const styles = floorSelectorStyles;
   const navigation = useNavigation();
   const route = useRoute();
-  const windowHeight = Dimensions.get('window').height;
-  
+  const windowHeight = Dimensions.get("window").height;
+
   // Get buildingType from route params, default to HallBuilding if not specified
-  const buildingType = route.params?.buildingType || 'HallBuilding';
-   // Get building data from FloorRegistry
-   const building = FloorRegistry.getBuilding(buildingType);
+  const buildingType = route.params?.buildingType || "HallBuilding";
+  // Get building data from FloorRegistry
+  const building = FloorRegistry.getBuilding(buildingType);
 
   const handleFloorSelect = (floorId) => {
     // Check if the selected floor is a tunnel level
-    if (floorId === 'T') {
-      navigation.navigate('TunnelNavigation');
+    if (floorId === "T") {
+      navigation.navigate("TunnelNavigation");
       return;
     }
 
-     // Check if floor has navigation data
-     if (FloorRegistry.supportsNavigation(buildingType, floorId)) {
-      navigation.navigate('IndoorNavigation', { 
+    // Check if floor has navigation data
+    if (FloorRegistry.supportsNavigation(buildingType, floorId)) {
+      navigation.navigate("IndoorNavigation", {
         buildingType: buildingType,
-        floor: floorId 
+        floor: floorId,
       });
     } else {
-      alert('Indoor navigation for this floor is coming soon!');
+      alert("Indoor navigation for this floor is coming soon!");
     }
   };
 
@@ -53,7 +60,8 @@ const FloorSelector = () => {
             style={[
               styles.floorCard,
               { height: windowHeight * 0.25 },
-              FloorRegistry.supportsNavigation(buildingType, floor.id) && styles.activeFloor
+              FloorRegistry.supportsNavigation(buildingType, floor.id) &&
+                styles.activeFloor,
             ]}
             onPress={() => handleFloorSelect(floor.id)}
           >

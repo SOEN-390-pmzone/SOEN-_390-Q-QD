@@ -6,52 +6,64 @@
  * @returns {Array} - Array of nodes representing the shortest path
  */
 export function findShortestPath(graph, start, end) {
-  // Initialize distances with infinity for all nodes except start
+  const { distances, previous, nodes } = initializeGraphData(graph, start);
+
+  processNodes(graph, nodes, distances, previous, end);
+
+  return buildPath(previous, end);
+}
+
+function initializeGraphData(graph, start) {
   const distances = {};
   const previous = {};
   const nodes = new Set();
-  
+
   for (let node in graph) {
     distances[node] = node === start ? 0 : Infinity;
     previous[node] = null;
     nodes.add(node);
   }
-  
+
+  return { distances, previous, nodes };
+}
+
+function findMinDistanceNode(nodes, distances) {
+  return Array.from(nodes).reduce(
+    (minNode, node) =>
+      !minNode || distances[node] < distances[minNode] ? node : minNode,
+    null,
+  );
+}
+
+function processNodes(graph, nodes, distances, previous, end) {
   while (nodes.size > 0) {
-    // Find node with minimum distance
-    let minNode = null;
-    for (let node of nodes) {
-      if (minNode === null || distances[node] < distances[minNode]) {
-        minNode = node;
-      }
-    }
-    
-    // Remove node from unvisited set
+    const minNode = findMinDistanceNode(nodes, distances);
     nodes.delete(minNode);
-    
-    // If we've reached our target, we're done
+
     if (minNode === end) break;
-    
-    // Check all neighboring nodes
-    for (let neighbor in graph[minNode]) {
-      const weight = graph[minNode][neighbor];
-      const totalDistance = distances[minNode] + weight;
-      
-      if (totalDistance < distances[neighbor]) {
-        distances[neighbor] = totalDistance;
-        previous[neighbor] = minNode;
-      }
+
+    updateNeighbors(graph, minNode, distances, previous);
+  }
+}
+
+function updateNeighbors(graph, minNode, distances, previous) {
+  for (let neighbor in graph[minNode]) {
+    const totalDistance = distances[minNode] + graph[minNode][neighbor];
+    if (totalDistance < distances[neighbor]) {
+      distances[neighbor] = totalDistance;
+      previous[neighbor] = minNode;
     }
   }
-  
-  // Build the path by working backwards from end
+}
+
+function buildPath(previous, end) {
   const path = [];
   let current = end;
-  
+
   while (current !== null) {
     path.unshift(current);
     current = previous[current];
   }
-  
+
   return path.length === 1 ? [] : path;
-} 
+}

@@ -24,10 +24,6 @@ jobs:
         working-directory: ./ConcordiaMaps
         run: npx prettier --check .
 
-      - name: Run Jest Tests
-        working-directory: ./ConcordiaMaps
-        run: npm run test -- --coverage
-  
   test:
     runs-on: ubuntu-latest
     steps:
@@ -62,7 +58,7 @@ jobs:
             -Dsonar.exclusions=**/node_modules/**,**/*.test.js \
             -Dsonar.javascript.lcov.reportPaths=./coverage/lcov.info \
             -Dsonar.host.url=https://sonarcloud.io
-  
+
   deploy:
     runs-on: ubuntu-latest
     needs: [build, test]

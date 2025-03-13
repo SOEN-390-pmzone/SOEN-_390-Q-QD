@@ -254,8 +254,7 @@ class FloorRegistry {
   // Get the SVG content for a floor
   static async getFloorPlan(buildingType, floorId) {
     const floor = this.getFloor(buildingType, floorId);
-    if (!floor || !floor.getSVG) return null;
-    return floor.getSVG();
+    return floor?.getSVG?.() ?? null;
   }
 
   // Check if a floor supports indoor navigation

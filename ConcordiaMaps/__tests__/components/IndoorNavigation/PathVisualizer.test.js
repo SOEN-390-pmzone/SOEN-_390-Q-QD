@@ -1,5 +1,5 @@
-import { visualizePath } from "../components/IndoorNavigation/PathVisualizer";
-import { rooms } from "../constants/coordinates/h8";
+import { visualizePath } from "../../../components/IndoorNavigation/PathVisualizer";
+import { rooms } from "../../../constants/coordinates/h8";
 
 describe("PathVisualizer", () => {
   let mockSvgElement;

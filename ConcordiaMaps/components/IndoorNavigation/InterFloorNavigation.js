@@ -1,16 +1,29 @@
-import React, { useState } from 'react';
-import { Modal, View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
-import { WebView } from 'react-native-webview';
-import { findShortestPath } from './PathFinder';
-import FloorRegistry from '../../services/BuildingDataService';
-import PropTypes
- from 'prop-types';
-const InterFloorNavigation = ({ isVisible, onClose, startFloor, endFloor, buildingType = 'HallBuilding', onPathCalculated }) => {
-  const [selectedStartRoom, setSelectedStartRoom] = useState('');
-  const [selectedEndRoom, setSelectedEndRoom] = useState('');
+import React, { useState } from "react";
+import {
+  Modal,
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+} from "react-native";
+import { WebView } from "react-native-webview";
+import { findShortestPath } from "./PathFinder";
+import FloorRegistry from "../../services/BuildingDataService";
+import PropTypes from "prop-types";
+const InterFloorNavigation = ({
+  isVisible,
+  onClose,
+  startFloor,
+  endFloor,
+  buildingType = "HallBuilding",
+  onPathCalculated,
+}) => {
+  const [selectedStartRoom, setSelectedStartRoom] = useState("");
+  const [selectedEndRoom, setSelectedEndRoom] = useState("");
   const [navigationSteps, setNavigationSteps] = useState([]);
-  const [startFloorPlan, setStartFloorPlan] = useState('');
-  const [endFloorPlan, setEndFloorPlan] = useState('');
+  const [startFloorPlan, setStartFloorPlan] = useState("");
+  const [endFloorPlan, setEndFloorPlan] = useState("");
   const [startFloorPath, setStartFloorPath] = useState([]);
   const [endFloorPath, setEndFloorPath] = useState([]);
   const [expandedFloor, setExpandedFloor] = useState(null);
@@ -27,12 +40,12 @@ const InterFloorNavigation = ({ isVisible, onClose, startFloor, endFloor, buildi
       try {
         const [startSvg, endSvg] = await Promise.all([
           FloorRegistry.getFloorPlan(buildingType, startFloor),
-          FloorRegistry.getFloorPlan(buildingType, endFloor)
+          FloorRegistry.getFloorPlan(buildingType, endFloor),
         ]);
         setStartFloorPlan(startSvg);
         setEndFloorPlan(endSvg);
       } catch (error) {
-        console.error('Error loading floor plans:', error);
+        console.error("Error loading floor plans:", error);
       }
     };
     loadFloorPlans();
@@ -44,33 +57,46 @@ const InterFloorNavigation = ({ isVisible, onClose, startFloor, endFloor, buildi
     }
 
     // Calculate path from start room to escalator on start floor
-    const startFloorEscalatorPath = findShortestPath(startFloorGraph, selectedStartRoom, 'escalator');
+    const startFloorEscalatorPath = findShortestPath(
+      startFloorGraph,
+      selectedStartRoom,
+      "escalator",
+    );
     setStartFloorPath(startFloorEscalatorPath);
 
     // Calculate path from escalator to end room on end floor
-    const endFloorEscalatorPath = findShortestPath(endFloorGraph, 'escalator', selectedEndRoom);
+    const endFloorEscalatorPath = findShortestPath(
+      endFloorGraph,
+      "escalator",
+      selectedEndRoom,
+    );
     setEndFloorPath(endFloorEscalatorPath);
 
     // Create detailed navigation steps
     const building = FloorRegistry.getBuilding(buildingType);
-    const buildingName = building ? building.name : '';
-    
+    const buildingName = building ? building.name : "";
+
     const steps = [
-      { type: 'start', text: `Start at room ${selectedStartRoom} on floor ${startFloor} of ${buildingName}` },
+      {
+        type: "start",
+        text: `Start at room ${selectedStartRoom} on floor ${startFloor} of ${buildingName}`,
+      },
       ...startFloorEscalatorPath.map((node, index) => ({
-        type: 'walk',
-        text: index === startFloorEscalatorPath.length - 1 
-          ? `Arrive at escalator on floor ${startFloor}`
-          : `Go to ${node}`
+        type: "walk",
+        text:
+          index === startFloorEscalatorPath.length - 1
+            ? `Arrive at escalator on floor ${startFloor}`
+            : `Go to ${node}`,
       })),
-      { type: 'escalator', text: `Take escalator to floor ${endFloor}` },
+      { type: "escalator", text: `Take escalator to floor ${endFloor}` },
       ...endFloorEscalatorPath.map((node, index) => ({
-        type: 'walk',
-        text: index === 0 
-          ? `Start from escalator on floor ${endFloor}`
-          : `Go to ${node}`
+        type: "walk",
+        text:
+          index === 0
+            ? `Start from escalator on floor ${endFloor}`
+            : `Go to ${node}`,
       })),
-      { type: 'end', text: `Arrive at destination: ${selectedEndRoom}` }
+      { type: "end", text: `Arrive at destination: ${selectedEndRoom}` },
     ];
 
     setNavigationSteps(steps);
@@ -78,13 +104,17 @@ const InterFloorNavigation = ({ isVisible, onClose, startFloor, endFloor, buildi
       onPathCalculated({
         steps,
         startFloorPath: startFloorEscalatorPath,
-        endFloorPath: endFloorEscalatorPath
+        endFloorPath: endFloorEscalatorPath,
       });
     }
   };
 
   // Rest of the component remains the same
-  const generateFloorHtml = (floorPlan, pathCoordinates, isExpanded = false) => {
+  const generateFloorHtml = (
+    floorPlan,
+    pathCoordinates,
+    isExpanded = false,
+  ) => {
     return `
       <!DOCTYPE html>
       <html>
@@ -108,8 +138,8 @@ const InterFloorNavigation = ({ isVisible, onClose, startFloor, endFloor, buildi
               align-items: center;
             }
             svg { 
-              width: ${isExpanded ? '100%' : '95%'}; 
-              height: ${isExpanded ? '100%' : '95%'};
+              width: ${isExpanded ? "100%" : "95%"}; 
+              height: ${isExpanded ? "100%" : "95%"};
               max-width: 100%;
               max-height: 100%;
             }
@@ -165,7 +195,7 @@ const InterFloorNavigation = ({ isVisible, onClose, startFloor, endFloor, buildi
             // Initialize when the document is loaded
             document.addEventListener('DOMContentLoaded', () => {
               initSvg();
-              ${pathCoordinates ? `visualizePath(${JSON.stringify(pathCoordinates)});` : ''}
+              ${pathCoordinates ? `visualizePath(${JSON.stringify(pathCoordinates)});` : ""}
             });
           </script>
         </head>
@@ -182,23 +212,32 @@ const InterFloorNavigation = ({ isVisible, onClose, startFloor, endFloor, buildi
     <View style={styles.selectorContainer}>
       <Text style={styles.selectorTitle}>{title}</Text>
       <ScrollView style={styles.roomList}>
-        {Object.keys(rooms).sort().map((roomId) => (
-          <TouchableOpacity
-            key={roomId}
-            style={[
-              styles.roomItem,
-              selectedRoom === roomId && styles.selectedRoom
-            ]}
-            onPress={() => onSelect(roomId)}
-          >
-            <Text style={[
-              styles.roomText,
-              selectedRoom === roomId && styles.selectedRoomText
-            ]}>
-              {roomId}
-            </Text>
-          </TouchableOpacity>
-        ))}
+        {Object.keys(rooms)
+          .sort((a, b) =>
+            a.localeCompare(b, undefined, {
+              numeric: true,
+              sensitivity: "base",
+            }),
+          )
+          .map((roomId) => (
+            <TouchableOpacity
+              key={roomId}
+              style={[
+                styles.roomItem,
+                selectedRoom === roomId && styles.selectedRoom,
+              ]}
+              onPress={() => onSelect(roomId)}
+            >
+              <Text
+                style={[
+                  styles.roomText,
+                  selectedRoom === roomId && styles.selectedRoomText,
+                ]}
+              >
+                {roomId}
+              </Text>
+            </TouchableOpacity>
+          ))}
       </ScrollView>
     </View>
   );
@@ -230,11 +269,11 @@ const InterFloorNavigation = ({ isVisible, onClose, startFloor, endFloor, buildi
                 source={{
                   html: generateFloorHtml(
                     isStartFloor ? startFloorPlan : endFloorPlan,
-                    isStartFloor 
-                      ? startFloorPath.map(node => startFloorRooms[node])
-                      : endFloorPath.map(node => endFloorRooms[node]),
-                    true
-                  )
+                    isStartFloor
+                      ? startFloorPath.map((node) => startFloorRooms[node])
+                      : endFloorPath.map((node) => endFloorRooms[node]),
+                    true,
+                  ),
                 }}
                 style={styles.expandedWebView}
               />
@@ -256,31 +295,33 @@ const InterFloorNavigation = ({ isVisible, onClose, startFloor, endFloor, buildi
         <ScrollView style={styles.modalScrollView}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Floor-to-Floor Navigation</Text>
-            
+
             <View style={styles.selectionContainer}>
               {renderRoomSelector(
                 `Select Start Room (Floor ${startFloor})`,
                 startFloorRooms,
                 selectedStartRoom,
-                setSelectedStartRoom
+                setSelectedStartRoom,
               )}
-              
+
               {renderRoomSelector(
                 `Select Destination Room (Floor ${endFloor})`,
                 endFloorRooms,
                 selectedEndRoom,
-                setSelectedEndRoom
+                setSelectedEndRoom,
               )}
             </View>
 
             {(startFloorPath.length > 0 || endFloorPath.length > 0) && (
               <View style={styles.floorPlansContainer}>
                 <View style={styles.floorPlanWrapper}>
-                  <TouchableOpacity 
+                  <TouchableOpacity
                     style={styles.floorPlanTitleContainer}
                     onPress={() => setExpandedFloor(startFloor)}
                   >
-                    <Text style={styles.floorPlanTitle}>Floor {startFloor}</Text>
+                    <Text style={styles.floorPlanTitle}>
+                      Floor {startFloor}
+                    </Text>
                     <Text style={styles.expandIcon}>⤢</Text>
                   </TouchableOpacity>
                   <View style={styles.webViewContainer}>
@@ -288,9 +329,9 @@ const InterFloorNavigation = ({ isVisible, onClose, startFloor, endFloor, buildi
                       source={{
                         html: generateFloorHtml(
                           startFloorPlan,
-                          startFloorPath.map(node => startFloorRooms[node]),
-                          false
-                        )
+                          startFloorPath.map((node) => startFloorRooms[node]),
+                          false,
+                        ),
                       }}
                       style={styles.webView}
                     />
@@ -298,7 +339,7 @@ const InterFloorNavigation = ({ isVisible, onClose, startFloor, endFloor, buildi
                 </View>
 
                 <View style={styles.floorPlanWrapper}>
-                  <TouchableOpacity 
+                  <TouchableOpacity
                     style={styles.floorPlanTitleContainer}
                     onPress={() => setExpandedFloor(endFloor)}
                   >
@@ -310,9 +351,9 @@ const InterFloorNavigation = ({ isVisible, onClose, startFloor, endFloor, buildi
                       source={{
                         html: generateFloorHtml(
                           endFloorPlan,
-                          endFloorPath.map(node => endFloorRooms[node]),
-                          false
-                        )
+                          endFloorPath.map((node) => endFloorRooms[node]),
+                          false,
+                        ),
                       }}
                       style={styles.webView}
                     />
@@ -326,7 +367,10 @@ const InterFloorNavigation = ({ isVisible, onClose, startFloor, endFloor, buildi
                 <Text style={styles.stepsTitle}>Navigation Steps:</Text>
                 <ScrollView style={styles.navigationSteps}>
                   {navigationSteps.map((step, index) => (
-                    <View key={index} style={styles.stepItem}>
+                    <View
+                      key={`${step.type}-${step.text}`}
+                      style={styles.stepItem}
+                    >
                       <Text style={styles.stepNumber}>{index + 1}.</Text>
                       <Text style={styles.stepText}>{step.text}</Text>
                     </View>
@@ -342,7 +386,7 @@ const InterFloorNavigation = ({ isVisible, onClose, startFloor, endFloor, buildi
               >
                 <Text style={styles.buttonText}>Calculate Path</Text>
               </TouchableOpacity>
-              
+
               <TouchableOpacity
                 style={[styles.button, styles.closeButton]}
                 onPress={onClose}
@@ -362,13 +406,13 @@ const InterFloorNavigation = ({ isVisible, onClose, startFloor, endFloor, buildi
 const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   modalScrollView: {
     flex: 1,
   },
   modalContent: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     margin: 20,
     borderRadius: 20,
     padding: 20,
@@ -376,14 +420,14 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: "bold",
+    textAlign: "center",
     marginBottom: 20,
-    color: '#912338',
+    color: "#912338",
   },
   selectionContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: 20,
   },
   selectorContainer: {
@@ -392,34 +436,34 @@ const styles = StyleSheet.create({
   },
   selectorTitle: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 10,
-    color: '#333',
+    color: "#333",
   },
   roomList: {
     maxHeight: 150,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: "#ddd",
     borderRadius: 8,
   },
   roomItem: {
     padding: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: "#eee",
   },
   selectedRoom: {
-    backgroundColor: '#912338',
+    backgroundColor: "#912338",
   },
   roomText: {
     fontSize: 16,
-    color: '#333',
+    color: "#333",
   },
   selectedRoomText: {
-    color: 'white',
+    color: "white",
   },
   floorPlansContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: 20,
   },
   floorPlanWrapper: {
@@ -427,27 +471,27 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
   },
   floorPlanTitleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: 5,
   },
   floorPlanTitle: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
   },
   expandIcon: {
     marginLeft: 5,
     fontSize: 16,
-    color: '#666',
+    color: "#666",
   },
   webViewContainer: {
     height: 200,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: "#ddd",
     borderRadius: 8,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   webView: {
     flex: 1,
@@ -457,35 +501,35 @@ const styles = StyleSheet.create({
     maxHeight: 200,
   },
   navigationSteps: {
-    backgroundColor: '#f5f5f5',
+    backgroundColor: "#f5f5f5",
     borderRadius: 8,
     padding: 10,
   },
   stepsTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 10,
-    color: '#333',
+    color: "#333",
   },
   stepItem: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginBottom: 8,
-    alignItems: 'flex-start',
+    alignItems: "flex-start",
   },
   stepNumber: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginRight: 8,
-    color: '#912338',
+    color: "#912338",
   },
   stepText: {
     fontSize: 16,
     flex: 1,
-    color: '#333',
+    color: "#333",
   },
   buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexDirection: "row",
+    justifyContent: "space-around",
     marginTop: 20,
   },
   button: {
@@ -495,54 +539,54 @@ const styles = StyleSheet.create({
     minWidth: 120,
   },
   calculateButton: {
-    backgroundColor: '#912338',
+    backgroundColor: "#912338",
   },
   closeButton: {
-    backgroundColor: '#666',
+    backgroundColor: "#666",
   },
   buttonText: {
-    color: 'white',
+    color: "white",
     fontSize: 16,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: "bold",
+    textAlign: "center",
   },
   expandedModalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(0, 0, 0, 0.8)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   expandedModalContent: {
-    backgroundColor: 'white',
-    width: '95%',
-    height: '90%',
+    backgroundColor: "white",
+    width: "95%",
+    height: "90%",
     borderRadius: 20,
     padding: 20,
   },
   expandedHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 10,
   },
   expandedTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
   },
   closeExpandedButton: {
     padding: 5,
   },
   closeExpandedText: {
     fontSize: 30,
-    color: '#666',
+    color: "#666",
   },
   expandedWebViewContainer: {
     flex: 1,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: "#ddd",
     borderRadius: 8,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   expandedWebView: {
     flex: 1,
@@ -555,12 +599,7 @@ InterFloorNavigation.propTypes = {
   startFloor: PropTypes.string.isRequired,
   endFloor: PropTypes.string.isRequired,
   buildingType: PropTypes.string,
-  onPathCalculated: PropTypes.func
-};
-// Optional default props
-InterFloorNavigation.defaultProps = {
-  buildingType: 'HallBuilding',
-  onPathCalculated: null
+  onPathCalculated: PropTypes.func,
 };
 
 export default InterFloorNavigation;

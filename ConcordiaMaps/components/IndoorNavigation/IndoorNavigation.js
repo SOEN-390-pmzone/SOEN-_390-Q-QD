@@ -1,37 +1,44 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { WebView } from 'react-native-webview';
-import { findShortestPath } from './PathFinder';
-import InterFloorNavigation from './InterFloorNavigation';
-import Header from '../Header';
-import NavBar from '../NavBar';
-import FloorRegistry from '../../services/BuildingDataService';
-import PropTypes from 'prop-types';
+import React, { useState, useEffect, useRef } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+} from "react-native";
+import { WebView } from "react-native-webview";
+import { findShortestPath } from "./PathFinder";
+import InterFloorNavigation from "./InterFloorNavigation";
+import Header from "../Header";
+import NavBar from "../NavBar";
+import FloorRegistry from "../../services/BuildingDataService";
+import PropTypes from "prop-types";
 
 const IndoorNavigation = ({ route, navigation }) => {
-  const [startPoint, setStartPoint] = useState('');
-  const [endPoint, setEndPoint] = useState('');
+  const [startPoint, setStartPoint] = useState("");
+  const [endPoint, setEndPoint] = useState("");
   const [path, setPath] = useState([]);
   const [allNodes, setAllNodes] = useState([]);
-  const [floorPlan, setFloorPlan] = useState('');
-  const [isInterFloorModalVisible, setIsInterFloorModalVisible] = useState(false);
+  const [floorPlan, setFloorPlan] = useState("");
+  const [isInterFloorModalVisible, setIsInterFloorModalVisible] =
+    useState(false);
   const webViewRef = useRef(null);
 
   // Get both buildingType and floor from route params, default to hall
-  const { buildingType = 'HallBuilding', floor } = route.params;
-   // Get building information
-   const building = FloorRegistry.getBuilding(buildingType);
+  const { buildingType = "HallBuilding", floor } = route.params;
+  // Get building information
+  const building = FloorRegistry.getBuilding(buildingType);
 
   useEffect(() => {
     // Set up navigation healder
     navigation.setOptions({
-      headerTitle: 'Indoor Navigation',
+      headerTitle: "Indoor Navigation",
       headerStyle: {
-        backgroundColor: '#912338',
+        backgroundColor: "#912338",
       },
-      headerTintColor: '#fff',
+      headerTintColor: "#fff",
       headerTitleStyle: {
-        fontWeight: 'bold',
+        fontWeight: "bold",
       },
     });
 
@@ -48,9 +55,9 @@ const IndoorNavigation = ({ route, navigation }) => {
       const svgContent = await FloorRegistry.getFloorPlan(buildingType, floor);
       setFloorPlan(svgContent);
     } catch (error) {
-      console.error('Error loading floor plan:', error);
+      console.error("Error loading floor plan:", error);
       // Set a default message or placeholder when SVG fails to load
-      setFloorPlan('<div>Error loading floor plan</div>');
+      setFloorPlan("<div>Error loading floor plan</div>");
     }
   };
 
@@ -58,19 +65,19 @@ const IndoorNavigation = ({ route, navigation }) => {
     try {
       const graph = FloorRegistry.getGraph(buildingType, floor);
       const shortestPath = findShortestPath(graph, startPoint, endPoint);
-  
+
       if (shortestPath.length === 0) {
-        setPath(['No path found']);
+        setPath(["No path found"]);
       } else {
         setPath(shortestPath);
-  
+
         // Inject the visualizePath function into WebView
         if (webViewRef.current) {
           const coordinates = FloorRegistry.getRooms(buildingType, floor);
-  
+
           // Convert coordinates to a JSON string for injection
           const coordinatesJSON = JSON.stringify(coordinates);
-  
+
           // Create the JavaScript to execute in the WebView
           const js = `
           (function() {
@@ -225,12 +232,12 @@ const IndoorNavigation = ({ route, navigation }) => {
             return true;
           })();
         `;
-  
+
           webViewRef.current.injectJavaScript(js);
         }
       }
     } catch (error) {
-      console.error('Error calculating path:', error);
+      console.error("Error calculating path:", error);
     }
   };
 
@@ -484,13 +491,25 @@ const IndoorNavigation = ({ route, navigation }) => {
 
     webViewRef.current.injectJavaScript(js);
   };
-
+  const getFloorSuffix = (floor) => {
+    switch (floor) {
+      case "1":
+        return "st";
+      case "2":
+        return "nd";
+      case "3":
+        return "rd";
+      default:
+        return "th";
+    }
+  };
   return (
     <View style={styles.container}>
       <Header />
       <NavBar />
       <Text style={styles.title}>
-        {building.name} - {building.code} {floor}{floor === '1' ? 'st' : (floor === '2' ? 'nd' : (floor === '3' ? 'rd' : 'th'))} Floor
+        {building.name} - {building.code} {floor}
+        {getFloorSuffix(floor)} Floor
       </Text>
       {/* SVG Floor Plan in WebView - generateHtmlContent remains the same */}
       <View style={styles.webViewContainer}>
@@ -505,10 +524,13 @@ const IndoorNavigation = ({ route, navigation }) => {
         <View style={styles.selectorWrapper}>
           <Text style={styles.label}>Start:</Text>
           <ScrollView style={styles.selector}>
-            {allNodes.map(node => (
-              <TouchableOpacity 
-                key={node} 
-                style={[styles.option, startPoint === node && styles.selectedOption]}
+            {allNodes.map((node) => (
+              <TouchableOpacity
+                key={node}
+                style={[
+                  styles.option,
+                  startPoint === node && styles.selectedOption,
+                ]}
                 onPress={() => {
                   setStartPoint(node);
                   highlightSelectedRooms();
@@ -523,10 +545,13 @@ const IndoorNavigation = ({ route, navigation }) => {
         <View style={styles.selectorWrapper}>
           <Text style={styles.label}>End:</Text>
           <ScrollView style={styles.selector}>
-            {allNodes.map(node => (
-              <TouchableOpacity 
-                key={node} 
-                style={[styles.option, endPoint === node && styles.selectedOption]}
+            {allNodes.map((node) => (
+              <TouchableOpacity
+                key={node}
+                style={[
+                  styles.option,
+                  endPoint === node && styles.selectedOption,
+                ]}
                 onPress={() => {
                   setEndPoint(node);
                   highlightSelectedRooms();
@@ -543,8 +568,8 @@ const IndoorNavigation = ({ route, navigation }) => {
         <Text style={styles.buttonText}>Find Path</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity 
-        style={[styles.button, { marginTop: 10, backgroundColor: '#666' }]} 
+      <TouchableOpacity
+        style={[styles.button, { marginTop: 10, backgroundColor: "#666" }]}
         onPress={() => setIsInterFloorModalVisible(true)}
       >
         <Text style={styles.buttonText}>Inter-Floor Navigation</Text>
@@ -552,23 +577,24 @@ const IndoorNavigation = ({ route, navigation }) => {
 
       <View style={styles.resultContainerWrapper}>
         <Text style={styles.resultTitle}>Navigation Path:</Text>
-        <ScrollView 
-          style={styles.resultContainer}
-          nestedScrollEnabled={true}
-        >
+        <ScrollView style={styles.resultContainer} nestedScrollEnabled={true}>
           {path.length > 0 ? (
             <View style={styles.pathContainer}>
-              {path.map((node, index) => (
-                <View key={index} style={styles.pathStep}>
-                  <Text style={styles.stepText}>{index + 1}. {node}</Text>
-                  {index < path.length - 1 && (
+              {path.map((node) => (
+                <View key={`path-step-${node}`} style={styles.pathStep}>
+                  <Text style={styles.stepText}>
+                    {path.indexOf(node) + 1}. {node}
+                  </Text>
+                  {path.indexOf(node) < path.length - 1 && (
                     <Text style={styles.arrow}>↓</Text>
                   )}
                 </View>
               ))}
             </View>
           ) : (
-            <Text style={styles.noPath}>Press &apos;Find Path&apos; to calculate the route</Text>
+            <Text style={styles.noPath}>
+              Press &apos;Find Path&apos; to calculate the route
+            </Text>
           )}
         </ScrollView>
       </View>
@@ -577,10 +603,10 @@ const IndoorNavigation = ({ route, navigation }) => {
         isVisible={isInterFloorModalVisible}
         onClose={() => setIsInterFloorModalVisible(false)}
         startFloor={floor}
-        endFloor={floor === '8' ? '9' : '8'}
+        endFloor={floor === "8" ? "9" : "8"}
         buildingType={buildingType}
         onPathCalculated={(pathData) => {
-          console.log('Inter-floor path calculated:', pathData);
+          console.log("Inter-floor path calculated:", pathData);
         }}
       />
     </View>
@@ -589,19 +615,19 @@ const IndoorNavigation = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: "white",
   },
   title: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginVertical: 16,
-    textAlign: 'center',
-    color: '#912338',
+    textAlign: "center",
+    color: "#912338",
     paddingHorizontal: 16,
   },
   selectorsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: 16,
     paddingHorizontal: 16,
   },
@@ -611,38 +637,38 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 8,
   },
   selector: {
     height: 120,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 4,
   },
   option: {
     padding: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: "#eee",
   },
   selectedOption: {
-    backgroundColor: '#ffe6e6',
+    backgroundColor: "#ffe6e6",
   },
   optionText: {
     fontSize: 14,
   },
   button: {
-    backgroundColor: '#912338',
+    backgroundColor: "#912338",
     padding: 12,
     borderRadius: 4,
-    alignItems: 'center',
+    alignItems: "center",
     marginVertical: 8,
     marginHorizontal: 16,
   },
   buttonText: {
-    color: 'white',
+    color: "white",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   resultContainerWrapper: {
     flex: 1,
@@ -651,13 +677,13 @@ const styles = StyleSheet.create({
   },
   resultTitle: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 8,
   },
   resultContainer: {
     flex: 1,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 4,
     padding: 16,
     maxHeight: 200,
@@ -672,37 +698,37 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   arrow: {
-    textAlign: 'center',
+    textAlign: "center",
     fontSize: 18,
-    color: '#912338',
+    color: "#912338",
   },
   noPath: {
-    fontStyle: 'italic',
-    color: '#666',
+    fontStyle: "italic",
+    color: "#666",
   },
   webViewContainer: {
     height: 300,
     marginVertical: 10,
     marginHorizontal: 16,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 4,
-    overflow: 'hidden'
+    overflow: "hidden",
   },
   webView: {
-    flex: 1
-  }
+    flex: 1,
+  },
 });
 
 IndoorNavigation.propTypes = {
   route: PropTypes.shape({
     params: PropTypes.shape({
       buildingType: PropTypes.string,
-      floor: PropTypes.string
-    })
+      floor: PropTypes.string,
+    }),
   }),
   navigation: PropTypes.shape({
-    setOptions: PropTypes.func.isRequired
-  }).isRequired
+    setOptions: PropTypes.func.isRequired,
+  }).isRequired,
 };
 export default IndoorNavigation;

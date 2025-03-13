@@ -1,11 +1,16 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import Header from '../Header';
-import NavBar from '../NavBar';
-import FloorRegistry from '../../services/BuildingDataService';
+import React from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+} from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import Header from "../Header";
+import NavBar from "../NavBar";
+import FloorRegistry from "../../services/BuildingDataService";
 import {buildingSelectorStyles} from '../../styles'
-
 
 const BuildingSelector = () => {
 
@@ -18,12 +23,12 @@ const BuildingSelector = () => {
   const handleBuildingSelect = (buildingId) => {
     // Find the corresponding key in the FloorRegistry by matching the building data
     const buildingTypes = Object.keys(FloorRegistry.getAllBuildings());
-    const buildingType = buildingTypes.find(key => 
-      FloorRegistry.getBuilding(key).id === buildingId
+    const buildingType = buildingTypes.find(
+      (key) => FloorRegistry.getBuilding(key).id === buildingId,
     );
-    
+
     if (buildingType) {
-      navigation.navigate('FloorSelector', { buildingType });
+      navigation.navigate("FloorSelector", { buildingType });
     }
   };
 
@@ -33,9 +38,10 @@ const BuildingSelector = () => {
       <NavBar />
       <View style={styles.contentContainer}>
         <Text style={styles.title}>Select Building</Text>
-        <ScrollView 
+        <ScrollView
           style={styles.buildingsContainer}
           showsVerticalScrollIndicator={true}
+          testID="buildings-scroll-view"
         >
           {BUILDINGS.map((building) => (
             <TouchableOpacity
@@ -47,7 +53,9 @@ const BuildingSelector = () => {
                 <View style={styles.textContainer}>
                   <Text style={styles.buildingName}>{building.name}</Text>
                   <Text style={styles.buildingCode}>{building.code}</Text>
-                  <Text style={styles.buildingDescription}>{building.description}</Text>
+                  <Text style={styles.buildingDescription}>
+                    {building.description}
+                  </Text>
                   <Text style={styles.buildingAddress}>{building.address}</Text>
                 </View>
               </View>
@@ -58,7 +66,6 @@ const BuildingSelector = () => {
     </View>
   );
 };
-
 
 
 export default BuildingSelector;
