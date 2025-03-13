@@ -15,7 +15,9 @@ const PopupOPI = ({ isVisible, data, onClose }) => {
     >
       <View style={styles.modalOverlay}>
         <View style={styles.modalContainer}>
-          <Text style={styles.modalTitle}>{name || "Cafe/Restaurant Name"}</Text>
+          <Text style={styles.modalTitle}>
+            {name || "Cafe/Restaurant Name"}
+          </Text>
           <Text style={styles.modalText}>
             {address || "Address not available"}
           </Text>
