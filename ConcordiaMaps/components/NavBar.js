@@ -4,6 +4,7 @@ import { useNavigation } from "@react-navigation/native";
 import styles from "../styles";
 import { Alert } from "react-native";
 import ShuttleSchedule from "./ShuttleSchedule";
+import analytics from '@react-native-firebase/analytics';  // Import Firebase Analytics
 
 function NavBar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -17,7 +18,13 @@ function NavBar() {
       toValue,
       duration: 300,
       useNativeDriver: true,
-    }).start(() => setIsOpen(!isOpen));
+    }).start(() => {
+      setIsOpen(!isOpen);
+      // Log the menu toggle event
+      analytics().logEvent('menu_toggle', {
+        is_open: !isOpen,
+      });
+    });
   };
 
   const handlePress = (item) => {
@@ -26,6 +33,11 @@ function NavBar() {
     } else {
       Alert.alert(`You clicked: ${item}`);
     }
+
+    // Log click event for each menu item
+    analytics().logEvent('menu_item_click', {
+      item_name: item,
+    });
   };
 
   const translateX = animation.interpolate({
