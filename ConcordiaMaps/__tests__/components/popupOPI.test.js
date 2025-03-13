@@ -2,6 +2,7 @@ import React from "react";
 import { render, fireEvent } from "@testing-library/react-native";
 import PopupOPI from "../../components/PopupOPI";
 import "@testing-library/jest-native/extend-expect";
+import { Alert } from "react-native";
 
 describe("<PopupOPI/>", () => {
   const mockOnClose = jest.fn();
@@ -50,5 +51,22 @@ describe("<PopupOPI/>", () => {
     );
     expect(queryByText("Test Cafe")).toBeNull();
     expect(queryByText("123 Test St.")).toBeNull();
+  });
+  it("Get Directions alert appears when Get Directions is pressed", () => {
+    const alertSpy = jest.spyOn(Alert, "alert"); // Spy on Alert.alert
+
+    const { getByText } = render(
+      <PopupOPI isVisible={true} data={mockData} onClose={mockOnClose} />,
+    );
+
+    fireEvent.press(getByText("Get Directions"));
+
+    // Check if Alert.alert was called with correct arguments
+    expect(alertSpy).toHaveBeenCalledWith(
+      "Get Directions",
+      "Directions pressed",
+    );
+
+    alertSpy.mockRestore(); // Restore original Alert.alert function
   });
 });
