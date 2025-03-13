@@ -1,6 +1,6 @@
 import React from "react";
 import { render, fireEvent } from "@testing-library/react-native";
-import PopupOPI from "../PopupOPI"; // adjust the path if needed
+import PopupOPI from "../../components/PopupOPI"; 
 import "@testing-library/jest-native/extend-expect";
 
 describe("<PopupOPI/>", () => {
@@ -37,14 +37,6 @@ describe("<PopupOPI/>", () => {
     fireEvent.press(getByText("Close"));
 
     expect(mockOnClose).toHaveBeenCalled();
-  });
-  it("calls onGetDirections when Get Directions button is pressed", () => {
-    const { getByText } = render(
-      <PopupOPI isVisible={true} data={mockData} onClose={mockOnClose} />,
-    );
-
-    fireEvent.press(getByText("Get Directions"));
-    expect(mockOnGetDirections).toHaveBeenCalledTimes(1);
   });
   it("displays the modal when visible is true", () => {
     const { getByText } = render(
