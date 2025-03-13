@@ -4,6 +4,7 @@ import { useNavigation } from "@react-navigation/native";
 import styles from "../styles";
 import { Alert } from "react-native";
 import ShuttleSchedule from "./ShuttleSchedule";
+import NavbarStateManager from "../utils/navbarStateManager";
 
 function NavBar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -17,7 +18,12 @@ function NavBar() {
       toValue,
       duration: 300,
       useNativeDriver: true,
-    }).start(() => setIsOpen(!isOpen));
+    }).start(() => {
+      const newIsOpen = !isOpen;
+      setIsOpen(newIsOpen);
+      //To update the shared state with the markers behind the navbar and stop them from triggerinh
+      NavbarStateManager.setMenuOpen(newIsOpen);
+    });
   };
 
   const handlePress = (item) => {

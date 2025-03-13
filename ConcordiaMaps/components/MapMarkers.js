@@ -1,20 +1,32 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Marker, Callout } from "react-native-maps";
 import { Text, View, Image, StyleSheet } from "react-native";
 import PropTypes from "prop-types";
 import PopupModal from "./PopupModal";
+import NavbarStateManager from "../utils/navbarStateManager";
 
 const customMarkerImage = require("../assets/PinLogo.png");
 
 const MapMarkers = ({ markers }) => {
   const [popupVisible, setPopupVisible] = useState(false);
   const [popupData, setPopupData] = useState(null);
+  const [isNavMenuOpen, setIsNavMenuOpen] = useState(
+    NavbarStateManager.getMenuOpen(),
+  );
+  // Listen for changes to navbar state
+  useEffect(() => {
+    const unsubscribe = NavbarStateManager.subscribe(setIsNavMenuOpen);
+    return unsubscribe; // Cleanup on unmount
+  }, []);
 
   if (!markers || markers.length === 0) return null;
 
   const handleMarkerPress = (marker) => {
-    setPopupData(marker);
-    setPopupVisible(true);
+    // Only allow marker interaction when navbar is closed
+    if (!isNavMenuOpen) {
+      setPopupData(marker);
+      setPopupVisible(true);
+    }
   };
 
   const closePopup = () => {
