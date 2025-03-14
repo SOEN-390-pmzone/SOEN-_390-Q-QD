@@ -1,0 +1,12 @@
+appId: com.anonymous.ConcordiaMaps
+---
+- launchApp
+- assertVisible: "Henry F. Hall"
+- doubleTapOn:
+    point: 55%,65%
+- tapOn: "Webster Library"
+- tapOn: "Close"
+- tapOn: "Henry F. Hall"
+- tapOn: "Close"
+- tapOn: "EV Building"
+- tapOn: "Close"

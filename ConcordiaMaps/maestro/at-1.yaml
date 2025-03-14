@@ -1,0 +1,13 @@
+appId: com.anonymous.ConcordiaMaps
+---
+- launchApp
+- assertVisible: "Legend"
+- swipe:
+    start: "68%,72%"
+    end: "54%,61%"
+- doubleTapOn:
+    point: 46%,56%
+- tapOn:
+    id: change-campus-button
+- doubleTapOn:
+    point: 55%,60%

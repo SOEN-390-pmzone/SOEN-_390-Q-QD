@@ -1,0 +1,38 @@
+appId: com.anonymous.ConcordiaMaps
+---
+- launchApp
+- assertVisible: "Legend"
+- tapOn:
+    id: "hamburger-button"
+- tapOn:
+    point: "14%,19%"
+    label: "Tap on \"Get directions\""
+- tapOn:
+    text: "Using Current Location"
+    label: "Tap on origin search bar"
+- inputText:
+    label: "Input part of the origin"
+    text: "h b"
+- tapOn:
+    text: "H Building Concordia University, Boulevard De Maisonneuve Ouest,\
+        \ Montreal, QC, Canada"
+    label: "Tap on suggested origin"
+- tapOn:
+    text: "Enter Destination"
+    label: "Tap on destination search bar"
+- inputText:
+    label: "Input part of the destination"
+    text: "vanier li"
+- tapOn:
+    text: "Vanier Library, Sherbrooke Street West, Montreal, QC, Canada"
+    label: "Tap on suggested destination"
+- tapOn: "GET DIRECTIONS"
+- tapOn: "CHANGE DIRECTIONS"
+- tapOn: "CAR"
+- tapOn: "GET DIRECTIONS"
+- tapOn: "CHANGE DIRECTIONS"
+- tapOn: "TRANSIT"
+- tapOn: "GET DIRECTIONS"
+- tapOn: "CHANGE DIRECTIONS"
+- tapOn: "BIKING"
+- tapOn: "GET DIRECTIONS"
