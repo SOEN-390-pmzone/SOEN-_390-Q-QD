@@ -192,5 +192,36 @@ describe("useGoogleMapDirections", () => {
 
       expect(result).toEqual([]);
     });
+    it("should throw an error if fetch fails", async () => {
+      fetch.mockImplementationOnce(() => Promise.reject(new Error("Network error")));
+      await expect(hook.geocodeAddress("Invalid Address")).rejects.toThrow("Network error");
+    });    
+    it("should throw an error when fetch fails", async () => {
+      fetch.mockImplementationOnce(() => Promise.reject(new Error("Network error")));
+      await expect(hook.getDirections({}, {}, "walking")).rejects.toThrow("Network error");
+    });
+    
+    it("should throw an error when the API returns an error status", async () => {
+      fetch.mockImplementationOnce(() =>
+        Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ status: "REQUEST_DENIED" }),
+        })
+      );
+    
+      await expect(hook.getDirections({}, {}, "walking")).rejects.toThrow("Direction API error: REQUEST_DENIED");
+    });
+    it("should return empty array if API response is missing overview_polyline", async () => {
+      fetch.mockImplementationOnce(() =>
+        Promise.resolve({
+          json: () => Promise.resolve({ status: "OK", routes: [{}] }),
+        })
+      );
+    
+      const result = await hook.getPolyline(mockOrigin, mockDestination, "driving");
+      expect(result).toEqual([]);
+    });
+
+    
   });
 });
