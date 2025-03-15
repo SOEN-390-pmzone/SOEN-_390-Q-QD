@@ -1,14 +1,13 @@
-import React, { useState } from "react";
-import { View, Text, ScrollView, StyleSheet } from "react-native";
-import { Ionicons } from '@expo/vector-icons'; // To make the arrow between steps look nicer
-import { useNavigation } from '@react-navigation/native'; //To navigate to Indoor or outdoor directions depending on the Navigation strategy
+import React from "react";
+import { View, Text, ScrollView, TouchableOpacity, Alert } from "react-native";
+import { useNavigation } from '@react-navigation/native';
 
 import Header from "../Header";
 import NavBar from "../NavBar";
 import NavigationStep from "./NavigationStep";
 import styles from "../../styles/MultistepNavigation/MultistepNavigationStyles";
 import NavigationStrategyService from "../../services/NavigationStrategyService";
-import DirectionArrow from "./DirectionArrow"
+import DirectionArrow from "./DirectionArrow";
 
 /**
  * Example of how to navigate to this screen with custom steps data:
@@ -20,99 +19,88 @@ import DirectionArrow from "./DirectionArrow"
  *       title: 'Start at Library Building',
  *       description: 'Begin your journey at the library entrance',
  *       type: 'indoor',
- *       buildingId: 'library'
+ *       buildingId: 'library',
+ *       startPoint: 'entrance',
+ *       endPoint: '101'
  *     },
- *     {
- *       id: 'custom-2',
- *       title: 'Walk to Hall Building',
- *       description: 'Exit library and walk to Hall Building',
- *       type: 'outdoor'
- *     }
+ *     // Additional steps...
  *   ] 
  * });
  */
 
-// Default/dummy steps data
+// Default steps data - with verified room IDs that exist in the coordinate files
 const DEFAULT_STEPS = [
   {
     id: '1',
-    title: 'Hall Building',
-    description: 'Start from the main entrance, go to the 8th floor',
+    title: 'Hall Building Entry',
+    description: 'Start from the main entrance, go to the elevator',
     type: 'indoor',
     buildingId: 'hall',
-    startPoint: 'entrance',
-    endPoint: '8th-floor'
+    startPoint: 'entrance-east', // Exists in h1.js
+    endPoint: 'H937'         // Exists in h9.js
   },
   {
     id: '2',
     title: 'Use Sky Bridge',
-    description: 'Cross the sky bridge to the Vanier Library',
+    description: 'Cross the sky bridge to the EV Building',
     type: 'outdoor',
-    startPoint: 'hall-end',
+    startPoint: 'hall-exit',
     endPoint: 'ev-entrance'
   },
   {
     id: '3',
-    title: 'Vanier Library',
-    description: 'Go to room EV 3.101',
+    title: 'Navigate H8 Floor',
+    description: 'Go to room H820 on the 8th floor',
     type: 'indoor',
-    buildingId: 'vl',
-    startPoint: 'entrance',
-    endPoint: 'room-3.101'
+    buildingId: 'hall',
+    startPoint: 'H821',          // Exists in h8.js
+    endPoint: 'entrance-south'             // Exists in h8.js
   },
   {
     id: '4',
-    title: 'Walk to Vanier Extension',
-    description: 'Exit Vanier Library building and walk to the vanier Extension',
-    type: 'indoor',
-    buildingId: 've',
-    startPoint: 'park',
-    endPoint: 'library-entrance'
-  },
-  {
-    id: '5',
-    title: 'JMSB',
-    description: 'Go to the 4th floor of JMSB',
+    title: 'Go to JMSB',
+    description: 'Take the tunnel to JMSB',
     type: 'indoor',
     buildingId: 'jmsb',
-    startPoint: 'entrance',
-    endPoint: '4th-floor'
+    startPoint: 'main hall',     // Exists in mbs1.js
+    endPoint: '1.294'            // Exists in mbs1.js
   }
 ];
 
+/**
+ * MultistepNavigationScreen
+ * 
+ * This screen displays a sequence of navigation steps that guide users
+ * through a multi-building journey across the campus.
+ */
 const MultistepNavigationScreen = ({ route }) => {
   // Extract steps from route params or use default steps
   const stepsData = route?.params?.steps || DEFAULT_STEPS;
-
-    /**
-   * The useNavigation hook provides access to the navigation object without prop drilling
-   * This allows any component in the tree to navigate without explicitly receiving
-   * the navigation prop from parent components
-   */
   const navigation = useNavigation();
 
+  /**
+   * Handle a navigation step being pressed
+   * @param {number} index - The index of the step in the stepsData array
+   */
   const handleStepPress = (index) => {
     const selectedStep = stepsData[index];
-      /**
-     * We pass the navigation object to the service because:
-     * 1. The service is outside the React component tree and can't use hooks
-     * 2. This decouples navigation logic from UI components
-     * 3. It follows the dependency injection principle
-     * 
-     * We pass selectedStep because:
-     * 1. It contains all the data needed for navigation (type, buildingId, startPoint, endPoint)
-     * 2. The strategy service needs this data to determine how to navigate
-     * 3. This allows the service to handle different navigation types based on step properties
-     */
+    
+    // Validate the step data before navigation
+    if (!selectedStep.startPoint || !selectedStep.endPoint) {
+      console.error('Step is missing startPoint or endPoint:', selectedStep);
+      Alert.alert('Error', 'This navigation step is missing required information.');
+      return;
+    }
+    
+    // Use the strategy service to handle the navigation appropriately
     NavigationStrategyService.navigateToStep(navigation, selectedStep);
   };
-
-
 
   return (
     <View style={styles.container}>
       <Header />
       <NavBar />
+
       <ScrollView 
         style={styles.scrollContainer}
         contentContainerStyle={{ paddingBottom: 80 }} 
@@ -149,6 +137,5 @@ const MultistepNavigationScreen = ({ route }) => {
     </View>
   );
 };
-
 
 export default MultistepNavigationScreen;
