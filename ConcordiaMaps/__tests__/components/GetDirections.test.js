@@ -49,7 +49,7 @@ jest.mock("react-native-maps", () => {
 });
 
 // Mock FloatingSearchBar component with value tracking
-jest.mock("../../components/FloatingSearchBar", () => {
+jest.mock("../../components/OutdoorNavigation/FloatingSearchBar", () => {
   const React = require("react");
   const PropTypes = require("prop-types");
 
@@ -76,7 +76,7 @@ jest.mock("../../components/FloatingSearchBar", () => {
 
 jest.mock("../../components/Header", () => "Header");
 jest.mock("../../components/NavBar", () => "NavBar");
-jest.mock("../../components/DirectionsBox", () => "DirectionsBox");
+jest.mock("../../components/OutdoorNavigation/DirectionsBox", () => "DirectionsBox");
 
 const mockGetCurrentPositionAsync = jest.fn().mockResolvedValue({
   coords: {
