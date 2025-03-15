@@ -21,6 +21,7 @@ import {
 } from "../components/AsyncPersistence";
 import convertToCoordinates from "../components/convertToCoordinates";
 import PropTypes from "prop-types";
+import NavbarStateManager from "../utils/navbarStateManager";
 
 function HomeScreen({ asyncKey = "Campus" }) {
   const loyolaPostalCode = process.env.EXPO_PUBLIC_LOYOLA_POSTAL_CODE;
@@ -115,13 +116,16 @@ function HomeScreen({ asyncKey = "Campus" }) {
 
   // Function to handle marker press and pass data to the modal
   const handleMarkerPress = (building) => {
-    setModalData({
-      name: building.name,
-      coordinate: building.coordinat,
-      address: building.address,
-      fullBuildingName: building.fullBuildingName,
-    }); // Update modalData
-    toggleModal(); // Show modal
+    // Only proceed if navbar menu is closed
+    if (!NavbarStateManager.getMenuOpen()) {
+      setModalData({
+        name: building.name,
+        coordinate: building.coordinate,
+        address: building.address,
+        fullBuildingName: building.fullBuildingName,
+      });
+      toggleModal();
+    }
   };
 
   const [modalState, setModalState] = useState(true);
