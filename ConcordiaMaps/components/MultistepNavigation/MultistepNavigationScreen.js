@@ -8,7 +8,7 @@ import NavBar from "../NavBar";
 import NavigationStep from "./NavigationStep";
 import styles from "../../styles/MultistepNavigation/MultistepNavigationStyles";
 import NavigationStrategyService from "../../services/NavigationStrategyService";
-
+import DirectionArrow from "./DirectionArrow"
 
 /**
  * Example of how to navigate to this screen with custom steps data:
@@ -107,12 +107,7 @@ const MultistepNavigationScreen = ({ route }) => {
     NavigationStrategyService.navigateToStep(navigation, selectedStep);
   };
 
-  // Simple arrow component to show direction between steps
-  const DirectionArrow = () => (
-    <View style={arrowStyles.container}>
-      <Ionicons name="chevron-down" size={28} color="#912338" style={arrowStyles.icon} />
-    </View>
-  );
+
 
   return (
     <View style={styles.container}>
@@ -155,18 +150,5 @@ const MultistepNavigationScreen = ({ route }) => {
   );
 };
 
-// Styles for the direction arrows
-const arrowStyles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    paddingVertical: 8,
-  },
-  icon: {
-    // Optional shadow for the arrow
-    textShadowColor: 'rgba(0, 0, 0, 0.2)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 1,
-  }
-});
 
 export default MultistepNavigationScreen;
