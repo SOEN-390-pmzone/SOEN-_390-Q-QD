@@ -9,7 +9,7 @@ import React, {
 import { View, Button } from "react-native";
 import MapView, { Polyline, Marker } from "react-native-maps";
 import * as Location from "expo-location";
-import FloatingSearchBar from "../FloatingSearchBar";
+import FloatingSearchBar from "./FloatingSearchBar";
 import Header from "../Header";
 import NavBar from "../NavBar";
 import styles from "../../styles";

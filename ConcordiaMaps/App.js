@@ -8,11 +8,13 @@ import PopupModal from "./components/PopupModal";
 import styles from "./styles";
 import GetDirections from "./components/OutdoorNavigation/GetDirections";
 
+//? SCREENS 
 import IndoorNavigation from "./components/IndoorNavigation/IndoorNavigation";
 import FloorSelector from "./components/IndoorNavigation/FloorSelector";
 import BuildingSelector from "./components/IndoorNavigation/BuildingSelector";
 import RoomToRoomNavigation from "./components/IndoorNavigation/RoomToRoomNavigation";
 import TunnelNavigation from "./components/IndoorNavigation/TunnelNavigation";
+import MultistepNavigationScreen from "./components/MultistepNavigation/MultistepNavigationScreen";
 import PropTypes from "prop-types";
 
 // Create Context for modal data and visibility
@@ -36,8 +38,7 @@ PopupModalWrapper.propTypes = {
   isVisible: PropTypes.bool.isRequired,
   data: PropTypes.object.isRequired,
   onClose: PropTypes.func.isRequired,
-};
-export default function App() {
+};export default function App() {
   const [isModalVisible, setModalVisible] = useState(false);
   const [modalData, setModalData] = useState({
     name: "",
@@ -82,6 +83,10 @@ export default function App() {
             <Stack.Screen
               name="TunnelNavigation"
               component={TunnelNavigation}
+            />
+            <Stack.Screen
+              name="MultistepNavigationScreen"
+              component={MultistepNavigationScreen}
             />
           </Stack.Navigator>
 

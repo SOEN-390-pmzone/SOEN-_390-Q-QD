@@ -33,6 +33,12 @@ export const navigationItems = [
       screen: 'RoomToRoomNavigation',
     },
     {
+        id: 'multistep',
+        label: 'Multistep Navigation',
+        actionType: 'navigate',
+        screen: 'MultistepNavigationScreen',
+    },
+    {
       id: 'poi',
       label: 'Outdoor Points of Interest',
       actionType: 'alert',
