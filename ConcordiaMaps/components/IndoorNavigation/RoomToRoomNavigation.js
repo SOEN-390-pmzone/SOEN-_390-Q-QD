@@ -7,6 +7,24 @@ import Header from "../Header";
 import NavBar from "../NavBar";
 import styles from "../../styles/IndoorNavigation/RoomtoRoomNavigationStyles";
 
+// Helper function to get color for navigation step type
+export const getStepColor = (type) => {
+  switch (type) {
+    case "start":
+      return "#4CAF50"; // Green
+    case "end":
+      return "#F44336"; // Red
+    case "escalator":
+      return "#2196F3"; // Blue
+    case "elevator":
+      return "#9C27B0"; // Purple
+    case "stairs":
+      return "#FF9800"; // Orange
+    default:
+      return "#912338"; // Maroon
+  }
+};
+
 const RoomToRoomNavigation = () => {
   // State for building and floor selection
   const [selectedBuilding, setSelectedBuilding] = useState("");
@@ -817,24 +835,6 @@ const RoomToRoomNavigation = () => {
         </View>
       </Modal>
     );
-  };
-
-  // Helper function to get color for navigation step type
-  const getStepColor = (type) => {
-    switch (type) {
-      case "start":
-        return "#4CAF50"; // Green
-      case "end":
-        return "#F44336"; // Red
-      case "escalator":
-        return "#2196F3"; // Blue
-      case "elevator":
-        return "#9C27B0"; // Purple
-      case "stairs":
-        return "#FF9800"; // Orange
-      default:
-        return "#912338"; // Maroon
-    }
   };
 
   // Main render method
