@@ -6,7 +6,7 @@ import {
   Animated,
   TouchableOpacity,
 } from "react-native";
-import styles from "../styles/DirectionBox.style";
+import styles from "../../styles/DirectionBox.style";
 import PropTypes from "prop-types"; // Import prop-types
 
 function DirectionsBox({ directions = [] }) {

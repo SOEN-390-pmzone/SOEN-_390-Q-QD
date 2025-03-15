@@ -13,7 +13,7 @@ import { ModalContext } from "../App";
 import BuildingColoring from "../components/buildingColoring";
 import Legend from "../components/Legend";
 import ShuttleStop from "../components/ShuttleStop";
-import FloatingSearchBar from "../components/FloatingSearchBar";
+import FloatingSearchBar from "../components/OutdoorNavigation/FloatingSearchBar";
 import LiveBusTracker from "../components/LiveBusTracker";
 import {
   saveToAsyncStorage,

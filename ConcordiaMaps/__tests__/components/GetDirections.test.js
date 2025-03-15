@@ -6,7 +6,7 @@ import {
   waitFor,
   cleanup,
 } from "@testing-library/react-native";
-import GetDirections from "../../components/GetDirections";
+import GetDirections from "../../components/OutdoorNavigation/GetDirections";
 import { useGoogleMapDirections } from "../../hooks/useGoogleMapDirections";
 import { LocationContext } from "../../contexts/LocationContext";
 
@@ -813,7 +813,7 @@ describe("GetDirections Additional Coverage Tests", () => {
     });
 
     // Initially, DirectionsBox should be collapsed
-    const DirectionsBox = require("../../components/DirectionsBox");
+    const DirectionsBox = require("../../components/OutdoorNavigation/DirectionsBox");
     expect(DirectionsBox).toBeTruthy();
   });
 

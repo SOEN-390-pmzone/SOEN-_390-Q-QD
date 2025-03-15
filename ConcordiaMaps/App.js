@@ -6,7 +6,7 @@ import HomeScreen from "./screen/HomeScreen";
 import { LocationProvider } from "./contexts/LocationContext";
 import PopupModal from "./components/PopupModal";
 import styles from "./styles";
-import GetDirections from "./components/GetDirections";
+import GetDirections from "./components/OutdoorNavigation/GetDirections";
 
 import IndoorNavigation from "./components/IndoorNavigation/IndoorNavigation";
 import FloorSelector from "./components/IndoorNavigation/FloorSelector";

@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import * as Location from "expo-location";
-import styles from "../styles";
+import styles from "../../styles";
 import PropTypes from "prop-types";
 import * as Crypto from "expo-crypto";
 
