@@ -1,11 +1,14 @@
 import React, { useState } from "react";
 import { View, Text, ScrollView, StyleSheet } from "react-native";
 import { Ionicons } from '@expo/vector-icons'; // To make the arrow between steps look nicer
+import { useNavigation } from '@react-navigation/native'; //To navigate to Indoor or outdoor directions depending on the Navigation strategy
 
 import Header from "../Header";
 import NavBar from "../NavBar";
 import NavigationStep from "./NavigationStep";
 import styles from "../../styles/MultistepNavigation/MultistepNavigationStyles";
+import NavigationStrategyService from "../../services/NavigationStrategyService";
+
 
 /**
  * Example of how to navigate to this screen with custom steps data:
@@ -81,9 +84,27 @@ const MultistepNavigationScreen = ({ route }) => {
   // Extract steps from route params or use default steps
   const stepsData = route?.params?.steps || DEFAULT_STEPS;
 
+    /**
+   * The useNavigation hook provides access to the navigation object without prop drilling
+   * This allows any component in the tree to navigate without explicitly receiving
+   * the navigation prop from parent components
+   */
+  const navigation = useNavigation();
+
   const handleStepPress = (index) => {
-    // TODO: 
-    // Add additional logic when a step is selected. This should send to indoor or outdoor navigation components accordingly
+    const selectedStep = stepsData[index];
+      /**
+     * We pass the navigation object to the service because:
+     * 1. The service is outside the React component tree and can't use hooks
+     * 2. This decouples navigation logic from UI components
+     * 3. It follows the dependency injection principle
+     * 
+     * We pass selectedStep because:
+     * 1. It contains all the data needed for navigation (type, buildingId, startPoint, endPoint)
+     * 2. The strategy service needs this data to determine how to navigate
+     * 3. This allows the service to handle different navigation types based on step properties
+     */
+    NavigationStrategyService.navigateToStep(navigation, selectedStep);
   };
 
   // Simple arrow component to show direction between steps
