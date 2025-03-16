@@ -1175,7 +1175,6 @@ describe("RoomToRoomNavigation", () => {
     expect(global.alert).toHaveBeenCalledWith(
       "Start room H-801 not found in navigation graph",
     );
-
   });
 
   it("progresses through floor selection to room selection", () => {
