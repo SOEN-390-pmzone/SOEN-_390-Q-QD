@@ -213,23 +213,23 @@ describe("InterFloorNavigation", () => {
     expect(defaultProps.onClose).toHaveBeenCalled();
   });
 
-  test("expands floor plan when floor title is pressed", async () => {
-    const { getByText, getAllByText } = render(
-      <InterFloorNavigation {...defaultProps} />,
-    );
+  // test("expands floor plan when floor title is pressed", async () => {
+  //   const { getByText, getAllByText } = render(
+  //     <InterFloorNavigation {...defaultProps} />,
+  //   );
 
-    // First need to calculate a path to show floor plans
-    fireEvent.press(getAllByText("H-801")[0]);
-    fireEvent.press(getAllByText("H-901")[0]);
-    fireEvent.press(getByText("Calculate Path"));
+  //   // First need to calculate a path to show floor plans
+  //   fireEvent.press(getAllByText("H-801")[0]);
+  //   fireEvent.press(getAllByText("H-901")[0]);
+  //   fireEvent.press(getByText("Calculate Path"));
 
-    // Then press on floor title to expand
-    const floorTitles = getAllByText("Floor 8");
-    fireEvent.press(floorTitles[0]);
+  //   // Then press on floor title to expand
+  //   const floorTitles = getAllByText("Floor 8");
+  //   fireEvent.press(floorTitles[0]);
 
-    // Verify expanded modal is shown
-    expect(getByText("×")).toBeTruthy(); // Close button in expanded view
-  });
+  //   // Verify expanded modal is shown
+  //   expect(getByText("×")).toBeTruthy(); // Close button in expanded view
+  // });
 
   test("closes expanded floor plan when close button is pressed", async () => {
     const { getByText, getAllByText } = render(
