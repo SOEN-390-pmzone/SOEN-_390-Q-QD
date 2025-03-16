@@ -3,7 +3,7 @@ appId: com.anonymous.ConcordiaMaps
 - launchApp
 - assertVisible: "Legend"
 - doubleTapOn:
-    point: 62%,65%
+    point: "62%,65%"
 - doubleTapOn:
     point: "39%,50%"
 - swipe:

@@ -23,9 +23,7 @@ appId: com.anonymous.ConcordiaMaps
     label: "Input part of the destination"
     text: "h b"
 - tapOn:
-    text:
-      "H Building Concordia University, Boulevard De Maisonneuve Ouest, Montreal,\
-      \ QC, Canada"
+    text: "H Building Concordia University, Boulevard De Maisonneuve Ouest, Montreal, QC, Canada"
     label: "Tap on suggested destination"
 - tapOn: "GET DIRECTIONS"
 - swipe:
