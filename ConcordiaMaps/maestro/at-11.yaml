@@ -6,7 +6,7 @@ appId: com.anonymous.ConcordiaMaps
     id: "hamburger-button"
 - tapOn:
     point: "20%,33%"
-    label: "Tap on \"Shuttle Schedule\""
+    label: 'Tap on "Shuttle Schedule"'
 - tapOn: "Friday"
 - tapOn: "Loyola"
 - tapOn: "Mon - Thu"

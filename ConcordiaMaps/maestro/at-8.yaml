@@ -6,7 +6,7 @@ appId: com.anonymous.ConcordiaMaps
     id: "hamburger-button"
 - tapOn:
     point: "14%,19%"
-    label: "Tap on \"Get directions\""
+    label: 'Tap on "Get directions"'
 - tapOn:
     text: "Using Current Location"
     label: "Tap on origin search bar"
@@ -23,7 +23,8 @@ appId: com.anonymous.ConcordiaMaps
     label: "Input part of the destination"
     text: "h b"
 - tapOn:
-    text: "H Building Concordia University, Boulevard De Maisonneuve Ouest, Montreal,\
+    text:
+      "H Building Concordia University, Boulevard De Maisonneuve Ouest, Montreal,\
       \ QC, Canada"
     label: "Tap on suggested destination"
 - tapOn: "GET DIRECTIONS"
