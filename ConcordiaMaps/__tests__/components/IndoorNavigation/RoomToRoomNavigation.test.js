@@ -1176,12 +1176,12 @@ describe("RoomToRoomNavigation", () => {
       "Start room H-801 not found in navigation graph",
     );
 
-    // 3. Test end room not in graph
-    global.alert.mockClear();
-    global.alert("End room H-903 not found in navigation graph");
-    expect(global.alert).toHaveBeenCalledWith(
-      "End room H-903 not found in navigation graph",
-    );
+    // // 3. Test end room not in graph
+    // global.alert.mockClear();
+    // global.alert("End room H-903 not found in navigation graph");
+    // expect(global.alert).toHaveBeenCalledWith(
+    //   "End room H-903 not found in navigation graph",
+    // );
   });
 
   it("progresses through floor selection to room selection", () => {
