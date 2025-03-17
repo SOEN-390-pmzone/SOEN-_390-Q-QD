@@ -1,13 +1,12 @@
 import React, { useState } from "react";
-import { View, TouchableOpacity, Text, Animated } from "react-native";
+import { View, TouchableOpacity, Text, Animated, Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import styles from "../styles";
-import { Alert } from "react-native";
 import ShuttleSchedule from "./ShuttleSchedule";
 
 function NavBar() {
   const [isOpen, setIsOpen] = useState(false);
-  const [isScheduleVisible, setIsScheduleVisible] = useState(false); // Added missing state
+  const [isScheduleVisible, setIsScheduleVisible] = useState(false);
   const animation = useState(new Animated.Value(0))[0];
   const navigation = useNavigation();
 
@@ -23,6 +22,8 @@ function NavBar() {
   const handlePress = (item) => {
     if (item === "Get directions") {
       navigation.navigate("GetDirections");
+    } else if (item === "Calendar") {
+      navigation.navigate("Calendar");
     } else {
       Alert.alert(`You clicked: ${item}`);
     }
@@ -65,6 +66,9 @@ function NavBar() {
           testID="shuttle-schedule-modal"
         >
           <Text style={styles.menuItem}>Shuttle Schedule</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => handlePress("Calendar")}>
+          <Text style={styles.menuItem}>Calendar</Text>
         </TouchableOpacity>
       </Animated.View>
 

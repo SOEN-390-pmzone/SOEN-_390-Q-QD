@@ -197,23 +197,23 @@ const styles = StyleSheet.create({
 
   centeredView: {
     position: "absolute",
-    bottom: 100, // Adjust this value to position the modal above the button
+    bottom: 100,
     right: 20,
-    width: 200, // Adjust the width as needed
-    height: 150, // Adjust the height as needed
+    width: 200,
+    height: 150,
     justifyContent: "center",
     alignItems: "center",
   },
   buttonImage: {
-    width: "100%", // Make the image take the full width of the parent view
-    height: "100%", // Make the image take the full height of the parent view
-    borderRadius: 10, // Optional: Add rounded corners to the image
+    width: "100%",
+    height: "100%",
+    borderRadius: 10,
   },
   modalView: {
     margin: 20,
     backgroundColor: "white",
     borderRadius: 20,
-    padding: 20, // Adjust padding to fit content
+    padding: 20,
     alignItems: "center",
     shadowColor: "#000",
     shadowOffset: {
@@ -236,6 +236,112 @@ const styles = StyleSheet.create({
     fontFamily: "Times New Roman",
     fontWeight: "bold",
     textAlign: "center",
+  },
+  eventCard: {
+    backgroundColor: "#912338",
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  eventTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#FFFFFF",
+  },
+  eventTime: {
+    fontSize: 14,
+    color: "#F5F5F5",
+    marginTop: 5,
+  },
+  eventLocation: {
+    fontSize: 14,
+    color: "#F5F5F5",
+  },
+  selectBox: {
+    backgroundColor: "#912338",
+    padding: 12,
+    borderRadius: 10,
+    alignItems: "center",
+    marginBottom: 15,
+  },
+  selectBoxText: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    width: "80%",
+    backgroundColor: "white",
+    padding: 20,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  calendarItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ddd",
+  },
+  calendarText: {
+    marginLeft: 10,
+    fontSize: 16,
+  },
+  dateText: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 20,
+    color: "black",
+  },
+  doneButton: {
+    backgroundColor: "#912338",
+    paddingVertical: 12,
+    paddingHorizontal: 25,
+    borderRadius: 10,
+    alignItems: "center",
+    marginTop: 15,
+  },
+  doneButtonText: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+  navigationButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 15,
+    marginTop: 20,
+  },
+
+  navigationButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 8,
+    width: "45%",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  navigationButtonText: {
+    color: "black",
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });
 

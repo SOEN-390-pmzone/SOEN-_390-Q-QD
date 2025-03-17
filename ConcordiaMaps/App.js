@@ -1,12 +1,12 @@
 import React, { useState, createContext, useMemo } from "react";
-
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import HomeScreen from "./screen/HomeScreen";
 import { LocationProvider } from "./contexts/LocationContext";
-import PopupModal from "./components/PopupModal"; // Import the PopupModal
+import PopupModal from "./components/PopupModal";
 import styles from "./styles";
 import GetDirections from "./components/GetDirections";
+import CalendarScreen from "./components/CalendarScreen"; // Import CalendarScreen
 
 // Create Context for modal data and visibility
 export const ModalContext = createContext();
@@ -42,6 +42,7 @@ export default function App() {
               component={HomeScreen}
             />
             <Stack.Screen name="GetDirections" component={GetDirections} />
+            <Stack.Screen name="Calendar" component={CalendarScreen} />
           </Stack.Navigator>
         </NavigationContainer>
 
