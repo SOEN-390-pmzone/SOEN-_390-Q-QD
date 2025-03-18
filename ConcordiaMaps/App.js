@@ -8,7 +8,7 @@ import PopupModal from "./components/PopupModal";
 import styles from "./styles";
 import GetDirections from "./components/OutdoorNavigation/GetDirections";
 
-//? SCREENS 
+//? SCREENS
 import IndoorNavigation from "./components/IndoorNavigation/IndoorNavigation";
 import FloorSelector from "./components/IndoorNavigation/FloorSelector";
 import BuildingSelector from "./components/IndoorNavigation/BuildingSelector";
@@ -38,7 +38,8 @@ PopupModalWrapper.propTypes = {
   isVisible: PropTypes.bool.isRequired,
   data: PropTypes.object.isRequired,
   onClose: PropTypes.func.isRequired,
-};export default function App() {
+};
+export default function App() {
   const [isModalVisible, setModalVisible] = useState(false);
   const [modalData, setModalData] = useState({
     name: "",
@@ -52,7 +53,7 @@ PopupModalWrapper.propTypes = {
   // Memoize the context value
   const modalContextValue = useMemo(
     () => ({ isModalVisible, modalData, toggleModal, setModalData }),
-    [isModalVisible, modalData],
+    [isModalVisible, modalData]
   );
 
   return (
@@ -87,6 +88,14 @@ PopupModalWrapper.propTypes = {
             <Stack.Screen
               name="MultistepNavigationScreen"
               component={MultistepNavigationScreen}
+            />
+            <Stack.Screen
+              name="MultistepNavigation"
+              component={MultistepNavigationScreen}
+              options={{
+                title: "Navigation",
+                headerShown: true,
+              }}
             />
           </Stack.Navigator>
 
