@@ -1,4 +1,3 @@
-// NOSONAR
 import React, { useState, useEffect, useRef } from "react";
 import { View, Text, TouchableOpacity, ScrollView, Modal } from "react-native";
 import { WebView } from "react-native-webview";
