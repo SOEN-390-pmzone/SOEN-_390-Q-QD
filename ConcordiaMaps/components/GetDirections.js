@@ -6,7 +6,7 @@ import React, {
   useContext,
   useMemo,
 } from "react";
-import { View, Button } from "react-native";
+import { View, Button,Keyboard } from "react-native";
 import MapView, { Polyline, Marker } from "react-native-maps";
 import * as Location from "expo-location";
 import FloatingSearchBar from "./FloatingSearchBar";
@@ -71,6 +71,28 @@ const GetDirections = () => {
   const { getStepsInHTML, getPolyline } = useGoogleMapDirections();
   const [useCurrentLocation, setUseCurrentLocation] = useState(true);
 
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      "keyboardDidShow",
+      () => {
+        console.log("Keyboard appeared - collapsing DirectionsBox");
+        setIsDirectionsBoxCollapsed(true);
+      }
+    );
+  
+    const keyboardDidHideListener = Keyboard.addListener(
+      "keyboardDidHide",
+      () => {
+        console.log("Keyboard disappeared - expanding DirectionsBox");
+        setIsDirectionsBoxCollapsed(false);
+      }
+    );
+  
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
+  }, []);
   // Set initial location from context
   useEffect(() => {
     if (location && useCurrentLocation) {
