@@ -3,18 +3,40 @@ import { Modal, View, Text, TouchableOpacity, Alert } from "react-native";
 import PropTypes from "prop-types";
 import styles from "../styles/DirectionBox.style";
 
+
+
+
 // Building to floor selector mapping
 const INDOOR_NAVIGATION_BUILDINGS = {
-  "Henry F. Hall": "HallBuilding",
-  "John Molson School Of Business": "JMSB",
+  "Henry F. Hall Building": "HallBuilding",
+  "John Molson School of Business Building": "JMSB",
+  "Vanier Library Extension": "VanierExtension",
+  "Engineering and Visual Arts Building": "EVBuilding",
+  "Webster Library": "Library",
+  "Vanier Library": "VanierLibrary",
 };
 
 const PopupModal = ({ isVisible, data, onClose, navigation }) => {
+  //data = JSON.stringify(data);
+  const buildingType = INDOOR_NAVIGATION_BUILDINGS[data.fullBuildingName]; 
+  const handleOutdoorsDirectionsSelect = (coordinates) => {
+    onClose();
+    // Find the corresponding key in the FloorRegistry by matching the building data
+    const buildingTypes = Object.keys(FloorRegistry.getAllBuildings());
+    const buildingType = buildingTypes.find(
+      (key) => FloorRegistry.getBuilding(key).id === buildingId,
+    );
+
+    if (buildingType) {
+      navigation.navigate("GetDirections", { buildingType });
+    }
+  };
+
   const handleFloorSelector = () => {
     onClose(); // Close the modal first
-    const buildingType = INDOOR_NAVIGATION_BUILDINGS[data.name];
+
     navigation.navigate("FloorSelector", {
-      buildingName: data.name,
+      buildingName: data?.name,
       buildingType: buildingType,
     });
   };
@@ -52,7 +74,7 @@ const PopupModal = ({ isVisible, data, onClose, navigation }) => {
             {hasIndoorNavigation && (
               <TouchableOpacity
                 style={styles.getDirectionsButton}
-                onPress={handleFloorSelector}
+                onPress={handleFloorSelector() }
               >
                 <Text style={styles.getDirectionsButtonText}>
                   Floor Selector
@@ -70,12 +92,10 @@ const PopupModal = ({ isVisible, data, onClose, navigation }) => {
           ].includes(data?.name) && (
             <TouchableOpacity
               style={styles.getDirectionsButton1}
-              onPress={() =>
-                Alert.alert("Get Inner Directions", "Inner directions pressed")
-              }
+              onPress={ handleFloorSelector}
             >
               <Text style={styles.getDirectionsButtonText}>
-                Get in Building Directions
+                Get Indoor Directions
               </Text>
             </TouchableOpacity>
           )}
