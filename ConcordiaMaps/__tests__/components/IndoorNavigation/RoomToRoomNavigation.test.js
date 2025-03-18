@@ -3,7 +3,7 @@ import React from "react";
 import { render, fireEvent } from "@testing-library/react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import RoomToRoomNavigation, {
-  getStepColor,
+  getStepColor
 } from "../../../components/IndoorNavigation/RoomToRoomNavigation";
 import FloorRegistry from "../../../services/BuildingDataService";
 import * as PathFinder from "../../../components/IndoorNavigation/PathFinder";
