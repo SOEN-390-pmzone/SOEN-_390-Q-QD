@@ -6,6 +6,7 @@ import React, {
   useContext,
   useMemo,
 } from "react";
+import { useRoute } from "@react-navigation/native";
 import { View, Button } from "react-native";
 import MapView, { Polyline, Marker } from "react-native-maps";
 import * as Location from "expo-location";
@@ -57,11 +58,17 @@ LocationMarkers.propTypes = {
 };
 
 const GetDirections = () => {
+  const routeParams = useRoute();
+  const lat = routeParams.params?.latitude;
+  const long = routeParams.params?.longitude;
   const mapRef = useRef(null);
   const location = useContext(LocationContext);
   const [mode, setMode] = useState("walking");
   const [origin, setOrigin] = useState(null);
-  const [destination, setDestination] = useState(null);
+  const [destination, setDestination] = useState({
+    latitude: lat,
+    longitude: long,
+  });
   const [directions, setDirections] = useState([]);
   const [route, setRoute] = useState([]);
   const [isInNavigationMode, setIsInNavigationMode] = useState(false);
