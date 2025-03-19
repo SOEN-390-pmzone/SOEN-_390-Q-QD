@@ -5,6 +5,7 @@ import { findShortestPath } from "./PathFinder";
 import FloorRegistry from "../../services/BuildingDataService";
 import PropTypes from "prop-types";
 import styles from "../../styles/IndoorNavigation/InterfloorNavigationStyles";
+import ExpandedFloorPlanModal from "./ExpandedFloorPlanModal";
 
 const InterFloorNavigation = ({
   isVisible,
@@ -239,43 +240,20 @@ const InterFloorNavigation = ({
 
   const renderExpandedFloorPlan = () => {
     if (!expandedFloor) return null;
-
+  
     const isStartFloor = expandedFloor === startFloor;
+    const floorPlan = isStartFloor ? startFloorPlan : endFloorPlan;
+    const pathNodes = isStartFloor
+      ? startFloorPath.map((node) => startFloorRooms[node])
+      : endFloorPath.map((node) => endFloorRooms[node]);
+    
     return (
-      <Modal
+      <ExpandedFloorPlanModal
         visible={!!expandedFloor}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setExpandedFloor(null)}
-      >
-        <View style={styles.expandedModalOverlay}>
-          <View style={styles.expandedModalContent}>
-            <View style={styles.expandedHeader}>
-              <Text style={styles.expandedTitle}>Floor {expandedFloor}</Text>
-              <TouchableOpacity
-                style={styles.closeExpandedButton}
-                onPress={() => setExpandedFloor(null)}
-              >
-                <Text style={styles.closeExpandedText}>×</Text>
-              </TouchableOpacity>
-            </View>
-            <View style={styles.expandedWebViewContainer}>
-              <WebView
-                source={{
-                  html: generateFloorHtml(
-                    isStartFloor ? startFloorPlan : endFloorPlan,
-                    isStartFloor
-                      ? startFloorPath.map((node) => startFloorRooms[node])
-                      : endFloorPath.map((node) => endFloorRooms[node]),
-                    true,
-                  ),
-                }}
-                style={styles.expandedWebView}
-              />
-            </View>
-          </View>
-        </View>
-      </Modal>
+        floorNumber={expandedFloor}
+        onClose={() => setExpandedFloor(null)}
+        htmlContent={generateFloorHtml(floorPlan, pathNodes, true)}
+      />
     );
   };
 
