@@ -22,8 +22,6 @@ function NavBar() {
   const handlePress = (item) => {
     if (item === "Get directions") {
       navigation.navigate("GetDirections");
-    } else if (item === "Calendar") {
-      navigation.navigate("Calendar");
     } else {
       Alert.alert(`You clicked: ${item}`);
     }
@@ -50,25 +48,24 @@ function NavBar() {
         <TouchableOpacity onPress={() => handlePress("Login")}>
           <Text style={styles.menuItem}>Login</Text>
         </TouchableOpacity>
+
         <TouchableOpacity onPress={() => handlePress("Get directions")}>
           <Text style={styles.menuItem}>Get directions</Text>
         </TouchableOpacity>
+
         <TouchableOpacity
-          onPress={() => handlePress("Outdoor Points of Interest")}
-        >
+          onPress={() => handlePress("Outdoor Points of Interest")}>
           <Text style={styles.menuItem}>Outdoor Points of Interest</Text>
         </TouchableOpacity>
+        
         <TouchableOpacity onPress={() => handlePress("Smart Planner")}>
           <Text style={styles.menuItem}>Smart Planner</Text>
         </TouchableOpacity>
+
         <TouchableOpacity
           onPress={() => setIsScheduleVisible(true)}
-          testID="shuttle-schedule-modal"
-        >
+          testID="shuttle-schedule-modal">
           <Text style={styles.menuItem}>Shuttle Schedule</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => handlePress("Calendar")}>
-          <Text style={styles.menuItem}>Calendar</Text>
         </TouchableOpacity>
       </Animated.View>
 

@@ -88,7 +88,8 @@
     "lint": "^0.8.19",
     "prettier": "3.4.2",
     "react-native-dotenv": "^3.4.11",
-    "react-test-renderer": "18.3.1"
+    "react-test-renderer": "18.3.1",
+    "typescript": "^5.3.3"
   },
   "private": true
 }

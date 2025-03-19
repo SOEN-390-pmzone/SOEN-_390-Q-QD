@@ -14,6 +14,9 @@ function Header() {
   const handlePress = () => {
     navigation.navigate("Home");
   };
+  const handleCalendarPress = () => {
+    navigation.navigate("Calendar");
+  };
   return (
     <SafeAreaView>
       <View style={styles.header}>
@@ -24,6 +27,12 @@ function Header() {
           />
         </TouchableOpacity>
         <Text style={styles.headerText}>ConcordiaMaps</Text>
+        <TouchableOpacity testID="calendarButton" onPress={() => handleCalendarPress()}>
+          <Image
+            source={require("../assets/calendarIcon.png")}
+            style={styles.calendarIcon}
+          />
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );

@@ -38,8 +38,8 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   logo: {
-    width: 50,
-    height: 50,
+    width: 30,
+    height: 30,
   },
   headerText: {
     fontWeight: "bold",
@@ -47,6 +47,11 @@ const styles = StyleSheet.create({
     fontSize: 25,
     color: "white",
     marginLeft: 10,
+    marginRight: 10
+  },
+  calendarIcon: {
+    width: 30,
+    height: 30,
   },
   navbar: {
     backgroundColor: "#912338",
