@@ -19,7 +19,7 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [predictions, setPredictions] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState("");
+  const [setSelectedLocation] = useState("");
   const [userLocation, setUserLocation] = useState(null);
   const sessionTokenRef = useRef("");
 
@@ -112,17 +112,16 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
         `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry&key=${GOOGLE_MAPS_API_KEY}&sessiontoken=${sessionTokenRef.current}`,
       );
       const { result } = await response.json();
-
       if (result?.geometry?.location) {
         onPlaceSelect({
           latitude: result.geometry.location.lat,
           longitude: result.geometry.location.lng,
         });
-
-        setSearchQuery(description); // Set selected location text in input
-        setSelectedLocation(description); // Save selected location
+        setSearchQuery(description);
+        setSelectedLocation(description);
         setPredictions([]);
 
+        // Use the function defined above
         sessionTokenRef.current = generateRandomToken();
       }
     } catch (error) {
