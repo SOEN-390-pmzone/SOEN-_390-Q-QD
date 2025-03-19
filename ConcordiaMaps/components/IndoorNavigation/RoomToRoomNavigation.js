@@ -25,7 +25,6 @@ import {
 
 const RoomToRoomNavigation = () => {
   const route = useRoute();
-  const navigation = useNavigation(); // Moved hook to top level of component
 
   // Extract route parameters
   const {
@@ -631,6 +630,7 @@ const RoomToRoomNavigation = () => {
 
   // Render the navigation results screen (using NavigationSteps component)
   const renderNavigation = () => {
+    const navigation = useNavigation();
     const { skipSelection } = route.params || {};
 
     return (
@@ -679,7 +679,7 @@ const RoomToRoomNavigation = () => {
               </View>
             </View>
 
-            {startFloor !== endFloor && !!endFloorPlan ? (
+            {startFloor !== endFloor && endFloorPlan && (
               <View style={styles.floorPlanContainer}>
                 <Text style={styles.floorColumnTitle}>Floor {endFloor}</Text>
                 <TouchableOpacity
