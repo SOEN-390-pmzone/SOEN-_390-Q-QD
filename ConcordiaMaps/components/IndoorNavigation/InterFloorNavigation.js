@@ -5,7 +5,7 @@ import { findShortestPath } from "./PathFinder";
 import FloorRegistry from "../../services/BuildingDataService";
 import PropTypes from "prop-types";
 import styles from "../../styles/IndoorNavigation/InterfloorNavigationStyles";
-import ExpandedFloorPlanModal from "./ExpandedFloorPlanModal";
+import ExpandedFloorPlanModal from "./ExpandedFloorPlan";
 
 const InterFloorNavigation = ({
   isVisible,
