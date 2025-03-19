@@ -19,7 +19,8 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [predictions, setPredictions] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [setSelectedLocation] = useState("");
+  // eslint-disable-next-line no-unused-vars
+  const [selectedLocation, setSelectedLocation] = useState(""); // reason: necessary fo running the appropriate tests.
   const [userLocation, setUserLocation] = useState(null);
   const sessionTokenRef = useRef("");
 
