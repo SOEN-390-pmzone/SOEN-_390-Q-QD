@@ -1,0 +1,36 @@
+appId: com.anonymous.ConcordiaMaps
+---
+- launchApp
+- assertVisible: "Legend"
+- tapOn:
+    id: "hamburger-button"
+- tapOn:
+    point: "14%,19%"
+    label: 'Tap on "Get directions"'
+- tapOn:
+    text: "Using Current Location"
+    label: "Tap on origin search bar"
+- inputText:
+    label: "Input part of the origin"
+    text: "h b"
+- tapOn:
+    text:
+      "H Building Concordia University, Boulevard De Maisonneuve Ouest, Montreal,\
+      \ QC, Canada"
+    label: "Tap on suggested origin"
+- tapOn:
+    text: "Enter Destination"
+    label: "Tap on destination search bar"
+- inputText:
+    label: "Input part of the destination"
+    text: "john molson"
+- tapOn:
+    text: "John Molson School of Business, Guy Street, Montreal, QC, Canada"
+    label: "Tap on suggested destination"
+- tapOn: "GET DIRECTIONS"
+- swipe:
+    start: "50%,51%"
+    end: "50%,36%"
+- swipe:
+    start: "49%,50%"
+    end: "39%,26%"
