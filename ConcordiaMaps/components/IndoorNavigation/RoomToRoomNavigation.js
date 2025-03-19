@@ -7,7 +7,6 @@ import FloorRegistry from "../../services/BuildingDataService";
 import Header from "../Header";
 import NavBar from "../NavBar";
 import styles from "../../styles/IndoorNavigation/RoomtoRoomNavigationStyles";
-import ExpandedFloorPlanModal from "./ExpandedFloorPlanModal";
 
 const RoomToRoomNavigation = () => {
   const route = useRoute();
@@ -1031,27 +1030,57 @@ const renderNavigation = () => {
   );
 };
 
+  // Render expanded floor plan modal
+  const renderExpandedFloorPlan = () => {
+    if (!expandedFloor) return null;
 
-const renderExpandedFloorPlan = () => {
-  if (!expandedFloor) return null;
-  
-  return (
-    <ExpandedFloorPlanModal
-      visible={!!expandedFloor}
-      floorNumber={expandedFloor}
-      onClose={() => setExpandedFloor(null)}
-      htmlContent={generateFloorHtml(floorPlan, pathNodes, rooms)}
-      webViewProps={{
-        scrollEnabled: false,
-        onError: (e) => console.error("WebView error in modal:", e.nativeEvent),
-        onLoadEnd: () => console.log("Modal WebView loaded"),
-        cacheEnabled: false,
-        incognito: true,
-        key: `expanded-${expandedFloor}-${pathNodes.length}`,
-      }}
-    />
-  );
-};
+    const isStartFloor = expandedFloor === startFloor;
+    const floorPlan = isStartFloor ? startFloorPlan : endFloorPlan;
+    const pathNodes = isStartFloor ? startFloorPath : endFloorPath;
+    const rooms = isStartFloor ? startFloorRooms : endFloorRooms;
+
+    return (
+      <Modal
+        visible={!!expandedFloor}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setExpandedFloor(null)}
+      >
+        <View style={styles.expandedModalOverlay}>
+          <View style={styles.expandedModalContent}>
+            <View style={styles.expandedHeader}>
+              <Text style={styles.expandedTitle}>Floor {expandedFloor}</Text>
+              <TouchableOpacity
+                style={styles.closeExpandedButton}
+                onPress={() => setExpandedFloor(null)}
+              >
+                <Text style={styles.closeExpandedText}>×</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.expandedWebViewContainer}>
+              <WebView
+                originWhitelist={["*"]}
+                source={{
+                  html: generateFloorHtml(floorPlan, pathNodes, rooms),
+                }}
+                style={styles.expandedWebView}
+                scrollEnabled={false}
+                onError={(e) =>
+                  console.error("WebView error in modal:", e.nativeEvent)
+                }
+                onLoadEnd={() => console.log("Modal WebView loaded")}
+                javaScriptEnabled={true}
+                domStorageEnabled={true}
+                cacheEnabled={false}
+                incognito={true}
+                key={`expanded-${expandedFloor}-${pathNodes.length}`} // Add a key
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
+    );
+  };
 
   // Helper function to get color for navigation step type
   const getStepColor = (type) => {
