@@ -19,7 +19,8 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [predictions, setPredictions] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState("");
+  // eslint-disable-next-line no-unused-vars
+  const [selectedLocation, setSelectedLocation] = useState(""); // reason: necessary fo running the appropriate tests.
   const [userLocation, setUserLocation] = useState(null);
   const sessionTokenRef = useRef("");
 
@@ -63,12 +64,10 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
         }
 
         let location = await Location.getCurrentPositionAsync({});
-        const userCoords = {
+        setUserLocation({
           latitude: location.coords.latitude,
           longitude: location.coords.longitude,
-        };
-
-        setUserLocation(userCoords);
+        });
       } catch (error) {
         console.error("Error getting location:", error);
       }
@@ -108,7 +107,7 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
     }
   };
 
-  const handleSelection = async (placeId) => {
+  const handleSelection = async (placeId, description) => {
     try {
       const response = await fetch(
         `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry&key=${GOOGLE_MAPS_API_KEY}&sessiontoken=${sessionTokenRef.current}`,
@@ -119,7 +118,8 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
           latitude: result.geometry.location.lat,
           longitude: result.geometry.location.lng,
         });
-        setSearchQuery("");
+        setSearchQuery(description);
+        setSelectedLocation(description);
         setPredictions([]);
 
         // Use the function defined above
@@ -137,9 +137,7 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
         <TextInput
           value={searchQuery}
           onChangeText={searchPlaces}
-          placeholder={
-            selectedLocation || placeholder || "Search for a place..."
-          }
+          placeholder={placeholder || "Search for a place..."}
           style={styles.input}
         />
         {loading && <ActivityIndicator />}
@@ -147,6 +145,7 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
           <TouchableOpacity
             onPress={() => {
               setSearchQuery("");
+              setSelectedLocation("");
               setPredictions([]);
             }}
           >
@@ -162,7 +161,7 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
           style={[styles.list, { marginTop: 5 }]}
           renderItem={({ item }) => (
             <TouchableOpacity
-              onPress={() => handleSelection(item.place_id)}
+              onPress={() => handleSelection(item.place_id, item.description)}
               style={styles.item}
             >
               <Ionicons
