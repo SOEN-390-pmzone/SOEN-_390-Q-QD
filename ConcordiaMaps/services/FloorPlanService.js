@@ -10,15 +10,15 @@
  * @returns {string} - HTML string for the WebView component
  */
 export const generateFloorHtml = (floorPlan, pathNodes = [], rooms = {}) => {
-    // Prepare path data by converting node names to coordinates
-    const pathCoordinates = pathNodes
-      .map((node) => (rooms[node] ? rooms[node] : null))
-      .filter((coord) => coord !== null);
-  
-    // Serialize path data for safe injection into HTML
-    const pathDataJson = JSON.stringify(pathCoordinates);
-  
-    return `
+  // Prepare path data by converting node names to coordinates
+  const pathCoordinates = pathNodes
+    .map((node) => (rooms[node] ? rooms[node] : null))
+    .filter((coord) => coord !== null);
+
+  // Serialize path data for safe injection into HTML
+  const pathDataJson = JSON.stringify(pathCoordinates);
+
+  return `
       <!DOCTYPE html>
       <html>
         <head>
@@ -221,4 +221,4 @@ export const generateFloorHtml = (floorPlan, pathNodes = [], rooms = {}) => {
         </body>
       </html>
     `;
-  };
+};

@@ -1,7 +1,7 @@
 /**
  * Service for calculating navigation paths between rooms
  */
-import { findShortestPath } from '../components/IndoorNavigation/PathFinder';
+import { findShortestPath } from "../components/IndoorNavigation/PathFinder";
 
 /**
  * Find available transportation method between floors
@@ -38,12 +38,12 @@ export const handleSameFloorNavigation = (
   selectedStartRoom,
   selectedEndRoom,
   startFloor,
-  buildingName
+  buildingName,
 ) => {
   const directPath = findShortestPath(
     startFloorGraph,
     selectedStartRoom,
-    selectedEndRoom
+    selectedEndRoom,
   );
 
   if (directPath.length < 2) {
@@ -65,7 +65,7 @@ export const handleSameFloorNavigation = (
       {
         type: "end",
         text: `Arrive at destination: ${selectedEndRoom}`,
-      }
+      },
     ],
   };
 };
@@ -88,31 +88,28 @@ export const handleInterFloorNavigation = (
   selectedEndRoom,
   startFloor,
   endFloor,
-  buildingName
+  buildingName,
 ) => {
   const transportMethod = findTransportMethod(startFloorGraph, endFloorGraph);
 
   if (!transportMethod) {
     throw new Error(
-      `Cannot navigate between floors ${startFloor} and ${endFloor}`
+      `Cannot navigate between floors ${startFloor} and ${endFloor}`,
     );
   }
 
   const startFloorTransportPath = findShortestPath(
     startFloorGraph,
     selectedStartRoom,
-    transportMethod
+    transportMethod,
   );
   const endFloorTransportPath = findShortestPath(
     endFloorGraph,
     transportMethod,
-    selectedEndRoom
+    selectedEndRoom,
   );
 
-  if (
-    startFloorTransportPath.length < 2 ||
-    endFloorTransportPath.length < 2
-  ) {
+  if (startFloorTransportPath.length < 2 || endFloorTransportPath.length < 2) {
     throw new Error("Could not find a complete path between these rooms");
   }
 
@@ -161,31 +158,55 @@ export const calculateNavigationPath = ({
   endFloor,
   selectedStartRoom,
   selectedEndRoom,
-  FloorRegistry
+  FloorRegistry,
 }) => {
   // Verify all required data is available
-  if (!buildingType || !startFloor || !endFloor || !selectedStartRoom || !selectedEndRoom) {
-    throw new Error("Missing navigation data. Please select building, floors, and rooms.");
+  if (
+    !buildingType ||
+    !startFloor ||
+    !endFloor ||
+    !selectedStartRoom ||
+    !selectedEndRoom
+  ) {
+    throw new Error(
+      "Missing navigation data. Please select building, floors, and rooms.",
+    );
   }
-  
-  console.log("Calculating path from", selectedStartRoom, "to", selectedEndRoom);
-  console.log("Building type:", buildingType, "Start floor:", startFloor, "End floor:", endFloor);
-  
+
+  console.log(
+    "Calculating path from",
+    selectedStartRoom,
+    "to",
+    selectedEndRoom,
+  );
+  console.log(
+    "Building type:",
+    buildingType,
+    "Start floor:",
+    startFloor,
+    "End floor:",
+    endFloor,
+  );
+
   const startFloorGraph = FloorRegistry.getGraph(buildingType, startFloor);
   const endFloorGraph = FloorRegistry.getGraph(buildingType, endFloor);
   const building = FloorRegistry.getBuilding(buildingType);
-  
+
   // Validate room selection
   if (!selectedStartRoom || !selectedEndRoom) {
     throw new Error("Please select both start and end rooms");
   }
 
   if (!startFloorGraph[selectedStartRoom]) {
-    throw new Error(`Start room ${selectedStartRoom} not found in navigation graph`);
+    throw new Error(
+      `Start room ${selectedStartRoom} not found in navigation graph`,
+    );
   }
 
   if (!endFloorGraph[selectedEndRoom]) {
-    throw new Error(`End room ${selectedEndRoom} not found in navigation graph`);
+    throw new Error(
+      `End room ${selectedEndRoom} not found in navigation graph`,
+    );
   }
 
   // Calculate path based on whether rooms are on the same floor or not
@@ -195,7 +216,7 @@ export const calculateNavigationPath = ({
       selectedStartRoom,
       selectedEndRoom,
       startFloor,
-      building.name
+      building.name,
     );
   } else {
     return handleInterFloorNavigation(
@@ -205,7 +226,7 @@ export const calculateNavigationPath = ({
       selectedEndRoom,
       startFloor,
       endFloor,
-      building.name
+      building.name,
     );
   }
 };

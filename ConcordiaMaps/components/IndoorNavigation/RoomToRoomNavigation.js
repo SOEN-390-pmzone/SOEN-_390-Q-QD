@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, Text, TouchableOpacity, ScrollView, Alert } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView } from "react-native";
 import { WebView } from "react-native-webview";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import FloorRegistry from "../../services/BuildingDataService";
@@ -11,16 +11,16 @@ import NavigationSteps from "./NavigationSteps";
 
 // Import extracted services
 import { generateFloorHtml } from "../../services/FloorPlanService";
-import { 
+import {
   findBuildingTypeFromId,
   findFloorForRoom,
-  validateRoomSelection 
+  validateRoomSelection,
 } from "../../services/NavigationValidationService";
-import { 
-  calculateNavigationPath,
+import {
+  // calculateNavigationPath,
   handleSameFloorNavigation,
   handleInterFloorNavigation,
-  findTransportMethod
+  // findTransportMethod
 } from "../../services/PathCalculationService";
 
 const RoomToRoomNavigation = () => {
@@ -28,12 +28,12 @@ const RoomToRoomNavigation = () => {
 
   // Extract route parameters
   const {
-    buildingId = null,          // Building ID (e.g., "hall", "jmsb")
-    startRoom = null,           // Starting room ID
-    endRoom = null,             // Destination room ID
-    startFloor: startFloorParam = null,  // Starting floor (optional)
-    endFloor: endFloorParam = null,      // Ending floor (optional)
-    skipSelection = false       // Skip the selection screens
+    buildingId = null, // Building ID (e.g., "hall", "jmsb")
+    startRoom = null, // Starting room ID
+    endRoom = null, // Destination room ID
+    startFloor: startFloorParam = null, // Starting floor (optional)
+    endFloor: endFloorParam = null, // Ending floor (optional)
+    skipSelection = false, // Skip the selection screens
   } = route.params || {};
 
   // State for building and floor selection
@@ -70,10 +70,15 @@ const RoomToRoomNavigation = () => {
   // Initialize from route params on component mount
   useEffect(() => {
     if (buildingId) {
-      const determinedBuildingType = findBuildingTypeFromId(buildingId, FloorRegistry);
-      
+      const determinedBuildingType = findBuildingTypeFromId(
+        buildingId,
+        FloorRegistry,
+      );
+
       if (determinedBuildingType) {
-        console.log(`Found building type ${determinedBuildingType} for ID ${buildingId}`);
+        console.log(
+          `Found building type ${determinedBuildingType} for ID ${buildingId}`,
+        );
         setBuildingType(determinedBuildingType);
         setSelectedBuilding(buildingId);
 
@@ -83,26 +88,44 @@ const RoomToRoomNavigation = () => {
 
         // If no start floor provided but have start room, find the floor
         if (!foundStartFloor && startRoom) {
-          foundStartFloor = findFloorForRoom(determinedBuildingType, startRoom, FloorRegistry);
-          console.log(`Determined start floor: ${foundStartFloor} for room ${startRoom}`);
+          foundStartFloor = findFloorForRoom(
+            determinedBuildingType,
+            startRoom,
+            FloorRegistry,
+          );
+          console.log(
+            `Determined start floor: ${foundStartFloor} for room ${startRoom}`,
+          );
         }
 
         // If no end floor provided but have end room, find the floor
         if (!foundEndFloor && endRoom) {
-          foundEndFloor = findFloorForRoom(determinedBuildingType, endRoom, FloorRegistry);
-          console.log(`Determined end floor: ${foundEndFloor} for room ${endRoom}`);
+          foundEndFloor = findFloorForRoom(
+            determinedBuildingType,
+            endRoom,
+            FloorRegistry,
+          );
+          console.log(
+            `Determined end floor: ${foundEndFloor} for room ${endRoom}`,
+          );
         }
 
         // Set floors and load rooms if floors were found
         if (foundStartFloor) {
           setStartFloor(foundStartFloor);
-          const startRooms = FloorRegistry.getRooms(determinedBuildingType, foundStartFloor);
+          const startRooms = FloorRegistry.getRooms(
+            determinedBuildingType,
+            foundStartFloor,
+          );
           setStartFloorRooms(startRooms);
         }
-        
+
         if (foundEndFloor) {
           setEndFloor(foundEndFloor);
-          const endRooms = FloorRegistry.getRooms(determinedBuildingType, foundEndFloor);
+          const endRooms = FloorRegistry.getRooms(
+            determinedBuildingType,
+            foundEndFloor,
+          );
           setEndFloorRooms(endRooms);
         }
 
@@ -111,7 +134,13 @@ const RoomToRoomNavigation = () => {
         if (endRoom) setSelectedEndRoom(endRoom);
 
         // Determine which step to show based on what info we have
-        if (skipSelection && startRoom && endRoom && foundStartFloor && foundEndFloor) {
+        if (
+          skipSelection &&
+          startRoom &&
+          endRoom &&
+          foundStartFloor &&
+          foundEndFloor
+        ) {
           setStep("navigation");
         } else if (startRoom && endRoom) {
           setStep("rooms");
@@ -120,7 +149,7 @@ const RoomToRoomNavigation = () => {
         } else {
           setStep("building");
         }
-        
+
         // Mark initialization as complete
         setInitializationComplete(true);
       }
@@ -205,7 +234,7 @@ const RoomToRoomNavigation = () => {
           console.error("Failed to load end floor SVG");
         }
       }
-      
+
       return true;
     } catch (error) {
       console.error("Error loading floor plans:", error);
@@ -215,23 +244,32 @@ const RoomToRoomNavigation = () => {
 
   // Effect to handle coordinating navigation when all data is present
   useEffect(() => {
-    if (initializationComplete && 
-        step === "navigation" && 
-        buildingType && 
-        startFloor && 
-        endFloor && 
-        selectedStartRoom && 
-        selectedEndRoom && 
-        !navigationSteps.length) {
-      
+    if (
+      initializationComplete &&
+      step === "navigation" &&
+      buildingType &&
+      startFloor &&
+      endFloor &&
+      selectedStartRoom &&
+      selectedEndRoom &&
+      !navigationSteps.length
+    ) {
       console.log("Auto-navigating with complete data");
-      loadFloorPlans().then(success => {
+      loadFloorPlans().then((success) => {
         if (success) {
           setTimeout(() => calculatePath(), 500);
         }
       });
     }
-  }, [initializationComplete, step, buildingType, startFloor, endFloor, selectedStartRoom, selectedEndRoom]);
+  }, [
+    initializationComplete,
+    step,
+    buildingType,
+    startFloor,
+    endFloor,
+    selectedStartRoom,
+    selectedEndRoom,
+  ]);
 
   // Add useEffect to load floor plans when floors change
   useEffect(() => {
@@ -283,28 +321,68 @@ const RoomToRoomNavigation = () => {
   const calculatePath = () => {
     try {
       // Verify all required data is available
-      if (!buildingType || !startFloor || !endFloor || !selectedStartRoom || !selectedEndRoom) {
-        console.error("Calculating path from", selectedStartRoom, "to", selectedEndRoom);
-        console.error("Building type:", buildingType, "Start floor:", startFloor, "End floor:", endFloor);
-        alert("Missing navigation data. Please select building, floors, and rooms.");
+      if (
+        !buildingType ||
+        !startFloor ||
+        !endFloor ||
+        !selectedStartRoom ||
+        !selectedEndRoom
+      ) {
+        console.error(
+          "Calculating path from",
+          selectedStartRoom,
+          "to",
+          selectedEndRoom,
+        );
+        console.error(
+          "Building type:",
+          buildingType,
+          "Start floor:",
+          startFloor,
+          "End floor:",
+          endFloor,
+        );
+        alert(
+          "Missing navigation data. Please select building, floors, and rooms.",
+        );
         return;
       }
-      
-      console.log("Calculating path from", selectedStartRoom, "to", selectedEndRoom);
-      console.log("Building type:", buildingType, "Start floor:", startFloor, "End floor:", endFloor);
-      
+
+      console.log(
+        "Calculating path from",
+        selectedStartRoom,
+        "to",
+        selectedEndRoom,
+      );
+      console.log(
+        "Building type:",
+        buildingType,
+        "Start floor:",
+        startFloor,
+        "End floor:",
+        endFloor,
+      );
+
       const startFloorGraph = FloorRegistry.getGraph(buildingType, startFloor);
       const endFloorGraph = FloorRegistry.getGraph(buildingType, endFloor);
       const building = FloorRegistry.getBuilding(buildingType);
-      
-      console.log("Start floor graph loaded:", Object.keys(startFloorGraph).length, "nodes");
-      console.log("End floor graph loaded:", Object.keys(endFloorGraph).length, "nodes");
+
+      console.log(
+        "Start floor graph loaded:",
+        Object.keys(startFloorGraph).length,
+        "nodes",
+      );
+      console.log(
+        "End floor graph loaded:",
+        Object.keys(endFloorGraph).length,
+        "nodes",
+      );
 
       const validationError = validateRoomSelection(
         startFloorGraph,
         endFloorGraph,
         selectedStartRoom,
-        selectedEndRoom
+        selectedEndRoom,
       );
 
       if (validationError) {
@@ -321,13 +399,19 @@ const RoomToRoomNavigation = () => {
           selectedStartRoom,
           selectedEndRoom,
           startFloor,
-          building.name
+          building.name,
         );
       } else {
         console.log("Finding transport method between floors");
-        console.log("Start floor nodes:", JSON.stringify(Object.keys(startFloorGraph)));
-        console.log("End floor nodes:", JSON.stringify(Object.keys(endFloorGraph)));
-        
+        console.log(
+          "Start floor nodes:",
+          JSON.stringify(Object.keys(startFloorGraph)),
+        );
+        console.log(
+          "End floor nodes:",
+          JSON.stringify(Object.keys(endFloorGraph)),
+        );
+
         result = handleInterFloorNavigation(
           startFloorGraph,
           endFloorGraph,
@@ -335,15 +419,21 @@ const RoomToRoomNavigation = () => {
           selectedEndRoom,
           startFloor,
           endFloor,
-          building.name
+          building.name,
         );
       }
 
       console.log("Path calculation successful");
-      console.log("Start floor path (" + result.startFloorPath.length + " nodes):", JSON.stringify(result.startFloorPath));
-      console.log("End floor path (" + result.endFloorPath.length + " nodes):", JSON.stringify(result.endFloorPath));
+      console.log(
+        "Start floor path (" + result.startFloorPath.length + " nodes):",
+        JSON.stringify(result.startFloorPath),
+      );
+      console.log(
+        "End floor path (" + result.endFloorPath.length + " nodes):",
+        JSON.stringify(result.endFloorPath),
+      );
       console.log("Navigation steps:", result.navigationSteps.length, "steps");
-      
+
       setStartFloorPath(result.startFloorPath);
       setEndFloorPath(result.endFloorPath);
       setNavigationSteps(result.navigationSteps);
@@ -574,7 +664,11 @@ const RoomToRoomNavigation = () => {
                     console.error("WebView error:", e.nativeEvent)
                   }
                   onLoadEnd={() => console.log("WebView loaded")}
-                  renderLoading={() => <View style={styles.webViewLoader}><Text>Loading...</Text></View>}
+                  renderLoading={() => (
+                    <View style={styles.webViewLoader}>
+                      <Text>Loading...</Text>
+                    </View>
+                  )}
                   startInLoadingState={true}
                   javaScriptEnabled={true}
                   domStorageEnabled={true}
@@ -611,7 +705,11 @@ const RoomToRoomNavigation = () => {
                       console.error("WebView error:", e.nativeEvent)
                     }
                     onLoadEnd={() => console.log("WebView loaded")}
-                    renderLoading={() => <View style={styles.webViewLoader}><Text>Loading...</Text></View>}
+                    renderLoading={() => (
+                      <View style={styles.webViewLoader}>
+                        <Text>Loading...</Text>
+                      </View>
+                    )}
                     startInLoadingState={true}
                     javaScriptEnabled={true}
                     domStorageEnabled={true}
@@ -651,12 +749,12 @@ const RoomToRoomNavigation = () => {
   // Render expanded floor plan modal
   const renderExpandedFloorPlan = () => {
     if (!expandedFloor) return null;
-    
+
     const isStartFloor = expandedFloor === startFloor;
     const floorPlan = isStartFloor ? startFloorPlan : endFloorPlan;
     const pathNodes = isStartFloor ? startFloorPath : endFloorPath;
     const rooms = isStartFloor ? startFloorRooms : endFloorRooms;
-    
+
     return (
       <ExpandedFloorPlanModal
         visible={!!expandedFloor}
@@ -665,7 +763,8 @@ const RoomToRoomNavigation = () => {
         htmlContent={generateFloorHtml(floorPlan, pathNodes, rooms)}
         webViewProps={{
           scrollEnabled: false,
-          onError: (e) => console.error("WebView error in modal:", e.nativeEvent),
+          onError: (e) =>
+            console.error("WebView error in modal:", e.nativeEvent),
           onLoadEnd: () => console.log("Modal WebView loaded"),
           cacheEnabled: false,
           incognito: true,

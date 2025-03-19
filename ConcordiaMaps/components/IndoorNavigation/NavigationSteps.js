@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 import { View, Text, ScrollView, StyleSheet } from "react-native";
 import { getStepColor } from "../../services/NavigationStylesService";
 
@@ -91,5 +92,15 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
 });
+
+NavigationSteps.propTypes = {
+  steps: PropTypes.arrayOf(
+    PropTypes.shape({
+      text: PropTypes.string.isRequired,
+      type: PropTypes.string.isRequired,
+    }),
+  ).isRequired,
+  customStyles: PropTypes.object,
+};
 
 export default NavigationSteps;

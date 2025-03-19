@@ -240,13 +240,13 @@ const InterFloorNavigation = ({
 
   const renderExpandedFloorPlan = () => {
     if (!expandedFloor) return null;
-  
+
     const isStartFloor = expandedFloor === startFloor;
     const floorPlan = isStartFloor ? startFloorPlan : endFloorPlan;
     const pathNodes = isStartFloor
       ? startFloorPath.map((node) => startFloorRooms[node])
       : endFloorPath.map((node) => endFloorRooms[node]);
-    
+
     return (
       <ExpandedFloorPlanModal
         visible={!!expandedFloor}
