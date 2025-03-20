@@ -1,17 +1,19 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react-native";
 import PopupModal from "../../components/PopupModal";
-import { Alert } from "react-native";
 
-// Mock Alert to prevent actual pop-ups
-jest.spyOn(Alert, "alert").mockImplementation(() => {});
+
+
 
 describe("PopupModal Component", () => {
+  
   const mockData = {
     name: "H Building",
     fullBuildingName: "Henry F. Hall Building",
     address: "1455 DeMaisonneuve W",
     coordinate: { latitude: 45.497092, longitude: -73.5788 },
+    buildingType: "HallBuilding",
+    fromPopup: true
   };
 
   const mockOnClose = jest.fn();
@@ -70,7 +72,7 @@ describe("PopupModal Component", () => {
     expect(mockOnClose).toHaveBeenCalled();
   });
 
-  test("triggers alert when get directions button is pressed", () => {
+  test("directs to GetDirections component", () => {
     render(
       <PopupModal
         isVisible={true}
@@ -79,29 +81,46 @@ describe("PopupModal Component", () => {
         navigation={mockNavigation}
       />,
     );
-
+    
     const getDirectionsButton = screen.getByText("Get Directions");
     fireEvent.press(getDirectionsButton);
 
-    expect(Alert.alert).toHaveBeenCalledWith(
-      "Get Directions",
-      "Directions pressed",
-    );
+    expect(mockNavigation.navigate).toHaveBeenCalledWith('GetDirections', {
+      latitude: mockData.coordinate.latitude,
+      longitude: mockData.coordinate.longitude,
+      fromPopup: mockData.fromPopup
+    });
+
+    // Verify that onClose was called
+    expect(mockOnClose).toHaveBeenCalled();
+    
   });
 
-  test("triggers alert when get inner directions button is pressed", () => {
+  it('navigates to FloorSelector screen when "Floor Selector" button is pressed', () => {
+    // Render the component with the required props
     render(
-      <PopupModal isVisible={true} data={mockData} onClose={mockOnClose} />,
+      <PopupModal
+        isVisible={true}
+        data={mockData}
+        onClose={mockOnClose}
+        navigation={mockNavigation}
+      />
     );
 
-    const getInnerDirectionsButton = screen.getByText(
-      "Get in Building Directions",
-    );
-    fireEvent.press(getInnerDirectionsButton);
+    // Find the "Floor Selector" button using testID and press it
+    const floorSelectorButton = screen.getByText('Get Indoor Directions');
+    fireEvent.press(floorSelectorButton);
 
-    expect(Alert.alert).toHaveBeenCalledWith(
-      "Get Inner Directions",
-      "Inner directions pressed",
-    );
+    // Verify that navigation.navigate was called with the correct arguments
+    //const buildingType = INDOOR_NAVIGATION_BUILDINGS[mockData.fullBuildingName];
+    expect(mockNavigation.navigate).toHaveBeenCalledWith('FloorSelector', {
+      buildingType: mockData.buildingType,
+      // latitude: mockData.coordinate.latitude,
+      // longitude: mockData. coordinate.longitude,
+      // fromPopup: mockData.fromPopup
+    });
+
+    // Verify that onClose was called
+    expect(mockOnClose).toHaveBeenCalled();
   });
 });

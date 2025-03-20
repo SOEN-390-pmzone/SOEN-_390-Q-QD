@@ -23,6 +23,7 @@ const PopupModal = ({ isVisible, data, onClose, navigation }) => {
     navigation.navigate("GetDirections", {
       latitude: data.coordinate.latitude,
       longitude: data.coordinate.longitude,
+      fromPopup: true,
     });
   };
 
@@ -30,7 +31,7 @@ const PopupModal = ({ isVisible, data, onClose, navigation }) => {
     onClose(); // Close the modal first
 
     navigation.navigate("FloorSelector", {
-      buildingName: data?.name,
+      //buildingName: data?.name,
       buildingType: buildingType,
     });
   };

@@ -61,14 +61,12 @@ const GetDirections = () => {
   const routeParams = useRoute();
   const lat = routeParams.params?.latitude;
   const long = routeParams.params?.longitude;
+  const fromPopup = routeParams.params?.fromPopup || null;
   const mapRef = useRef(null);
   const location = useContext(LocationContext);
   const [mode, setMode] = useState("walking");
   const [origin, setOrigin] = useState(null);
-  const [destination, setDestination] = useState({
-    latitude: lat,
-    longitude: long,
-  });
+  const [destination, setDestination] = useState(null);
   const [directions, setDirections] = useState([]);
   const [route, setRoute] = useState([]);
   const [isInNavigationMode, setIsInNavigationMode] = useState(false);
@@ -79,6 +77,15 @@ const GetDirections = () => {
   const [useCurrentLocation, setUseCurrentLocation] = useState(true);
 
   // Set initial location from context
+  useEffect(() => {
+    if (fromPopup) {
+      console.log("zzz");
+      setDestination({
+        latitude: lat,
+        longitude: long,
+      });
+    } else setDestination(null);
+  }, []);
   useEffect(() => {
     if (location && useCurrentLocation) {
       setOrigin({
