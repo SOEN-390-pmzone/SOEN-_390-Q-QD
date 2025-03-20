@@ -70,7 +70,8 @@ const GetDirections = () => {
 
   const { getStepsInHTML, getPolyline } = useGoogleMapDirections();
   const [useCurrentLocation, setUseCurrentLocation] = useState(true);
-
+  const [originText, setOriginText] = useState("");
+  const [destinationText, setDestinationText] = useState("");
   // Set initial location from context
   useEffect(() => {
     if (location && useCurrentLocation) {
@@ -212,27 +213,28 @@ const GetDirections = () => {
       <View style={styles.searchContainer}>
         {!isInNavigationMode && (
           <View>
-            <FloatingSearchBar
-              onPlaceSelect={(location) => {
-                setUseCurrentLocation(false); // Disable auto-update when manual location entered
+<FloatingSearchBar
+              onPlaceSelect={(location, displayName) => {
+                setUseCurrentLocation(false);
                 setOrigin(location);
+                setOriginText(displayName);
               }}
               placeholder={
                 useCurrentLocation ? "Using Current Location" : "Enter Origin"
               }
               style={styles.searchBar}
-              initialValue={
-                useCurrentLocation && origin
-                  ? `Current Location (${origin.latitude.toFixed(4)}, ${origin.longitude.toFixed(4)})`
-                  : ""
-              }
+              value={originText}
+              onChangeText={setOriginText}
             />
             <FloatingSearchBar
-              onPlaceSelect={(location) => {
+              onPlaceSelect={(location, displayName) => {
                 setDestination(location);
+                setDestinationText(displayName);
               }}
               placeholder="Enter Destination"
               style={[styles.searchBar, { marginTop: 10 }]}
+              value={destinationText}
+              onChangeText={setDestinationText}
             />
             <View style={styles.modes}>
               <Button

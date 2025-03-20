@@ -13,15 +13,15 @@ import styles from "../styles";
 import PropTypes from "prop-types";
 import * as Crypto from "expo-crypto";
 
-const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
+const FloatingSearchBar = ({ onPlaceSelect, placeholder, value, onChangeText }) => {
   const GOOGLE_MAPS_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
 
   const [searchQuery, setSearchQuery] = useState("");
   const [predictions, setPredictions] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState("");
   const [userLocation, setUserLocation] = useState(null);
   const sessionTokenRef = useRef("");
+  const inputRef = useRef(null); // Add ref for TextInput
 
   const generateRandomToken = async () => {
     try {
@@ -39,14 +39,18 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
       return base64.replace(/[+/=]/g, "").substring(0, 16);
     } catch (error) {
       console.error("Error generating random token:", error);
+      return Math.random().toString(36).substring(2, 18);
     }
   };
 
   // Generate a new session token when component mounts
   useEffect(() => {
-    const token = generateRandomToken();
-    sessionTokenRef.current = token;
-
+    const initToken = async () => {
+      const token = await generateRandomToken();
+      sessionTokenRef.current = token;
+    };
+    
+    initToken();
     return () => {
       // Clear session token on unmount
       sessionTokenRef.current = "";
@@ -77,7 +81,10 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
 
   const searchPlaces = async (text) => {
     setSearchQuery(text);
-    setSelectedLocation("");
+    if (onChangeText) {
+      onChangeText(text);
+    }
+    
     if (text.length < 3) {
       setPredictions([]);
       return;
@@ -90,13 +97,13 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
         locationParam = `&location=${userLocation.latitude},${userLocation.longitude}&radius=5000`;
       } else {
         console.warn(
-          "User location not available. Searching without location bias.",
+          "User location not available. Searching without location bias."
         );
       }
 
       //use the session token to prevent caching of search results
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_MAPS_API_KEY}&components=country:ca${locationParam}&sessiontoken=${sessionTokenRef.current}`,
+        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_MAPS_API_KEY}&components=country:ca${locationParam}&sessiontoken=${sessionTokenRef.current}`
       );
 
       const { predictions } = await response.json();
@@ -108,46 +115,69 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
     }
   };
 
-  const handleSelection = async (placeId) => {
+  const handleSelection = async (placeId, description) => {
     try {
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry&key=${GOOGLE_MAPS_API_KEY}&sessiontoken=${sessionTokenRef.current}`,
+        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry&key=${GOOGLE_MAPS_API_KEY}&sessiontoken=${sessionTokenRef.current}`
       );
       const { result } = await response.json();
       if (result?.geometry?.location) {
-        onPlaceSelect({
-          latitude: result.geometry.location.lat,
-          longitude: result.geometry.location.lng,
-        });
-        setSearchQuery("");
+        // Pass both location and description to parent
+        onPlaceSelect(
+          {
+            latitude: result.geometry.location.lat,
+            longitude: result.geometry.location.lng,
+          },
+          description
+        );
+        
+        // Update the display value
+        if (onChangeText) {
+          onChangeText(description);
+        }
+        
         setPredictions([]);
+        setSearchQuery(description);
 
-        // Use the function defined above
-        sessionTokenRef.current = generateRandomToken();
+        // Get a new token for next search
+        const newToken = await generateRandomToken();
+        sessionTokenRef.current = newToken;
+        
+        // Reset cursor position to beginning after a short delay
+        setTimeout(() => {
+          if (inputRef.current) {
+            inputRef.current.setSelection(0, 0);
+          }
+        }, 100);
       }
     } catch (error) {
       console.error("Error fetching place details:", error);
     }
   };
 
+  // Use controlled input if value is provided
+  const displayValue = value !== undefined ? value : searchQuery;
+
   return (
     <View style={{ width: "90%" }}>
       <View style={styles.searchBar}>
         <Ionicons name="search" size={20} color="#888" style={styles.icon} />
         <TextInput
-          value={searchQuery}
+          ref={inputRef}
+          value={displayValue}
           onChangeText={searchPlaces}
-          placeholder={
-            selectedLocation || placeholder || "Search for a place..."
-          }
+          placeholder={placeholder || "Search for a place..."}
           style={styles.input}
         />
         {loading && <ActivityIndicator />}
-        {searchQuery.length > 0 && (
+        {displayValue.length > 0 && (
           <TouchableOpacity
             onPress={() => {
               setSearchQuery("");
               setPredictions([]);
+              if (onChangeText) {
+                onChangeText("");
+              }
             }}
           >
             <Ionicons name="close-circle" size={20} color="#888" />
@@ -162,7 +192,7 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
           style={[styles.list, { marginTop: 5 }]}
           renderItem={({ item }) => (
             <TouchableOpacity
-              onPress={() => handleSelection(item.place_id)}
+              onPress={() => handleSelection(item.place_id, item.description)}
               style={styles.item}
             >
               <Ionicons
@@ -183,6 +213,8 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
 FloatingSearchBar.propTypes = {
   onPlaceSelect: PropTypes.func.isRequired,
   placeholder: PropTypes.string,
+  value: PropTypes.string,
+  onChangeText: PropTypes.func,
 };
 
 export default FloatingSearchBar;
