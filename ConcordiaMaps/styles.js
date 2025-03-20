@@ -38,47 +38,44 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   logo: {
-    width: 30,
-    height: 30,
+    width: 40,
+    height: 40,
+    marginHorizontal: 10
   },
   headerText: {
     fontWeight: "bold",
     fontFamily: "Times New Roman",
     fontSize: 25,
     color: "white",
-    marginLeft: 10,
-    marginRight: 10
+    flex: 1,
+    textAlign: "center"
   },
   calendarIcon: {
     width: 30,
     height: 30,
+    marginHorizontal: 10
   },
   navbar: {
     backgroundColor: "#912338",
-    paddingHorizontal: 10,
-    paddingVertical: 10,
-    flexDirection: "row",
-    justifyContent: "flex-start",
-    alignItems: "center",
     borderBottomLeftRadius: 10,
     borderBottomRightRadius: 10,
     zIndex: 2,
     position: "absolute",
-    top: 60,
-    left: 20,
-    width: 70,
-    height: 50,
+    top: 117,
+    bottom: 0,
+    justifyContent: "flex-start",
+    alignItems: "center"
   },
   hamburger: {
-    padding: 10,
+    padding: 5,
     justifyContent: "center",
-    alignItems: "center",
+    alignItems: "center"
   },
   hamburgerLine: {
     width: 30,
     height: 4,
     backgroundColor: "#fff",
-    marginVertical: 4,
+    marginVertical: 2,
   },
   menu: {
     backgroundColor: "#912338",

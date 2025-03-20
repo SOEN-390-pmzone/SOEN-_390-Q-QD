@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useContext } from "react";
 import { View, Text, TouchableOpacity, Image } from "react-native";
 import MapView, { Marker } from "react-native-maps";
-import NavBar from "../components/NavBar";
 import Header from "../components/Header";
 import TemporaryModal from "../components/temporaryModal";
 import { LocationContext } from "../contexts/LocationContext";
@@ -142,7 +141,6 @@ function HomeScreen({ asyncKey = "Campus" }) {
   return (
     <View style={styles.container} testID="home-screen">
       <Header />
-      <NavBar />
       <FloatingSearchBar onPlaceSelect={handlePlaceSelect} />
       {error ? <Text testID="error-message">{error}</Text> : null}
 

@@ -10,7 +10,6 @@ import {
 import * as Calendar from "expo-calendar";
 import { format, addDays, subDays } from "date-fns";
 import styles from "../styles";
-import NavBar from "../components/NavBar";
 import Header from "../components/Header";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -77,7 +76,6 @@ const CalendarScreen = () => {
   return (
     <View style={[styles.container, { backgroundColor: "white" }]}>
       <Header />
-      <NavBar />
       <View style={{ padding: 20 }}>
         <Text style={styles.dateText}>
           {format(currentDate, "MMMM d, yyyy")}
