@@ -9,7 +9,11 @@ import {
 import styles from "../styles/DirectionBox.style";
 import PropTypes from "prop-types";
 
-function DirectionsBox({ directions = [], isCollapsed = true, setIsCollapsed = () => {} }) {
+function DirectionsBox({
+  directions = [],
+  isCollapsed = true,
+  setIsCollapsed = () => {},
+}) {
   const [animation] = useState(new Animated.Value(isCollapsed ? 1 : 0));
 
   // This effect ensures the animation responds to isCollapsed prop changes
@@ -86,7 +90,7 @@ DirectionsBox.propTypes = {
     PropTypes.shape({
       html_instructions: PropTypes.string,
       distance: PropTypes.string,
-    })
+    }),
   ),
   isCollapsed: PropTypes.bool,
   setIsCollapsed: PropTypes.func,

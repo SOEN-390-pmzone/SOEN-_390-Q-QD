@@ -13,13 +13,12 @@ import styles from "../styles";
 import PropTypes from "prop-types";
 import * as Crypto from "expo-crypto";
 
-const FloatingSearchBar = ({ 
-  onPlaceSelect, 
-  placeholder, 
-  value, 
+const FloatingSearchBar = ({
+  onPlaceSelect,
+  placeholder,
+  value,
   onChangeText,
   onFocus,
-  onBlur 
 }) => {
   const GOOGLE_MAPS_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
 
@@ -56,7 +55,7 @@ const FloatingSearchBar = ({
       const token = await generateRandomToken();
       sessionTokenRef.current = token;
     };
-    
+
     initToken();
     return () => {
       // Clear session token on unmount
@@ -91,7 +90,7 @@ const FloatingSearchBar = ({
     if (onChangeText) {
       onChangeText(text);
     }
-    
+
     if (text.length < 3) {
       setPredictions([]);
       return;
@@ -104,13 +103,13 @@ const FloatingSearchBar = ({
         locationParam = `&location=${userLocation.latitude},${userLocation.longitude}&radius=5000`;
       } else {
         console.warn(
-          "User location not available. Searching without location bias."
+          "User location not available. Searching without location bias.",
         );
       }
 
       //use the session token to prevent caching of search results
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_MAPS_API_KEY}&components=country:ca${locationParam}&sessiontoken=${sessionTokenRef.current}`
+        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_MAPS_API_KEY}&components=country:ca${locationParam}&sessiontoken=${sessionTokenRef.current}`,
       );
 
       const { predictions } = await response.json();
@@ -125,7 +124,7 @@ const FloatingSearchBar = ({
   const handleSelection = async (placeId, description) => {
     try {
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry&key=${GOOGLE_MAPS_API_KEY}&sessiontoken=${sessionTokenRef.current}`
+        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry&key=${GOOGLE_MAPS_API_KEY}&sessiontoken=${sessionTokenRef.current}`,
       );
       const { result } = await response.json();
       if (result?.geometry?.location) {
@@ -135,21 +134,21 @@ const FloatingSearchBar = ({
             latitude: result.geometry.location.lat,
             longitude: result.geometry.location.lng,
           },
-          description
+          description,
         );
-        
+
         // Update the display value
         if (onChangeText) {
           onChangeText(description);
         }
-        
+
         setPredictions([]);
         setSearchQuery(description);
 
         // Get a new token for next search
         const newToken = await generateRandomToken();
         sessionTokenRef.current = newToken;
-        
+
         // Reset cursor position to beginning after a short delay
         setTimeout(() => {
           if (inputRef.current) {
@@ -176,7 +175,6 @@ const FloatingSearchBar = ({
           placeholder={placeholder || "Search for a place..."}
           style={styles.input}
           onFocus={onFocus}
-          onBlur={onBlur}
         />
         {loading && <ActivityIndicator />}
         {displayValue.length > 0 && (
@@ -225,8 +223,6 @@ FloatingSearchBar.propTypes = {
   value: PropTypes.string,
   onChangeText: PropTypes.func,
   onFocus: PropTypes.func,
-  onBlur: PropTypes.func
 };
-
 
 export default FloatingSearchBar;
