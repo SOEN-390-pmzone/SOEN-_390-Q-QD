@@ -1,11 +1,4 @@
 import { StyleSheet } from "react-native";
-<<<<<<< HEAD
-=======
-import {
-  commonStyles,
-  colors,
-} from "./BuildingSelectorTunnelNavigationCommonStyles";
->>>>>>> 8e647e506c6adfab5413e0d173fdc6d5ce7e7dd4
 
 const styles = StyleSheet.create({
   container: {

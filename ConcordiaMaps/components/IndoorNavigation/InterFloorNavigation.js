@@ -5,10 +5,6 @@ import { findShortestPath } from "./PathFinder";
 import FloorRegistry from "../../services/BuildingDataService";
 import PropTypes from "prop-types";
 import styles from "../../styles/IndoorNavigation/InterfloorNavigationStyles";
-<<<<<<< HEAD
-=======
-import ExpandedFloorPlanModal from "./ExpandedFloorPlan";
->>>>>>> 8e647e506c6adfab5413e0d173fdc6d5ce7e7dd4
 
 const InterFloorNavigation = ({
   isVisible,
@@ -245,14 +241,6 @@ const InterFloorNavigation = ({
     if (!expandedFloor) return null;
 
     const isStartFloor = expandedFloor === startFloor;
-<<<<<<< HEAD
-=======
-    const floorPlan = isStartFloor ? startFloorPlan : endFloorPlan;
-    const pathNodes = isStartFloor
-      ? startFloorPath.map((node) => startFloorRooms[node])
-      : endFloorPath.map((node) => endFloorRooms[node]);
-
->>>>>>> 8e647e506c6adfab5413e0d173fdc6d5ce7e7dd4
     return (
       <Modal
         visible={!!expandedFloor}
