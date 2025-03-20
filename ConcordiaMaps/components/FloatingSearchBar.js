@@ -13,7 +13,14 @@ import styles from "../styles";
 import PropTypes from "prop-types";
 import * as Crypto from "expo-crypto";
 
-const FloatingSearchBar = ({ onPlaceSelect, placeholder, value, onChangeText }) => {
+const FloatingSearchBar = ({ 
+  onPlaceSelect, 
+  placeholder, 
+  value, 
+  onChangeText,
+  onFocus,
+  onBlur 
+}) => {
   const GOOGLE_MAPS_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -168,6 +175,8 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder, value, onChangeText }) 
           onChangeText={searchPlaces}
           placeholder={placeholder || "Search for a place..."}
           style={styles.input}
+          onFocus={onFocus}
+          onBlur={onBlur}
         />
         {loading && <ActivityIndicator />}
         {displayValue.length > 0 && (
@@ -215,6 +224,9 @@ FloatingSearchBar.propTypes = {
   placeholder: PropTypes.string,
   value: PropTypes.string,
   onChangeText: PropTypes.func,
+  onFocus: PropTypes.func,
+  onBlur: PropTypes.func
 };
+
 
 export default FloatingSearchBar;

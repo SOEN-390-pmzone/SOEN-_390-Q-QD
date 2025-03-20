@@ -72,6 +72,10 @@ const GetDirections = () => {
   const [useCurrentLocation, setUseCurrentLocation] = useState(true);
   const [originText, setOriginText] = useState("");
   const [destinationText, setDestinationText] = useState("");
+
+  //To keep track of when the user is typing a new address and automatically close the directions modal 
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+
   // Set initial location from context
   useEffect(() => {
     if (location && useCurrentLocation) {
@@ -205,7 +209,6 @@ const GetDirections = () => {
     }
   }, [location, useCurrentLocation]);
 
-  // Update the FloatingSearchBar for origin
   return (
     <View style={styles.container}>
       <Header />
@@ -214,28 +217,47 @@ const GetDirections = () => {
         {!isInNavigationMode && (
           <View>
 <FloatingSearchBar
-              onPlaceSelect={(location, displayName) => {
-                setUseCurrentLocation(false);
-                setOrigin(location);
-                setOriginText(displayName);
-              }}
-              placeholder={
-                useCurrentLocation ? "Using Current Location" : "Enter Origin"
-              }
-              style={styles.searchBar}
-              value={originText}
-              onChangeText={setOriginText}
-            />
-            <FloatingSearchBar
-              onPlaceSelect={(location, displayName) => {
-                setDestination(location);
-                setDestinationText(displayName);
-              }}
-              placeholder="Enter Destination"
-              style={[styles.searchBar, { marginTop: 10 }]}
-              value={destinationText}
-              onChangeText={setDestinationText}
-            />
+  onPlaceSelect={(location, displayName) => {
+    setUseCurrentLocation(false);
+    setOrigin(location);
+    setOriginText(displayName);
+    setIsSearchFocused(false); // Reset focus state after selection
+  }}
+  placeholder={
+    useCurrentLocation ? "Using Current Location" : "Enter Origin"
+  }
+  style={styles.searchBar}
+  value={originText}
+  onChangeText={setOriginText}
+  onFocus={() => {
+    setIsSearchFocused(true);
+    setIsDirectionsBoxCollapsed(true); // Collapse box when search is focused
+  }}
+  onBlur={() => {
+    // Optional: Only unfocus when both inputs are unfocused
+    setTimeout(() => setIsSearchFocused(false), 100);
+  }}
+/>
+
+<FloatingSearchBar
+  onPlaceSelect={(location, displayName) => {
+    setDestination(location);
+    setDestinationText(displayName);
+    setIsSearchFocused(false); // Reset focus state after selection
+  }}
+  placeholder="Enter Destination"
+  style={[styles.searchBar, { marginTop: 10 }]}
+  value={destinationText}
+  onChangeText={setDestinationText}
+  onFocus={() => {
+    setIsSearchFocused(true);
+    setIsDirectionsBoxCollapsed(true); // Collapse box when search is focused
+  }}
+  onBlur={() => {
+    // Optional: Only unfocus when both inputs are unfocused
+    setTimeout(() => setIsSearchFocused(false), 100);
+  }}
+/>
             <View style={styles.modes}>
               <Button
                 title="Walking"

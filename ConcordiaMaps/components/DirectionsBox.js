@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -7,47 +7,22 @@ import {
   TouchableOpacity,
 } from "react-native";
 import styles from "../styles/DirectionBox.style";
-import PropTypes from "prop-types"; // Import prop-types
+import PropTypes from "prop-types";
 
-function DirectionsBox({ directions = [] }) {
-  DirectionsBox.propTypes = {
-    directions: PropTypes.arrayOf(
-      PropTypes.shape({
-        // Define the shape of each direction object
-        html_instructions: PropTypes.string.isRequired,
-        distance: PropTypes.string.isRequired,
-      }),
-    ).isRequired,
-  };
-  //? ANIMATION ONLY
-  const [isCollapsed, setIsCollapsed] = useState(true);
-  const [animation] = useState(new Animated.Value(1));
+function DirectionsBox({ directions = [], isCollapsed = true, setIsCollapsed = () => {} }) {
+  const [animation] = useState(new Animated.Value(isCollapsed ? 1 : 0));
 
-  // Run initial animation when component mounts
+  // This effect ensures the animation responds to isCollapsed prop changes
   useEffect(() => {
     Animated.timing(animation, {
       toValue: isCollapsed ? 1 : 0,
-      duration: 0, // Immediate for initial state
-      useNativeDriver: true,
-    }).start();
-  }, []);
-
-  useEffect(() => {
-    if (directions.length > 0) {
-      Animated.timing(animation, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true,
-      }).start(() => setIsCollapsed(false));
-    }
-  }, [directions, animation]);
-
-  const toggleCollapse = () => {
-    Animated.timing(animation, {
-      toValue: isCollapsed ? 0 : 1,
       duration: 300,
       useNativeDriver: true,
-    }).start(() => setIsCollapsed(!isCollapsed));
+    }).start();
+  }, [isCollapsed, animation]);
+
+  const toggleCollapse = () => {
+    setIsCollapsed(!isCollapsed);
   };
 
   const translateY = animation.interpolate({
@@ -105,5 +80,16 @@ function DirectionsBox({ directions = [] }) {
     </Animated.View>
   );
 }
+
+DirectionsBox.propTypes = {
+  directions: PropTypes.arrayOf(
+    PropTypes.shape({
+      html_instructions: PropTypes.string,
+      distance: PropTypes.string,
+    })
+  ),
+  isCollapsed: PropTypes.bool,
+  setIsCollapsed: PropTypes.func,
+};
 
 export default DirectionsBox;
