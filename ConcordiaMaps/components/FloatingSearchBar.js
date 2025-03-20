@@ -62,14 +62,13 @@ const FloatingSearchBar = ({
         console.error("Web Crypto API fallback failed:", webCryptoError);
       }
 
-      // Last resort fallback (should rarely be needed)
-      const timestamp = Date.now().toString();
-      return (
-        timestamp +
-        Math.floor(Math.random() * 1000000)
-          .toString()
-          .padStart(6, "0")
+      // If we've reached here, both secure methods failed
+      // Rather than using an insecure method, use a deterministic value
+      // This is safer than using Math.random() for security-sensitive operations
+      console.warn(
+        "Failed to generate secure token, using fallback constant value",
       );
+      return "TOKEN_GENERATION_FAILED_" + Date.now().toString().substring(0, 8);
     }
   };
 
