@@ -719,7 +719,7 @@ const RoomToRoomNavigation = () => {
                   />
                 </View>
               </View>
-            ) : null}
+            )}
           </View>
 
           {/* Use the extracted NavigationSteps component */}
