@@ -31,7 +31,7 @@ const FloatingSearchBar = ({
 
   const generateRandomToken = async () => {
     try {
-      // Generate random bytes
+      // Use expo-crypto for generating random bytes
       const randomBytes = await Crypto.getRandomBytesAsync(16);
 
       // Convert to base64 string
@@ -45,7 +45,31 @@ const FloatingSearchBar = ({
       return base64.replace(/[+/=]/g, "").substring(0, 16);
     } catch (error) {
       console.error("Error generating random token:", error);
-      return Math.random().toString(36).substring(2, 18);
+
+      // Fallback using the Web Crypto API as recommended by SonarQube
+      try {
+        // For client-side React Native environments
+        const crypto = global.crypto || global.msCrypto;
+        if (crypto && crypto.getRandomValues) {
+          const array = new Uint32Array(4);
+          crypto.getRandomValues(array);
+          return Array.from(array)
+            .map((n) => n.toString(36))
+            .join("")
+            .substring(0, 16);
+        }
+      } catch (webCryptoError) {
+        console.error("Web Crypto API fallback failed:", webCryptoError);
+      }
+
+      // Last resort fallback (should rarely be needed)
+      const timestamp = Date.now().toString();
+      return (
+        timestamp +
+        Math.floor(Math.random() * 1000000)
+          .toString()
+          .padStart(6, "0")
+      );
     }
   };
 
