@@ -1,34 +1,37 @@
 import { StyleSheet } from "react-native";
-<<<<<<< HEAD
-=======
-import {
-  commonStyles,
-  colors,
-} from "./BuildingSelectorTunnelNavigationCommonStyles";
->>>>>>> 8e647e506c6adfab5413e0d173fdc6d5ce7e7dd4
 
-const styles = StyleSheet.create({
+export const colors = {
+  primary: "#912338",
+  background: "#fff",
+  cardBackground: "#f5f5f5",
+  textDark: "#333",
+  textMedium: "#666",
+  textLight: "#888",
+};
+
+export const commonStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
-  },
-  contentContainer: {
-    flex: 1,
-    padding: 16,
+    backgroundColor: colors.background,
   },
   title: {
     fontSize: 28,
     fontWeight: "bold",
     textAlign: "center",
     marginVertical: 20,
-    color: "#912338",
+    color: colors.primary,
   },
-  buildingsContainer: {
+  subtitle: {
+    fontSize: 16,
+    color: colors.textMedium,
+    textAlign: "center",
+    marginBottom: 24,
+  },
+  scrollContainer: {
     flex: 1,
-    gap: 20,
   },
   buildingCard: {
-    backgroundColor: "#f5f5f5",
+    backgroundColor: colors.cardBackground,
     borderRadius: 15,
     overflow: "hidden",
     elevation: 4,
@@ -46,34 +49,21 @@ const styles = StyleSheet.create({
   buildingName: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#333",
+    color: colors.textDark,
   },
   buildingCode: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#912338",
+    color: colors.primary,
   },
   buildingDescription: {
     fontSize: 16,
-    color: "#666",
+    color: colors.textMedium,
     marginTop: 4,
   },
   buildingAddress: {
     fontSize: 14,
-    color: "#888",
+    color: colors.textLight,
     marginTop: 4,
   },
-  availableTag: {
-    position: "absolute",
-    top: 10,
-    right: 10,
-    backgroundColor: "#912338",
-    color: "#fff",
-    padding: 8,
-    borderRadius: 12,
-    fontSize: 12,
-    fontWeight: "bold",
-  },
 });
-
-export default styles;
