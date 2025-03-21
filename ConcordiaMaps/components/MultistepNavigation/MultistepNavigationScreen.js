@@ -803,26 +803,149 @@ const MultistepNavigationScreen = () => {
     setLoadingDirections(true);
 
     try {
-      // Convert address to coordinates if needed
-      const originCoords = userLocation || {
-        latitude: 45.497095,
-        longitude: -73.57878,
-      }; // Default to Concordia if no location
+      // Use step's explicitly defined startPoint if available
+      let originCoords;
+
+      if (step.startPoint && typeof step.startPoint === "string") {
+        // If startPoint is an address, try to geocode it
+        try {
+          const geocodeResponse = await fetch(
+            `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(step.startPoint)}&key=${GOOGLE_MAPS_API_KEY}`
+          );
+          const geocodeData = await geocodeResponse.json();
+
+          if (geocodeData.results && geocodeData.results.length > 0) {
+            const location = geocodeData.results[0].geometry.location;
+            originCoords = {
+              latitude: location.lat,
+              longitude: location.lng,
+            };
+            console.log("Using geocoded startPoint:", originCoords);
+          } else {
+            console.error("Failed to geocode startPoint address");
+          }
+        } catch (geocodeError) {
+          console.error("Error geocoding startPoint:", geocodeError);
+        }
+      } else if (
+        step.startPoint &&
+        step.startPoint.latitude &&
+        step.startPoint.longitude
+      ) {
+        // If startPoint is already coordinates, use directly
+        originCoords = step.startPoint;
+        console.log("Using startPoint coordinates:", originCoords);
+      }
+
+      // If no valid originCoords found yet, use originDetails if available
+      if (!originCoords && originDetails) {
+        originCoords = {
+          latitude: originDetails.latitude,
+          longitude: originDetails.longitude,
+        };
+        console.log("Using originDetails:", originCoords);
+      }
+
+      // Only fall back to user location if we still don't have valid coordinates
+      if (!originCoords) {
+        if (userLocation && userLocation.latitude && userLocation.longitude) {
+          originCoords = userLocation;
+          console.log("Using user location as fallback:", originCoords);
+        } else if (step.startPoint && typeof step.startPoint === "string") {
+          // Try to use a building ID if possible
+          const startBuilding = CONCORDIA_BUILDINGS.find(
+            (b) =>
+              b.id.toUpperCase() === step.startPoint.toUpperCase() ||
+              b.name.toUpperCase().includes(step.startPoint.toUpperCase())
+          );
+
+          if (startBuilding) {
+            // Use hardcoded coordinates for known buildings
+            if (startBuilding.id === "H") {
+              originCoords = { latitude: 45.497095, longitude: -73.57878 };
+            } else if (startBuilding.id === "MB") {
+              originCoords = { latitude: 45.495304, longitude: -73.577893 };
+            } else if (startBuilding.id === "EV") {
+              originCoords = { latitude: 45.495655, longitude: -73.578025 };
+            } else if (startBuilding.id === "LB") {
+              originCoords = { latitude: 45.49674, longitude: -73.57785 };
+            }
+            console.log(
+              `Using hardcoded coordinates for ${startBuilding.id}:`,
+              originCoords
+            );
+          } else {
+            // Last resort fallback - should rarely happen
+            console.warn("No valid origin coordinates found, using default");
+            originCoords = {
+              latitude: 45.497095,
+              longitude: -73.57878,
+            };
+          }
+        } else {
+          // Last resort fallback - should rarely happen
+          console.warn("No valid origin coordinates found, using default");
+          originCoords = {
+            latitude: 45.497095,
+            longitude: -73.57878,
+          };
+        }
+      }
 
       // Find the destination building coordinates
-      const destinationBuilding = CONCORDIA_BUILDINGS.find(
-        (b) => b.id === step.endPoint
-      );
       let destinationCoords;
+      if (step.endPoint) {
+        if (typeof step.endPoint === "string") {
+          // Check if it's a building ID first
+          const destinationBuilding = CONCORDIA_BUILDINGS.find(
+            (b) => b.id === step.endPoint
+          );
 
-      if (destinationBuilding) {
-        // For demo purposes - in real implementation you'd geocode the address
-        // This is simplified for the Hall Building
-        if (destinationBuilding.id === "H") {
-          destinationCoords = { latitude: 45.497095, longitude: -73.57878 };
-        } else {
-          // For other buildings, you'll need to use geocoding or store coordinates
-          destinationCoords = { latitude: 45.495304, longitude: -73.577893 }; // Example coords
+          if (destinationBuilding) {
+            // For demo purposes - in real implementation you'd geocode the address
+            if (destinationBuilding.id === "H") {
+              destinationCoords = { latitude: 45.497095, longitude: -73.57878 };
+            } else if (destinationBuilding.id === "MB") {
+              destinationCoords = {
+                latitude: 45.495304,
+                longitude: -73.577893,
+              };
+            } else if (destinationBuilding.id === "EV") {
+              destinationCoords = {
+                latitude: 45.495655,
+                longitude: -73.578025,
+              };
+            } else if (destinationBuilding.id === "LB") {
+              destinationCoords = { latitude: 45.49674, longitude: -73.57785 };
+            } else {
+              // Try to geocode the building address
+              try {
+                const geocoded = await getStepsInHTML.geocodeAddress(
+                  destinationBuilding.address
+                );
+                if (geocoded) {
+                  destinationCoords = geocoded;
+                }
+              } catch (error) {
+                console.error("Failed to geocode building address:", error);
+              }
+            }
+          } else {
+            // If not a building ID, try to geocode as address
+            try {
+              const geocoded = await getStepsInHTML.geocodeAddress(
+                step.endPoint
+              );
+              if (geocoded) {
+                destinationCoords = geocoded;
+              }
+            } catch (error) {
+              console.error("Failed to geocode destination address:", error);
+            }
+          }
+        } else if (step.endPoint.latitude && step.endPoint.longitude) {
+          // If endPoint is already coordinates, use directly
+          destinationCoords = step.endPoint;
         }
       }
 
@@ -831,6 +954,13 @@ const MultistepNavigationScreen = () => {
         setLoadingDirections(false);
         return;
       }
+
+      console.log(
+        "Fetching directions from",
+        originCoords,
+        "to",
+        destinationCoords
+      );
 
       // Get directions and polyline using your existing hook
       const directions = await getStepsInHTML(
