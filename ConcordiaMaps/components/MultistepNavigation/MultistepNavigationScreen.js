@@ -20,16 +20,7 @@ import NavigationStrategyService from "../../services/NavigationStrategyService"
 import { useNavigation, useRoute } from "@react-navigation/native";
 import * as Crypto from "expo-crypto";
 import { useGoogleMapDirections } from "../../hooks/useGoogleMapDirections";
-import {
-  floor8SVG,
-  floor9SVG,
-  floor1SVG,
-  MBfloor1SVG,
-  MBfloor2SVG,
-  VEfloor1SVG,
-  VEfloor2SVG,
-  VLfloor1SVG,
-} from "../../assets/svg/SVGtoString";
+import BuildingDataService from "../../services/BuildingDataService";
 
 // List of Concordia buildings for suggestions
 const CONCORDIA_BUILDINGS = [
@@ -45,8 +36,6 @@ const CONCORDIA_BUILDINGS = [
     name: "Engineering & Visual Arts Complex",
     address: "1515 St. Catherine St. W.",
   },
-  { id: "FB", name: "Faubourg Building", address: "1250 Guy St." },
-  // Add more buildings as needed
 ];
 
 const MultistepNavigationScreen = () => {
@@ -616,43 +605,52 @@ const MultistepNavigationScreen = () => {
 
     console.log(`Getting SVG for ${buildingId} floor ${floorNumber}`);
 
-    // Map building and floor to appropriate SVG
-    let svgContent = null;
-
-    // Hard-coded test to confirm your SVGs are working
-    console.log("SVG content length check:");
-    console.log(
-      "floor9SVG length:",
-      floor9SVG ? floor9SVG.length : "undefined"
-    );
-    console.log(
-      "floor8SVG length:",
-      floor8SVG ? floor8SVG.length : "undefined"
-    );
+    // Map building ID to BuildingDataService building type
+    let buildingType = null;
 
     if (buildingId === "H" || buildingId === "HALL") {
-      if (floorNumber === "9") {
-        svgContent = floor9SVG;
-        console.log("Using floor9SVG for H floor 9");
-      } else if (floorNumber === "8") {
-        svgContent = floor8SVG;
-        console.log("Using floor8SVG for H floor 8");
-      } else if (floorNumber === "1") {
-        svgContent = floor1SVG;
-      }
-    } else if (buildingId === "MB") {
-      if (floorNumber === "1") svgContent = MBfloor1SVG;
-      else if (floorNumber === "2") svgContent = MBfloor2SVG;
+      buildingType = "HallBuilding";
+    } else if (buildingId === "MB" || buildingId === "JMSB") {
+      buildingType = "JMSB";
+    } else if (buildingId === "EV") {
+      buildingType = "EVBuilding";
+    } else if (buildingId === "LB") {
+      buildingType = "Library";
     } else if (buildingId === "VE") {
-      if (floorNumber === "1") svgContent = VEfloor1SVG;
-      else if (floorNumber === "2") svgContent = VEfloor2SVG;
+      buildingType = "VanierExtension";
     } else if (buildingId === "VL") {
-      if (floorNumber === "1") svgContent = VLfloor1SVG;
+      buildingType = "VanierLibrary";
     }
 
-    console.log(`SVG content found: ${svgContent ? "Yes" : "No"}`);
+    if (!buildingType) {
+      console.warn(`Building type not found for ID: ${buildingId}`);
+      return null;
+    }
 
-    return svgContent;
+    // Get SVG from BuildingDataService
+    try {
+      const svg = BuildingDataService.getFloor(
+        buildingType,
+        floorNumber
+      )?.getSVG();
+
+      console.log(
+        `SVG found for ${buildingId} floor ${floorNumber}: ${svg ? "Yes" : "No"}`
+      );
+
+      if (svg) {
+        return svg;
+      } else {
+        console.warn(`No SVG found for ${buildingId} floor ${floorNumber}`);
+        return null;
+      }
+    } catch (error) {
+      console.error(
+        `Error getting SVG for ${buildingId} floor ${floorNumber}:`,
+        error
+      );
+      return null;
+    }
   };
 
   // Generate a random session token for Google Places API
