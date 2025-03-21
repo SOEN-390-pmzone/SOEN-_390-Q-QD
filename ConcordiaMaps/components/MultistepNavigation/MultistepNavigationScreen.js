@@ -22,6 +22,7 @@ import * as Crypto from "expo-crypto";
 import { useGoogleMapDirections } from "../../hooks/useGoogleMapDirections";
 import BuildingDataService from "../../services/BuildingDataService";
 import { visualizePath } from "../IndoorNavigation/PathVisualizer";
+import styles from "../../styles/MultistepNavigation/MultistepNavigationStyles";
 
 // List of Concordia buildings for suggestions
 const CONCORDIA_BUILDINGS = [
@@ -1338,112 +1339,122 @@ const MultistepNavigationScreen = () => {
   };
 
   // Render navigation form if no plan is active
+
   const renderNavigationForm = () => {
     return (
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.container}
+        style={[styles.container, { backgroundColor: "#f5f5f5" }]}
       >
-        <ScrollView style={styles.formContainer}>
-          <Text style={styles.title}>Multi-step Navigation</Text>
-          <Text style={styles.subtitle}>From your location to classroom</Text>
+        <ScrollView
+          style={[styles.formContainer, { flex: 1 }]}
+          contentContainerStyle={{ flexGrow: 1 }}
+        >
+          <View style={styles.header}>
+            <Text style={styles.title}>Multi-step Navigation</Text>
+            <Text style={styles.subtitle}>Navigate to your classroom</Text>
+          </View>
 
-          {/* Origin Input with Google Places Autocomplete */}
-          <Text style={styles.label}>Starting Point</Text>
-          <View style={styles.searchBar}>
-            <Ionicons
-              name="search"
-              size={20}
-              color="#888"
-              style={styles.icon}
-            />
-            <TextInput
-              value={originSearchQuery}
-              onChangeText={searchOriginPlaces}
-              placeholder={origin || "Enter your address"}
-              style={styles.input}
-            />
-            {loadingOrigin && <ActivityIndicator />}
-            {originSearchQuery.length > 0 && (
-              <TouchableOpacity
-                onPress={() => {
-                  setOriginSearchQuery("");
-                  setOriginPredictions([]);
-                }}
-              >
-                <Ionicons name="close-circle" size={20} color="#888" />
-              </TouchableOpacity>
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Starting Point</Text>
+            <View
+              style={[
+                styles.searchBar,
+                originSearchQuery.length > 0 && styles.searchBarFocused,
+              ]}
+            >
+              <Ionicons name="location-outline" size={20} style={styles.icon} />
+              <TextInput
+                value={originSearchQuery}
+                onChangeText={searchOriginPlaces}
+                placeholder={origin || "Enter your starting location"}
+                style={styles.input}
+              />
+              {loadingOrigin ? (
+                <ActivityIndicator color="#912338" />
+              ) : (
+                originSearchQuery.length > 0 && (
+                  <TouchableOpacity
+                    onPress={() => {
+                      setOriginSearchQuery("");
+                      setOriginPredictions([]);
+                    }}
+                  >
+                    <Ionicons
+                      name="close-circle"
+                      size={20}
+                      style={styles.icon}
+                    />
+                  </TouchableOpacity>
+                )
+              )}
+            </View>
+
+            {originPredictions.length > 0 && (
+              <FlatList
+                data={originPredictions}
+                keyExtractor={(item) => item.place_id}
+                style={styles.predictionsList}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    onPress={() =>
+                      handleOriginSelection(item.place_id, item.description)
+                    }
+                    style={styles.predictionItem}
+                  >
+                    <Ionicons
+                      name="location-outline"
+                      size={20}
+                      style={styles.icon}
+                    />
+                    <Text style={styles.predictionText}>
+                      {item.description}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              />
             )}
           </View>
 
-          {/* Origin Predictions */}
-          {originPredictions.length > 0 && (
-            <FlatList
-              data={originPredictions}
-              keyExtractor={(item) => item.place_id}
-              keyboardShouldPersistTaps="handled"
-              scrollEnabled={false}
-              style={styles.predictionsList}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  onPress={() =>
-                    handleOriginSelection(item.place_id, item.description)
-                  }
-                  style={styles.predictionItem}
-                >
-                  <Ionicons
-                    name="location-outline"
-                    size={20}
-                    color="#888"
-                    style={styles.icon}
-                  />
-                  <Text>{item.description}</Text>
-                </TouchableOpacity>
-              )}
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Destination</Text>
+            <TextInput
+              style={styles.roomInput}
+              placeholder="Enter classroom (e.g. H-920)"
+              value={destination}
+              onChangeText={parseDestination}
             />
-          )}
 
-          {/* Destination Input */}
-          <Text style={styles.label}>Destination Room</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter classroom (e.g. H-920)"
-            value={destination}
-            onChangeText={parseDestination}
-          />
+            {showBuildingSuggestions && (
+              <ScrollView style={styles.suggestionsContainer}>
+                {buildingSuggestions.map((item) => (
+                  <TouchableOpacity
+                    key={item.id}
+                    style={styles.suggestionItem}
+                    onPress={() => handleBuildingSelect(item)}
+                  >
+                    <Text style={styles.suggestionText}>
+                      {item.name} ({item.id})
+                    </Text>
+                    <Text style={styles.suggestionAddress}>{item.address}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            )}
+          </View>
 
-          {/* Building Suggestions */}
-          {showBuildingSuggestions && (
-            <View style={styles.suggestionsContainer}>
-              {buildingSuggestions.map((item) => (
-                <TouchableOpacity
-                  key={item.id}
-                  style={styles.suggestionItem}
-                  onPress={() => handleBuildingSelect(item)}
-                >
-                  <Text style={styles.suggestionText}>
-                    {item.name} ({item.id})
-                  </Text>
-                  <Text style={styles.suggestionAddress}>{item.address}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          )}
-
-          {/* Room Input - shown after building selection */}
           {building && (
-            <>
+            <View style={styles.inputGroup}>
               <Text style={styles.label}>Room Number</Text>
               <TextInput
-                style={styles.input}
+                style={styles.roomInput}
                 placeholder="Enter room number (e.g. 920)"
                 value={room.replace(/^[A-Za-z]+-/, "")}
                 onChangeText={(text) => setRoom(`${building.id}-${text}`)}
               />
-            </>
+            </View>
           )}
 
-          {/* Start Navigation Button */}
           <TouchableOpacity
             style={[
               styles.button,
@@ -1528,39 +1539,15 @@ const MultistepNavigationScreen = () => {
       <View style={styles.stepContentContainer}>
         <View style={styles.floorSelectorContainer}>
           <Text style={styles.floorSelectorLabel}>Floor:</Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={styles.floorSelector}
-          >
-            {["1", "2", "3", "4", "5", "6", "7", "8", "9"].map((floor) => (
-              <TouchableOpacity
-                key={`floor-${floor}`}
-                style={[
-                  styles.floorButton,
-                  currentFloor === floor && styles.floorButtonActive,
-                ]}
-                onPress={() => setCurrentFloor(floor)}
-              >
-                <Text
-                  style={[
-                    styles.floorButtonText,
-                    currentFloor === floor && styles.floorButtonTextActive,
-                  ]}
-                >
-                  {floor}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
         </View>
 
+        {/* Increase height of floor plan to give more space to directions */}
         <View style={styles.floorPlanContainer}>
           <TouchableOpacity
             style={styles.expandButton}
             onPress={() => setExpandedFloorPlan(true)}
           >
-            <Text style={styles.expandButtonText}>Expand Floor Plan</Text>
+            <MaterialIcons name="fullscreen" size={20} color="#912338" />
           </TouchableOpacity>
 
           <View style={styles.floorPlanWrapper}>
@@ -1570,39 +1557,51 @@ const MultistepNavigationScreen = () => {
               source={{ html: generateFloorPlanHtml() }}
               style={styles.floorPlanWebView}
               scrollEnabled={false}
+              onMessage={(event) =>
+                console.log("WebView message:", event.nativeEvent.data)
+              }
             />
           </View>
         </View>
 
+        {/* Optimize the directions container to show at most 3-4 items */}
         <View style={styles.directionsContainer}>
           <Text style={styles.directionsTitle}>Indoor Directions</Text>
 
           {loadingIndoorDirections ? (
-            <ActivityIndicator size="large" color="#800000" />
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="small" color="#912338" />
+              <Text style={styles.loadingText}>Loading directions...</Text>
+            </View>
           ) : indoorDirections.length > 0 ? (
-            <ScrollView style={styles.directionsList}>
-              {indoorDirections.map((direction, index) => (
-                <View key={`indoor-dir-${index}`} style={styles.directionItem}>
+            <FlatList
+              data={indoorDirections}
+              keyExtractor={(_, index) => `indoor-dir-${index}`}
+              style={[styles.directionsList, { maxHeight: 120 }]} // Reduce max height
+              renderItem={({ item, index }) => (
+                <View style={[styles.directionItem, { paddingVertical: 6 }]}>
                   <View
                     style={[
                       styles.stepDot,
-                      { backgroundColor: getStepColor(direction.type) },
+                      { backgroundColor: getStepColor(item.type) },
                     ]}
                   />
                   <View style={styles.directionContent}>
-                    <Text style={styles.directionText}>{direction.text}</Text>
-                    {direction.distance && (
-                      <Text style={styles.distanceText}>
-                        {direction.distance}
+                    <Text style={[styles.directionText, { fontSize: 14 }]}>
+                      {item.text}
+                    </Text>
+                    {item.distance && (
+                      <Text style={[styles.distanceText, { fontSize: 12 }]}>
+                        {item.distance}
                       </Text>
                     )}
                   </View>
                 </View>
-              ))}
-            </ScrollView>
+              )}
+            />
           ) : (
             <Text style={styles.noDirectionsText}>
-              No indoor directions available. Please try again.
+              No indoor directions available for this location.
             </Text>
           )}
         </View>
@@ -1652,9 +1651,14 @@ const MultistepNavigationScreen = () => {
       <View style={styles.navigationContainer}>
         <View style={styles.header}>
           <Text style={styles.title}>{navigationPlan.title}</Text>
-          <Text style={styles.stepCounter}>
-            Step {currentStepIndex + 1} of {navigationPlan.steps.length}
-          </Text>
+          <View
+            style={{ flexDirection: "row", alignItems: "center", marginTop: 2 }}
+          >
+            <MaterialIcons name="directions-walk" size={16} color="#666666" />
+            <Text style={[styles.subtitle, { marginLeft: 4 }]}>
+              Step {currentStepIndex + 1} of {navigationPlan.steps.length}
+            </Text>
+          </View>
         </View>
 
         <View style={styles.stepCard}>
@@ -1666,31 +1670,33 @@ const MultistepNavigationScreen = () => {
             : renderIndoorStep(currentStep)}
         </View>
 
-        <View style={styles.navigationControls}>
-          <TouchableOpacity
-            style={[
-              styles.navButton,
-              currentStepIndex === 0 && styles.disabledButton,
-            ]}
-            onPress={navigateToPreviousStep}
-            disabled={currentStepIndex === 0}
-          >
-            <MaterialIcons name="arrow-back" size={24} color="white" />
-            <Text style={styles.navButtonText}>Previous</Text>
-          </TouchableOpacity>
+        <View style={styles.navigationButtonsContainer}>
+          <View style={styles.navigationControls}>
+            <TouchableOpacity
+              style={[
+                styles.navigationButton,
+                currentStepIndex === 0 && styles.navigationButtonDisabled,
+              ]}
+              onPress={navigateToPreviousStep}
+              disabled={currentStepIndex === 0}
+            >
+              <MaterialIcons name="arrow-back" size={22} color="white" />
+              <Text style={styles.navigationButtonText}>Previous</Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity
-            style={[
-              styles.navButton,
-              currentStepIndex >= navigationPlan.steps.length - 1 &&
-                styles.disabledButton,
-            ]}
-            onPress={navigateToNextStep}
-            disabled={currentStepIndex >= navigationPlan.steps.length - 1}
-          >
-            <Text style={styles.navButtonText}>Next</Text>
-            <MaterialIcons name="arrow-forward" size={24} color="white" />
-          </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.navigationButton,
+                currentStepIndex >= navigationPlan.steps.length - 1 &&
+                  styles.navigationButtonDisabled,
+              ]}
+              onPress={navigateToNextStep}
+              disabled={currentStepIndex >= navigationPlan.steps.length - 1}
+            >
+              <Text style={styles.navigationButtonText}>Next</Text>
+              <MaterialIcons name="arrow-forward" size={22} color="white" />
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     );
@@ -1723,371 +1729,14 @@ const MultistepNavigationScreen = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      {navigationPlan ? renderNavigationSteps() : renderNavigationForm()}
-      {expandedMap && renderExpandedMap()}
-      {expandedFloorPlan && renderExpandedFloorPlan()}
+    <SafeAreaView style={[styles.container, { backgroundColor: "#f5f5f5" }]}>
+      <View style={[styles.content, { flex: 1 }]}>
+        {navigationPlan ? renderNavigationSteps() : renderNavigationForm()}
+        {expandedMap && renderExpandedMap()}
+        {expandedFloorPlan && renderExpandedFloorPlan()}
+      </View>
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f5f5f5",
-  },
-  formContainer: {
-    padding: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 10,
-    color: "#333",
-  },
-  subtitle: {
-    fontSize: 16,
-    marginBottom: 20,
-    color: "#666",
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 8,
-    color: "#333",
-  },
-  input: {
-    flex: 1,
-    height: 50,
-    fontSize: 16,
-    paddingHorizontal: 8,
-  },
-  searchBar: {
-    flexDirection: "row",
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    padding: 8,
-    marginBottom: 15,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    alignItems: "center",
-  },
-  icon: {
-    marginHorizontal: 10,
-  },
-  predictionsList: {
-    backgroundColor: "#fff",
-    marginTop: -15,
-    marginBottom: 15,
-    borderBottomLeftRadius: 8,
-    borderBottomRightRadius: 8,
-    borderWidth: 1,
-    borderTopWidth: 0,
-    borderColor: "#ddd",
-    maxHeight: 200,
-  },
-  predictionItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-  },
-  button: {
-    backgroundColor: "#800000", // Concordia maroon
-    borderRadius: 8,
-    padding: 16,
-    alignItems: "center",
-    marginVertical: 20,
-  },
-  disabledButton: {
-    backgroundColor: "#cccccc",
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "600",
-  },
-  suggestionsContainer: {
-    backgroundColor: "#fff",
-    marginBottom: 20,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    maxHeight: 200,
-  },
-  suggestionItem: {
-    padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-  },
-  suggestionText: {
-    fontSize: 16,
-  },
-  suggestionAddress: {
-    fontSize: 14,
-    color: "#666",
-  },
-  navigationContainer: {
-    flex: 1,
-    padding: 20,
-  },
-  header: {
-    marginBottom: 20,
-  },
-  stepCounter: {
-    fontSize: 16,
-    color: "#666",
-  },
-  stepCard: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 15,
-    marginBottom: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    flex: 1,
-  },
-  stepTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 15,
-    color: "#800000",
-  },
-  stepContentContainer: {
-    flex: 1,
-  },
-  stepDetail: {
-    fontSize: 16,
-    marginBottom: 8,
-    color: "#333",
-  },
-  mapContainer: {
-    height: 200,
-    marginBottom: 15,
-    borderRadius: 8,
-    overflow: "hidden",
-    borderWidth: 1,
-    borderColor: "#ddd",
-  },
-  mapWrapper: {
-    flex: 1,
-  },
-  mapWebView: {
-    flex: 1,
-    borderRadius: 8,
-  },
-  directionsContainer: {
-    flex: 1,
-    marginTop: 10,
-  },
-  directionsTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    marginBottom: 10,
-    color: "#333",
-  },
-  directionsList: {
-    flex: 1,
-  },
-  directionItem: {
-    flexDirection: "row",
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-  },
-  // Floor selector styles
-  floorSelectorContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 10,
-    paddingHorizontal: 5,
-  },
-  floorSelectorLabel: {
-    fontSize: 16,
-    fontWeight: "600",
-    marginRight: 10,
-  },
-  floorSelector: {
-    flexGrow: 1,
-  },
-  floorButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "#f0f0f0",
-    justifyContent: "center",
-    alignItems: "center",
-    marginHorizontal: 4,
-    borderWidth: 1,
-    borderColor: "#ddd",
-  },
-  floorButtonActive: {
-    backgroundColor: "#800000",
-    borderColor: "#800000",
-  },
-  floorButtonText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#333",
-  },
-  floorButtonTextActive: {
-    color: "#fff",
-  },
-
-  // Floor plan container styles
-  floorPlanContainer: {
-    height: 200,
-    marginBottom: 15,
-    borderRadius: 8,
-    overflow: "hidden",
-    borderWidth: 1,
-    borderColor: "#ddd",
-    backgroundColor: "#f9f9f9",
-  },
-  floorPlanWrapper: {
-    flex: 1,
-  },
-  floorPlanWebView: {
-    flex: 1,
-  },
-
-  // Indoor navigation styles
-  indoorInstructions: {
-    fontSize: 16,
-    lineHeight: 22,
-    color: "#333",
-    marginBottom: 15,
-  },
-  goToIndoorNavButton: {
-    backgroundColor: "#800000",
-    borderRadius: 8,
-    padding: 12,
-    alignItems: "center",
-    marginVertical: 15,
-  },
-  goToIndoorNavButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-
-  // Expanded view styles
-  expandButton: {
-    position: "absolute",
-    top: 5,
-    right: 5,
-    backgroundColor: "rgba(255, 255, 255, 0.8)",
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    borderRadius: 4,
-    zIndex: 10,
-  },
-  expandButtonText: {
-    color: "#800000",
-    fontSize: 12,
-    fontWeight: "600",
-  },
-  expandedModalOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 1000,
-  },
-  expandedModalContent: {
-    width: "90%",
-    height: "80%",
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    overflow: "hidden",
-  },
-  expandedHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-  },
-  expandedTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  closeExpandedButton: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: "#f0f0f0",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  closeExpandedText: {
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-  expandedWebView: {
-    flex: 1,
-  },
-
-  // Direction item styles
-  directionNumber: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: "#800000",
-    color: "#fff",
-    textAlign: "center",
-    lineHeight: 24,
-    marginRight: 10,
-    fontSize: 14,
-    fontWeight: "bold",
-  },
-  directionContent: {
-    flex: 1,
-  },
-  directionText: {
-    fontSize: 16,
-    marginBottom: 4,
-  },
-  distanceText: {
-    fontSize: 14,
-    color: "#666",
-  },
-  noDirectionsText: {
-    fontSize: 16,
-    color: "#666",
-    textAlign: "center",
-    marginTop: 20,
-  },
-  outdoorStep: {
-    padding: 8,
-  },
-  indoorStep: {
-    padding: 8,
-  },
-  stepDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: "#2196F3",
-    marginRight: 10,
-    marginTop: 5,
-  },
-  directionItem: {
-    flexDirection: "row",
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-    alignItems: "flex-start",
-  },
-});
 
 export default MultistepNavigationScreen;
