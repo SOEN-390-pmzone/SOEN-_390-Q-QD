@@ -21,6 +21,7 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import * as Crypto from "expo-crypto";
 import { useGoogleMapDirections } from "../../hooks/useGoogleMapDirections";
 import BuildingDataService from "../../services/BuildingDataService";
+import { visualizePath } from "../IndoorNavigation/PathVisualizer";
 
 // List of Concordia buildings for suggestions
 const CONCORDIA_BUILDINGS = [
@@ -149,6 +150,9 @@ const MultistepNavigationScreen = () => {
     console.log(
       `SVG Content available: ${svgContent ? "Yes (length: " + svgContent.length + ")" : "No"}`
     );
+
+    // Serialize path data for passing to WebView
+    const pathDataJson = JSON.stringify(indoorPath);
 
     return `
       <!DOCTYPE html>
@@ -326,6 +330,42 @@ const MultistepNavigationScreen = () => {
   
               // Highlight room if coordinates are available
               highlightRoom('${step.endRoom}');
+              
+              // Draw the navigation path
+              drawNavigationPath(svg);
+            }
+            
+            function drawNavigationPath(svg) {
+              try {
+                // Parse the path data provided from React Native
+                const pathData = ${pathDataJson || "[]"};
+                if (!pathData || pathData.length < 2) {
+                  window.ReactNativeWebView.postMessage('No path data available');
+                  return;
+                }
+                
+                window.ReactNativeWebView.postMessage('Drawing path with ' + pathData.length + ' points');
+                
+                // Create a path element
+                const svgNS = "http://www.w3.org/2000/svg";
+                const pathElement = document.createElementNS(svgNS, "path");
+                pathElement.classList.add("navigation-path");
+                
+                // Build the path data string
+                let pathString = "M";
+                pathData.forEach((point, index) => {
+                  pathString += \` \${point.x} \${point.y}\`;
+                  if (index === 0) pathString += " L";
+                });
+                
+                pathElement.setAttribute("d", pathString);
+                svg.appendChild(pathElement);
+                
+                window.ReactNativeWebView.postMessage('Path drawn successfully');
+              } catch (e) {
+                console.error('Error drawing path:', e);
+                window.ReactNativeWebView.postMessage('Error drawing path: ' + e.message);
+              }
             }
             
             function setupPanAndZoom(svg) {
@@ -559,6 +599,39 @@ const MultistepNavigationScreen = () => {
     `;
   };
 
+  const fetchIndoorPathData = (step) => {
+    if (step.type !== "indoor" || !step.endRoom) return;
+
+    // Extract building ID and room number
+    const buildingId = step.buildingId || "H";
+    const roomId = step.endRoom;
+    const floorNumber = currentFloor;
+
+    console.log(
+      `Fetching indoor path data for ${buildingId}, floor ${floorNumber}, to room ${roomId}`
+    );
+
+    // Simulated path data - replace with actual data from your navigation service
+    // In a real implementation, you would call a service to calculate the path
+    const samplePath = [
+      { x: 100, y: 100 },
+      { x: 150, y: 150 },
+      { x: 200, y: 150 },
+      { x: 250, y: 200 },
+      { x: 300, y: 250 },
+      { x: 350, y: 250 },
+      { x: 400, y: 300 },
+    ];
+
+    // For demo purposes, we'll generate a slightly different path for each floor
+    const modifiedPath = samplePath.map((point) => ({
+      x: point.x + parseInt(floorNumber) * 5,
+      y: point.y + parseInt(floorNumber) * 3,
+    }));
+
+    setIndoorPath(modifiedPath);
+  };
+
   const navigation = useNavigation();
   const route = useRoute();
   const GOOGLE_MAPS_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
@@ -594,6 +667,8 @@ const MultistepNavigationScreen = () => {
   const [currentFloor, setCurrentFloor] = useState("1");
   const [indoorDirections, setIndoorDirections] = useState([]);
   const [loadingIndoorDirections, setLoadingIndoorDirections] = useState(true);
+
+  const [indoorPath, setIndoorPath] = useState([]);
 
   // WebView refs
   const mapWebViewRef = useRef(null);
@@ -703,7 +778,6 @@ const MultistepNavigationScreen = () => {
     }
   };
 
-  // Update the indoorDirections array structure in the useEffect
   useEffect(() => {
     if (
       navigationPlan &&
@@ -712,10 +786,10 @@ const MultistepNavigationScreen = () => {
     ) {
       const step = navigationPlan.steps[currentStepIndex];
 
+      // Extract floor from room number (e.g., H-920 is on floor 9)
       let floorNumber = "1"; // Default floor
       const roomId = step.endRoom;
 
-      // Extract floor from room number (e.g., H-920 is on floor 9)
       const roomMatch = roomId.match(/[A-Za-z]+-?(\d)(\d+)/);
       if (roomMatch && roomMatch[1]) {
         floorNumber = roomMatch[1];
@@ -723,10 +797,13 @@ const MultistepNavigationScreen = () => {
 
       setCurrentFloor(floorNumber);
 
+      // Fetch indoor path data
+      fetchIndoorPathData(step);
+
       // Simulate loading indoor directions
       setLoadingIndoorDirections(true);
       setTimeout(() => {
-        // Enhanced indoor directions with step types
+        // Generate indoor directions with step types
         setIndoorDirections([
           {
             type: "start",
@@ -735,27 +812,33 @@ const MultistepNavigationScreen = () => {
           },
           {
             type: "elevator",
-            text: `Take the elevator to floor ${roomMatch?.[1] || "?"}`,
+            text: `Take the elevator to floor ${floorNumber}`,
             distance: "",
           },
           {
-            type: "walk",
-            text: `Turn right after exiting the elevator`,
-            distance: "10m",
+            type: "walking",
+            text: `Walk straight ahead through the main corridor`,
+            distance: "30m",
           },
           {
-            type: "walk",
-            text: `Walk straight ahead`,
+            type: "walking",
+            text: `Turn right at the end of the hallway`,
             distance: "15m",
           },
           {
-            type: "end",
-            text: `Your destination ${step.endRoom} will be on your left`,
+            type: "walking",
+            text: `Room ${step.endRoom} will be on your left side`,
             distance: "5m",
           },
+          {
+            type: "end",
+            text: `You have arrived at your destination: Room ${step.endRoom}`,
+            distance: "",
+          },
         ]);
+
         setLoadingIndoorDirections(false);
-      }, 1500);
+      }, 1000);
     }
   }, [navigationPlan, currentStepIndex]);
 
@@ -1394,16 +1477,16 @@ const MultistepNavigationScreen = () => {
 
           <View style={styles.mapWrapper}>
             <WebView
-              ref={floorPlanWebViewRef}
+              ref={mapWebViewRef}
               originWhitelist={["*"]}
-              source={{ html: generateFloorPlanHtml() }}
-              style={styles.floorPlanWebView}
+              source={{ html: generateMapHtml() }}
+              style={styles.mapWebView}
               scrollEnabled={false}
               onError={(e) => console.error("WebView error:", e.nativeEvent)}
               onMessage={(event) =>
                 console.log("WebView message:", event.nativeEvent.data)
               }
-              onLoadEnd={() => console.log("WebView loaded")}
+              onLoadEnd={() => console.log("Map WebView loaded")}
             />
           </View>
         </View>
