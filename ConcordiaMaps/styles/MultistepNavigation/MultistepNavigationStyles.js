@@ -176,6 +176,49 @@ const styles = StyleSheet.create({
     padding: 16,
     paddingBottom: 100,
   },
+  transitionInfoContainer: {
+    padding: 15,
+    alignItems: "center",
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    marginBottom: 15,
+  },
+  transitionInfoText: {
+    fontSize: 16,
+    textAlign: "center",
+    marginBottom: 15,
+  },
+  transportIconContainer: {
+    marginVertical: 15,
+    backgroundColor: "#f5f5f5",
+    padding: 15,
+    borderRadius: 50,
+  },
+  floorTransitionIndicator: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 15,
+  },
+  floorIndicator: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#912338",
+  },
+  transitionArrowContainer: {
+    marginHorizontal: 10,
+  },
+  visualizeButton: {
+    backgroundColor: "#912338",
+    paddingVertical: 12,
+    paddingHorizontal: 25,
+    borderRadius: 25,
+    marginTop: 10,
+  },
+  visualizeButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "500",
+  },
   navigationButton: {
     backgroundColor: "#912338",
     borderRadius: 12,

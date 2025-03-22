@@ -21,6 +21,7 @@ import * as Crypto from "expo-crypto";
 import { useGoogleMapDirections } from "../../hooks/useGoogleMapDirections";
 import BuildingDataService from "../../services/BuildingDataService";
 import styles from "../../styles/MultistepNavigation/MultistepNavigationStyles";
+import InterFloorNavigation from "../IndoorNavigation/InterFloorNavigation";
 
 // List of Concordia buildings for suggestions
 const CONCORDIA_BUILDINGS = [
@@ -64,7 +65,7 @@ const MultistepNavigationScreen = () => {
     // Debug output to show what's happening
     console.log(`Building ID: ${buildingId}, Floor: ${currentFloor}`);
     console.log(
-      `SVG Content available: ${svgContent ? "Yes (length: " + svgContent.length + ")" : "No"}`,
+      `SVG Content available: ${svgContent ? "Yes (length: " + svgContent.length + ")" : "No"}`
     );
 
     // Serialize path data for passing to WebView
@@ -518,34 +519,77 @@ const MultistepNavigationScreen = () => {
   const fetchIndoorPathData = (step) => {
     if (step.type !== "indoor" || !step.endRoom) return;
 
-    // Extract building ID and room number
+    // Extract building ID and room numbers
     const buildingId = step.buildingId || "H";
-    const roomId = step.endRoom;
+    const startRoom = step.startRoom || "entrance";
+    const endRoom = step.endRoom;
     const floorNumber = currentFloor;
 
     console.log(
-      `Fetching indoor path data for ${buildingId}, floor ${floorNumber}, to room ${roomId}`,
+      `Fetching indoor path data for ${buildingId}, floor ${floorNumber}, from ${startRoom} to ${endRoom}`
     );
 
-    // Simulated path data - replace with actual data from your navigation service
-    // In a real implementation, you would call a service to calculate the path
-    const samplePath = [
-      { x: 100, y: 100 },
-      { x: 150, y: 150 },
-      { x: 200, y: 150 },
-      { x: 250, y: 200 },
-      { x: 300, y: 250 },
-      { x: 350, y: 250 },
-      { x: 400, y: 300 },
-    ];
+    // Map building ID to building type
+    let buildingType = "HallBuilding"; // Default
 
-    // For demo purposes, we'll generate a slightly different path for each floor
-    const modifiedPath = samplePath.map((point) => ({
-      x: point.x + parseInt(floorNumber) * 5,
-      y: point.y + parseInt(floorNumber) * 3,
-    }));
+    if (buildingId === "H" || buildingId === "HALL") {
+      buildingType = "HallBuilding";
+    } else if (buildingId === "MB" || buildingId === "JMSB") {
+      buildingType = "JMSB";
+    } else if (buildingId === "EV") {
+      buildingType = "EVBuilding";
+    } else if (buildingId === "LB") {
+      buildingType = "Library";
+    }
 
-    setIndoorPath(modifiedPath);
+    try {
+      // Try to get path from building data service
+      const floorData = BuildingDataService.getFloor(buildingType, floorNumber);
+
+      if (floorData && floorData.getPathBetweenRooms) {
+        const path = floorData.getPathBetweenRooms(startRoom, endRoom);
+        if (path && path.length > 0) {
+          setIndoorPath(path);
+          return;
+        }
+      }
+
+      // Fallback to simple path generation if no specific path found
+      // Get room coordinates - implementation depends on your data structure
+      const startCoords = { x: 100 + parseInt(floorNumber) * 10, y: 100 };
+      const endCoords = { x: 300 + parseInt(floorNumber) * 10, y: 300 };
+
+      // Create a simple path with intermediate points
+      const simplePath = [
+        startCoords,
+        { x: (startCoords.x + endCoords.x) / 2, y: startCoords.y },
+        { x: (startCoords.x + endCoords.x) / 2, y: endCoords.y },
+        endCoords,
+      ];
+
+      setIndoorPath(simplePath);
+    } catch (error) {
+      console.error("Error generating indoor path:", error);
+
+      // Fallback to simple path if there's an error
+      const samplePath = [
+        { x: 100, y: 100 },
+        { x: 150, y: 150 },
+        { x: 200, y: 150 },
+        { x: 250, y: 200 },
+        { x: 300, y: 250 },
+        { x: 350, y: 250 },
+        { x: 400, y: 300 },
+      ];
+
+      // For demo purposes, we'll generate a slightly different path for each floor
+      const modifiedPath = samplePath.map((point) => ({
+        x: point.x + parseInt(floorNumber) * 5,
+        y: point.y + parseInt(floorNumber) * 3,
+      }));
+
+      setIndoorPath(modifiedPath);
+    }
   };
 
   const navigation = useNavigation();
@@ -566,10 +610,13 @@ const MultistepNavigationScreen = () => {
   const [originBuilding, setOriginBuilding] = useState(null);
   const [originRoom, setOriginRoom] = useState("");
   const [originBuildingSuggestions, setOriginBuildingSuggestions] = useState(
-    [],
+    []
   );
   const [showOriginBuildingSuggestions, setShowOriginBuildingSuggestions] =
     useState(false);
+
+  const [showInterFloorModal, setShowInterFloorModal] = useState(false);
+  const [currentTransitionStep, setCurrentTransitionStep] = useState(null);
 
   // Destination state
   const [destination, setDestination] = useState("");
@@ -620,13 +667,13 @@ const MultistepNavigationScreen = () => {
         locationParam = `&location=${userLocation.latitude},${userLocation.longitude}&radius=5000`;
       } else {
         console.warn(
-          "User location not available. Searching without location bias.",
+          "User location not available. Searching without location bias."
         );
       }
 
       // Use the session token to prevent caching of search results
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_MAPS_API_KEY}&components=country:ca${locationParam}&sessiontoken=${sessionTokenRef.current}`,
+        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_MAPS_API_KEY}&components=country:ca${locationParam}&sessiontoken=${sessionTokenRef.current}`
       );
 
       const { predictions } = await response.json();
@@ -638,10 +685,74 @@ const MultistepNavigationScreen = () => {
     }
   };
 
+  // Render transition step UI with floor transition visualization
+  const renderTransitionStep = (step) => {
+    // Extract parameters from step
+    const {
+      buildingId,
+      buildingType,
+      startFloor,
+      endFloor,
+      transportationType = "elevator",
+    } = step;
+
+    // Handle when the floor transition is complete
+    const handleTransitionComplete = () => {
+      // Mark step as complete if needed
+      if (step.onComplete && typeof step.onComplete === "function") {
+        step.onComplete();
+      }
+
+      // Move to next step if there is one
+      if (currentStepIndex < navigationPlan.steps.length - 1) {
+        navigateToNextStep();
+      }
+    };
+
+    return (
+      <View style={styles.stepContentContainer}>
+        <View style={styles.transitionInfoContainer}>
+          <Text style={styles.transitionInfoText}>
+            Take {transportationType} from Floor {startFloor} to Floor{" "}
+            {endFloor}
+          </Text>
+
+          <View style={styles.transportIconContainer}>
+            {transportationType === "elevator" ? (
+              <MaterialIcons name="elevator" size={48} color="#912338" />
+            ) : transportationType === "escalator" ? (
+              <MaterialIcons name="escalator" size={48} color="#912338" />
+            ) : (
+              <MaterialIcons name="stairs" size={48} color="#912338" />
+            )}
+          </View>
+
+          <View style={styles.floorTransitionIndicator}>
+            <Text style={styles.floorIndicator}>Floor {startFloor}</Text>
+            <View style={styles.transitionArrowContainer}>
+              <MaterialIcons name="arrow-downward" size={24} color="#666" />
+            </View>
+            <Text style={styles.floorIndicator}>Floor {endFloor}</Text>
+          </View>
+
+          <TouchableOpacity
+            style={styles.visualizeButton}
+            onPress={() => {
+              setCurrentTransitionStep(step);
+              setShowInterFloorModal(true);
+            }}
+          >
+            <Text style={styles.visualizeButtonText}>View Floor Plans</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  };
+
   const handleDestinationSelection = async (placeId, description) => {
     try {
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry,formatted_address&key=${GOOGLE_MAPS_API_KEY}&sessiontoken=${sessionTokenRef.current}`,
+        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry,formatted_address&key=${GOOGLE_MAPS_API_KEY}&sessiontoken=${sessionTokenRef.current}`
       );
       const { result } = await response.json();
 
@@ -694,11 +805,11 @@ const MultistepNavigationScreen = () => {
     try {
       const svg = BuildingDataService.getFloor(
         buildingType,
-        floorNumber,
+        floorNumber
       )?.getSVG();
 
       console.log(
-        `SVG found for ${buildingId} floor ${floorNumber}: ${svg ? "Yes" : "No"}`,
+        `SVG found for ${buildingId} floor ${floorNumber}: ${svg ? "Yes" : "No"}`
       );
 
       if (svg) {
@@ -710,7 +821,7 @@ const MultistepNavigationScreen = () => {
     } catch (error) {
       console.error(
         `Error getting SVG for ${buildingId} floor ${floorNumber}:`,
-        error,
+        error
       );
       return null;
     }
@@ -788,24 +899,62 @@ const MultistepNavigationScreen = () => {
       // Fetch indoor path data
       fetchIndoorPathData(step);
 
+      // Determine start location for directions
+      const startLocation = step.startRoom || "entrance";
+      const isStartingFromElevator =
+        startLocation.includes("ELEVATOR") ||
+        startLocation.includes("elevator");
+      const isStartingFromStairs =
+        startLocation.includes("STAIRS") || startLocation.includes("stairs");
+      const isStartingFromEntrance = startLocation === "entrance";
+
       // Simulate loading indoor directions
       setLoadingIndoorDirections(true);
       setTimeout(() => {
-        // Generate indoor directions with step types
-        setIndoorDirections([
-          {
+        // Generate appropriate directions based on starting point
+        let directions = [];
+
+        // First direction depends on starting point
+        if (isStartingFromEntrance) {
+          directions.push({
             type: "start",
             text: `Enter ${step.buildingId} Building through the main entrance`,
             distance: "",
-          },
-          {
+          });
+        } else if (isStartingFromElevator) {
+          directions.push({
+            type: "start",
+            text: `Start from the elevator on floor ${floorNumber}`,
+            distance: "",
+          });
+        } else if (isStartingFromStairs) {
+          directions.push({
+            type: "start",
+            text: `Start from the stairwell on floor ${floorNumber}`,
+            distance: "",
+          });
+        } else {
+          directions.push({
+            type: "start",
+            text: `Start from room ${startLocation}`,
+            distance: "",
+          });
+        }
+
+        // Only add elevator instruction if starting from entrance and not on the ground floor
+        if (isStartingFromEntrance && floorNumber !== "1") {
+          directions.push({
             type: "elevator",
             text: `Take the elevator to floor ${floorNumber}`,
             distance: "",
-          },
+          });
+        }
+
+        // Add navigation steps
+        directions.push(
           {
             type: "walking",
-            text: `Walk straight ahead through the main corridor`,
+            text: `Walk ${isStartingFromEntrance ? "straight ahead" : "forward"} through the main corridor`,
             distance: "30m",
           },
           {
@@ -822,9 +971,10 @@ const MultistepNavigationScreen = () => {
             type: "end",
             text: `You have arrived at your destination: Room ${step.endRoom}`,
             distance: "",
-          },
-        ]);
+          }
+        );
 
+        setIndoorDirections(directions);
         setLoadingIndoorDirections(false);
       }, 1000);
     }
@@ -879,7 +1029,7 @@ const MultistepNavigationScreen = () => {
         // If startPoint is an address, try to geocode it
         try {
           const geocodeResponse = await fetch(
-            `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(step.startPoint)}&key=${GOOGLE_MAPS_API_KEY}`,
+            `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(step.startPoint)}&key=${GOOGLE_MAPS_API_KEY}`
           );
           const geocodeData = await geocodeResponse.json();
 
@@ -925,7 +1075,7 @@ const MultistepNavigationScreen = () => {
           const startBuilding = CONCORDIA_BUILDINGS.find(
             (b) =>
               b.id.toUpperCase() === step.startPoint.toUpperCase() ||
-              b.name.toUpperCase().includes(step.startPoint.toUpperCase()),
+              b.name.toUpperCase().includes(step.startPoint.toUpperCase())
           );
 
           if (startBuilding) {
@@ -941,7 +1091,7 @@ const MultistepNavigationScreen = () => {
             }
             console.log(
               `Using hardcoded coordinates for ${startBuilding.id}:`,
-              originCoords,
+              originCoords
             );
           } else {
             // Last resort fallback - should rarely happen
@@ -967,7 +1117,7 @@ const MultistepNavigationScreen = () => {
         if (typeof step.endPoint === "string") {
           // Check if it's a building ID first
           const destinationBuilding = CONCORDIA_BUILDINGS.find(
-            (b) => b.id === step.endPoint,
+            (b) => b.id === step.endPoint
           );
 
           if (destinationBuilding) {
@@ -990,7 +1140,7 @@ const MultistepNavigationScreen = () => {
               // Try to geocode the building address
               try {
                 const geocoded = await getStepsInHTML.geocodeAddress(
-                  destinationBuilding.address,
+                  destinationBuilding.address
                 );
                 if (geocoded) {
                   destinationCoords = geocoded;
@@ -1003,7 +1153,7 @@ const MultistepNavigationScreen = () => {
             // If not a building ID, try to geocode as address
             try {
               const geocoded = await getStepsInHTML.geocodeAddress(
-                step.endPoint,
+                step.endPoint
               );
               if (geocoded) {
                 destinationCoords = geocoded;
@@ -1028,19 +1178,19 @@ const MultistepNavigationScreen = () => {
         "Fetching directions from",
         originCoords,
         "to",
-        destinationCoords,
+        destinationCoords
       );
 
       // Get directions and polyline using your existing hook
       const directions = await getStepsInHTML(
         originCoords,
         destinationCoords,
-        "walking",
+        "walking"
       );
       const route = await getPolyline(
         originCoords,
         destinationCoords,
-        "walking",
+        "walking"
       );
 
       setOutdoorDirections(directions);
@@ -1067,13 +1217,13 @@ const MultistepNavigationScreen = () => {
         locationParam = `&location=${userLocation.latitude},${userLocation.longitude}&radius=5000`;
       } else {
         console.warn(
-          "User location not available. Searching without location bias.",
+          "User location not available. Searching without location bias."
         );
       }
 
       // Use the session token to prevent caching of search results
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_MAPS_API_KEY}&components=country:ca${locationParam}&sessiontoken=${sessionTokenRef.current}`,
+        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_MAPS_API_KEY}&components=country:ca${locationParam}&sessiontoken=${sessionTokenRef.current}`
       );
 
       const { predictions } = await response.json();
@@ -1089,7 +1239,7 @@ const MultistepNavigationScreen = () => {
   const handleOriginSelection = async (placeId, description) => {
     try {
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry,formatted_address&key=${GOOGLE_MAPS_API_KEY}&sessiontoken=${sessionTokenRef.current}`,
+        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry,formatted_address&key=${GOOGLE_MAPS_API_KEY}&sessiontoken=${sessionTokenRef.current}`
       );
       const { result } = await response.json();
       if (result?.geometry?.location) {
@@ -1116,7 +1266,7 @@ const MultistepNavigationScreen = () => {
     const filtered = CONCORDIA_BUILDINGS.filter(
       (building) =>
         building.name.toLowerCase().includes(text.toLowerCase()) ||
-        building.id.toLowerCase().includes(text.toLowerCase()),
+        building.id.toLowerCase().includes(text.toLowerCase())
     );
     setBuildingSuggestions(filtered);
     setShowBuildingSuggestions(filtered.length > 0);
@@ -1127,7 +1277,7 @@ const MultistepNavigationScreen = () => {
     const filtered = CONCORDIA_BUILDINGS.filter(
       (building) =>
         building.name.toLowerCase().includes(text.toLowerCase()) ||
-        building.id.toLowerCase().includes(text.toLowerCase()),
+        building.id.toLowerCase().includes(text.toLowerCase())
     );
     setOriginBuildingSuggestions(filtered);
     setShowOriginBuildingSuggestions(filtered.length > 0);
@@ -1153,7 +1303,7 @@ const MultistepNavigationScreen = () => {
 
       // Find building details
       const foundBuilding = CONCORDIA_BUILDINGS.find(
-        (b) => b.id === buildingCode,
+        (b) => b.id === buildingCode
       );
 
       if (foundBuilding) {
@@ -1200,7 +1350,7 @@ const MultistepNavigationScreen = () => {
 
       // Find building details
       const foundBuilding = CONCORDIA_BUILDINGS.find(
-        (b) => b.id === buildingCode,
+        (b) => b.id === buildingCode
       );
 
       if (foundBuilding) {
@@ -1291,7 +1441,7 @@ const MultistepNavigationScreen = () => {
         originAddress,
         destinationBuildingId,
         destinationRoomId,
-        { buildingName: building.name },
+        { buildingName: building.name }
       );
     }
     // Case 2: Classroom to Classroom (both in same building)
@@ -1307,7 +1457,7 @@ const MultistepNavigationScreen = () => {
         {
           title: `Navigate from ${originRoomId} to ${destinationRoomId}`,
           buildingName: originBuilding.name,
-        },
+        }
       );
     }
     // Case 3: Classroom to Classroom (different buildings)
@@ -1480,7 +1630,7 @@ const MultistepNavigationScreen = () => {
         acc.longitude += point.longitude / outdoorRoute.length;
         return acc;
       },
-      { latitude: 0, longitude: 0 },
+      { latitude: 0, longitude: 0 }
     );
 
     // Convert route to Google Maps format
@@ -1811,16 +1961,15 @@ const MultistepNavigationScreen = () => {
                     )
                   )}
                 </View>
-
                 {destinationPredictions.length > 0 && (
-                  <View style={styles.predictionsList}>
-                    {originPredictions.map((item) => (
+                  <ScrollView style={styles.predictionsList}>
+                    {destinationPredictions.map((item) => (
                       <TouchableOpacity
                         key={item.place_id}
                         onPress={() =>
                           handleDestinationSelection(
                             item.place_id,
-                            item.description,
+                            item.description
                           )
                         }
                         style={styles.predictionItem}
@@ -1835,7 +1984,7 @@ const MultistepNavigationScreen = () => {
                         </Text>
                       </TouchableOpacity>
                     ))}
-                  </View>
+                  </ScrollView>
                 )}
               </>
             ) : (
@@ -2104,10 +2253,16 @@ const MultistepNavigationScreen = () => {
         <View style={styles.stepCard}>
           <Text style={styles.stepTitle}>{currentStep.title}</Text>
 
-          {/* Display step details */}
-          {currentStep.type === "outdoor"
-            ? renderOutdoorStep(currentStep)
-            : renderIndoorStep(currentStep)}
+          {/* Display step details based on type */}
+          {currentStep.type === "outdoor" ? (
+            renderOutdoorStep(currentStep)
+          ) : currentStep.type === "indoor" ? (
+            renderIndoorStep(currentStep)
+          ) : currentStep.type === "transition" ? (
+            renderTransitionStep(currentStep)
+          ) : (
+            <Text>Unknown step type: {currentStep.type}</Text>
+          )}
         </View>
 
         <View style={styles.navigationButtonsContainer}>
@@ -2174,6 +2329,16 @@ const MultistepNavigationScreen = () => {
         {navigationPlan ? renderNavigationSteps() : renderNavigationForm()}
         {expandedMap && renderExpandedMap()}
         {expandedFloorPlan && renderExpandedFloorPlan()}
+
+        {/* Add the InterFloorNavigation modal here */}
+        <InterFloorNavigation
+          isVisible={showInterFloorModal}
+          onClose={() => setShowInterFloorModal(false)}
+          startFloor={currentTransitionStep?.startFloor}
+          endFloor={currentTransitionStep?.endFloor}
+          buildingType={currentTransitionStep?.buildingType}
+          onPathCalculated={() => {}} // Optional callback when path is calculated
+        />
       </View>
     </SafeAreaView>
   );
