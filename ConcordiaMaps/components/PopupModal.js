@@ -68,7 +68,7 @@ const PopupModal = ({ isVisible, data, onClose, navigation }) => {
             {hasIndoorNavigation && (
               <TouchableOpacity
                 style={styles.getDirectionsButton}
-                onPress={handleFloorSelector()}
+                onPress={handleFloorSelector}
               >
                 <Text style={styles.getDirectionsButtonText}>
                   Floor Selector
