@@ -7,7 +7,7 @@ import FloorRegistry from "../../services/BuildingDataService";
 import Header from "../Header";
 import NavBar from "../NavBar";
 import styles from "../../styles/IndoorNavigation/RoomtoRoomNavigationStyles";
-import ExpandedFloorPlanModal from "./ExpandedFloorPlanModal";
+import ExpandedFloorPlanModal from "./ExpandedFloorPlan";
 
 const RoomToRoomNavigation = () => {
   const route = useRoute();
