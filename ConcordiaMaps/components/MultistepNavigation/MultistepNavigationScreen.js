@@ -25,17 +25,27 @@ import InterFloorNavigation from "../IndoorNavigation/InterFloorNavigation";
 
 // List of Concordia buildings for suggestions
 const CONCORDIA_BUILDINGS = [
-  { id: "H", name: "Hall Building", address: "1455 De Maisonneuve Blvd. W." },
+  {
+    id: "H",
+    name: "Hall Building",
+    address: "1455 De Maisonneuve Blvd. Ouest",
+    latitude: 45.497092,
+    longitude: -73.5788,
+  },
   {
     id: "LB",
     name: "J.W. McConnell Building",
-    address: "1400 De Maisonneuve Blvd. W.",
+    address: "1400 De Maisonneuve Blvd. Ouest",
   },
-  { id: "MB", name: "John Molson Building", address: "1450 Guy St." },
+  {
+    id: "MB",
+    name: "John Molson Building",
+    address: "1450 Guy St.",
+  },
   {
     id: "EV",
     name: "Engineering & Visual Arts Complex",
-    address: "1515 St. Catherine St. W.",
+    address: "1515 St. Catherine St. Ouest",
   },
 ];
 
@@ -885,13 +895,20 @@ const MultistepNavigationScreen = () => {
     ) {
       const step = navigationPlan.steps[currentStepIndex];
 
-      // Extract floor from room number (e.g., H-920 is on floor 9)
+      // Extract floor from room number
       let floorNumber = "1"; // Default floor
       const roomId = step.endRoom;
 
-      const roomMatch = roomId.match(/[A-Za-z]+-?(\d)(\d+)/);
-      if (roomMatch && roomMatch[1]) {
-        floorNumber = roomMatch[1];
+      // Try to extract floor number from room, unless it's an elevator/entrance
+      if (
+        roomId !== "ELEVATOR" &&
+        roomId !== "entrance" &&
+        roomId !== "STAIRS"
+      ) {
+        const roomMatch = roomId.match(/[A-Za-z]+-?(\d)(\d+)/);
+        if (roomMatch && roomMatch[1]) {
+          floorNumber = roomMatch[1];
+        }
       }
 
       setCurrentFloor(floorNumber);
@@ -901,6 +918,8 @@ const MultistepNavigationScreen = () => {
 
       // Determine start location for directions
       const startLocation = step.startRoom || "entrance";
+      const endLocation = step.endRoom;
+
       const isStartingFromElevator =
         startLocation.includes("ELEVATOR") ||
         startLocation.includes("elevator");
@@ -908,10 +927,16 @@ const MultistepNavigationScreen = () => {
         startLocation.includes("STAIRS") || startLocation.includes("stairs");
       const isStartingFromEntrance = startLocation === "entrance";
 
+      const isGoingToElevator =
+        endLocation.includes("ELEVATOR") || endLocation.includes("elevator");
+      const isGoingToStairs =
+        endLocation.includes("STAIRS") || endLocation.includes("stairs");
+      const isGoingToEntrance = endLocation === "entrance";
+
       // Simulate loading indoor directions
       setLoadingIndoorDirections(true);
       setTimeout(() => {
-        // Generate appropriate directions based on starting point
+        // Generate appropriate directions based on starting point and destination
         let directions = [];
 
         // First direction depends on starting point
@@ -941,38 +966,80 @@ const MultistepNavigationScreen = () => {
           });
         }
 
-        // Only add elevator instruction if starting from entrance and not on the ground floor
-        if (isStartingFromEntrance && floorNumber !== "1") {
-          directions.push({
-            type: "elevator",
-            text: `Take the elevator to floor ${floorNumber}`,
-            distance: "",
-          });
-        }
-
-        // Add navigation steps
-        directions.push(
-          {
-            type: "walking",
-            text: `Walk ${isStartingFromEntrance ? "straight ahead" : "forward"} through the main corridor`,
-            distance: "30m",
-          },
-          {
-            type: "walking",
-            text: `Turn right at the end of the hallway`,
-            distance: "15m",
-          },
-          {
-            type: "walking",
-            text: `Room ${step.endRoom} will be on your left side`,
-            distance: "5m",
-          },
-          {
-            type: "end",
-            text: `You have arrived at your destination: Room ${step.endRoom}`,
-            distance: "",
+        // Middle directions depend on destination type
+        if (isGoingToElevator) {
+          directions.push(
+            {
+              type: "walking",
+              text: `Walk ${isStartingFromEntrance ? "straight ahead" : "forward"} through the corridor`,
+              distance: "25m",
+            },
+            {
+              type: "walking",
+              text: `Turn left at the intersection`,
+              distance: "10m",
+            },
+            {
+              type: "end",
+              text: `You've reached the elevator`,
+              distance: "",
+            }
+          );
+        } else if (isGoingToEntrance) {
+          directions.push(
+            {
+              type: "walking",
+              text: isStartingFromElevator
+                ? "Exit the elevator and turn right"
+                : "Proceed down the main corridor",
+              distance: "20m",
+            },
+            {
+              type: "walking",
+              text: "Follow the exit signs toward the main entrance",
+              distance: "15m",
+            },
+            {
+              type: "end",
+              text: "You've reached the building exit",
+              distance: "",
+            }
+          );
+        } else {
+          // Regular classroom destination
+          // Only add elevator instruction if starting from entrance and not on the ground floor
+          if (isStartingFromEntrance && floorNumber !== "1") {
+            directions.push({
+              type: "elevator",
+              text: `Take the elevator to floor ${floorNumber}`,
+              distance: "",
+            });
           }
-        );
+
+          // Add classroom navigation steps
+          directions.push(
+            {
+              type: "walking",
+              text: `Walk ${isStartingFromEntrance || isStartingFromElevator ? "straight ahead" : "forward"} through the main corridor`,
+              distance: "30m",
+            },
+            {
+              type: "walking",
+              text: `Turn right at the end of the hallway`,
+              distance: "15m",
+            },
+            {
+              type: "walking",
+              text: `Room ${step.endRoom} will be on your left side`,
+              distance: "5m",
+            },
+            {
+              type: "end",
+              text: `You have arrived at your destination: Room ${step.endRoom}`,
+              distance: "",
+            }
+          );
+        }
 
         setIndoorDirections(directions);
         setLoadingIndoorDirections(false);
@@ -1028,8 +1095,9 @@ const MultistepNavigationScreen = () => {
       if (step.startPoint && typeof step.startPoint === "string") {
         // If startPoint is an address, try to geocode it
         try {
+          // Add region and components parameters to bias results to Montreal, Canada
           const geocodeResponse = await fetch(
-            `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(step.startPoint)}&key=${GOOGLE_MAPS_API_KEY}`
+            `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(step.startPoint)}&key=${GOOGLE_MAPS_API_KEY}&region=ca&components=country:ca|locality:montreal`
           );
           const geocodeData = await geocodeResponse.json();
 
@@ -1066,48 +1134,35 @@ const MultistepNavigationScreen = () => {
       }
 
       // Only fall back to user location if we still don't have valid coordinates
-      if (!originCoords) {
-        if (userLocation && userLocation.latitude && userLocation.longitude) {
-          originCoords = userLocation;
-          console.log("Using user location as fallback:", originCoords);
-        } else if (step.startPoint && typeof step.startPoint === "string") {
-          // Try to use a building ID if possible
-          const startBuilding = CONCORDIA_BUILDINGS.find(
-            (b) =>
-              b.id.toUpperCase() === step.startPoint.toUpperCase() ||
-              b.name.toUpperCase().includes(step.startPoint.toUpperCase())
-          );
+      if (
+        !originCoords &&
+        step.startPoint &&
+        typeof step.startPoint === "string"
+      ) {
+        // Try to use a building ID if possible
+        const startBuilding = CONCORDIA_BUILDINGS.find(
+          (b) =>
+            b.id.toUpperCase() === step.startPoint.toUpperCase() ||
+            step.startPoint.toUpperCase().includes(b.id.toUpperCase()) ||
+            b.name.toUpperCase().includes(step.startPoint.toUpperCase()) ||
+            step.startPoint.toUpperCase().includes(b.name.toUpperCase())
+        );
 
-          if (startBuilding) {
-            // Use hardcoded coordinates for known buildings
-            if (startBuilding.id === "H") {
-              originCoords = { latitude: 45.497095, longitude: -73.57878 };
-            } else if (startBuilding.id === "MB") {
-              originCoords = { latitude: 45.495304, longitude: -73.577893 };
-            } else if (startBuilding.id === "EV") {
-              originCoords = { latitude: 45.495655, longitude: -73.578025 };
-            } else if (startBuilding.id === "LB") {
-              originCoords = { latitude: 45.49674, longitude: -73.57785 };
-            }
-            console.log(
-              `Using hardcoded coordinates for ${startBuilding.id}:`,
-              originCoords
-            );
-          } else {
-            // Last resort fallback - should rarely happen
-            console.warn("No valid origin coordinates found, using default");
-            originCoords = {
-              latitude: 45.497095,
-              longitude: -73.57878,
-            };
+        if (startBuilding) {
+          // Use hardcoded coordinates for known buildings
+          if (startBuilding.id === "H") {
+            originCoords = { latitude: 45.497092, longitude: -73.5788 };
+          } else if (startBuilding.id === "MB") {
+            originCoords = { latitude: 45.495304, longitude: -73.577893 };
+          } else if (startBuilding.id === "EV") {
+            originCoords = { latitude: 45.495655, longitude: -73.578025 };
+          } else if (startBuilding.id === "LB") {
+            originCoords = { latitude: 45.49674, longitude: -73.57785 };
           }
-        } else {
-          // Last resort fallback - should rarely happen
-          console.warn("No valid origin coordinates found, using default");
-          originCoords = {
-            latitude: 45.497095,
-            longitude: -73.57878,
-          };
+          console.log(
+            `Using hardcoded coordinates for ${startBuilding.id}:`,
+            originCoords
+          );
         }
       }
 
@@ -1117,17 +1172,16 @@ const MultistepNavigationScreen = () => {
         if (typeof step.endPoint === "string") {
           // Check if it's a building ID first
           const destinationBuilding = CONCORDIA_BUILDINGS.find(
-            (b) => b.id === step.endPoint
+            (b) => b.id === step.endPoint || b.name.includes(step.endPoint)
           );
 
           if (destinationBuilding) {
-            // For demo purposes - in real implementation you'd geocode the address
             if (destinationBuilding.id === "H") {
-              destinationCoords = { latitude: 45.497095, longitude: -73.57878 };
+              destinationCoords = { latitude: 45.497092, longitude: -73.5788 };
             } else if (destinationBuilding.id === "MB") {
               destinationCoords = {
                 latitude: 45.495304,
-                longitude: -73.577893,
+                longitude: -73.579044,
               };
             } else if (destinationBuilding.id === "EV") {
               destinationCoords = {
@@ -1139,11 +1193,17 @@ const MultistepNavigationScreen = () => {
             } else {
               // Try to geocode the building address
               try {
-                const geocoded = await getStepsInHTML.geocodeAddress(
-                  destinationBuilding.address
+                const geocodeResponse = await fetch(
+                  `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(step.endPoint)}&key=${GOOGLE_MAPS_API_KEY}&region=ca&components=country:ca|locality:montreal`
                 );
-                if (geocoded) {
-                  destinationCoords = geocoded;
+                const geocodeData = await geocodeResponse.json();
+
+                if (geocodeData.results && geocodeData.results.length > 0) {
+                  const location = geocodeData.results[0].geometry.location;
+                  destinationCoords = {
+                    latitude: location.lat,
+                    longitude: location.lng,
+                  };
                 }
               } catch (error) {
                 console.error("Failed to geocode building address:", error);
@@ -1152,11 +1212,17 @@ const MultistepNavigationScreen = () => {
           } else {
             // If not a building ID, try to geocode as address
             try {
-              const geocoded = await getStepsInHTML.geocodeAddress(
-                step.endPoint
+              const geocodeResponse = await fetch(
+                `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(step.endPoint)}&key=${GOOGLE_MAPS_API_KEY}&region=ca&components=country:ca|locality:montreal`
               );
-              if (geocoded) {
-                destinationCoords = geocoded;
+              const geocodeData = await geocodeResponse.json();
+
+              if (geocodeData.results && geocodeData.results.length > 0) {
+                const location = geocodeData.results[0].geometry.location;
+                destinationCoords = {
+                  latitude: location.lat,
+                  longitude: location.lng,
+                };
               }
             } catch (error) {
               console.error("Failed to geocode destination address:", error);
@@ -1193,10 +1259,49 @@ const MultistepNavigationScreen = () => {
         "walking"
       );
 
-      setOutdoorDirections(directions);
-      setOutdoorRoute(route);
+      if (directions && directions.length > 0) {
+        // Format directions with better text
+        const formattedDirections = directions.map((direction) => {
+          let text = parseHtmlInstructions(direction.html_instructions);
+
+          // Improve clarity for building navigation context
+          if (text.includes("Destination")) {
+            const destBuildingName =
+              step.endAddress && typeof step.endAddress === "string"
+                ? step.endAddress.split(",")[0]
+                : step.endPoint;
+            text = `You've arrived at ${destBuildingName}. Enter the building.`;
+          }
+
+          return {
+            ...direction,
+            formatted_text: text,
+          };
+        });
+
+        setOutdoorDirections(formattedDirections);
+      } else {
+        setOutdoorDirections([
+          {
+            distance: "approx. 250m",
+            html_instructions: `Walk from ${step.startAddress || "starting location"} to ${step.endAddress || "destination building"}`,
+            formatted_text: `Walk from ${step.startAddress || "starting location"} to ${step.endAddress || "destination building"}`,
+          },
+        ]);
+      }
+
+      setOutdoorRoute(route || []);
     } catch (error) {
       console.error("Error fetching outdoor directions:", error);
+
+      // Provide fallback directions even if there's an error
+      setOutdoorDirections([
+        {
+          distance: "Unknown distance",
+          html_instructions: `Walk from ${step.startAddress || "starting location"} to ${step.endAddress || "destination building"}`,
+          formatted_text: `Walk from ${step.startAddress || "starting location"} to ${step.endAddress || "destination building"}`,
+        },
+      ]);
     } finally {
       setLoadingDirections(false);
     }
@@ -1323,9 +1428,8 @@ const MultistepNavigationScreen = () => {
 
     if (!building) return null;
 
-    // For demo purposes - in real implementation you'd have a more complete mapping
     if (building.id === "H") {
-      coordinates = { latitude: 45.497095, longitude: -73.57878 };
+      coordinates = { latitude: 45.497092, longitude: -73.5788 };
     } else if (building.id === "MB") {
       coordinates = { latitude: 45.495304, longitude: -73.577893 };
     } else if (building.id === "EV") {
@@ -1465,38 +1569,107 @@ const MultistepNavigationScreen = () => {
       originInputType === "classroom" &&
       destinationInputType === "classroom"
     ) {
-      // Create a multi-building navigation plan
+      // Extract floor numbers to determine if elevator steps are needed
+      const originFloorMatch = originRoom.match(/[A-Za-z]+-?(\d)(\d+)/);
+      const destFloorMatch = room.match(/[A-Za-z]+-?(\d)(\d+)/);
+
+      const originFloor = originFloorMatch ? originFloorMatch[1] : "1";
+      const destFloor = destFloorMatch ? destFloorMatch[1] : "1";
+
+      // Create navigation steps
+      const steps = [];
+
+      // Step 1: If not on ground floor, first navigate to elevator
+      if (originFloor !== "1") {
+        steps.push({
+          type: "indoor",
+          title: `Navigate to elevator in ${originBuilding.name}`,
+          buildingId: originBuildingId,
+          startRoom: originRoomId,
+          endRoom: "ELEVATOR",
+          isComplete: false,
+          description: `Navigate from room ${originRoomId} to the elevator`,
+        });
+
+        // Step 2: Take elevator down to ground floor
+        steps.push({
+          type: "transition",
+          title: `Take elevator to ground floor`,
+          buildingId: originBuildingId,
+          buildingType: originBuildingId, // This will be mapped to the right type
+          transportationType: "elevator",
+          startFloor: originFloor,
+          endFloor: "1",
+          isComplete: false,
+          description: `Take the elevator from floor ${originFloor} to ground floor`,
+        });
+      }
+
+      // Step 3: Navigate to building exit
+      steps.push({
+        type: "indoor",
+        title: `Exit ${originBuilding.name}`,
+        buildingId: originBuildingId,
+        startRoom: originFloor !== "1" ? "ELEVATOR" : originRoomId,
+        endRoom: "entrance",
+        isComplete: false,
+        description: `Navigate to the main entrance`,
+      });
+
+      // Step 4: Walk to destination building
+      steps.push({
+        type: "outdoor",
+        title: `Walk to ${building.name}`,
+        startPoint: originBuilding.address,
+        endPoint: building.address,
+        startAddress: originBuilding.address,
+        endAddress: building.address,
+        isComplete: false,
+        description: `Walk from ${originBuilding.name} to ${building.name}`,
+      });
+
+      // Step 5: Enter destination building
+      steps.push({
+        type: "indoor",
+        title: `Enter ${building.name}`,
+        buildingId: destinationBuildingId,
+        startRoom: "entrance",
+        endRoom: destFloor !== "1" ? "ELEVATOR" : destinationRoomId,
+        isComplete: false,
+        description: `Navigate from the entrance${destFloor !== "1" ? " to the elevator" : " toward your destination"}`,
+      });
+
+      // Step 6: If destination not on ground floor, take elevator
+      if (destFloor !== "1") {
+        steps.push({
+          type: "transition",
+          title: `Take elevator to floor ${destFloor}`,
+          buildingId: destinationBuildingId,
+          buildingType: destinationBuildingId, // Will be mapped correctly
+          transportationType: "elevator",
+          startFloor: "1",
+          endFloor: destFloor,
+          isComplete: false,
+          description: `Take the elevator from ground floor to floor ${destFloor}`,
+        });
+
+        // Step 7: Navigate from elevator to destination room
+        steps.push({
+          type: "indoor",
+          title: `Find ${destinationRoomId}`,
+          buildingId: destinationBuildingId,
+          startRoom: "ELEVATOR",
+          endRoom: destinationRoomId,
+          isComplete: false,
+          description: `Navigate from the elevator to room ${destinationRoomId}`,
+        });
+      }
+
+      // Create the complete navigation plan
       route = {
         title: `Navigate from ${originRoomId} to ${destinationRoomId}`,
         currentStep: 0,
-        steps: [
-          // Step 1: Exit origin building
-          {
-            type: "indoor",
-            title: `Exit ${originBuilding.name}`,
-            buildingId: originBuildingId,
-            startRoom: originRoomId,
-            endRoom: "entrance", // Navigate to building entrance
-            isComplete: false,
-          },
-          // Step 2: Walk to destination building
-          {
-            type: "outdoor",
-            title: `Walk to ${building.name}`,
-            startPoint: originBuilding.address,
-            endPoint: building.address,
-            isComplete: false,
-          },
-          // Step 3: Navigate to destination room
-          {
-            type: "indoor",
-            title: `Find ${destinationRoomId} in ${building.name}`,
-            buildingId: destinationBuildingId,
-            startRoom: "entrance",
-            endRoom: destinationRoomId,
-            isComplete: false,
-          },
-        ],
+        steps: steps,
       };
     }
     // Case 4: Location to Location (outdoor only)
@@ -1562,7 +1735,6 @@ const MultistepNavigationScreen = () => {
   };
 
   // Handle navigation through the steps
-  // Replace the navigateToNextStep function with this implementation
   const navigateToNextStep = () => {
     if (!navigationPlan || currentStepIndex >= navigationPlan.steps.length - 1)
       return;
@@ -1574,6 +1746,16 @@ const MultistepNavigationScreen = () => {
     updatedPlan.steps[currentStepIndex].isComplete = true;
     updatedPlan.currentStep = currentStepIndex + 1;
 
+    // Clear previous step data
+    setIndoorDirections([]);
+    setIndoorPath([]);
+    setOutdoorDirections([]);
+    setOutdoorRoute([]);
+
+    // Reset loading states
+    setLoadingDirections(true);
+    setLoadingIndoorDirections(true);
+
     // Update state with the new copy
     setNavigationPlan(updatedPlan);
     setCurrentStepIndex(currentStepIndex + 1);
@@ -1584,11 +1766,12 @@ const MultistepNavigationScreen = () => {
       fetchOutdoorDirections(nextStep);
     }
 
-    // Don't navigate away - handle everything within this component
-    // NavigationStrategyService.navigateToStep(navigation, nextStep);
+    // For transition steps, ensure we update the current floor
+    if (nextStep.type === "transition") {
+      setCurrentFloor(nextStep.endFloor);
+    }
   };
 
-  // Similarly, update the navigateToPreviousStep function
   const navigateToPreviousStep = () => {
     if (!navigationPlan || currentStepIndex <= 0) return;
 
@@ -1809,7 +1992,7 @@ const MultistepNavigationScreen = () => {
                 </View>
 
                 {originPredictions.length > 0 && (
-                  <View style={styles.predictionsList}>
+                  <ScrollView style={styles.predictionsList}>
                     {originPredictions.map((item) => (
                       <TouchableOpacity
                         key={item.place_id}
@@ -1828,7 +2011,7 @@ const MultistepNavigationScreen = () => {
                         </Text>
                       </TouchableOpacity>
                     ))}
-                  </View>
+                  </ScrollView>
                 )}
               </>
             ) : (
@@ -2065,8 +2248,32 @@ const MultistepNavigationScreen = () => {
 
   // Render outdoor step UI with map and directions
   const renderOutdoorStep = () => {
+    const currentStep = navigationPlan.steps[currentStepIndex];
+    const originBuildingName = currentStep.startAddress
+      ? currentStep.startAddress.split(",")[0]
+      : "origin";
+    const destBuildingName = currentStep.endAddress
+      ? currentStep.endAddress.split(",")[0]
+      : "destination";
+
     return (
       <View style={styles.stepContentContainer}>
+        {/* Step progress indicator */}
+        <View style={styles.stepProgressContainer}>
+          <View style={styles.buildingIndicator}>
+            <MaterialIcons name="business" size={24} color="#4CAF50" />
+            <Text style={styles.buildingName}>{originBuildingName}</Text>
+          </View>
+          <View style={styles.progressLine}>
+            <MaterialIcons name="directions-walk" size={20} color="#666" />
+          </View>
+          <View style={styles.buildingIndicator}>
+            <MaterialIcons name="business" size={24} color="#F44336" />
+            <Text style={styles.buildingName}>{destBuildingName}</Text>
+          </View>
+        </View>
+
+        {/* Map display */}
         <View style={styles.mapContainer}>
           <TouchableOpacity
             style={styles.expandButton}
@@ -2092,10 +2299,13 @@ const MultistepNavigationScreen = () => {
         </View>
 
         <View style={styles.directionsContainer}>
-          <Text style={styles.directionsTitle}>Directions</Text>
+          <Text style={styles.directionsTitle}>Outdoor Directions</Text>
 
           {loadingDirections ? (
-            <ActivityIndicator size="large" color="#800000" />
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="small" color="#912338" />
+              <Text style={styles.loadingText}>Getting directions...</Text>
+            </View>
           ) : outdoorDirections.length > 0 ? (
             <ScrollView style={styles.directionsList}>
               {outdoorDirections.map((direction, index) => (
@@ -2103,18 +2313,21 @@ const MultistepNavigationScreen = () => {
                   <Text style={styles.directionNumber}>{index + 1}</Text>
                   <View style={styles.directionContent}>
                     <Text style={styles.directionText}>
-                      {parseHtmlInstructions(direction.html_instructions)}
+                      {direction.formatted_text ||
+                        parseHtmlInstructions(direction.html_instructions)}
                     </Text>
-                    <Text style={styles.distanceText}>
-                      {direction.distance}
-                    </Text>
+                    {direction.distance && (
+                      <Text style={styles.distanceText}>
+                        {direction.distance}
+                      </Text>
+                    )}
                   </View>
                 </View>
               ))}
             </ScrollView>
           ) : (
             <Text style={styles.noDirectionsText}>
-              No directions available. Please try again.
+              Walk from {originBuildingName} to {destBuildingName}
             </Text>
           )}
         </View>
@@ -2334,10 +2547,10 @@ const MultistepNavigationScreen = () => {
         <InterFloorNavigation
           isVisible={showInterFloorModal}
           onClose={() => setShowInterFloorModal(false)}
-          startFloor={currentTransitionStep?.startFloor}
-          endFloor={currentTransitionStep?.endFloor}
-          buildingType={currentTransitionStep?.buildingType}
-          onPathCalculated={() => {}} // Optional callback when path is calculated
+          startFloor={currentTransitionStep?.startFloor || "1"}
+          endFloor={currentTransitionStep?.endFloor || "2"}
+          buildingType={currentTransitionStep?.buildingType || "HallBuilding"}
+          onPathCalculated={() => {}}
         />
       </View>
     </SafeAreaView>
