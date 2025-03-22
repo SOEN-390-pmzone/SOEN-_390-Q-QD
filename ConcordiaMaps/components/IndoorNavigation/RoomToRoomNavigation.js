@@ -7,11 +7,12 @@ import FloorRegistry from "../../services/BuildingDataService";
 import Header from "../Header";
 import NavBar from "../NavBar";
 import styles from "../../styles/IndoorNavigation/RoomtoRoomNavigationStyles";
+import ExpandedFloorPlanModal from "./ExpandedFloorPlanModal";
 
 const RoomToRoomNavigation = () => {
   const route = useRoute();
 
-  // Extract route params
+  // Extract route parameters
   const {
     buildingId = null, // Building ID (e.g., "hall", "jmsb")
     startRoom = null, // Starting room ID
@@ -56,7 +57,7 @@ const RoomToRoomNavigation = () => {
   const findBuildingTypeFromId = (id) => {
     const buildingTypes = Object.keys(FloorRegistry.getAllBuildings());
     return buildingTypes.find(
-      (key) => FloorRegistry.getBuilding(key).id === id,
+      (key) => FloorRegistry.getBuilding(key).id === id
     );
   };
 
@@ -82,7 +83,7 @@ const RoomToRoomNavigation = () => {
 
       if (determinedBuildingType) {
         console.log(
-          `Found building type ${determinedBuildingType} for ID ${buildingId}`,
+          `Found building type ${determinedBuildingType} for ID ${buildingId}`
         );
         setBuildingType(determinedBuildingType);
         setSelectedBuilding(buildingId);
@@ -95,7 +96,7 @@ const RoomToRoomNavigation = () => {
         if (!foundStartFloor && startRoom) {
           foundStartFloor = findFloorForRoom(determinedBuildingType, startRoom);
           console.log(
-            `Determined start floor: ${foundStartFloor} for room ${startRoom}`,
+            `Determined start floor: ${foundStartFloor} for room ${startRoom}`
           );
         }
 
@@ -103,7 +104,7 @@ const RoomToRoomNavigation = () => {
         if (!foundEndFloor && endRoom) {
           foundEndFloor = findFloorForRoom(determinedBuildingType, endRoom);
           console.log(
-            `Determined end floor: ${foundEndFloor} for room ${endRoom}`,
+            `Determined end floor: ${foundEndFloor} for room ${endRoom}`
           );
         }
 
@@ -112,7 +113,7 @@ const RoomToRoomNavigation = () => {
           setStartFloor(foundStartFloor);
           const startRooms = FloorRegistry.getRooms(
             determinedBuildingType,
-            foundStartFloor,
+            foundStartFloor
           );
           setStartFloorRooms(startRooms);
         }
@@ -121,7 +122,7 @@ const RoomToRoomNavigation = () => {
           setEndFloor(foundEndFloor);
           const endRooms = FloorRegistry.getRooms(
             determinedBuildingType,
-            foundEndFloor,
+            foundEndFloor
           );
           setEndFloorRooms(endRooms);
         }
@@ -162,7 +163,7 @@ const RoomToRoomNavigation = () => {
     console.log("Available building types:", buildingTypes);
 
     const type = buildingTypes.find(
-      (key) => FloorRegistry.getBuilding(key).id === buildingId,
+      (key) => FloorRegistry.getBuilding(key).id === buildingId
     );
 
     if (type) {
@@ -201,17 +202,17 @@ const RoomToRoomNavigation = () => {
 
     try {
       console.log(
-        `Loading floor plans for ${buildingType} - floors ${startFloor} and ${endFloor}...`,
+        `Loading floor plans for ${buildingType} - floors ${startFloor} and ${endFloor}...`
       );
 
       // Loading floor plans using the FloorRegistry
       const startSvg = await FloorRegistry.getFloorPlan(
         buildingType,
-        startFloor,
+        startFloor
       );
       if (startSvg) {
         console.log(
-          `Start floor SVG loaded successfully (${startSvg.length} characters)`,
+          `Start floor SVG loaded successfully (${startSvg.length} characters)`
         );
         setStartFloorPlan(startSvg);
       } else {
@@ -223,7 +224,7 @@ const RoomToRoomNavigation = () => {
         const endSvg = await FloorRegistry.getFloorPlan(buildingType, endFloor);
         if (endSvg) {
           console.log(
-            `End floor SVG loaded successfully (${endSvg.length} characters)`,
+            `End floor SVG loaded successfully (${endSvg.length} characters)`
           );
           setEndFloorPlan(endSvg);
         } else {
@@ -272,7 +273,7 @@ const RoomToRoomNavigation = () => {
   useEffect(() => {
     if (startFloor && endFloor) {
       console.log(
-        `Floor selection changed: ${startFloor} and ${endFloor}. Loading floor plans...`,
+        `Floor selection changed: ${startFloor} and ${endFloor}. Loading floor plans...`
       );
       loadFloorPlans();
     }
@@ -319,7 +320,7 @@ const RoomToRoomNavigation = () => {
     startFloorGraph,
     endFloorGraph,
     selectedStartRoom,
-    selectedEndRoom,
+    selectedEndRoom
   ) => {
     if (!selectedStartRoom || !selectedEndRoom) {
       return "Please select both start and end rooms";
@@ -342,12 +343,12 @@ const RoomToRoomNavigation = () => {
     selectedStartRoom,
     selectedEndRoom,
     startFloor,
-    buildingName,
+    buildingName
   ) => {
     const directPath = findShortestPath(
       startFloorGraph,
       selectedStartRoom,
-      selectedEndRoom,
+      selectedEndRoom
     );
 
     if (directPath.length < 2) {
@@ -398,25 +399,25 @@ const RoomToRoomNavigation = () => {
     selectedEndRoom,
     startFloor,
     endFloor,
-    buildingName,
+    buildingName
   ) => {
     const transportMethod = findTransportMethod(startFloorGraph, endFloorGraph);
 
     if (!transportMethod) {
       throw new Error(
-        `Cannot navigate between floors ${startFloor} and ${endFloor}`,
+        `Cannot navigate between floors ${startFloor} and ${endFloor}`
       );
     }
 
     const startFloorTransportPath = findShortestPath(
       startFloorGraph,
       selectedStartRoom,
-      transportMethod,
+      transportMethod
     );
     const endFloorTransportPath = findShortestPath(
       endFloorGraph,
       transportMethod,
-      selectedEndRoom,
+      selectedEndRoom
     );
 
     if (
@@ -475,7 +476,7 @@ const RoomToRoomNavigation = () => {
           "Calculating path from",
           selectedStartRoom,
           "to",
-          selectedEndRoom,
+          selectedEndRoom
         );
         console.error(
           "Building type:",
@@ -483,10 +484,10 @@ const RoomToRoomNavigation = () => {
           "Start floor:",
           startFloor,
           "End floor:",
-          endFloor,
+          endFloor
         );
         alert(
-          "Missing navigation data. Please select building, floors, and rooms.",
+          "Missing navigation data. Please select building, floors, and rooms."
         );
         return;
       }
@@ -495,7 +496,7 @@ const RoomToRoomNavigation = () => {
         "Calculating path from",
         selectedStartRoom,
         "to",
-        selectedEndRoom,
+        selectedEndRoom
       );
       console.log(
         "Building type:",
@@ -503,7 +504,7 @@ const RoomToRoomNavigation = () => {
         "Start floor:",
         startFloor,
         "End floor:",
-        endFloor,
+        endFloor
       );
 
       const startFloorGraph = FloorRegistry.getGraph(buildingType, startFloor);
@@ -513,19 +514,19 @@ const RoomToRoomNavigation = () => {
       console.log(
         "Start floor graph loaded:",
         Object.keys(startFloorGraph).length,
-        "nodes",
+        "nodes"
       );
       console.log(
         "End floor graph loaded:",
         Object.keys(endFloorGraph).length,
-        "nodes",
+        "nodes"
       );
 
       const validationError = validateRoomSelection(
         startFloorGraph,
         endFloorGraph,
         selectedStartRoom,
-        selectedEndRoom,
+        selectedEndRoom
       );
 
       if (validationError) {
@@ -541,17 +542,17 @@ const RoomToRoomNavigation = () => {
           selectedStartRoom,
           selectedEndRoom,
           startFloor,
-          building.name,
+          building.name
         );
       } else {
         console.log("Finding transport method between floors");
         console.log(
           "Start floor nodes:",
-          JSON.stringify(Object.keys(startFloorGraph)),
+          JSON.stringify(Object.keys(startFloorGraph))
         );
         console.log(
           "End floor nodes:",
-          JSON.stringify(Object.keys(endFloorGraph)),
+          JSON.stringify(Object.keys(endFloorGraph))
         );
 
         result = handleInterFloorNavigation(
@@ -561,18 +562,18 @@ const RoomToRoomNavigation = () => {
           selectedEndRoom,
           startFloor,
           endFloor,
-          building.name,
+          building.name
         );
       }
 
       console.log("Path calculation successful");
       console.log(
         "Start floor path (" + result.startFloorPath.length + " nodes):",
-        JSON.stringify(result.startFloorPath),
+        JSON.stringify(result.startFloorPath)
       );
       console.log(
         "End floor path (" + result.endFloorPath.length + " nodes):",
-        JSON.stringify(result.endFloorPath),
+        JSON.stringify(result.endFloorPath)
       );
       console.log("Navigation steps:", result.navigationSteps.length, "steps");
 
@@ -593,7 +594,6 @@ const RoomToRoomNavigation = () => {
   };
 
   // Generate HTML for floor visualization with path
-  // Update the generateFloorHtml function for better SVG rendering
   const generateFloorHtml = (floorPlan, pathNodes = [], rooms = {}) => {
     // Prepare path data by converting node names to coordinates
     const pathCoordinates = pathNodes
@@ -604,198 +604,208 @@ const RoomToRoomNavigation = () => {
     const pathDataJson = JSON.stringify(pathCoordinates);
 
     return `
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=yes">
-        <style>
-          body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            width: 100%;
-            overflow: hidden;
-            touch-action: manipulation;
-          }
-
-          #svg-container {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            position: relative;
-            background-color: #f5f5f5;
-          }
-
-          svg {
-            max-width: 100%;
-            max-height: 100%;
-            width: auto !important;
-            height: auto !important;
-            display: block;
-          }
-
-          .navigation-path { 
-            fill: none;
-            stroke: #912338; 
-            stroke-width: 4; 
-            stroke-linecap: round;
-            stroke-linejoin: round;
-            stroke-dasharray: 10,5;
-            animation: dash 1s linear infinite;
-          }
-          
-          @keyframes dash {
-            to {
-              stroke-dashoffset: -15;
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=yes">
+          <style>
+            body, html {
+              margin: 0;
+              padding: 0;
+              height: 100%;
+              width: 100%;
+              overflow: hidden;
+              touch-action: manipulation;
             }
-          }
-          
-          .room-highlight {
-            fill: #912338;
-            fill-opacity: 0.5;
-            stroke: #912338;
-            stroke-width: 2;
-            rx: 5;
-            ry: 5;
-          }
-          
-          /* Loading indicator */
-          #loader {
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #912338;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            margin-top: -15px;
-            margin-left: -15px;
-            z-index: 100;
-          }
-          
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
-        </style>
-        <script>
-          // Force layout recalculation after a small delay
-          setTimeout(function() {
-            document.body.style.display = 'none';
-            document.body.offsetHeight; // Force reflow
-            document.body.style.display = '';
-          }, 100);
-        
-          document.addEventListener('DOMContentLoaded', function() {
-            // Create a reference to the loader instead of adding it to the DOM
-            const loader = document.getElementById('loader');
+
+            #svg-container {
+              width: 100%;
+              height: 100%;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              overflow: hidden;
+              position: relative;
+              background-color: #f5f5f5;
+            }
+
+            svg {
+              max-width: 100%;
+              max-height: 100%;
+              width: auto !important;
+              height: auto !important;
+              display: block;
+              visibility: hidden; /* Start hidden and show when ready */
+            }
+
+            .navigation-path { 
+              fill: none;
+              stroke: #912338; 
+              stroke-width: 4; 
+              stroke-linecap: round;
+              stroke-linejoin: round;
+              stroke-dasharray: 10,5;
+              animation: dash 1s linear infinite;
+            }
             
-            function initializeSVG() {
-              const svg = document.querySelector('svg');
-              if (!svg) {
-                console.error('SVG element not found');
-                setTimeout(initializeSVG, 200); // Retry after a short delay
-                return;
+            @keyframes dash {
+              to {
+                stroke-dashoffset: -15;
               }
+            }
+            
+            .room-highlight {
+              fill: #912338;
+              fill-opacity: 0.5;
+              stroke: #912338;
+              stroke-width: 2;
+              rx: 5;
+              ry: 5;
+            }
+            
+            /* Loading indicator */
+            #loader {
+              border: 5px solid #f3f3f3;
+              border-top: 5px solid #912338;
+              border-radius: 50%;
+              width: 30px;
+              height: 30px;
+              animation: spin 1s linear infinite;
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              margin-top: -15px;
+              margin-left: -15px;
+              z-index: 100;
+            }
+            
+            @keyframes spin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+          </style>
+          <script>
+            // Make initialization more robust with retry mechanism
+            let initAttempts = 0;
+            const maxAttempts = 5;
+            let svgInitialized = false;
+            
+            document.addEventListener('DOMContentLoaded', function() {
+              const loader = document.getElementById('loader');
               
-              // Remove loading indicator
-              if (loader && loader.parentNode) {
-                loader.parentNode.removeChild(loader);
-              }
-
-              // Set viewBox if not already set
-              if (!svg.getAttribute('viewBox')) {
-                try {
-                  const bbox = svg.getBBox();
-                  svg.setAttribute('viewBox', \`\${bbox.x} \${bbox.y} \${bbox.width} \${bbox.height}\`);
-                } catch (e) {
-                  console.error('Error setting viewBox:', e);
-                }
-              }
-              
-              // Set preserveAspectRatio to see the full floor plan
-              svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
-              
-              // Make sure SVG is visible
-              svg.style.visibility = 'visible';
-              svg.style.opacity = '1';
-
-              // Function to visualize the path
-              function visualizePath(coordinates) {
-                if (!coordinates || coordinates.length < 2) {
-                  console.warn('Not enough coordinates to draw path');
+              function initializeSVG() {
+                if (svgInitialized) return; // Prevent multiple initializations
+                
+                const svg = document.querySelector('svg');
+                if (!svg && initAttempts < maxAttempts) {
+                  console.log('SVG element not found, retry attempt ' + (initAttempts + 1));
+                  initAttempts++;
+                  setTimeout(initializeSVG, 200);
                   return;
                 }
                 
-                // Create SVG path element
-                const svgNS = "http://www.w3.org/2000/svg";
-                const pathElement = document.createElementNS(svgNS, "path");
-                pathElement.classList.add('navigation-path');
+                if (!svg) {
+                  console.error('SVG element not found after ' + maxAttempts + ' attempts');
+                  if (loader && loader.parentNode) {
+                    loader.parentNode.removeChild(loader);
+                  }
+                  return;
+                }
                 
-                // Build the path data string
-                let pathData = '';
-                
-                coordinates.forEach((coord, index) => {
-                  if (!coord || !coord.nearestPoint) {
-                    console.warn('Invalid coordinate at index', index);
-                    return;
+                try {
+                  // Remove loading indicator
+                  if (loader && loader.parentNode) {
+                    loader.parentNode.removeChild(loader);
+                  }
+
+                  // Set viewBox if not already set
+                  if (!svg.getAttribute('viewBox')) {
+                    const bbox = svg.getBBox();
+                    svg.setAttribute('viewBox', \`\${bbox.x} \${bbox.y} \${bbox.width} \${bbox.height}\`);
                   }
                   
-                  const point = coord.nearestPoint;
-                  if (index === 0) {
-                    // Move to the first point
-                    pathData += \`M \${point.x} \${point.y}\`;
-                  } else {
-                    // Line to subsequent points
-                    pathData += \`L \${point.x} \${point.y}\`;
+                  // Set preserveAspectRatio to see the full floor plan
+                  svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+                  
+                  // Function to visualize the path
+                  function visualizePath(coordinates) {
+                    if (!coordinates || coordinates.length < 2) {
+                      console.warn('Not enough coordinates to draw path');
+                      return;
+                    }
+                    
+                    // Create SVG path element
+                    const svgNS = "http://www.w3.org/2000/svg";
+                    const pathElement = document.createElementNS(svgNS, "path");
+                    pathElement.classList.add('navigation-path');
+                    
+                    // Build the path data string
+                    let pathData = '';
+                    
+                    coordinates.forEach((coord, index) => {
+                      if (!coord || !coord.nearestPoint) {
+                        console.warn('Invalid coordinate at index', index);
+                        return;
+                      }
+                      
+                      const point = coord.nearestPoint;
+                      if (index === 0) {
+                        // Move to the first point
+                        pathData += \`M \${point.x} \${point.y}\`;
+                      } else {
+                        // Line to subsequent points
+                        pathData += \`L \${point.x} \${point.y}\`;
+                      }
+                    });
+                    
+                    if (pathData === '') {
+                      console.warn('No valid path data could be generated');
+                      return;
+                    }
+                    
+                    // Set path attributes
+                    pathElement.setAttribute('d', pathData);
+                    
+                    // Add to SVG
+                    svg.appendChild(pathElement);
+                    
+                    console.log('Path drawn with', coordinates.length, 'points');
                   }
-                });
-                
-                if (pathData === '') {
-                  console.warn('No valid path data could be generated');
-                  return;
-                }
-                
-                // Set path attributes
-                pathElement.setAttribute('d', pathData);
-                
-                // Add to SVG
-                svg.appendChild(pathElement);
-                
-                console.log('Path drawn with', coordinates.length, 'points');
-              }
 
-              // Get path coordinates and draw
-              const pathCoordinates = ${pathDataJson};
-              visualizePath(pathCoordinates);
-            }
+                  // Get path coordinates and draw
+                  const pathCoordinates = ${pathDataJson};
+                  visualizePath(pathCoordinates);
+                  
+                  // Make SVG visible after everything is ready
+                  svg.style.visibility = 'visible';
+                  svgInitialized = true;
+                } catch (error) {
+                  console.error('Error in SVG initialization:', error);
+                  if (svg) svg.style.visibility = 'visible'; // Show SVG even if there was an error
+                }
+              }
+              
+              // Initialize with a delay to ensure DOM is ready
+              setTimeout(initializeSVG, 300);
+            });
             
-            // Initialize with a slight delay to ensure DOM is ready
-            setTimeout(initializeSVG, 100);
-            
-            // Add window resize handler to ensure SVG is properly sized
+            // Prevent reinitializing on resize
             window.addEventListener('resize', function() {
               const svg = document.querySelector('svg');
               if (svg) {
                 svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
               }
             });
-          });
-        </script>
-      </head>
-      <body>
-        <div id="svg-container">
-          <div id="loader"></div>
-          ${floorPlan || '<div style="color:red;padding:20px;text-align:center;">No SVG loaded</div>'}
-        </div>
-      </body>
-    </html>
-  `;
+          </script>
+        </head>
+        <body>
+          <div id="svg-container">
+            <div id="loader"></div>
+            ${floorPlan || '<div style="color:red;padding:20px;text-align:center;">No SVG loaded</div>'}
+          </div>
+        </body>
+      </html>
+    `;
   };
 
   // Render the building selection screen
@@ -911,7 +921,7 @@ const RoomToRoomNavigation = () => {
                 a.localeCompare(b, undefined, {
                   numeric: true,
                   sensitivity: "base",
-                }),
+                })
               )
               .map((roomId) => (
                 <TouchableOpacity
@@ -938,7 +948,7 @@ const RoomToRoomNavigation = () => {
                 a.localeCompare(b, undefined, {
                   numeric: true,
                   sensitivity: "base",
-                }),
+                })
               )
               .map((roomId) => (
                 <TouchableOpacity
@@ -1003,7 +1013,7 @@ const RoomToRoomNavigation = () => {
                     html: generateFloorHtml(
                       startFloorPlan,
                       startFloorPath,
-                      startFloorRooms,
+                      startFloorRooms
                     ),
                   }}
                   style={styles.floorPlan}
@@ -1018,8 +1028,11 @@ const RoomToRoomNavigation = () => {
                     </View>
                   )}
                   startInLoadingState={true}
+                  javaScriptEnabled={true}
+                  domStorageEnabled={true}
                   cacheEnabled={false}
-                  incognito={true} // Use incognito to prevent caching issues
+                  incognito={true}
+                  key={`start-${startFloor}-${startFloorPath.length}`} // Add a key to control remounting
                 />
               </View>
             </View>
@@ -1041,7 +1054,7 @@ const RoomToRoomNavigation = () => {
                       html: generateFloorHtml(
                         endFloorPlan,
                         endFloorPath,
-                        endFloorRooms,
+                        endFloorRooms
                       ),
                     }}
                     style={styles.floorPlan}
@@ -1050,6 +1063,17 @@ const RoomToRoomNavigation = () => {
                       console.error("WebView error:", e.nativeEvent)
                     }
                     onLoadEnd={() => console.log("WebView loaded")}
+                    renderLoading={() => (
+                      <View style={styles.webViewLoader}>
+                        <Text>Loading...</Text>
+                      </View>
+                    )}
+                    startInLoadingState={true}
+                    javaScriptEnabled={true}
+                    domStorageEnabled={true}
+                    cacheEnabled={false}
+                    incognito={true}
+                    key={`end-${endFloor}-${endFloorPath.length}`} // Add a key to control remounting
                   />
                 </View>
               </View>
@@ -1094,50 +1118,25 @@ const RoomToRoomNavigation = () => {
     );
   };
 
-  // Render expanded floor plan modal
   const renderExpandedFloorPlan = () => {
     if (!expandedFloor) return null;
 
-    const isStartFloor = expandedFloor === startFloor;
-    const floorPlan = isStartFloor ? startFloorPlan : endFloorPlan;
-    const pathNodes = isStartFloor ? startFloorPath : endFloorPath;
-    const rooms = isStartFloor ? startFloorRooms : endFloorRooms;
-
     return (
-      <Modal
+      <ExpandedFloorPlanModal
         visible={!!expandedFloor}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setExpandedFloor(null)}
-      >
-        <View style={styles.expandedModalOverlay}>
-          <View style={styles.expandedModalContent}>
-            <View style={styles.expandedHeader}>
-              <Text style={styles.expandedTitle}>Floor {expandedFloor}</Text>
-              <TouchableOpacity
-                style={styles.closeExpandedButton}
-                onPress={() => setExpandedFloor(null)}
-              >
-                <Text style={styles.closeExpandedText}>×</Text>
-              </TouchableOpacity>
-            </View>
-            <View style={styles.expandedWebViewContainer}>
-              <WebView
-                originWhitelist={["*"]}
-                source={{
-                  html: generateFloorHtml(floorPlan, pathNodes, rooms),
-                }}
-                style={styles.expandedWebView}
-                scrollEnabled={false}
-                onError={(e) =>
-                  console.error("WebView error in modal:", e.nativeEvent)
-                }
-                onLoadEnd={() => console.log("Modal WebView loaded")}
-              />
-            </View>
-          </View>
-        </View>
-      </Modal>
+        floorNumber={expandedFloor}
+        onClose={() => setExpandedFloor(null)}
+        htmlContent={generateFloorHtml(floorPlan, pathNodes, rooms)}
+        webViewProps={{
+          scrollEnabled: false,
+          onError: (e) =>
+            console.error("WebView error in modal:", e.nativeEvent),
+          onLoadEnd: () => console.log("Modal WebView loaded"),
+          cacheEnabled: false,
+          incognito: true,
+          key: `expanded-${expandedFloor}-${pathNodes.length}`,
+        }}
+      />
     );
   };
 
