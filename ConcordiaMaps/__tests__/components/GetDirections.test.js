@@ -9,9 +9,7 @@ import {
 import GetDirections from "../../components/GetDirections";
 import { useGoogleMapDirections } from "../../hooks/useGoogleMapDirections";
 import { LocationContext } from "../../contexts/LocationContext";
-import { NavigationContainer } from "@react-navigation/native";
 import { useRoute } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
 
 jest.mock("expo-location", () => ({
   getCurrentPositionAsync: jest.fn().mockResolvedValue({
