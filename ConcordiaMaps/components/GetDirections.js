@@ -79,7 +79,6 @@ const GetDirections = () => {
   // Set initial location from context
   useEffect(() => {
     if (fromPopup) {
-      console.log("zzz");
       setDestination({
         latitude: lat,
         longitude: long,
