@@ -53,7 +53,7 @@ export default function App() {
   // Memoize the context value
   const modalContextValue = useMemo(
     () => ({ isModalVisible, modalData, toggleModal, setModalData }),
-    [isModalVisible, modalData]
+    [isModalVisible, modalData],
   );
 
   return (

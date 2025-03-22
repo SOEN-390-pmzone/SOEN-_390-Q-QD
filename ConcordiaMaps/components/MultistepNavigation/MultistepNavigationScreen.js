@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
-  StyleSheet,
   TouchableOpacity,
   TextInput,
   ScrollView,
@@ -21,7 +20,6 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import * as Crypto from "expo-crypto";
 import { useGoogleMapDirections } from "../../hooks/useGoogleMapDirections";
 import BuildingDataService from "../../services/BuildingDataService";
-import { visualizePath } from "../IndoorNavigation/PathVisualizer";
 import styles from "../../styles/MultistepNavigation/MultistepNavigationStyles";
 
 // List of Concordia buildings for suggestions
@@ -41,89 +39,6 @@ const CONCORDIA_BUILDINGS = [
 ];
 
 const MultistepNavigationScreen = () => {
-  function highlightRoom(roomId) {
-    // Room IDs in SVGs might be in different formats
-    // Try different possible ID formats
-    const possibleIds = [
-      roomId, // Exactly as provided
-      roomId.replace("-", ""), // Without hyphen
-      roomId.split("-")[1], // Just the number part
-      `H${roomId.split("-")[1]}`, // H prefix with number
-    ];
-
-    let roomElement = null;
-
-    // Try each possible ID format
-    for (let id of possibleIds) {
-      const el = document.getElementById(id);
-      if (el) {
-        roomElement = el;
-        break;
-      }
-    }
-
-    if (roomElement) {
-      // Add highlight class to the room
-      roomElement.classList.add("room-highlight");
-
-      // Scroll into view if needed
-      try {
-        const bbox = roomElement.getBBox();
-        const svg = document.querySelector("svg");
-        const viewBox = svg.viewBox.baseVal;
-
-        // Center on the room
-        const centerX = bbox.x + bbox.width / 2;
-        const centerY = bbox.y + bbox.height / 2;
-
-        // Set viewBox to center on room with some padding
-        const newWidth = bbox.width * 3;
-        const newHeight = bbox.height * 3;
-
-        svg.setAttribute(
-          "viewBox",
-          `${centerX - newWidth / 2} ${centerY - newHeight / 2} ${newWidth} ${newHeight}`
-        );
-      } catch (e) {
-        console.error("Error focusing on room:", e);
-
-        // Fallback - show label
-        const svgContainer = document.getElementById("svg-container");
-        if (svgContainer) {
-          const roomLabel = document.createElement("div");
-          roomLabel.style.position = "absolute";
-          roomLabel.style.top = "10px";
-          roomLabel.style.left = "10px";
-          roomLabel.style.background = "rgba(255,255,255,0.7)";
-          roomLabel.style.padding = "5px";
-          roomLabel.style.borderRadius = "3px";
-          roomLabel.style.fontSize = "14px";
-          roomLabel.style.fontWeight = "bold";
-          roomLabel.style.color = "#912338";
-          roomLabel.textContent = "Room: " + roomId;
-          svgContainer.appendChild(roomLabel);
-        }
-      }
-    } else {
-      // Room not found in SVG, show label
-      const svgContainer = document.getElementById("svg-container");
-      if (svgContainer) {
-        const roomLabel = document.createElement("div");
-        roomLabel.style.position = "absolute";
-        roomLabel.style.top = "10px";
-        roomLabel.style.left = "10px";
-        roomLabel.style.background = "rgba(255,255,255,0.7)";
-        roomLabel.style.padding = "5px";
-        roomLabel.style.borderRadius = "3px";
-        roomLabel.style.fontSize = "14px";
-        roomLabel.style.fontWeight = "bold";
-        roomLabel.style.color = "#912338";
-        roomLabel.textContent = "Room: " + roomId;
-        svgContainer.appendChild(roomLabel);
-      }
-    }
-  }
-
   const generateFloorPlanHtml = () => {
     // If no current step, return empty HTML
     if (!navigationPlan || !navigationPlan.steps[currentStepIndex]) {
@@ -149,7 +64,7 @@ const MultistepNavigationScreen = () => {
     // Debug output to show what's happening
     console.log(`Building ID: ${buildingId}, Floor: ${currentFloor}`);
     console.log(
-      `SVG Content available: ${svgContent ? "Yes (length: " + svgContent.length + ")" : "No"}`
+      `SVG Content available: ${svgContent ? "Yes (length: " + svgContent.length + ")" : "No"}`,
     );
 
     // Serialize path data for passing to WebView
@@ -609,7 +524,7 @@ const MultistepNavigationScreen = () => {
     const floorNumber = currentFloor;
 
     console.log(
-      `Fetching indoor path data for ${buildingId}, floor ${floorNumber}, to room ${roomId}`
+      `Fetching indoor path data for ${buildingId}, floor ${floorNumber}, to room ${roomId}`,
     );
 
     // Simulated path data - replace with actual data from your navigation service
@@ -646,6 +561,15 @@ const MultistepNavigationScreen = () => {
   const [userLocation, setUserLocation] = useState(null);
   const sessionTokenRef = useRef("");
   const [originDetails, setOriginDetails] = useState(null);
+  const [originInputType, setOriginInputType] = useState("location"); // "location" or "classroom"
+  const [destinationInputType, setDestinationInputType] = useState("classroom"); // "location" or "classroom"
+  const [originBuilding, setOriginBuilding] = useState(null);
+  const [originRoom, setOriginRoom] = useState("");
+  const [originBuildingSuggestions, setOriginBuildingSuggestions] = useState(
+    [],
+  );
+  const [showOriginBuildingSuggestions, setShowOriginBuildingSuggestions] =
+    useState(false);
 
   // Destination state
   const [destination, setDestination] = useState("");
@@ -656,6 +580,10 @@ const MultistepNavigationScreen = () => {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [buildingSuggestions, setBuildingSuggestions] = useState([]);
   const [showBuildingSuggestions, setShowBuildingSuggestions] = useState(false);
+  const [destinationSearchQuery, setDestinationSearchQuery] = useState("");
+  const [destinationPredictions, setDestinationPredictions] = useState([]);
+  const [loadingDestination, setLoadingDestination] = useState(false);
+  const [destinationDetails, setDestinationDetails] = useState(null);
 
   // Direction display state
   const [outdoorDirections, setOutdoorDirections] = useState([]);
@@ -674,6 +602,65 @@ const MultistepNavigationScreen = () => {
   // WebView refs
   const mapWebViewRef = useRef(null);
   const floorPlanWebViewRef = useRef(null);
+
+  const searchDestinationPlaces = async (text) => {
+    setDestinationSearchQuery(text);
+    setDestination(text);
+
+    if (text.length < 3) {
+      setDestinationPredictions([]);
+      return;
+    }
+
+    setLoadingDestination(true);
+
+    try {
+      let locationParam = "";
+      if (userLocation?.latitude && userLocation?.longitude) {
+        locationParam = `&location=${userLocation.latitude},${userLocation.longitude}&radius=5000`;
+      } else {
+        console.warn(
+          "User location not available. Searching without location bias.",
+        );
+      }
+
+      // Use the session token to prevent caching of search results
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_MAPS_API_KEY}&components=country:ca${locationParam}&sessiontoken=${sessionTokenRef.current}`,
+      );
+
+      const { predictions } = await response.json();
+      setDestinationPredictions(predictions || []);
+    } catch (error) {
+      console.error("Error fetching destination predictions:", error);
+    } finally {
+      setLoadingDestination(false);
+    }
+  };
+
+  const handleDestinationSelection = async (placeId, description) => {
+    try {
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry,formatted_address&key=${GOOGLE_MAPS_API_KEY}&sessiontoken=${sessionTokenRef.current}`,
+      );
+      const { result } = await response.json();
+
+      if (result?.geometry?.location) {
+        setDestination(description);
+        setDestinationDetails({
+          latitude: result.geometry.location.lat,
+          longitude: result.geometry.location.lng,
+          formatted_address: result.formatted_address,
+        });
+        setDestinationSearchQuery("");
+        setDestinationPredictions([]);
+
+        // Don't generate a new session token yet - we'll do that when navigation starts
+      }
+    } catch (error) {
+      console.error("Error fetching destination place details:", error);
+    }
+  };
 
   const getSvgForBuildingAndFloor = (buildingId, floorNumber) => {
     // Convert to uppercase for consistency
@@ -707,11 +694,11 @@ const MultistepNavigationScreen = () => {
     try {
       const svg = BuildingDataService.getFloor(
         buildingType,
-        floorNumber
+        floorNumber,
       )?.getSVG();
 
       console.log(
-        `SVG found for ${buildingId} floor ${floorNumber}: ${svg ? "Yes" : "No"}`
+        `SVG found for ${buildingId} floor ${floorNumber}: ${svg ? "Yes" : "No"}`,
       );
 
       if (svg) {
@@ -723,7 +710,7 @@ const MultistepNavigationScreen = () => {
     } catch (error) {
       console.error(
         `Error getting SVG for ${buildingId} floor ${floorNumber}:`,
-        error
+        error,
       );
       return null;
     }
@@ -892,7 +879,7 @@ const MultistepNavigationScreen = () => {
         // If startPoint is an address, try to geocode it
         try {
           const geocodeResponse = await fetch(
-            `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(step.startPoint)}&key=${GOOGLE_MAPS_API_KEY}`
+            `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(step.startPoint)}&key=${GOOGLE_MAPS_API_KEY}`,
           );
           const geocodeData = await geocodeResponse.json();
 
@@ -938,7 +925,7 @@ const MultistepNavigationScreen = () => {
           const startBuilding = CONCORDIA_BUILDINGS.find(
             (b) =>
               b.id.toUpperCase() === step.startPoint.toUpperCase() ||
-              b.name.toUpperCase().includes(step.startPoint.toUpperCase())
+              b.name.toUpperCase().includes(step.startPoint.toUpperCase()),
           );
 
           if (startBuilding) {
@@ -954,7 +941,7 @@ const MultistepNavigationScreen = () => {
             }
             console.log(
               `Using hardcoded coordinates for ${startBuilding.id}:`,
-              originCoords
+              originCoords,
             );
           } else {
             // Last resort fallback - should rarely happen
@@ -980,7 +967,7 @@ const MultistepNavigationScreen = () => {
         if (typeof step.endPoint === "string") {
           // Check if it's a building ID first
           const destinationBuilding = CONCORDIA_BUILDINGS.find(
-            (b) => b.id === step.endPoint
+            (b) => b.id === step.endPoint,
           );
 
           if (destinationBuilding) {
@@ -1003,7 +990,7 @@ const MultistepNavigationScreen = () => {
               // Try to geocode the building address
               try {
                 const geocoded = await getStepsInHTML.geocodeAddress(
-                  destinationBuilding.address
+                  destinationBuilding.address,
                 );
                 if (geocoded) {
                   destinationCoords = geocoded;
@@ -1016,7 +1003,7 @@ const MultistepNavigationScreen = () => {
             // If not a building ID, try to geocode as address
             try {
               const geocoded = await getStepsInHTML.geocodeAddress(
-                step.endPoint
+                step.endPoint,
               );
               if (geocoded) {
                 destinationCoords = geocoded;
@@ -1041,19 +1028,19 @@ const MultistepNavigationScreen = () => {
         "Fetching directions from",
         originCoords,
         "to",
-        destinationCoords
+        destinationCoords,
       );
 
       // Get directions and polyline using your existing hook
       const directions = await getStepsInHTML(
         originCoords,
         destinationCoords,
-        "walking"
+        "walking",
       );
       const route = await getPolyline(
         originCoords,
         destinationCoords,
-        "walking"
+        "walking",
       );
 
       setOutdoorDirections(directions);
@@ -1080,13 +1067,13 @@ const MultistepNavigationScreen = () => {
         locationParam = `&location=${userLocation.latitude},${userLocation.longitude}&radius=5000`;
       } else {
         console.warn(
-          "User location not available. Searching without location bias."
+          "User location not available. Searching without location bias.",
         );
       }
 
       // Use the session token to prevent caching of search results
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_MAPS_API_KEY}&components=country:ca${locationParam}&sessiontoken=${sessionTokenRef.current}`
+        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_MAPS_API_KEY}&components=country:ca${locationParam}&sessiontoken=${sessionTokenRef.current}`,
       );
 
       const { predictions } = await response.json();
@@ -1102,7 +1089,7 @@ const MultistepNavigationScreen = () => {
   const handleOriginSelection = async (placeId, description) => {
     try {
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry,formatted_address&key=${GOOGLE_MAPS_API_KEY}&sessiontoken=${sessionTokenRef.current}`
+        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry,formatted_address&key=${GOOGLE_MAPS_API_KEY}&sessiontoken=${sessionTokenRef.current}`,
       );
       const { result } = await response.json();
       if (result?.geometry?.location) {
@@ -1124,15 +1111,80 @@ const MultistepNavigationScreen = () => {
     }
   };
 
-  // Handle building suggestion filtering
+  // Filter building suggestions based on text input
   const filterBuildingSuggestions = (text) => {
     const filtered = CONCORDIA_BUILDINGS.filter(
       (building) =>
         building.name.toLowerCase().includes(text.toLowerCase()) ||
-        building.id.toLowerCase().includes(text.toLowerCase())
+        building.id.toLowerCase().includes(text.toLowerCase()),
     );
     setBuildingSuggestions(filtered);
     setShowBuildingSuggestions(filtered.length > 0);
+  };
+
+  // Handle building suggestion filtering
+  const filterOriginBuildingSuggestions = (text) => {
+    const filtered = CONCORDIA_BUILDINGS.filter(
+      (building) =>
+        building.name.toLowerCase().includes(text.toLowerCase()) ||
+        building.id.toLowerCase().includes(text.toLowerCase()),
+    );
+    setOriginBuildingSuggestions(filtered);
+    setShowOriginBuildingSuggestions(filtered.length > 0);
+  };
+
+  // Handle origin building selection from suggestions
+  const handleOriginBuildingSelect = (building) => {
+    setOriginBuilding(building);
+    setOrigin(building.name);
+    setShowOriginBuildingSuggestions(false);
+  };
+
+  // Parse origin into building and room
+  const parseOriginClassroom = (text) => {
+    setOrigin(text);
+
+    // Common formats: "H-920", "H 920", "Hall Building 920"
+    const buildingMatch = text.match(/^([A-Za-z]+)[- ]?(\d+)/);
+
+    if (buildingMatch) {
+      const buildingCode = buildingMatch[1].toUpperCase();
+      const roomNumber = buildingMatch[2];
+
+      // Find building details
+      const foundBuilding = CONCORDIA_BUILDINGS.find(
+        (b) => b.id === buildingCode,
+      );
+
+      if (foundBuilding) {
+        setOriginBuilding(foundBuilding);
+        setOriginRoom(`${buildingCode}-${roomNumber}`);
+      }
+    } else {
+      // If not in standard format, try to match building name
+      filterOriginBuildingSuggestions(text);
+    }
+  };
+
+  // Get coordinates for a classroom
+  const getCoordinatesForClassroom = (building) => {
+    // Default coordinates based on the building
+    let coordinates = null;
+
+    if (!building) return null;
+
+    // For demo purposes - in real implementation you'd have a more complete mapping
+    if (building.id === "H") {
+      coordinates = { latitude: 45.497095, longitude: -73.57878 };
+    } else if (building.id === "MB") {
+      coordinates = { latitude: 45.495304, longitude: -73.577893 };
+    } else if (building.id === "EV") {
+      coordinates = { latitude: 45.495655, longitude: -73.578025 };
+    } else if (building.id === "LB") {
+      coordinates = { latitude: 45.49674, longitude: -73.57785 };
+    }
+
+    return coordinates;
   };
 
   // Parse destination into building and room
@@ -1148,7 +1200,7 @@ const MultistepNavigationScreen = () => {
 
       // Find building details
       const foundBuilding = CONCORDIA_BUILDINGS.find(
-        (b) => b.id === buildingCode
+        (b) => b.id === buildingCode,
       );
 
       if (foundBuilding) {
@@ -1170,22 +1222,191 @@ const MultistepNavigationScreen = () => {
 
   // Create navigation plan from inputs
   const handleStartNavigation = () => {
-    if (!originDetails || !building || !room) {
-      alert("Please enter both an origin address and a destination room");
-      return;
+    // Get origin coordinates based on input type
+    let originCoords = null;
+    let originAddress = null;
+    let originBuildingId = null;
+    let originRoomId = null;
+
+    if (originInputType === "location") {
+      if (!originDetails) {
+        alert("Please enter a valid origin address");
+        return;
+      }
+      originCoords = {
+        latitude: originDetails.latitude,
+        longitude: originDetails.longitude,
+      };
+      originAddress = originDetails.formatted_address || origin;
+    } else {
+      // Origin is a classroom
+      if (!originBuilding || !originRoom) {
+        alert("Please enter a valid origin classroom");
+        return;
+      }
+      originCoords = getCoordinatesForClassroom(originBuilding, originRoom);
+      originBuildingId = originBuilding.id;
+      originRoomId = originRoom;
+      originAddress = `${originBuilding.name}, Room ${originRoom}`;
+    }
+
+    // Get destination details based on input type
+    let destinationAddress = null;
+    let destinationBuildingId = null;
+    let destinationRoomId = null;
+
+    if (destinationInputType === "location") {
+      if (!destinationDetails) {
+        alert("Please enter a valid destination address");
+        return;
+      }
+      destinationCoords = {
+        latitude: destinationDetails.latitude,
+        longitude: destinationDetails.longitude,
+      };
+      destinationAddress = destinationDetails.formatted_address || destination;
+    } else {
+      // Destination is a classroom - existing code
+      if (!building || !room) {
+        alert("Please enter a valid destination classroom");
+        return;
+      }
+      destinationCoords = getCoordinatesForClassroom(building, room);
+      destinationBuildingId = building.id;
+      destinationRoomId = room;
+      destinationAddress = `${building.name}, Room ${room}`;
     }
 
     setIsLoading(true);
 
-    // Create a navigation plan using the service
-    const route = NavigationStrategyService.createCombinedRoute(
-      originDetails.formatted_address || origin,
-      building.id,
-      room,
-      { buildingName: building.name }
-    );
+    // Create different navigation plans based on origin and destination types
+    let route;
 
-    // Use the service to navigate
+    // Case 1: Location to Classroom (original implementation)
+    if (
+      originInputType === "location" &&
+      destinationInputType === "classroom"
+    ) {
+      route = NavigationStrategyService.createCombinedRoute(
+        originAddress,
+        destinationBuildingId,
+        destinationRoomId,
+        { buildingName: building.name },
+      );
+    }
+    // Case 2: Classroom to Classroom (both in same building)
+    else if (
+      originInputType === "classroom" &&
+      destinationInputType === "classroom" &&
+      originBuildingId === destinationBuildingId
+    ) {
+      route = NavigationStrategyService.createIndoorRoute(
+        originBuildingId,
+        originRoomId,
+        destinationRoomId,
+        {
+          title: `Navigate from ${originRoomId} to ${destinationRoomId}`,
+          buildingName: originBuilding.name,
+        },
+      );
+    }
+    // Case 3: Classroom to Classroom (different buildings)
+    else if (
+      originInputType === "classroom" &&
+      destinationInputType === "classroom"
+    ) {
+      // Create a multi-building navigation plan
+      route = {
+        title: `Navigate from ${originRoomId} to ${destinationRoomId}`,
+        currentStep: 0,
+        steps: [
+          // Step 1: Exit origin building
+          {
+            type: "indoor",
+            title: `Exit ${originBuilding.name}`,
+            buildingId: originBuildingId,
+            startRoom: originRoomId,
+            endRoom: "entrance", // Navigate to building entrance
+            isComplete: false,
+          },
+          // Step 2: Walk to destination building
+          {
+            type: "outdoor",
+            title: `Walk to ${building.name}`,
+            startPoint: originBuilding.address,
+            endPoint: building.address,
+            isComplete: false,
+          },
+          // Step 3: Navigate to destination room
+          {
+            type: "indoor",
+            title: `Find ${destinationRoomId} in ${building.name}`,
+            buildingId: destinationBuildingId,
+            startRoom: "entrance",
+            endRoom: destinationRoomId,
+            isComplete: false,
+          },
+        ],
+      };
+    }
+    // Case 4: Location to Location (outdoor only)
+    else if (
+      originInputType === "location" &&
+      destinationInputType === "location"
+    ) {
+      route = {
+        title: `Navigate to ${destinationAddress}`,
+        currentStep: 0,
+        steps: [
+          {
+            type: "outdoor",
+            title: `Travel to ${destinationAddress}`,
+            startPoint: {
+              latitude: originDetails.latitude,
+              longitude: originDetails.longitude,
+            },
+            endPoint: {
+              latitude: destinationDetails.latitude,
+              longitude: destinationDetails.longitude,
+            },
+            startAddress: originAddress,
+            endAddress: destinationAddress,
+            isComplete: false,
+          },
+        ],
+      };
+    }
+    // Case 5: Classroom to Location
+    else if (
+      originInputType === "classroom" &&
+      destinationInputType === "location"
+    ) {
+      route = {
+        title: `Navigate to ${destinationAddress}`,
+        currentStep: 0,
+        steps: [
+          // Step 1: Exit origin building
+          {
+            type: "indoor",
+            title: `Exit ${originBuilding.name}`,
+            buildingId: originBuildingId,
+            startRoom: originRoomId,
+            endRoom: "entrance", // Navigate to building entrance
+            isComplete: false,
+          },
+          // Step 2: Navigate to destination location
+          {
+            type: "outdoor",
+            title: `Travel to ${destinationAddress}`,
+            startPoint: originBuilding.address,
+            endPoint: destinationAddress,
+            isComplete: false,
+          },
+        ],
+      };
+    }
+
+    // Use the service to navigate with the created route
     NavigationStrategyService.navigateToStep(navigation, route);
     setIsLoading(false);
   };
@@ -1259,7 +1480,7 @@ const MultistepNavigationScreen = () => {
         acc.longitude += point.longitude / outdoorRoute.length;
         return acc;
       },
-      { latitude: 0, longitude: 0 }
+      { latitude: 0, longitude: 0 },
     );
 
     // Convert route to Google Maps format
@@ -1352,116 +1573,335 @@ const MultistepNavigationScreen = () => {
         >
           <View style={styles.header}>
             <Text style={styles.title}>Multi-step Navigation</Text>
-            <Text style={styles.subtitle}>Navigate to your classroom</Text>
+            <Text style={styles.subtitle}>Navigate to your destination</Text>
           </View>
 
+          {/* Origin Input Section with Toggle */}
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Starting Point</Text>
-            <View
-              style={[
-                styles.searchBar,
-                originSearchQuery.length > 0 && styles.searchBarFocused,
-              ]}
-            >
-              <Ionicons name="location-outline" size={20} style={styles.icon} />
-              <TextInput
-                value={originSearchQuery}
-                onChangeText={searchOriginPlaces}
-                placeholder={origin || "Enter your starting location"}
-                style={styles.input}
-              />
-              {loadingOrigin ? (
-                <ActivityIndicator color="#912338" />
-              ) : (
-                originSearchQuery.length > 0 && (
-                  <TouchableOpacity
-                    onPress={() => {
-                      setOriginSearchQuery("");
-                      setOriginPredictions([]);
-                    }}
+            <View style={styles.inputHeader}>
+              <Text style={styles.label}>Starting Point</Text>
+              <View style={styles.toggleContainer}>
+                <TouchableOpacity
+                  style={[
+                    styles.toggleButton,
+                    originInputType === "location" && styles.toggleButtonActive,
+                  ]}
+                  onPress={() => setOriginInputType("location")}
+                >
+                  <Text
+                    style={[
+                      styles.toggleText,
+                      originInputType === "location" && styles.toggleTextActive,
+                    ]}
                   >
-                    <Ionicons
-                      name="close-circle"
-                      size={20}
-                      style={styles.icon}
-                    />
-                  </TouchableOpacity>
-                )
-              )}
+                    Location
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.toggleButton,
+                    originInputType === "classroom" &&
+                      styles.toggleButtonActive,
+                  ]}
+                  onPress={() => setOriginInputType("classroom")}
+                >
+                  <Text
+                    style={[
+                      styles.toggleText,
+                      originInputType === "classroom" &&
+                        styles.toggleTextActive,
+                    ]}
+                  >
+                    Classroom
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
 
-            {originPredictions.length > 0 && (
-              <FlatList
-                data={originPredictions}
-                keyExtractor={(item) => item.place_id}
-                style={styles.predictionsList}
-                renderItem={({ item }) => (
-                  <TouchableOpacity
-                    onPress={() =>
-                      handleOriginSelection(item.place_id, item.description)
-                    }
-                    style={styles.predictionItem}
-                  >
-                    <Ionicons
-                      name="location-outline"
-                      size={20}
-                      style={styles.icon}
-                    />
-                    <Text style={styles.predictionText}>
-                      {item.description}
-                    </Text>
-                  </TouchableOpacity>
+            {originInputType === "location" ? (
+              // Location input
+              <>
+                <View
+                  style={[
+                    styles.searchBar,
+                    originSearchQuery.length > 0 && styles.searchBarFocused,
+                  ]}
+                >
+                  <Ionicons
+                    name="location-outline"
+                    size={20}
+                    style={styles.icon}
+                  />
+                  <TextInput
+                    value={originSearchQuery}
+                    onChangeText={searchOriginPlaces}
+                    placeholder={origin || "Enter your starting location"}
+                    style={styles.input}
+                  />
+                  {loadingOrigin ? (
+                    <ActivityIndicator color="#912338" />
+                  ) : (
+                    originSearchQuery.length > 0 && (
+                      <TouchableOpacity
+                        onPress={() => {
+                          setOriginSearchQuery("");
+                          setOriginPredictions([]);
+                        }}
+                      >
+                        <Ionicons
+                          name="close-circle"
+                          size={20}
+                          style={styles.icon}
+                        />
+                      </TouchableOpacity>
+                    )
+                  )}
+                </View>
+
+                {originPredictions.length > 0 && (
+                  <View style={styles.predictionsList}>
+                    {originPredictions.map((item) => (
+                      <TouchableOpacity
+                        key={item.place_id}
+                        onPress={() =>
+                          handleOriginSelection(item.place_id, item.description)
+                        }
+                        style={styles.predictionItem}
+                      >
+                        <Ionicons
+                          name="location-outline"
+                          size={20}
+                          style={styles.icon}
+                        />
+                        <Text style={styles.predictionText}>
+                          {item.description}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
                 )}
-              />
+              </>
+            ) : (
+              // Classroom input
+              <>
+                <TextInput
+                  style={styles.roomInput}
+                  placeholder="Enter classroom (e.g. H-920)"
+                  value={origin}
+                  onChangeText={parseOriginClassroom}
+                />
+
+                {showOriginBuildingSuggestions && (
+                  <ScrollView style={styles.suggestionsContainer}>
+                    {originBuildingSuggestions.map((item) => (
+                      <TouchableOpacity
+                        key={item.id}
+                        style={styles.suggestionItem}
+                        onPress={() => handleOriginBuildingSelect(item)}
+                      >
+                        <Text style={styles.suggestionText}>
+                          {item.name} ({item.id})
+                        </Text>
+                        <Text style={styles.suggestionAddress}>
+                          {item.address}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                )}
+
+                {originBuilding && (
+                  <View style={styles.inputGroup}>
+                    <Text style={styles.label}>Room Number</Text>
+                    <TextInput
+                      style={styles.roomInput}
+                      placeholder="Enter room number (e.g. 920)"
+                      value={originRoom.replace(/^[A-Za-z]+-/, "")}
+                      onChangeText={(text) =>
+                        setOriginRoom(`${originBuilding.id}-${text}`)
+                      }
+                    />
+                  </View>
+                )}
+              </>
             )}
           </View>
 
+          {/* Destination Input Section with Toggle */}
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Destination</Text>
-            <TextInput
-              style={styles.roomInput}
-              placeholder="Enter classroom (e.g. H-920)"
-              value={destination}
-              onChangeText={parseDestination}
-            />
-
-            {showBuildingSuggestions && (
-              <ScrollView style={styles.suggestionsContainer}>
-                {buildingSuggestions.map((item) => (
-                  <TouchableOpacity
-                    key={item.id}
-                    style={styles.suggestionItem}
-                    onPress={() => handleBuildingSelect(item)}
+            <View style={styles.inputHeader}>
+              <Text style={styles.label}>Destination</Text>
+              <View style={styles.toggleContainer}>
+                <TouchableOpacity
+                  style={[
+                    styles.toggleButton,
+                    destinationInputType === "location" &&
+                      styles.toggleButtonActive,
+                  ]}
+                  onPress={() => setDestinationInputType("location")}
+                >
+                  <Text
+                    style={[
+                      styles.toggleText,
+                      destinationInputType === "location" &&
+                        styles.toggleTextActive,
+                    ]}
                   >
-                    <Text style={styles.suggestionText}>
-                      {item.name} ({item.id})
-                    </Text>
-                    <Text style={styles.suggestionAddress}>{item.address}</Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
+                    Location
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.toggleButton,
+                    destinationInputType === "classroom" &&
+                      styles.toggleButtonActive,
+                  ]}
+                  onPress={() => setDestinationInputType("classroom")}
+                >
+                  <Text
+                    style={[
+                      styles.toggleText,
+                      destinationInputType === "classroom" &&
+                        styles.toggleTextActive,
+                    ]}
+                  >
+                    Classroom
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {destinationInputType === "location" ? (
+              // Location input for destination with autocomplete
+              <>
+                <View
+                  style={[
+                    styles.searchBar,
+                    destinationSearchQuery.length > 0 &&
+                      styles.searchBarFocused,
+                  ]}
+                >
+                  <Ionicons
+                    name="location-outline"
+                    size={20}
+                    style={styles.icon}
+                  />
+                  <TextInput
+                    value={destinationSearchQuery}
+                    onChangeText={searchDestinationPlaces}
+                    placeholder={destination || "Enter your destination"}
+                    style={styles.input}
+                  />
+                  {loadingDestination ? (
+                    <ActivityIndicator color="#912338" />
+                  ) : (
+                    destinationSearchQuery.length > 0 && (
+                      <TouchableOpacity
+                        onPress={() => {
+                          setDestinationSearchQuery("");
+                          setDestinationPredictions([]);
+                        }}
+                      >
+                        <Ionicons
+                          name="close-circle"
+                          size={20}
+                          style={styles.icon}
+                        />
+                      </TouchableOpacity>
+                    )
+                  )}
+                </View>
+
+                {destinationPredictions.length > 0 && (
+                  <View style={styles.predictionsList}>
+                    {originPredictions.map((item) => (
+                      <TouchableOpacity
+                        key={item.place_id}
+                        onPress={() =>
+                          handleDestinationSelection(
+                            item.place_id,
+                            item.description,
+                          )
+                        }
+                        style={styles.predictionItem}
+                      >
+                        <Ionicons
+                          name="location-outline"
+                          size={20}
+                          style={styles.icon}
+                        />
+                        <Text style={styles.predictionText}>
+                          {item.description}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
+              </>
+            ) : (
+              // Classroom input for destination (existing code)
+              <>
+                <TextInput
+                  style={styles.roomInput}
+                  placeholder="Enter classroom (e.g. H-920)"
+                  value={destination}
+                  onChangeText={parseDestination}
+                />
+
+                {showBuildingSuggestions && (
+                  <ScrollView style={styles.suggestionsContainer}>
+                    {buildingSuggestions.map((item) => (
+                      <TouchableOpacity
+                        key={item.id}
+                        style={styles.suggestionItem}
+                        onPress={() => handleBuildingSelect(item)}
+                      >
+                        <Text style={styles.suggestionText}>
+                          {item.name} ({item.id})
+                        </Text>
+                        <Text style={styles.suggestionAddress}>
+                          {item.address}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                )}
+
+                {building && (
+                  <View style={styles.inputGroup}>
+                    <Text style={styles.label}>Room Number</Text>
+                    <TextInput
+                      style={styles.roomInput}
+                      placeholder="Enter room number (e.g. 920)"
+                      value={room.replace(/^[A-Za-z]+-/, "")}
+                      onChangeText={(text) => setRoom(`${building.id}-${text}`)}
+                    />
+                  </View>
+                )}
+              </>
             )}
           </View>
-
-          {building && (
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Room Number</Text>
-              <TextInput
-                style={styles.roomInput}
-                placeholder="Enter room number (e.g. 920)"
-                value={room.replace(/^[A-Za-z]+-/, "")}
-                onChangeText={(text) => setRoom(`${building.id}-${text}`)}
-              />
-            </View>
-          )}
 
           <TouchableOpacity
             style={[
               styles.button,
-              (!originDetails || !building || !room) && styles.disabledButton,
+              ((originInputType === "location" && !originDetails) ||
+                (originInputType === "classroom" &&
+                  (!originBuilding || !originRoom)) ||
+                (destinationInputType === "location" && !destinationDetails) ||
+                (destinationInputType === "classroom" &&
+                  (!building || !room))) &&
+                styles.disabledButton,
             ]}
             onPress={handleStartNavigation}
-            disabled={isLoading || !originDetails || !building || !room}
+            disabled={
+              isLoading ||
+              (originInputType === "location" && !originDetails) ||
+              (originInputType === "classroom" &&
+                (!originBuilding || !originRoom)) ||
+              (destinationInputType === "location" && !destinationDetails) ||
+              (destinationInputType === "classroom" && (!building || !room))
+            }
           >
             {isLoading ? (
               <ActivityIndicator color="#fff" />
@@ -1475,7 +1915,7 @@ const MultistepNavigationScreen = () => {
   };
 
   // Render outdoor step UI with map and directions
-  const renderOutdoorStep = (step) => {
+  const renderOutdoorStep = () => {
     return (
       <View style={styles.stepContentContainer}>
         <View style={styles.mapContainer}>
@@ -1534,7 +1974,7 @@ const MultistepNavigationScreen = () => {
   };
 
   // Render indoor step UI with floor plan and directions
-  const renderIndoorStep = (step) => {
+  const renderIndoorStep = () => {
     return (
       <View style={styles.stepContentContainer}>
         <View style={styles.floorSelectorContainer}>
@@ -1578,7 +2018,7 @@ const MultistepNavigationScreen = () => {
               data={indoorDirections}
               keyExtractor={(_, index) => `indoor-dir-${index}`}
               style={[styles.directionsList, { maxHeight: 120 }]} // Reduce max height
-              renderItem={({ item, index }) => (
+              renderItem={({ item }) => (
                 <View style={[styles.directionItem, { paddingVertical: 6 }]}>
                   <View
                     style={[

@@ -161,18 +161,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 15,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#912338", // Concordia maroon
-    marginTop: 10,
-    marginBottom: 5,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: "#444",
-    marginBottom: 20,
-  },
   content: {
     padding: 15,
     backgroundColor: "#f5f5f5",
@@ -491,6 +479,35 @@ const styles = StyleSheet.create({
     marginTop: 10,
     color: "#666666",
     fontSize: 14,
+  },
+  inputHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  toggleContainer: {
+    flexDirection: "row",
+    backgroundColor: "#EAEAEA",
+    borderRadius: 8,
+    overflow: "hidden",
+  },
+  toggleButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    minWidth: 80,
+    alignItems: "center",
+  },
+  toggleButtonActive: {
+    backgroundColor: "#912338",
+  },
+  toggleText: {
+    fontSize: 12,
+    color: "#666",
+  },
+  toggleTextActive: {
+    color: "#FFFFFF",
+    fontWeight: "500",
   },
 });
 
