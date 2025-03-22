@@ -11,7 +11,6 @@ import GetDirections from "./components/GetDirections";
 import IndoorNavigation from "./components/IndoorNavigation/IndoorNavigation";
 import FloorSelector from "./components/IndoorNavigation/FloorSelector";
 import BuildingSelector from "./components/IndoorNavigation/BuildingSelector";
-import RoomToRoomNavigation from "./components/IndoorNavigation/RoomToRoomNavigation";
 import TunnelNavigation from "./components/IndoorNavigation/TunnelNavigation";
 import PropTypes from "prop-types";
 
@@ -74,10 +73,6 @@ export default function App() {
             <Stack.Screen
               name="IndoorNavigation"
               component={IndoorNavigation}
-            />
-            <Stack.Screen
-              name="RoomToRoomNavigation"
-              component={RoomToRoomNavigation}
             />
             <Stack.Screen
               name="TunnelNavigation"
