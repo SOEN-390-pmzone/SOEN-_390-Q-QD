@@ -27,12 +27,6 @@ jest.mock("../../../components/IndoorNavigation/PathFinder", () => ({
   findShortestPath: jest.fn(),
 }));
 
-// Mock InterFloorNavigation - simplified to avoid React reference
-jest.mock(
-  "../../../components/IndoorNavigation/InterFloorNavigation",
-  () => "InterFloorNavigation",
-);
-
 // Mock Header and NavBar components
 jest.mock("../../../components/Header", () => "Header");
 jest.mock("../../../components/NavBar", () => "NavBar");
@@ -202,18 +196,6 @@ describe("IndoorNavigation", () => {
 
     // Verify "No path found" message
     expect(getByText("1. No path found")).toBeTruthy();
-  });
-
-  test("opens InterFloorNavigation modal when button is pressed", async () => {
-    const { getByText } = render(
-      <IndoorNavigation route={mockRoute} navigation={mockNavigation} />,
-    );
-
-    // Press the Inter-Floor Navigation button
-    fireEvent.press(getByText("Inter-Floor Navigation"));
-
-    // Verify the button was pressed (we can't easily check modal visibility with simplified mock)
-    expect(getByText("Inter-Floor Navigation")).toBeTruthy();
   });
 
   test("uses default building type if not provided", async () => {

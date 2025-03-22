@@ -21,7 +21,7 @@ describe("MapMarkers Component", () => {
     const { getAllByTestId } = render(
       <ModalContext.Provider value={mockModalContext}>
         <MapMarkers />
-      </ModalContext.Provider>
+      </ModalContext.Provider>,
     );
 
     const markers = getAllByTestId(/marker-/);
@@ -32,11 +32,11 @@ describe("MapMarkers Component", () => {
     const { getByTestId } = render(
       <ModalContext.Provider value={mockModalContext}>
         <MapMarkers />
-      </ModalContext.Provider>
+      </ModalContext.Provider>,
     );
 
     const firstMarker = getByTestId(
-      `marker-${Building[0].name.toLowerCase().replace(/\s+/g, "-")}`
+      `marker-${Building[0].name.toLowerCase().replace(/\s+/g, "-")}`,
     );
     fireEvent.press(firstMarker);
 
@@ -49,6 +49,4 @@ describe("MapMarkers Component", () => {
 
     expect(mockToggleModal).toHaveBeenCalled();
   });
-
-  
 });

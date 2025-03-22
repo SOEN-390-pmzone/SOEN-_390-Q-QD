@@ -9,7 +9,7 @@ import {
 import GetDirections from "../../components/GetDirections";
 import { useGoogleMapDirections } from "../../hooks/useGoogleMapDirections";
 import { LocationContext } from "../../contexts/LocationContext";
-import { useRoute } from '@react-navigation/native';
+import { useRoute } from "@react-navigation/native";
 
 jest.mock("expo-location", () => ({
   getCurrentPositionAsync: jest.fn().mockResolvedValue({
@@ -24,14 +24,14 @@ jest.mock("expo-location", () => ({
 jest.mock("../../hooks/useGoogleMapDirections");
 
 // Mock the dependencies with forwardRef for MapView
-jest.mock('@react-navigation/native', () => ({
+jest.mock("@react-navigation/native", () => ({
   useRoute: jest.fn(),
 }));
 const mockRoute = {
   params: {
     latitude: 45.4973,
     longitude: -73.5789,
-    fromPopup: false
+    fromPopup: false,
   },
 };
 // Mock the useRoute hook to return the mock route
@@ -91,7 +91,7 @@ jest.mock("../../components/FloatingSearchBar", () => {
 jest.mock("../../components/Header", () => "Header");
 jest.mock("../../components/NavBar", () => "NavBar");
 jest.mock("../../components/DirectionsBox", () => "DirectionsBox");
-jest.mock('@react-navigation/stack', () => ({
+jest.mock("@react-navigation/stack", () => ({
   createStackNavigator: jest.fn(() => ({
     Navigator: jest.fn(({ children }) => children),
     Screen: jest.fn(({ children }) => children),
@@ -141,7 +141,6 @@ describe("GetDirections", () => {
   });
 
   const renderWithContext = (component) => {
-    
     return render(
       <LocationContext.Provider value={mockLocation}>
         {component}

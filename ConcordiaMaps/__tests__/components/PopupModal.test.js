@@ -2,18 +2,14 @@ import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react-native";
 import PopupModal from "../../components/PopupModal";
 
-
-
-
 describe("PopupModal Component", () => {
-  
   const mockData = {
     name: "H Building",
     fullBuildingName: "Henry F. Hall Building",
     address: "1455 DeMaisonneuve W",
     coordinate: { latitude: 45.497092, longitude: -73.5788 },
     buildingType: "HallBuilding",
-    fromPopup: true
+    fromPopup: true,
   };
 
   const mockOnClose = jest.fn();
@@ -81,19 +77,18 @@ describe("PopupModal Component", () => {
         navigation={mockNavigation}
       />,
     );
-    
+
     const getDirectionsButton = screen.getByText("Get Directions");
     fireEvent.press(getDirectionsButton);
 
-    expect(mockNavigation.navigate).toHaveBeenCalledWith('GetDirections', {
+    expect(mockNavigation.navigate).toHaveBeenCalledWith("GetDirections", {
       latitude: mockData.coordinate.latitude,
       longitude: mockData.coordinate.longitude,
-      fromPopup: mockData.fromPopup
+      fromPopup: mockData.fromPopup,
     });
 
     // Verify that onClose was called
     expect(mockOnClose).toHaveBeenCalled();
-    
   });
 
   it('navigates to FloorSelector screen when "Floor Selector" button is pressed', () => {
@@ -104,16 +99,16 @@ describe("PopupModal Component", () => {
         data={mockData}
         onClose={mockOnClose}
         navigation={mockNavigation}
-      />
+      />,
     );
 
     // Find the "Floor Selector" button using testID and press it
-    const floorSelectorButton = screen.getByText('Get Indoor Directions');
+    const floorSelectorButton = screen.getByText("Get Indoor Directions");
     fireEvent.press(floorSelectorButton);
 
     // Verify that navigation.navigate was called with the correct arguments
     //const buildingType = INDOOR_NAVIGATION_BUILDINGS[mockData.fullBuildingName];
-    expect(mockNavigation.navigate).toHaveBeenCalledWith('FloorSelector', {
+    expect(mockNavigation.navigate).toHaveBeenCalledWith("FloorSelector", {
       buildingType: mockData.buildingType,
       // latitude: mockData.coordinate.latitude,
       // longitude: mockData. coordinate.longitude,

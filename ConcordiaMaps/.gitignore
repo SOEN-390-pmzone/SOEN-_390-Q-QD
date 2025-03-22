@@ -37,4 +37,8 @@ yarn-error.*
 
 #coverage
 coverage
+
+#maestro
+maestro
+
 android

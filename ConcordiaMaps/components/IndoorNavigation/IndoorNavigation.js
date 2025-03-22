@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import { View, Text, ScrollView, TouchableOpacity } from "react-native";
 import { WebView } from "react-native-webview";
 import { findShortestPath } from "./PathFinder";
-import InterFloorNavigation from "./InterFloorNavigation";
 import Header from "../Header";
 import NavBar from "../NavBar";
 import FloorRegistry from "../../services/BuildingDataService";
@@ -15,8 +14,6 @@ const IndoorNavigation = ({ route, navigation }) => {
   const [path, setPath] = useState([]);
   const [allNodes, setAllNodes] = useState([]);
   const [floorPlan, setFloorPlan] = useState("");
-  const [isInterFloorModalVisible, setIsInterFloorModalVisible] =
-    useState(false);
   const webViewRef = useRef(null);
 
   // Get both buildingType and floor from route params, default to hall
@@ -562,14 +559,6 @@ const IndoorNavigation = ({ route, navigation }) => {
       <TouchableOpacity style={styles.button} onPress={calculatePath}>
         <Text style={styles.buttonText}>Find Path</Text>
       </TouchableOpacity>
-
-      <TouchableOpacity
-        style={[styles.button, { marginTop: 10, backgroundColor: "#666" }]}
-        onPress={() => setIsInterFloorModalVisible(true)}
-      >
-        <Text style={styles.buttonText}>Inter-Floor Navigation</Text>
-      </TouchableOpacity>
-
       <View style={styles.resultContainerWrapper}>
         <Text style={styles.resultTitle}>Navigation Path:</Text>
         <ScrollView style={styles.resultContainer} nestedScrollEnabled={true}>
@@ -593,17 +582,6 @@ const IndoorNavigation = ({ route, navigation }) => {
           )}
         </ScrollView>
       </View>
-
-      <InterFloorNavigation
-        isVisible={isInterFloorModalVisible}
-        onClose={() => setIsInterFloorModalVisible(false)}
-        startFloor={floor}
-        endFloor={floor === "8" ? "9" : "8"}
-        buildingType={buildingType}
-        onPathCalculated={(pathData) => {
-          console.log("Inter-floor path calculated:", pathData);
-        }}
-      />
     </View>
   );
 };
