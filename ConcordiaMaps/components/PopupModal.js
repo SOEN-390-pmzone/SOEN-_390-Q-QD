@@ -1,20 +1,36 @@
 import React from "react";
-import { Modal, View, Text, TouchableOpacity, Alert } from "react-native";
+import { Modal, View, Text, TouchableOpacity } from "react-native";
 import PropTypes from "prop-types";
 import styles from "../styles/DirectionBox.style";
 
 // Building to floor selector mapping
 const INDOOR_NAVIGATION_BUILDINGS = {
-  "Henry F. Hall": "HallBuilding",
-  "John Molson School Of Business": "JMSB",
+  "Henry F. Hall Building": "HallBuilding",
+  "John Molson School of Business Building": "JMSB",
+  "Vanier Library Extension": "VanierExtension",
+  "Engineering and Visual Arts Building": "EVBuilding",
+  "Webster Library": "Library",
+  "Vanier Library": "VanierLibrary",
 };
 
 const PopupModal = ({ isVisible, data, onClose, navigation }) => {
+  const buildingType = INDOOR_NAVIGATION_BUILDINGS[data.fullBuildingName];
+
+  const handleOutdoorsDirectionsSelect = () => {
+    onClose();
+
+    navigation.navigate("GetDirections", {
+      latitude: data.coordinate.latitude,
+      longitude: data.coordinate.longitude,
+      fromPopup: true,
+    });
+  };
+
   const handleFloorSelector = () => {
     onClose(); // Close the modal first
-    const buildingType = INDOOR_NAVIGATION_BUILDINGS[data.name];
+
     navigation.navigate("FloorSelector", {
-      buildingName: data.name,
+      //buildingName: data?.name,
       buildingType: buildingType,
     });
   };
@@ -42,18 +58,14 @@ const PopupModal = ({ isVisible, data, onClose, navigation }) => {
 
             <TouchableOpacity
               style={styles.getDirectionsButton}
-              onPress={() =>
-                Alert.alert("Get Directions", "Directions pressed")
-              }
+              onPress={() => handleOutdoorsDirectionsSelect()}
+              //
             >
               <Text style={styles.getDirectionsButtonText}>Get Directions</Text>
             </TouchableOpacity>
 
             {hasIndoorNavigation && (
-              <TouchableOpacity
-                style={styles.getDirectionsButton}
-                onPress={handleFloorSelector}
-              >
+              <TouchableOpacity style={styles.getDirectionsButton}>
                 <Text style={styles.getDirectionsButtonText}>
                   Floor Selector
                 </Text>
@@ -70,12 +82,10 @@ const PopupModal = ({ isVisible, data, onClose, navigation }) => {
           ].includes(data?.name) && (
             <TouchableOpacity
               style={styles.getDirectionsButton1}
-              onPress={() =>
-                Alert.alert("Get Inner Directions", "Inner directions pressed")
-              }
+              onPress={handleFloorSelector}
             >
               <Text style={styles.getDirectionsButtonText}>
-                Get in Building Directions
+                Get Indoor Directions
               </Text>
             </TouchableOpacity>
           )}
@@ -91,7 +101,12 @@ PopupModal.propTypes = {
     name: PropTypes.string.isRequired,
     fullBuildingName: PropTypes.string,
     address: PropTypes.string,
+    coordinate: PropTypes.shape({
+      latitude: PropTypes.number,
+      longitude: PropTypes.number,
+    }),
   }).isRequired,
+
   onClose: PropTypes.func.isRequired,
   navigation: PropTypes.object.isRequired,
 };

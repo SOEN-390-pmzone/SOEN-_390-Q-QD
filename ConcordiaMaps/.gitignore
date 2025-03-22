@@ -35,5 +35,10 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
-# android folder
-android/
+#coverage
+coverage
+
+#maestro
+maestro
+
+android
