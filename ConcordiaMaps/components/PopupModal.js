@@ -14,7 +14,6 @@ const INDOOR_NAVIGATION_BUILDINGS = {
 };
 
 const PopupModal = ({ isVisible, data, onClose, navigation }) => {
-  //data = JSON.stringify(data);
   const buildingType = INDOOR_NAVIGATION_BUILDINGS[data.fullBuildingName];
 
   const handleOutdoorsDirectionsSelect = () => {
@@ -66,10 +65,7 @@ const PopupModal = ({ isVisible, data, onClose, navigation }) => {
             </TouchableOpacity>
 
             {hasIndoorNavigation && (
-              <TouchableOpacity
-                style={styles.getDirectionsButton}
-                onPress={handleFloorSelector}
-              >
+              <TouchableOpacity style={styles.getDirectionsButton}>
                 <Text style={styles.getDirectionsButtonText}>
                   Floor Selector
                 </Text>
