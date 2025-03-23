@@ -1,11 +1,19 @@
 import React, { useState, createContext, useMemo } from "react";
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer, useNavigation } from "@react-navigation/native";
+
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import HomeScreen from "./screen/HomeScreen";
 import { LocationProvider } from "./contexts/LocationContext";
 import PopupModal from "./components/PopupModal";
 import styles from "./styles";
 import GetDirections from "./components/GetDirections";
+
+import IndoorNavigation from "./components/IndoorNavigation/IndoorNavigation";
+import FloorSelector from "./components/IndoorNavigation/FloorSelector";
+import BuildingSelector from "./components/IndoorNavigation/BuildingSelector";
+import RoomToRoomNavigation from "./components/IndoorNavigation/RoomToRoomNavigation";
+import TunnelNavigation from "./components/IndoorNavigation/TunnelNavigation";
+import PropTypes from "prop-types";
 import CalendarScreen from "./components/CalendarScreen"; // Import CalendarScreen
 
 // Create Context for modal data and visibility
@@ -13,6 +21,23 @@ export const ModalContext = createContext();
 
 const Stack = createNativeStackNavigator();
 
+// Create a wrapper component for PopupModal that has access to navigation
+const PopupModalWrapper = ({ isVisible, data, onClose }) => {
+  const navigation = useNavigation();
+  return (
+    <PopupModal
+      isVisible={isVisible}
+      data={data}
+      onClose={onClose}
+      navigation={navigation}
+    />
+  );
+};
+PopupModalWrapper.propTypes = {
+  isVisible: PropTypes.bool.isRequired,
+  data: PropTypes.object.isRequired,
+  onClose: PropTypes.func.isRequired,
+};
 export default function App() {
   const [isModalVisible, setModalVisible] = useState(false);
   const [modalData, setModalData] = useState({
@@ -42,16 +67,32 @@ export default function App() {
               component={HomeScreen}
             />
             <Stack.Screen name="GetDirections" component={GetDirections} />
+            <Stack.Screen
+              name="BuildingSelector"
+              component={BuildingSelector}
+            />
+            <Stack.Screen name="FloorSelector" component={FloorSelector} />
+            <Stack.Screen
+              name="IndoorNavigation"
+              component={IndoorNavigation}
+            />
+            <Stack.Screen
+              name="RoomToRoomNavigation"
+              component={RoomToRoomNavigation}
+            />
+            <Stack.Screen
+              name="TunnelNavigation"
+              component={TunnelNavigation}
+            />
             <Stack.Screen name="Calendar" component={CalendarScreen} />
           </Stack.Navigator>
-        </NavigationContainer>
 
-        {/* Add PopupModal here */}
-        <PopupModal
-          isVisible={isModalVisible}
-          data={modalData}
-          onClose={toggleModal}
-        />
+          <PopupModalWrapper
+            isVisible={isModalVisible}
+            data={modalData}
+            onClose={toggleModal}
+          />
+        </NavigationContainer>
       </ModalContext.Provider>
     </LocationProvider>
   );
