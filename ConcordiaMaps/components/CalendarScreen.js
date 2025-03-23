@@ -85,6 +85,7 @@ const CalendarScreen = () => {
         <TouchableOpacity
           style={styles.selectBox}
           onPress={() => setModalVisible(true)}
+          testID="calendarButton"
         >
           <Text style={styles.selectBoxText}>
             Select your calendars ({selectedCalendarIds.length})

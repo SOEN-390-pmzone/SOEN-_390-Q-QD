@@ -17,7 +17,7 @@ function NavBar() {
   };
 
   return (
-    <View style={styles.navbar}>
+    <View style={styles.navbar} testID="hamburger-menu">
       <TouchableOpacity onPress={() => handlePress("Login")}>
         <Text style={styles.menuItem}>Login</Text>
       </TouchableOpacity>
