@@ -39,7 +39,7 @@ const CalendarScreen = () => {
 
   const fetchCalendars = async () => {
     const availableCalendars = await Calendar.getCalendarsAsync(
-      Calendar.EntityTypes.EVENT,
+      Calendar.EntityTypes.EVENT
     );
     setCalendars(availableCalendars);
 
@@ -62,14 +62,14 @@ const CalendarScreen = () => {
     const events = await Calendar.getEventsAsync(
       selectedCalendarIds,
       startDate,
-      endDate,
+      endDate
     );
     setEvents(events);
   };
 
   const toggleCalendarSelection = (id) => {
     setSelectedCalendarIds((prev) =>
-      prev.includes(id) ? prev.filter((calId) => calId !== id) : [...prev, id],
+      prev.includes(id) ? prev.filter((calId) => calId !== id) : [...prev, id]
     );
   };
 
@@ -154,13 +154,22 @@ const CalendarScreen = () => {
             renderItem={({ item }) => (
               <View style={styles.eventCard}>
                 <Text style={styles.eventTitle}>{item.title}</Text>
-                {item.location && (
-                  <Text style={styles.eventLocation}>{item.location}</Text>
+                {item.notes && (
+                  <Text style={styles.eventInfo}>{item.notes}</Text>
                 )}
-                <Text style={styles.eventTime}>
+                <Text style={styles.eventInfo}>
                   {format(new Date(item.startDate), "hh:mm a")} -{" "}
                   {format(new Date(item.endDate), "hh:mm a")}
                 </Text>
+                
+                <TouchableOpacity
+                  style={styles.classDirectionsButton}
+                  onPress={() =>
+                    alert("Get directions to " + item.notes)
+                  }
+                >
+                  <Text style={styles.classDirectionsButtonText}> Get Directions </Text>
+                </TouchableOpacity>
               </View>
             )}
           />

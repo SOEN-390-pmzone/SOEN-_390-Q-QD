@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
   logo: {
     width: 40,
     height: 40,
-    marginHorizontal: 10
+    marginHorizontal: 10,
   },
   headerText: {
     fontWeight: "bold",
@@ -48,12 +48,12 @@ const styles = StyleSheet.create({
     fontSize: 25,
     color: "white",
     flex: 1,
-    textAlign: "center"
+    textAlign: "center",
   },
   calendarIcon: {
     width: 30,
     height: 30,
-    marginHorizontal: 10
+    marginHorizontal: 10,
   },
   navbar: {
     backgroundColor: "#912338",
@@ -64,12 +64,12 @@ const styles = StyleSheet.create({
     top: 117,
     bottom: 0,
     justifyContent: "flex-start",
-    alignItems: "center"
+    alignItems: "center",
   },
   hamburger: {
     padding: 5,
     justifyContent: "center",
-    alignItems: "center"
+    alignItems: "center",
   },
   hamburgerLine: {
     width: 30,
@@ -254,15 +254,24 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     color: "#FFFFFF",
+    marginBottom: 5,
   },
-  eventTime: {
+  eventInfo: {
     fontSize: 14,
     color: "#F5F5F5",
-    marginTop: 5,
+    marginBottom: 5,
   },
-  eventLocation: {
-    fontSize: 14,
-    color: "#F5F5F5",
+  classDirectionsButton: {
+    backgroundColor: "white",
+    borderRadius: 20,
+    paddingHorizontal: 30,
+    paddingVertical: 5,
+    maxWidth: 160,
+    alignItems: "center"
+  },
+  classDirectionsButtonText: {
+    color: "#912338",
+    fontWeight: "bold",
   },
   selectBox: {
     backgroundColor: "#912338",
