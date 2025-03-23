@@ -1878,6 +1878,24 @@ const MultistepNavigationScreen = () => {
 
     return (
       <View style={{ flex: 1, paddingBottom: 70 }}>
+        {/* Back button at the top */}
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => {
+            // Reset navigation state
+            setNavigationPlan(null);
+            setCurrentStepIndex(0);
+            setOutdoorDirections([]);
+            setOutdoorRoute([]);
+            setShowIndoorNavigation(false);
+            setIndoorNavigationParams(null);
+            setExpandedMap(false);
+          }}
+        >
+          <MaterialIcons name="arrow-back" size={20} color="#912338" />
+          <Text style={styles.backButtonText}>Change Route</Text>
+        </TouchableOpacity>
+
         <View style={[styles.stepCard, { marginTop: 5 }]}>
           <Text style={styles.stepTitle}>{currentStep.title}</Text>
 
@@ -2169,7 +2187,7 @@ const MultistepNavigationScreen = () => {
           {
             flex: 1,
             paddingTop: 10,
-            paddingBottom: 60, // Add space for Footer
+            paddingBottom: 60,
           },
         ]}
       >
