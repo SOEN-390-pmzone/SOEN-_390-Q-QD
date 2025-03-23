@@ -6,6 +6,7 @@ import React, {
   useContext,
   useMemo,
 } from "react";
+import { useRoute } from "@react-navigation/native";
 import { View, Button } from "react-native";
 import MapView, { Polyline, Marker } from "react-native-maps";
 import * as Location from "expo-location";
@@ -57,6 +58,10 @@ LocationMarkers.propTypes = {
 };
 
 const GetDirections = () => {
+  const routeParams = useRoute();
+  const lat = routeParams.params?.latitude;
+  const long = routeParams.params?.longitude;
+  const fromPopup = routeParams.params?.fromPopup || null;
   const mapRef = useRef(null);
   const location = useContext(LocationContext);
   const [mode, setMode] = useState("walking");
@@ -70,10 +75,16 @@ const GetDirections = () => {
 
   const { getStepsInHTML, getPolyline } = useGoogleMapDirections();
   const [useCurrentLocation, setUseCurrentLocation] = useState(true);
-  const [originText, setOriginText] = useState("");
-  const [destinationText, setDestinationText] = useState("");
 
   // Set initial location from context
+  useEffect(() => {
+    if (fromPopup) {
+      setDestination({
+        latitude: lat,
+        longitude: long,
+      });
+    } else setDestination(null);
+  }, []);
   useEffect(() => {
     if (location && useCurrentLocation) {
       setOrigin({
@@ -206,6 +217,7 @@ const GetDirections = () => {
     }
   }, [location, useCurrentLocation]);
 
+  // Update the FloatingSearchBar for origin
   return (
     <View style={styles.container}>
       <Header />
@@ -214,34 +226,26 @@ const GetDirections = () => {
         {!isInNavigationMode && (
           <View>
             <FloatingSearchBar
-              onPlaceSelect={(location, displayName) => {
-                setUseCurrentLocation(false);
+              onPlaceSelect={(location) => {
+                setUseCurrentLocation(false); // Disable auto-update when manual location entered
                 setOrigin(location);
-                setOriginText(displayName);
               }}
               placeholder={
                 useCurrentLocation ? "Using Current Location" : "Enter Origin"
               }
               style={styles.searchBar}
-              value={originText}
-              onChangeText={setOriginText}
-              onFocus={() => {
-                setIsDirectionsBoxCollapsed(true); // Collapse box when search is focused
-              }}
+              initialValue={
+                useCurrentLocation && origin
+                  ? `Current Location (${origin.latitude.toFixed(4)}, ${origin.longitude.toFixed(4)})`
+                  : ""
+              }
             />
-
             <FloatingSearchBar
-              onPlaceSelect={(location, displayName) => {
+              onPlaceSelect={(location) => {
                 setDestination(location);
-                setDestinationText(displayName);
               }}
               placeholder="Enter Destination"
               style={[styles.searchBar, { marginTop: 10 }]}
-              value={destinationText}
-              onChangeText={setDestinationText}
-              onFocus={() => {
-                setIsDirectionsBoxCollapsed(true); // Collapse box when search is focused
-              }}
             />
             <View style={styles.modes}>
               <Button

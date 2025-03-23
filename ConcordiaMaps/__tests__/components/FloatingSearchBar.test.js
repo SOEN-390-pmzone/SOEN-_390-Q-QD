@@ -256,13 +256,10 @@ describe("FloatingSearchBar Component", () => {
       ),
     );
 
-    expect(mockOnPlaceSelect).toHaveBeenCalledWith(
-      {
-        latitude: 45.5017,
-        longitude: -73.5673,
-      },
-      "Montreal, QC, Canada",
-    );
+    expect(mockOnPlaceSelect).toHaveBeenCalledWith({
+      latitude: 45.5017,
+      longitude: -73.5673,
+    });
   });
 
   it("handles place details API error gracefully", async () => {

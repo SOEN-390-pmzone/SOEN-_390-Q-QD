@@ -7,8 +7,7 @@ import TemporaryModal from "../components/temporaryModal";
 import { LocationContext } from "../contexts/LocationContext";
 import Footer from "../components/Footer";
 import styles from "../styles";
-import { Building } from "../components/MapMarkers";
-import { ModalContext } from "../App";
+
 import BuildingColoring from "../components/buildingColoring";
 import Legend from "../components/Legend";
 import ShuttleStop from "../components/ShuttleStop";
@@ -20,6 +19,9 @@ import {
 } from "../components/AsyncPersistence";
 import convertToCoordinates from "../components/convertToCoordinates";
 import PropTypes from "prop-types";
+
+import MapMarkers from "../components/MapMarkers";
+
 import PopupOPI from "../components/PopupOPI"; // Import the new popup component
 import { PointsOfInterest } from "../constants/OutdoorPtsOfDirections"; // Import the new Points of Interest data
 
@@ -31,7 +33,9 @@ function HomeScreen({ asyncKey = "Campus" }) {
   const sgwPostalCode = process.env.EXPO_PUBLIC_SGW_POSTAL_CODE;
 
   const location = useContext(LocationContext);
+
   const { toggleModal, setModalData } = useContext(ModalContext);
+
 
   const [postalCode, setPostalCode] = useState(null);
   const [coordinates, setCoordinates] = useState(null);
@@ -120,7 +124,6 @@ function HomeScreen({ asyncKey = "Campus" }) {
       mapRef.current?.animateToRegion(region, 1000);
     }, 100);
   };
-
   const handleMarkerPress = (building) => {
     setModalData({
       name: building.name,
@@ -135,7 +138,6 @@ function HomeScreen({ asyncKey = "Campus" }) {
     setSelectedOPI(poi);
     setOpiPopupVisible(true);
   };
-
   const [modalState, setModalState] = useState(true);
   useEffect(() => {
     if (modalState) {
@@ -188,6 +190,7 @@ function HomeScreen({ asyncKey = "Campus" }) {
             watchUserLocation={true}
             onRegionChangeComplete={(region) => setMapRegion(region)}
           >
+
             {Building.map((building) => (
               <Marker
                 key={`${building.name}-${building.coordinate.latitude}-${building.coordinate.longitude}`}
@@ -218,6 +221,7 @@ function HomeScreen({ asyncKey = "Campus" }) {
                 />
               </Marker>
             ))}
+
             <BuildingColoring />
             {selectedLocation && (
               <Marker

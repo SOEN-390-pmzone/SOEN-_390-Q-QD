@@ -12,7 +12,8 @@
     "prettier:fix": "npx prettier \"*/*.{js,jsx,ts,tsx,json,css,scss,md}\" --write --ignore-path .gitignore",
     "lint:fix": "eslint . --fix --ignore-pattern node_modules/ --ignore-pattern .expo/",
     "format": "npm run lint:fix & npm run prettier:fix",
-    "test": "jest"
+    "test": "jest",
+    "test:exclude": "jest --testPathIgnorePatterns=$npm_config_exclude"
   },
   "jest": {
     "preset": "jest-expo",
@@ -30,8 +31,9 @@
     "@expo/metro-runtime": "~4.0.1",
     "@mapbox/polyline": "^1.2.1",
     "@react-native-async-storage/async-storage": "^2.1.2",
-    "@react-navigation/native": "^7.0.14",
+    "@react-navigation/native": "^7.0.17",
     "@react-navigation/native-stack": "^7.2.0",
+    "@react-navigation/stack": "^7.2.1",
     "@testing-library/react": "^16.2.0",
     "axios": "^1.7.9",
     "ci": "^2.3.0",
@@ -60,7 +62,7 @@
     "react-native-svg-transformer": "^1.5.0",
     "react-native-vector-icons": "^10.2.0",
     "react-native-web": "~0.19.13",
-    "react-native-webview": "^13.13.2",
+    "react-native-webview": "^13.13.4",
     "react-test-renderer": "18.3.1"
   },
   "devDependencies": {
