@@ -12,7 +12,8 @@
     "prettier:fix": "npx prettier \"*/*.{js,jsx,ts,tsx,json,css,scss,md}\" --write --ignore-path .gitignore",
     "lint:fix": "eslint . --fix --ignore-pattern node_modules/ --ignore-pattern .expo/",
     "format": "npm run lint:fix & npm run prettier:fix",
-    "test": "jest"
+    "test": "jest",
+    "pre-commit": "node scripts/pre-commit.js"
   },
   "jest": {
     "preset": "jest-expo",
