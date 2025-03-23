@@ -112,3 +112,18 @@ PopupModal.propTypes = {
 };
 
 export default PopupModal;
+
+PopupModal.propTypes = {
+  isVisible: PropTypes.bool.isRequired, // Whether the modal is visible
+  data: PropTypes.shape({
+    name: PropTypes.string.isRequired, // The name of the building
+    fullBuildingName: PropTypes.string, // The full name of the building (optional)
+    address: PropTypes.string, // The address of the building (optional)
+    coordinate: PropTypes.shape({
+      latitude: PropTypes.number, // Latitude of the building's location
+      longitude: PropTypes.number, // Longitude of the building's location
+    }),
+  }).isRequired, // The data object is required
+  onClose: PropTypes.func.isRequired, // Function to handle closing the modal
+  navigation: PropTypes.object.isRequired, // Navigation object for navigation actions
+};

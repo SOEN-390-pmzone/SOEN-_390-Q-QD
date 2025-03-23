@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -21,7 +21,7 @@ function DirectionsBox({ directions = [] }) {
   };
   //? ANIMATION ONLY
   const [isCollapsed, setIsCollapsed] = useState(true);
-  const [animation] = useState(new Animated.Value(1));
+  const animation = useRef(new Animated.Value(1)).current;
 
   // Run initial animation when component mounts
   useEffect(() => {
