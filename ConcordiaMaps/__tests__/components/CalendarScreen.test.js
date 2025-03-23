@@ -3,6 +3,7 @@ import { render, fireEvent, waitFor } from "@testing-library/react-native";
 import CalendarScreen from "../../components/CalendarScreen";
 import Header from "../../components/Header";
 import { NavigationContainer } from "@react-navigation/native";
+import { Alert } from "react-native";
 
 jest.mock("expo-calendar", () => ({
   requestCalendarPermissionsAsync: jest
@@ -24,6 +25,15 @@ jest.mock("expo-calendar", () => ({
   EntityTypes: {
     EVENT: "event",
   },
+}));
+
+// Fix for "TypeError: loadedNativeFonts.forEach is not a function"
+jest.mock("expo-font", () => ({
+  loadAsync: jest.fn(),
+}));
+
+jest.mock("@expo/vector-icons", () => ({
+  Ionicons: "Ionicons",
 }));
 
 describe("Header", () => {
@@ -58,6 +68,8 @@ describe("CalendarScreen", () => {
       expect(getByText("Select Calendars")).toBeTruthy();
     });
 
+    // Fix: Wait for "Calendar 1" to be available before selecting it
+    await waitFor(() => expect(getByText("Calendar 1")).toBeTruthy());
     const calendar1 = getByText("Calendar 1");
     fireEvent.press(calendar1);
 
@@ -100,30 +112,36 @@ describe("CalendarScreen", () => {
   });
 
   it("clicks on the Get Directions button and closes the alert", async () => {
+    // Mock the alert function - make sure it's defined before rendering
+    const alertMock = jest.fn();
+    global.alert = alertMock;
+
     const { getByText, getByTestId, debug } = render(
       <NavigationContainer>
         <CalendarScreen />
       </NavigationContainer>
     );
 
-    // Mock the alert function - make sure it's defined before rendering
-    const alertMock = jest.fn();
-    global.alert = alertMock;
-
+    // Wait for the event to load
     await waitFor(() => {
       expect(getByText("Event 1")).toBeTruthy();
     });
 
+    // Log to check if the button is found
     debug();
 
+    // Find the "Get Directions" button and simulate a press
     const getDirectionsButton = getByTestId("getClassDirectionsButton");
     console.log("Button found:", getDirectionsButton);
 
-    // Try logging before and after press to confirm the press is happening
+    // Check if alert has been called before pressing the button
     console.log("Before press - alert called:", alertMock.mock.calls.length);
-    fireEvent.press(getDirectionsButton);
-    console.log("After press - alert called:", alertMock.mock.calls.length);
 
+    // Fire the press event on the button
+    fireEvent.press(getDirectionsButton);
+
+    // Check if the alert was called with the expected message
+    console.log("After press - alert called:", alertMock.mock.calls.length);
     expect(alertMock).toHaveBeenCalledWith("Get directions to Room 101");
   });
 });
