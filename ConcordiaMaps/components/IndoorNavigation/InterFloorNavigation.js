@@ -56,7 +56,7 @@ const InterFloorNavigation = ({
     const startFloorEscalatorPath = findShortestPath(
       startFloorGraph,
       selectedStartRoom,
-      "escalator"
+      "escalator",
     );
     setStartFloorPath(startFloorEscalatorPath);
 
@@ -64,7 +64,7 @@ const InterFloorNavigation = ({
     const endFloorEscalatorPath = findShortestPath(
       endFloorGraph,
       "escalator",
-      selectedEndRoom
+      selectedEndRoom,
     );
     setEndFloorPath(endFloorEscalatorPath);
 
@@ -109,7 +109,7 @@ const InterFloorNavigation = ({
   const generateFloorHtml = (
     floorPlan,
     pathCoordinates,
-    isExpanded = false
+    isExpanded = false,
   ) => {
     return `
       <!DOCTYPE html>
@@ -213,7 +213,7 @@ const InterFloorNavigation = ({
             a.localeCompare(b, undefined, {
               numeric: true,
               sensitivity: "base",
-            })
+            }),
           )
           .map((roomId) => (
             <TouchableOpacity
@@ -274,14 +274,14 @@ const InterFloorNavigation = ({
                 `Select Start Room (Floor ${startFloor})`,
                 startFloorRooms,
                 selectedStartRoom,
-                setSelectedStartRoom
+                setSelectedStartRoom,
               )}
 
               {renderRoomSelector(
                 `Select Destination Room (Floor ${endFloor})`,
                 endFloorRooms,
                 selectedEndRoom,
-                setSelectedEndRoom
+                setSelectedEndRoom,
               )}
             </View>
 
@@ -303,7 +303,7 @@ const InterFloorNavigation = ({
                         html: generateFloorHtml(
                           startFloorPlan,
                           startFloorPath.map((node) => startFloorRooms[node]),
-                          false
+                          false,
                         ),
                       }}
                       style={styles.webView}
@@ -325,7 +325,7 @@ const InterFloorNavigation = ({
                         html: generateFloorHtml(
                           endFloorPlan,
                           endFloorPath.map((node) => endFloorRooms[node]),
-                          false
+                          false,
                         ),
                       }}
                       style={styles.webView}

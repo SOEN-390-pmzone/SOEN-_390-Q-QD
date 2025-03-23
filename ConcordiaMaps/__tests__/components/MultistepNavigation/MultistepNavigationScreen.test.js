@@ -2,6 +2,7 @@ import React from "react";
 import { render, fireEvent } from "@testing-library/react-native";
 import MultistepNavigationScreen from "../../../components/MultistepNavigation/MultistepNavigationScreen";
 import NavigationStrategyService from "../../../services/NavigationStrategyService";
+import PropTypes from "prop-types";
 
 // Mock dependencies
 jest.mock("@react-navigation/native", () => ({
@@ -20,7 +21,13 @@ jest.mock("../../../components/MultistepNavigation/NavigationStep", () => {
   const React = require("react");
   const { TouchableOpacity, Text } = require("react-native");
 
-  return ({ title, description, type, buildingId, onPress }) => (
+  const NavigationStepMock = ({
+    title,
+    description,
+    type,
+    buildingId,
+    onPress,
+  }) => (
     <TouchableOpacity
       onPress={onPress}
       testID={`step-${title.replace(/\s+/g, "-").toLowerCase()}`}
@@ -31,6 +38,18 @@ jest.mock("../../../components/MultistepNavigation/NavigationStep", () => {
       <Text testID="step-building">{buildingId}</Text>
     </TouchableOpacity>
   );
+
+  NavigationStepMock.propTypes = {
+    title: PropTypes.string.isRequired,
+    description: PropTypes.string,
+    type: PropTypes.string,
+    buildingId: PropTypes.string,
+    onPress: PropTypes.func,
+  };
+
+  NavigationStepMock.displayName = "NavigationStep";
+
+  return NavigationStepMock;
 });
 
 jest.mock(
@@ -170,5 +189,73 @@ describe("MultistepNavigationScreen Component", () => {
     // There should be 4 DirectionArrow components (one less than the number of steps)
     const directionArrows = UNSAFE_getAllByType("DirectionArrow");
     expect(directionArrows).toHaveLength(4);
+  });
+
+  it("handles step with missing properties gracefully", () => {
+    const incompleteSteps = [
+      {
+        id: "incomplete-1",
+        title: "Incomplete Step", // Missing description, type and buildingId
+      },
+    ];
+
+    const { getByTestId } = render(
+      <MultistepNavigationScreen
+        route={{ params: { steps: incompleteSteps } }}
+      />,
+    );
+
+    // Make sure the step is rendered despite missing props
+    expect(getByTestId("step-incomplete-step")).toBeTruthy();
+  });
+
+  it("allows opening modal when indoor navigation is selected", () => {
+    const indoorSteps = [
+      {
+        id: "indoor-1",
+        title: "Indoor Navigation",
+        description: "Navigate inside a building",
+        type: "indoor",
+        buildingId: "hall",
+      },
+    ];
+
+    const { getByTestId } = render(
+      <MultistepNavigationScreen route={{ params: { steps: indoorSteps } }} />,
+    );
+
+    // Press the indoor navigation step
+    fireEvent.press(getByTestId("step-indoor-navigation"));
+
+    // Verify navigation service was called with the right params
+    expect(NavigationStrategyService.navigateToStep).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        id: "indoor-1",
+        title: "Indoor Navigation",
+        type: "indoor",
+      }),
+    );
+  });
+
+  it("handles steps with special characters in title", () => {
+    const specialCharSteps = [
+      {
+        id: "special-1",
+        title: "Special & Characters!",
+        description: "Step with special chars in title",
+        type: "indoor",
+        buildingId: "hall",
+      },
+    ];
+
+    const { getByTestId } = render(
+      <MultistepNavigationScreen
+        route={{ params: { steps: specialCharSteps } }}
+      />,
+    );
+
+    // The test ID should have normalized the special characters
+    expect(getByTestId("step-special-characters")).toBeTruthy();
   });
 });

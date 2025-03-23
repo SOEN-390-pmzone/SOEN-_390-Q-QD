@@ -1,5 +1,6 @@
 import React from "react";
 import { TouchableOpacity, Image } from "react-native";
+import PropTypes from "prop-types"; // Add this import
 import styles from "../../styles/MultistepNavigation/NavigationStepStyles";
 
 /**
@@ -53,6 +54,20 @@ const NavigationStep = ({
       />
     </TouchableOpacity>
   );
+};
+
+// Add PropTypes validation
+NavigationStep.propTypes = {
+  title: PropTypes.string.isRequired,
+  description: PropTypes.string.isRequired,
+  onPress: PropTypes.func.isRequired,
+  type: PropTypes.oneOf(["indoor", "outdoor"]),
+  buildingId: PropTypes.oneOf(["hall", "ve", "vl", "jmsb"]),
+};
+
+// Define default props
+NavigationStep.defaultProps = {
+  type: "outdoor",
 };
 
 export default NavigationStep;

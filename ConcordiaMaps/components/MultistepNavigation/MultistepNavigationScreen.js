@@ -20,8 +20,13 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import * as Crypto from "expo-crypto";
 import { useGoogleMapDirections } from "../../hooks/useGoogleMapDirections";
 import styles from "../../styles/MultistepNavigation/MultistepNavigationStyles";
-import FloorRegistry from "../../services/BuildingDataService";
-import { findShortestPath } from "../IndoorNavigation/PathFinder";
+import {
+  calculatePath,
+  loadFloorPlans,
+} from "../IndoorNavigation/RoomToRoomNavigation";
+import Header from "../Header";
+import NavBar from "../NavBar";
+import Footer from "../Footer";
 
 // List of Concordia buildings for suggestions
 const CONCORDIA_BUILDINGS = [
@@ -51,19 +56,24 @@ const CONCORDIA_BUILDINGS = [
 
 const MultistepNavigationScreen = () => {
   const navigation = useNavigation();
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerShown: false,
+    });
+  }, [navigation]);
+
   const route = useRoute();
   const GOOGLE_MAPS_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
   const { getStepsInHTML, getPolyline } = useGoogleMapDirections();
 
   // Indoor navigation state
-  const [indoorFloorPlans, setIndoorFloorPlans] = useState({});
-  const [indoorPaths, setIndoorPaths] = useState({});
+  const [indoorFloorPlans] = useState({});
+  const [indoorPaths] = useState({});
   const [showIndoorNavigation, setShowIndoorNavigation] = useState(false);
   const [indoorNavigationParams, setIndoorNavigationParams] = useState(null);
-  const [currentIndoorStep, setCurrentIndoorStep] = useState(0);
-  const indoorWebViewRef = useRef(null);
 
-  const [navigationSteps, setNavigationSteps] = useState([]);
+  const [navigationSteps] = useState([]);
 
   // Origin search state
   const [origin, setOrigin] = useState("");
@@ -78,7 +88,7 @@ const MultistepNavigationScreen = () => {
   const [originBuilding, setOriginBuilding] = useState(null);
   const [originRoom, setOriginRoom] = useState("");
   const [originBuildingSuggestions, setOriginBuildingSuggestions] = useState(
-    []
+    [],
   );
   const [showOriginBuildingSuggestions, setShowOriginBuildingSuggestions] =
     useState(false);
@@ -186,7 +196,7 @@ const MultistepNavigationScreen = () => {
         try {
           // Add region and components parameters to bias results to Montreal, Canada
           const geocodeResponse = await fetch(
-            `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(step.startPoint)}&key=${GOOGLE_MAPS_API_KEY}&region=ca&components=country:ca|locality:montreal`
+            `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(step.startPoint)}&key=${GOOGLE_MAPS_API_KEY}&region=ca&components=country:ca|locality:montreal`,
           );
           const geocodeData = await geocodeResponse.json();
 
@@ -234,7 +244,7 @@ const MultistepNavigationScreen = () => {
             b.id.toUpperCase() === step.startPoint.toUpperCase() ||
             step.startPoint.toUpperCase().includes(b.id.toUpperCase()) ||
             b.name.toUpperCase().includes(step.startPoint.toUpperCase()) ||
-            step.startPoint.toUpperCase().includes(b.name.toUpperCase())
+            step.startPoint.toUpperCase().includes(b.name.toUpperCase()),
         );
 
         if (startBuilding) {
@@ -250,7 +260,7 @@ const MultistepNavigationScreen = () => {
           }
           console.log(
             `Using hardcoded coordinates for ${startBuilding.id}:`,
-            originCoords
+            originCoords,
           );
         }
       }
@@ -261,7 +271,7 @@ const MultistepNavigationScreen = () => {
         if (typeof step.endPoint === "string") {
           // Check if it's a building ID first
           const destinationBuilding = CONCORDIA_BUILDINGS.find(
-            (b) => b.id === step.endPoint || b.name.includes(step.endPoint)
+            (b) => b.id === step.endPoint || b.name.includes(step.endPoint),
           );
 
           if (destinationBuilding) {
@@ -283,7 +293,7 @@ const MultistepNavigationScreen = () => {
               // Try to geocode the building address
               try {
                 const geocodeResponse = await fetch(
-                  `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(step.endPoint)}&key=${GOOGLE_MAPS_API_KEY}&region=ca&components=country:ca|locality:montreal`
+                  `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(step.endPoint)}&key=${GOOGLE_MAPS_API_KEY}&region=ca&components=country:ca|locality:montreal`,
                 );
                 const geocodeData = await geocodeResponse.json();
 
@@ -302,7 +312,7 @@ const MultistepNavigationScreen = () => {
             // If not a building ID, try to geocode as address
             try {
               const geocodeResponse = await fetch(
-                `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(step.endPoint)}&key=${GOOGLE_MAPS_API_KEY}&region=ca&components=country:ca|locality:montreal`
+                `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(step.endPoint)}&key=${GOOGLE_MAPS_API_KEY}&region=ca&components=country:ca|locality:montreal`,
               );
               const geocodeData = await geocodeResponse.json();
 
@@ -333,19 +343,19 @@ const MultistepNavigationScreen = () => {
         "Fetching directions from",
         originCoords,
         "to",
-        destinationCoords
+        destinationCoords,
       );
 
       // Get directions and polyline using your existing hook
       const directions = await getStepsInHTML(
         originCoords,
         destinationCoords,
-        "walking"
+        "walking",
       );
       const route = await getPolyline(
         originCoords,
         destinationCoords,
-        "walking"
+        "walking",
       );
 
       if (directions && directions.length > 0) {
@@ -434,13 +444,13 @@ const MultistepNavigationScreen = () => {
         locationParam = `&location=${userLocation.latitude},${userLocation.longitude}&radius=5000`;
       } else {
         console.warn(
-          "User location not available. Searching without location bias."
+          "User location not available. Searching without location bias.",
         );
       }
 
       // Use the session token to prevent caching of search results
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_MAPS_API_KEY}&components=country:ca${locationParam}&sessiontoken=${sessionTokenRef.current}`
+        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_MAPS_API_KEY}&components=country:ca${locationParam}&sessiontoken=${sessionTokenRef.current}`,
       );
 
       const { predictions } = await response.json();
@@ -470,13 +480,13 @@ const MultistepNavigationScreen = () => {
         locationParam = `&location=${userLocation.latitude},${userLocation.longitude}&radius=5000`;
       } else {
         console.warn(
-          "User location not available. Searching without location bias."
+          "User location not available. Searching without location bias.",
         );
       }
 
       // Use the session token to prevent caching of search results
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_MAPS_API_KEY}&components=country:ca${locationParam}&sessiontoken=${sessionTokenRef.current}`
+        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_MAPS_API_KEY}&components=country:ca${locationParam}&sessiontoken=${sessionTokenRef.current}`,
       );
 
       const { predictions } = await response.json();
@@ -492,7 +502,7 @@ const MultistepNavigationScreen = () => {
   const handleOriginSelection = async (placeId, description) => {
     try {
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry,formatted_address&key=${GOOGLE_MAPS_API_KEY}&sessiontoken=${sessionTokenRef.current}`
+        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry,formatted_address&key=${GOOGLE_MAPS_API_KEY}&sessiontoken=${sessionTokenRef.current}`,
       );
       const { result } = await response.json();
       if (result?.geometry?.location) {
@@ -518,7 +528,7 @@ const MultistepNavigationScreen = () => {
   const handleDestinationSelection = async (placeId, description) => {
     try {
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry,formatted_address&key=${GOOGLE_MAPS_API_KEY}&sessiontoken=${sessionTokenRef.current}`
+        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry,formatted_address&key=${GOOGLE_MAPS_API_KEY}&sessiontoken=${sessionTokenRef.current}`,
       );
       const { result } = await response.json();
 
@@ -544,7 +554,7 @@ const MultistepNavigationScreen = () => {
     const filtered = CONCORDIA_BUILDINGS.filter(
       (building) =>
         building.name.toLowerCase().includes(text.toLowerCase()) ||
-        building.id.toLowerCase().includes(text.toLowerCase())
+        building.id.toLowerCase().includes(text.toLowerCase()),
     );
     setBuildingSuggestions(filtered);
     setShowBuildingSuggestions(filtered.length > 0);
@@ -555,7 +565,7 @@ const MultistepNavigationScreen = () => {
     const filtered = CONCORDIA_BUILDINGS.filter(
       (building) =>
         building.name.toLowerCase().includes(text.toLowerCase()) ||
-        building.id.toLowerCase().includes(text.toLowerCase())
+        building.id.toLowerCase().includes(text.toLowerCase()),
     );
     setOriginBuildingSuggestions(filtered);
     setShowOriginBuildingSuggestions(filtered.length > 0);
@@ -573,15 +583,13 @@ const MultistepNavigationScreen = () => {
     setOrigin(text);
 
     // Common formats: "H-920", "H 920", "Hall Building 920"
-    const buildingMatch = text.match(/^([A-Za-z]+)[-\s]?(\d+)/);
-
+    const buildingMatch = text.match(/^([A-Za-z]+)-?(\d+)$/);
     if (buildingMatch) {
-      const buildingCode = buildingMatch[1].toUpperCase();
-      const roomNumber = buildingMatch[2];
+      const [, buildingCode, roomNumber] = buildingMatch;
 
       // Find building details
       const foundBuilding = CONCORDIA_BUILDINGS.find(
-        (b) => b.id === buildingCode
+        (b) => b.id === buildingCode,
       );
 
       if (foundBuilding) {
@@ -627,7 +635,7 @@ const MultistepNavigationScreen = () => {
 
       // Find building details
       const foundBuilding = CONCORDIA_BUILDINGS.find(
-        (b) => b.id === buildingCode
+        (b) => b.id === buildingCode,
       );
 
       if (foundBuilding) {
@@ -782,7 +790,7 @@ const MultistepNavigationScreen = () => {
 
     // Default to Hall Building if no match
     console.log(
-      `No specific building type found for ${buildingId}, using default.`
+      `No specific building type found for ${buildingId}, using default.`,
     );
     return "HallBuilding";
   };
@@ -883,7 +891,7 @@ const MultistepNavigationScreen = () => {
       ) {
         // Don't automatically show the modal on return - let user click button again if needed
         console.log(
-          "Returned to MultistepNavigation with indoor navigation data"
+          "Returned to MultistepNavigation with indoor navigation data",
         );
       }
     });
@@ -911,72 +919,36 @@ const MultistepNavigationScreen = () => {
         endFloor,
       });
 
-      // Set all required state variables for navigation
-      if (buildingType) setBuildingType(buildingType);
-      if (buildingId) setSelectedBuilding(buildingId);
-      if (startFloor) setStartFloor(startFloor);
-      if (endFloor) setEndFloor(endFloor);
-      if (startRoom) setSelectedStartRoom(startRoom);
-      if (endRoom) setSelectedEndRoom(endRoom);
-
-      // Load rooms data
-      if (buildingType && startFloor) {
-        const rooms = FloorRegistry.getRooms(buildingType, startFloor);
-        if (rooms) {
-          console.log(
-            `Found ${Object.keys(rooms).length} rooms on floor ${startFloor}`
-          );
-          setStartFloorRooms(rooms);
-        } else {
-          console.error(
-            `No rooms data found for ${buildingType}, floor ${startFloor}`
-          );
-        }
-      }
-
-      if (buildingType && endFloor) {
-        const rooms = FloorRegistry.getRooms(buildingType, endFloor);
-        if (rooms) {
-          console.log(
-            `Found ${Object.keys(rooms).length} rooms on floor ${endFloor}`
-          );
-          setEndFloorRooms(rooms);
-        } else {
-          console.error(
-            `No rooms data found for ${buildingType}, floor ${endFloor}`
-          );
-        }
-      }
-
-      // Set navigation step
-      setStep("navigation");
-
-      // Extra logging to debug room ID formats
-      if (startRoom) {
-        const roomsData =
-          FloorRegistry.getRooms(buildingType, startFloor) || {};
-        console.log(
-          `Room format check: looking for "${startRoom}" in:`,
-          Object.keys(roomsData).slice(0, 10)
-        ); // Just show first 10 rooms for brevity
-
-        if (roomsData[startRoom]) {
-          console.log(`Found room ${startRoom} in floor data`);
-        } else {
-          console.warn(`Room ${startRoom} not found in floor data`);
-        }
-      }
-
-      // Load floor plans with a delay to ensure state is updated
-      setTimeout(() => {
-        loadFloorPlans().then((success) => {
-          if (success) {
-            calculatePath();
-          }
+      // Instead of setting state variables that don't exist, prepare indoor navigation parameters
+      if (
+        buildingId &&
+        buildingType &&
+        startRoom &&
+        endRoom &&
+        startFloor &&
+        endFloor
+      ) {
+        setIndoorNavigationParams({
+          buildingId,
+          buildingType,
+          startRoom,
+          endRoom,
+          startFloor,
+          endFloor,
         });
-      }, 800); // Increased delay for more reliability
+
+        // Load floor plans with a delay to ensure state is updated
+        setTimeout(() => {
+          loadFloorPlans().then((success) => {
+            if (success) {
+              calculatePath();
+            }
+          });
+        }, 800); // Increased delay for more reliability
+      }
     }
   }, [route.params]);
+
   // Handle navigation through the steps
   const navigateToNextStep = () => {
     if (!navigationPlan || currentStepIndex >= navigationPlan.steps.length - 1)
@@ -1056,7 +1028,7 @@ const MultistepNavigationScreen = () => {
         acc.longitude += point.longitude / outdoorRoute.length;
         return acc;
       },
-      { latitude: 0, longitude: 0 }
+      { latitude: 0, longitude: 0 },
     );
 
     // Convert route to Google Maps format
@@ -1192,7 +1164,7 @@ const MultistepNavigationScreen = () => {
                         source={{
                           html: generateFloorHtml(
                             indoorFloorPlans.start,
-                            indoorPaths?.start || []
+                            indoorPaths?.start || [],
                           ),
                         }}
                         style={styles.floorPlanWebView}
@@ -1234,7 +1206,7 @@ const MultistepNavigationScreen = () => {
                           source={{
                             html: generateFloorHtml(
                               indoorFloorPlans.end,
-                              indoorPaths?.end || []
+                              indoorPaths?.end || [],
                             ),
                           }}
                           style={styles.floorPlanWebView}
@@ -1417,19 +1389,36 @@ const MultistepNavigationScreen = () => {
     return (
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={[styles.container, { backgroundColor: "#f5f5f5" }]}
+        style={{ flex: 1 }}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0}
       >
         <ScrollView
-          style={[styles.formContainer, { flex: 1 }]}
-          contentContainerStyle={{ flexGrow: 1 }}
+          style={{ flex: 1 }}
+          contentContainerStyle={{
+            paddingVertical: 20,
+            paddingHorizontal: 16,
+            paddingBottom: 120, // Extra padding at bottom for keyboard
+          }}
         >
-          <View style={styles.header}>
-            <Text style={styles.title}>Navigation</Text>
-            <Text style={styles.subtitle}>Navigate to your destination</Text>
+          {/* Title section */}
+          <View style={{ marginBottom: 24, alignItems: "center" }}>
+            <Text style={{ fontSize: 22, fontWeight: "bold", color: "#333" }}>
+              Plan Your Route
+            </Text>
+            <Text
+              style={{
+                fontSize: 14,
+                color: "#666",
+                marginTop: 4,
+                textAlign: "center",
+              }}
+            >
+              Enter your starting point and destination
+            </Text>
           </View>
 
           {/* Origin Input Section with Toggle */}
-          <View style={styles.inputGroup}>
+          <View style={[styles.inputGroup, { marginBottom: 24 }]}>
             <View style={styles.inputHeader}>
               <Text style={styles.label}>Starting Point</Text>
               <View style={styles.toggleContainer}>
@@ -1511,7 +1500,10 @@ const MultistepNavigationScreen = () => {
                 </View>
 
                 {originPredictions.length > 0 && (
-                  <ScrollView style={styles.predictionsList}>
+                  <ScrollView
+                    style={[styles.predictionsList, { maxHeight: 150 }]}
+                    nestedScrollEnabled={true}
+                  >
                     {originPredictions.map((item) => (
                       <TouchableOpacity
                         key={item.place_id}
@@ -1561,7 +1553,10 @@ const MultistepNavigationScreen = () => {
                 )}
 
                 {showOriginBuildingSuggestions && (
-                  <ScrollView style={styles.suggestionsContainer}>
+                  <ScrollView
+                    style={[styles.suggestionsContainer, { maxHeight: 150 }]}
+                    nestedScrollEnabled={true}
+                  >
                     {originBuildingSuggestions.map((item) => (
                       <TouchableOpacity
                         key={item.id}
@@ -1583,7 +1578,7 @@ const MultistepNavigationScreen = () => {
           </View>
 
           {/* Destination Input Section with Toggle */}
-          <View style={styles.inputGroup}>
+          <View style={[styles.inputGroup, { marginBottom: 24 }]}>
             <View style={styles.inputHeader}>
               <Text style={styles.label}>Destination</Text>
               <View style={styles.toggleContainer}>
@@ -1667,14 +1662,17 @@ const MultistepNavigationScreen = () => {
                   )}
                 </View>
                 {destinationPredictions.length > 0 && (
-                  <ScrollView style={styles.predictionsList}>
+                  <ScrollView
+                    style={[styles.predictionsList, { maxHeight: 150 }]}
+                    nestedScrollEnabled={true}
+                  >
                     {destinationPredictions.map((item) => (
                       <TouchableOpacity
                         key={item.place_id}
                         onPress={() =>
                           handleDestinationSelection(
                             item.place_id,
-                            item.description
+                            item.description,
                           )
                         }
                         style={styles.predictionItem}
@@ -1719,7 +1717,10 @@ const MultistepNavigationScreen = () => {
                   />
                 )}
                 {showBuildingSuggestions && (
-                  <ScrollView style={styles.suggestionsContainer}>
+                  <ScrollView
+                    style={[styles.suggestionsContainer, { maxHeight: 150 }]}
+                    nestedScrollEnabled={true}
+                  >
                     {buildingSuggestions.map((item) => (
                       <TouchableOpacity
                         key={item.id}
@@ -1743,6 +1744,15 @@ const MultistepNavigationScreen = () => {
           <TouchableOpacity
             style={[
               styles.button,
+              {
+                marginTop: 12,
+                height: 50,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 3,
+                elevation: 3,
+              },
               ((originInputType === "location" && !originDetails) ||
                 (originInputType === "classroom" && !originBuilding) ||
                 (destinationInputType === "location" && !destinationDetails) ||
@@ -1761,7 +1771,9 @@ const MultistepNavigationScreen = () => {
             {isLoading ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.buttonText}>Start Navigation</Text>
+              <Text style={[styles.buttonText, { fontSize: 16 }]}>
+                Start Navigation
+              </Text>
             )}
           </TouchableOpacity>
         </ScrollView>
@@ -1865,20 +1877,8 @@ const MultistepNavigationScreen = () => {
     const currentStep = navigationPlan.steps[currentStepIndex];
 
     return (
-      <View style={styles.navigationContainer}>
-        <View style={styles.header}>
-          <Text style={styles.title}>{navigationPlan.title}</Text>
-          <View
-            style={{ flexDirection: "row", alignItems: "center", marginTop: 2 }}
-          >
-            <MaterialIcons name="directions-walk" size={16} color="#666666" />
-            <Text style={[styles.subtitle, { marginLeft: 4 }]}>
-              Step {currentStepIndex + 1} of {navigationPlan.steps.length}
-            </Text>
-          </View>
-        </View>
-
-        <View style={styles.stepCard}>
+      <View style={{ flex: 1, paddingBottom: 70 }}>
+        <View style={[styles.stepCard, { marginTop: 5 }]}>
           <Text style={styles.stepTitle}>{currentStep.title}</Text>
 
           {/* Display step details based on type */}
@@ -1895,8 +1895,12 @@ const MultistepNavigationScreen = () => {
             </View>
           )}
         </View>
-
-        <View style={styles.navigationButtonsContainer}>
+        <View
+          style={[
+            styles.navigationButtonsContainer,
+            { backgroundColor: "white" },
+          ]}
+        >
           <View style={styles.navigationControls}>
             <TouchableOpacity
               style={[
@@ -1909,6 +1913,13 @@ const MultistepNavigationScreen = () => {
               <MaterialIcons name="arrow-back" size={22} color="white" />
               <Text style={styles.navigationButtonText}>Previous</Text>
             </TouchableOpacity>
+
+            <View style={styles.stepIndicator}>
+              <MaterialIcons name="directions-walk" size={14} color="#666666" />
+              <Text style={styles.stepIndicatorText}>
+                Step {currentStepIndex + 1} of {navigationPlan.steps.length}
+              </Text>
+            </View>
 
             <TouchableOpacity
               style={[
@@ -1932,587 +1943,8 @@ const MultistepNavigationScreen = () => {
     return showIndoorNavigation && indoorNavigationParams !== null;
   };
 
-  // Navigate to RoomToRoomNavigation screen with parameters
-  const openIndoorNavigation = (params) => {
-    // Store the parameters for later use
-    setIndoorNavigationParams(params);
-
-    // Show the indoor navigation section
-    setShowIndoorNavigation(true);
-
-    // Load actual floor plans and paths
-    loadIndoorNavigation(params).catch((error) => {
-      console.error("Error loading indoor navigation:", error);
-      // Set fallback empty data
-      setIndoorFloorPlans({ start: "", end: "" });
-      setIndoorPaths({ start: [], end: [] });
-      setNavigationSteps([
-        { type: "error", text: "Could not load navigation data" },
-      ]);
-    });
-  };
-
-  // Load floor plans and path data for indoor navigation
-  const loadIndoorNavigation = async (params) => {
-    const { buildingType, startFloor, endFloor, startRoom, endRoom } = params;
-
-    console.log(
-      `Loading indoor navigation data for ${buildingType} from ${startRoom} to ${endRoom}`
-    );
-
-    try {
-      // First, set loading states
-      setIndoorFloorPlans({ start: null, end: null });
-      setIndoorPaths({ start: [], end: [] });
-      setNavigationSteps([]);
-
-      // Get graph data for path finding
-      const startFloorGraph = FloorRegistry.getGraph(buildingType, startFloor);
-      const endFloorGraph = FloorRegistry.getGraph(buildingType, endFloor);
-
-      if (!startFloorGraph) {
-        console.error(
-          `Could not load graph for ${buildingType}, floor ${startFloor}`
-        );
-        throw new Error(`Could not load floor data for ${startFloor}`);
-      }
-
-      if (!endFloorGraph && startFloor !== endFloor) {
-        console.error(
-          `Could not load graph for ${buildingType}, floor ${endFloor}`
-        );
-        throw new Error(`Could not load floor data for ${endFloor}`);
-      }
-
-      // Get room coordinates for visualization
-      const startFloorRooms =
-        FloorRegistry.getRooms(buildingType, startFloor) || {};
-      const endFloorRooms =
-        FloorRegistry.getRooms(buildingType, endFloor) || {};
-
-      // Find valid room nodes with flexibility for different formats
-      const findRoomInGraph = (roomId, graph) => {
-        // Direct match
-        if (graph[roomId]) return roomId;
-
-        // Try without building prefix for H-903 format
-        if (roomId.includes("-")) {
-          const withoutHyphen = roomId.replace("-", "");
-          if (graph[withoutHyphen]) return withoutHyphen;
-        }
-
-        // Try with building prefix for 903 format
-        const buildingMatch = roomId.match(/^([A-Za-z]+)-?(\d+)$/);
-        if (buildingMatch) {
-          const [_, buildingCode, roomNumber] = buildingMatch;
-
-          // Try various formats
-          const possibleFormats = [
-            `${buildingCode}${roomNumber}`, // H903
-            `${roomNumber}`, // 903
-            `room-${roomNumber}`, // room-903
-            `Room${roomNumber}`, // Room903
-            `r${roomNumber}`, // r903
-          ];
-
-          for (const format of possibleFormats) {
-            if (graph[format]) return format;
-          }
-        }
-
-        // Handle entrance specially
-        if (
-          roomId.toLowerCase() === "entrance" ||
-          roomId.toLowerCase() === "main entrance"
-        ) {
-          for (const nodeId of Object.keys(graph)) {
-            const nodeLower = nodeId.toLowerCase();
-            if (
-              nodeLower.includes("entrance") ||
-              nodeLower.includes("entry") ||
-              nodeLower === "lobby" ||
-              nodeLower === "main"
-            ) {
-              return nodeId;
-            }
-          }
-
-          // If no entrance found, use first node as fallback
-          const firstNode = Object.keys(graph)[0];
-          if (firstNode) {
-            console.log(`No entrance found, using ${firstNode} as fallback`);
-            return firstNode;
-          }
-        }
-
-        // Check for partial matches (useful for finding similar room names)
-        if (buildingMatch) {
-          const roomNumber = buildingMatch[2];
-          for (const nodeId of Object.keys(graph)) {
-            if (nodeId.includes(roomNumber)) {
-              console.log(`Found partial match: ${nodeId} for ${roomId}`);
-              return nodeId;
-            }
-          }
-        }
-
-        // No match found
-        return null;
-      };
-
-      // Validate and find start room
-      let validStartRoom =
-        startRoom === "entrance"
-          ? "entrance"
-          : findRoomInGraph(startRoom, startFloorGraph);
-      if (!validStartRoom) {
-        // For entrance, try to find a main node
-        if (startRoom === "entrance") {
-          validStartRoom =
-            Object.keys(startFloorGraph).find(
-              (node) =>
-                node.toLowerCase().includes("entrance") ||
-                node.toLowerCase().includes("lobby") ||
-                node === "main"
-            ) || Object.keys(startFloorGraph)[0]; // Fallback to first node
-        } else {
-          console.error(
-            `Start room ${startRoom} not found in floor ${startFloor}`
-          );
-          throw new Error(
-            `Start room ${startRoom} not found. Available rooms: ${Object.keys(startFloorGraph).slice(0, 5).join(", ")}...`
-          );
-        }
-      }
-
-      // Validate and find end room
-      const validEndRoom = findRoomInGraph(endRoom, endFloorGraph);
-      if (!validEndRoom) {
-        console.error(`End room ${endRoom} not found in floor ${endFloor}`);
-        throw new Error(
-          `Destination room ${endRoom} not found. Available rooms: ${Object.keys(endFloorGraph).slice(0, 5).join(", ")}...`
-        );
-      }
-
-      console.log(`Using valid rooms: ${validStartRoom} to ${validEndRoom}`);
-
-      // Calculate paths - handle same floor vs different floors
-      let startFloorPath = [];
-      let endFloorPath = [];
-      let steps = [];
-
-      // Same floor navigation
-      if (startFloor === endFloor) {
-        startFloorPath = findShortestPath(
-          startFloorGraph,
-          validStartRoom,
-          validEndRoom
-        );
-
-        if (!startFloorPath || startFloorPath.length < 2) {
-          console.error(
-            `No path found from ${validStartRoom} to ${validEndRoom}`
-          );
-          throw new Error(`Unable to find a path between these rooms`);
-        }
-
-        // Generate step-by-step instructions
-        steps = [
-          {
-            type: "start",
-            text: `Start at ${startRoom === validStartRoom ? startRoom : `${startRoom} (${validStartRoom})`}`,
-          },
-          ...startFloorPath.slice(1, -1).map((node) => ({
-            type: "walk",
-            text: `Go to ${node}`,
-          })),
-          { type: "end", text: `Arrive at destination: ${endRoom}` },
-        ];
-      }
-      // Different floor navigation
-      else {
-        // Find a common transport method between floors
-        const transportMethod = findTransportMethod(
-          startFloorGraph,
-          endFloorGraph
-        );
-
-        if (!transportMethod) {
-          // If no transport method found, create a special message
-          console.error(
-            `No transport method found between floors ${startFloor} and ${endFloor}`
-          );
-
-          // Create a basic path with just start and end points
-          steps = [
-            {
-              type: "start",
-              text: `Start at ${startRoom} on floor ${startFloor}`,
-            },
-            {
-              type: "error",
-              text: `No elevator or stairs found connecting floors ${startFloor} and ${endFloor}. Please look for a nearby elevator or stairwell.`,
-            },
-            {
-              type: "end",
-              text: `Go to destination: ${endRoom} on floor ${endFloor}`,
-            },
-          ];
-
-          // Set empty paths
-          startFloorPath = [validStartRoom];
-          endFloorPath = [validEndRoom];
-        } else {
-          console.log(
-            `Calculating path from ${validStartRoom} to ${transportMethod} on floor ${startFloor}`
-          );
-
-          try {
-            // Try to find path on start floor
-            startFloorPath = findShortestPath(
-              startFloorGraph,
-              validStartRoom,
-              transportMethod
-            );
-
-            // Check if path is valid
-            if (!startFloorPath || startFloorPath.length < 2) {
-              console.error(
-                `No path found from ${validStartRoom} to ${transportMethod}`
-              );
-
-              // Try to find any path to any transport node
-              let alternateTransport = null;
-
-              // Look for other transport methods
-              for (const node in startFloorGraph) {
-                if (
-                  node.toLowerCase().includes("elevator") ||
-                  node.toLowerCase().includes("stair") ||
-                  node.toLowerCase().includes("escalator")
-                ) {
-                  // Try to find path to this transport node
-                  const altPath = findShortestPath(
-                    startFloorGraph,
-                    validStartRoom,
-                    node
-                  );
-                  if (altPath && altPath.length >= 2) {
-                    startFloorPath = altPath;
-                    alternateTransport = node;
-                    console.log(
-                      `Found alternate transport on start floor: ${alternateTransport}`
-                    );
-                    break;
-                  }
-                }
-              }
-
-              if (!alternateTransport) {
-                throw new Error(
-                  `Cannot find path to any elevator or stairs on floor ${startFloor}`
-                );
-              }
-
-              transportMethod = alternateTransport;
-            }
-          } catch (error) {
-            console.error(`Error finding start floor path: ${error.message}`);
-            // Create a direct path as fallback
-            startFloorPath = [validStartRoom, transportMethod];
-          }
-
-          console.log(
-            `Calculating path from ${transportMethod} to ${validEndRoom} on floor ${endFloor}`
-          );
-
-          try {
-            // Try to find path on end floor
-            endFloorPath = findShortestPath(
-              endFloorGraph,
-              transportMethod,
-              validEndRoom
-            );
-
-            // Check if path is valid
-            if (!endFloorPath || endFloorPath.length < 2) {
-              console.error(
-                `No path found from ${transportMethod} to ${validEndRoom}`
-              );
-
-              // Try to find path from any transport node to destination
-              let found = false;
-
-              // Look for transport methods on end floor
-              for (const node in endFloorGraph) {
-                if (
-                  node.toLowerCase().includes("elevator") ||
-                  node.toLowerCase().includes("stair") ||
-                  node.toLowerCase().includes("escalator")
-                ) {
-                  // Try to find path from this transport to destination
-                  const altPath = findShortestPath(
-                    endFloorGraph,
-                    node,
-                    validEndRoom
-                  );
-                  if (altPath && altPath.length >= 2) {
-                    endFloorPath = altPath;
-                    found = true;
-                    console.log(
-                      `Found path from alternate transport ${node} on end floor`
-                    );
-                    break;
-                  }
-                }
-              }
-
-              if (!found) {
-                // Last resort: direct path
-                endFloorPath = [transportMethod, validEndRoom];
-                console.log("Using direct path as fallback on end floor");
-              }
-            }
-          } catch (error) {
-            console.error(`Error finding end floor path: ${error.message}`);
-            // Create a direct path as fallback
-            endFloorPath = [transportMethod, validEndRoom];
-          }
-
-          // Generate step-by-step instructions
-          steps = [
-            {
-              type: "start",
-              text: `Start at ${startRoom} on floor ${startFloor}`,
-            },
-            ...startFloorPath.slice(1).map((node) => ({
-              type:
-                node.toLowerCase().includes("elevator") ||
-                node.toLowerCase().includes("stair") ||
-                node.toLowerCase().includes("escalator")
-                  ? node.toLowerCase()
-                  : "walk",
-              text:
-                node.toLowerCase().includes("elevator") ||
-                node.toLowerCase().includes("stair") ||
-                node.toLowerCase().includes("escalator")
-                  ? `Arrive at ${node} on floor ${startFloor}`
-                  : `Go to ${node}`,
-            })),
-            {
-              type: transportMethod.toLowerCase().includes("elevator")
-                ? "elevator"
-                : transportMethod.toLowerCase().includes("stair")
-                  ? "stairs"
-                  : transportMethod.toLowerCase().includes("escalator")
-                    ? "escalator"
-                    : "transport",
-              text: `Take ${transportMethod} from floor ${startFloor} to floor ${endFloor}`,
-            },
-            ...endFloorPath.slice(1).map((node) => ({
-              type: "walk",
-              text: `Go to ${node}`,
-            })),
-            {
-              type: "end",
-              text: `Arrive at destination: ${endRoom} on floor ${endFloor}`,
-            },
-          ];
-        }
-      }
-
-      // Map room IDs to actual room objects with coordinates
-      const mapPathToRoomObjects = (path, rooms) => {
-        return path.map((nodeId) => {
-          // If rooms object has this node, return it
-          if (rooms[nodeId]) return rooms[nodeId];
-
-          // Otherwise create a fallback object
-          return {
-            id: nodeId,
-            name: nodeId,
-            type: "node",
-            nearestPoint: { x: 0, y: 0 }, // Default coordinates to prevent errors
-          };
-        });
-      };
-
-      // Update state with the calculated paths
-      setNavigationSteps(steps);
-      setIndoorPaths({
-        start: mapPathToRoomObjects(startFloorPath, startFloorRooms),
-        end: mapPathToRoomObjects(endFloorPath, endFloorRooms),
-      });
-
-      console.log("Path calculation completed");
-
-      // Load floor plans in a separate try block to avoid failures
-      try {
-        console.log(
-          `Loading floor plans for ${buildingType}, floors ${startFloor} and ${endFloor}`
-        );
-
-        // Load floor plans asynchronously
-        const [startPlan, endPlan] = await Promise.all([
-          FloorRegistry.getFloorPlan(buildingType, startFloor),
-          startFloor !== endFloor
-            ? FloorRegistry.getFloorPlan(buildingType, endFloor)
-            : Promise.resolve(""),
-        ]);
-
-        setIndoorFloorPlans({
-          start: startPlan || "",
-          end: endPlan || "",
-        });
-
-        console.log("Floor plans loaded successfully");
-        return true;
-      } catch (floorPlanError) {
-        console.error("Error loading floor plans:", floorPlanError);
-        // Continue even if floor plans fail to load - we can show instructions without them
-        setIndoorFloorPlans({
-          start: "",
-          end: "",
-        });
-        return true; // Still return success since we have navigation steps
-      }
-    } catch (error) {
-      console.error("Error in indoor navigation:", error);
-
-      // Show error in the navigation steps
-      setNavigationSteps([
-        {
-          type: "error",
-          text: `Navigation error: ${error.message || "Could not calculate path"}`,
-        },
-      ]);
-
-      // Set empty floor plans to avoid crashes
-      setIndoorFloorPlans({ start: "", end: "" });
-      setIndoorPaths({ start: [], end: [] });
-
-      return false;
-    }
-  };
-
-  // Find a transport method (elevator, stairs, etc.) that exists in both floor graphs
-  const findTransportMethod = (startFloorGraph, endFloorGraph) => {
-    // Common transport methods to check for
-    const transportMethods = ["elevator", "stairs", "escalator", "stairwell"];
-
-    // Try to find a transport method that exists in both graphs
-    for (const method of transportMethods) {
-      if (startFloorGraph[method] && endFloorGraph[method]) {
-        console.log(`Found transport method: ${method}`);
-        return method;
-      }
-    }
-
-    // If no exact match found, check for partial matches
-    for (const startNode in startFloorGraph) {
-      const startNodeLower = startNode.toLowerCase();
-      for (const transportType of transportMethods) {
-        if (startNodeLower.includes(transportType)) {
-          // Found a transport in start floor, check for matching in end floor
-          for (const endNode in endFloorGraph) {
-            const endNodeLower = endNode.toLowerCase();
-            if (endNodeLower.includes(transportType)) {
-              console.log(
-                `Found transport method by partial match: ${startNode} -> ${endNode}`
-              );
-              return startNode; // Return the node name from start floor
-            }
-          }
-        }
-      }
-    }
-
-    // Last resort: look for nodes with similar names
-    for (const startNode in startFloorGraph) {
-      for (const endNode in endFloorGraph) {
-        if (
-          startNode === endNode &&
-          !["room", "hall", "checkpoint"].some((term) =>
-            startNode.toLowerCase().includes(term)
-          )
-        ) {
-          console.log(`Found potential transport with same name: ${startNode}`);
-          return startNode;
-        }
-      }
-    }
-
-    console.error("No transport method found between floors");
-    return null;
-  };
-
-  // Generate navigation steps for same floor
-  const generateNavigationSteps = (path, floor, buildingType) => {
-    const building = FloorRegistry.getBuilding(buildingType);
-    const buildingName = building ? building.name : buildingType;
-
-    return [
-      {
-        type: "start",
-        text: `Start at room ${path[0]} on floor ${floor} of ${buildingName}`,
-      },
-      ...path.slice(1, -1).map((node) => ({
-        type: "walk",
-        text: `Go to ${node}`,
-      })),
-      {
-        type: "end",
-        text: `Arrive at destination: ${path[path.length - 1]}`,
-      },
-    ];
-  };
-
-  // Generate navigation steps for inter-floor navigation
-  const generateInterFloorSteps = (
-    startPath,
-    endPath,
-    transportMethod,
-    startFloor,
-    endFloor,
-    buildingType
-  ) => {
-    const building = FloorRegistry.getBuilding(buildingType);
-    const buildingName = building ? building.name : buildingType;
-
-    return [
-      {
-        type: "start",
-        text: `Start at room ${startPath[0]} on floor ${startFloor} of ${buildingName}`,
-      },
-      ...startPath.slice(1).map((node) => ({
-        type: node === transportMethod ? "transport" : "walk",
-        text:
-          node === transportMethod
-            ? `Arrive at ${transportMethod} on floor ${startFloor}`
-            : `Go to ${node}`,
-      })),
-      {
-        type: "transport",
-        text: `Take ${transportMethod} from floor ${startFloor} to floor ${endFloor}`,
-      },
-      ...endPath.slice(1).map((node) => ({
-        type: "walk",
-        text: `Go to ${node}`,
-      })),
-      {
-        type: "end",
-        text: `Arrive at destination: ${endPath[endPath.length - 1]} on floor ${endFloor}`,
-      },
-    ];
-  };
-
   // Generate HTML for floor visualization with path
-  // Generate HTML for floor visualization with path
-  const generateFloorHtml = (
-    floorPlan = "",
-    pathPoints = [],
-    isExpandedView = false
-  ) => {
+  const generateFloorHtml = (floorPlan = "", pathPoints = []) => {
     // If no floor plan is provided, return a placeholder
     if (!floorPlan) {
       return `
@@ -2533,7 +1965,7 @@ const MultistepNavigationScreen = () => {
             p &&
             p.nearestPoint &&
             typeof p.nearestPoint.x === "number" &&
-            typeof p.nearestPoint.y === "number"
+            typeof p.nearestPoint.y === "number",
         )
       : [];
 
@@ -2542,7 +1974,7 @@ const MultistepNavigationScreen = () => {
       validPoints.map((p) => ({
         x: p.nearestPoint.x,
         y: p.nearestPoint.y,
-      }))
+      })),
     );
 
     return `
@@ -2701,19 +2133,6 @@ const MultistepNavigationScreen = () => {
 `;
   };
 
-  // Generate empty floor plan HTML for loading state
-  const emptyFloorPlanHtml = () => {
-    return `
-    <html>
-      <body style="margin:0;display:flex;justify-content:center;align-items:center;height:100vh;background:#f5f5f5;">
-        <div style="text-align:center;color:#666;">
-          <p>Floor plan not available</p>
-        </div>
-      </body>
-    </html>
-  `;
-  };
-
   // Render expanded map modal
   const renderExpandedMap = () => {
     if (!expandedMap) return null;
@@ -2741,12 +2160,24 @@ const MultistepNavigationScreen = () => {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: "#f5f5f5" }]}>
-      <View style={[styles.content, { flex: 1 }]}>
+    <SafeAreaView style={[{ flex: 1, backgroundColor: "#f5f5f5" }]}>
+      <Header />
+      <NavBar />
+      <View
+        style={[
+          styles.navigationContainer,
+          {
+            flex: 1,
+            paddingTop: 10,
+            paddingBottom: 60, // Add space for Footer
+          },
+        ]}
+      >
         {navigationPlan ? renderNavigationSteps() : renderNavigationForm()}
         {expandedMap && renderExpandedMap()}
         {shouldShowIndoorNavigation() && renderIndoorNavigation()}
       </View>
+      <Footer />
     </SafeAreaView>
   );
 };

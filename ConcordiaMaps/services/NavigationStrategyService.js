@@ -7,7 +7,7 @@ const transitionNavigationStrategy = (navigation, step) => {
     Alert.alert(
       "Floor Transition Error",
       "Missing required parameters. Need building ID, start floor, and end floor.",
-      [{ text: "OK" }]
+      [{ text: "OK" }],
     );
     return;
   }
@@ -46,7 +46,7 @@ const findBuildingTypeFromId = (id) => {
   try {
     const buildingTypes = Object.keys(FloorRegistry.getAllBuildings());
     return buildingTypes.find(
-      (key) => FloorRegistry.getBuilding(key)?.id === id
+      (key) => FloorRegistry.getBuilding(key)?.id === id,
     );
   } catch (error) {
     console.error("Error finding building type:", error);
@@ -74,7 +74,7 @@ const indoorNavigationStrategy = (navigation, step) => {
       step.buildingId,
       step.startRoom || step.startPoint,
       step.endRoom || step.endPoint,
-      { directRouting: true }
+      { directRouting: true },
     );
 
     // Navigate using the plan
@@ -109,7 +109,7 @@ const indoorNavigationStrategy = (navigation, step) => {
         `Building: ${step.buildingId || "Not specified"}\n` +
         `Start point: ${step.startPoint || step.startRoom || "Not specified"}\n` +
         `End point: ${step.endPoint || step.endRoom || "Not specified"}`,
-      [{ text: "OK" }]
+      [{ text: "OK" }],
     );
   }
 };
@@ -122,7 +122,7 @@ const outdoorNavigationStrategy = (navigation, step) => {
     `Start point: ${step.startPoint || "Not specified"}\n` +
       `End point: ${step.endPoint || "Not specified"}\n` +
       `Title: ${step.title || "Not specified"}`,
-    [{ text: "OK" }]
+    [{ text: "OK" }],
   );
   // Navigate to outdoor navigation screen (when implemented)
   // navigation.navigate('OutdoorNavigationScreen', {
@@ -137,7 +137,7 @@ const combinedNavigationStrategy = (navigation, step) => {
     Alert.alert(
       "Combined Navigation Error",
       "Missing required parameters. Need external address, building ID, and destination room.",
-      [{ text: "OK" }]
+      [{ text: "OK" }],
     );
     return;
   }
@@ -191,7 +191,7 @@ class NavigationStrategyService {
     const endFloor = this._extractFloorFromRoom(endRoom);
 
     console.log(
-      `Creating indoor route in ${buildingId} from ${startRoom} (Floor ${startFloor}) to ${endRoom} (Floor ${endFloor})`
+      `Creating indoor route in ${buildingId} from ${startRoom} (Floor ${startFloor}) to ${endRoom} (Floor ${endFloor})`,
     );
 
     // For direct room-to-room navigation (regardless of floor)
@@ -375,7 +375,7 @@ class NavigationStrategyService {
       // This is a navigation plan, not a single step
       console.log(
         "Navigating with multi-step plan:",
-        step.title || "Untitled Plan"
+        step.title || "Untitled Plan",
       );
       navigation.navigate("MultistepNavigation", {
         navigationPlan: step,
@@ -440,7 +440,7 @@ class NavigationStrategyService {
     externalAddress,
     buildingId,
     roomId,
-    options = {}
+    options = {},
   ) {
     return this.createNavigationStep(
       "combined",
@@ -452,7 +452,7 @@ class NavigationStrategyService {
         endRoom: roomId,
         description:
           options.description || `From ${externalAddress} to ${roomId}`,
-      }
+      },
     );
   }
 }

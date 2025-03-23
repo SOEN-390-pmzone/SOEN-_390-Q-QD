@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { View, TouchableOpacity, Text, Animated } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import PropTypes from "prop-types"; // Add this import
 import styles from "../styles";
 import { Alert } from "react-native";
 import ShuttleSchedule from "./ShuttleSchedule";
@@ -61,6 +62,14 @@ function NavBar() {
       <Text style={styles.menuItem}>{item.label}</Text>
     </TouchableOpacity>
   );
+
+  MenuItem.propTypes = {
+    item: PropTypes.shape({
+      action: PropTypes.func.isRequired,
+      testID: PropTypes.string,
+      label: PropTypes.string.isRequired,
+    }).isRequired,
+  };
 
   return (
     <View style={styles.navbar}>

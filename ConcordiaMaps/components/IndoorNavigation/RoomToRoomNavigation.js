@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, Text, TouchableOpacity, ScrollView, Modal } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView } from "react-native";
 import { WebView } from "react-native-webview";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { findShortestPath } from "./PathFinder";
@@ -11,6 +11,8 @@ import ExpandedFloorPlanModal from "./ExpandedFloorPlan";
 
 const RoomToRoomNavigation = () => {
   const route = useRoute();
+
+  const navigation = useNavigation();
 
   // Extract route parameters
   const {
@@ -57,7 +59,7 @@ const RoomToRoomNavigation = () => {
   const findBuildingTypeFromId = (id) => {
     const buildingTypes = Object.keys(FloorRegistry.getAllBuildings());
     return buildingTypes.find(
-      (key) => FloorRegistry.getBuilding(key).id === id
+      (key) => FloorRegistry.getBuilding(key).id === id,
     );
   };
 
@@ -101,7 +103,7 @@ const RoomToRoomNavigation = () => {
       if (!determinedBuildingType && buildingId) {
         determinedBuildingType = findBuildingTypeFromId(buildingId);
         console.log(
-          `Found building type ${determinedBuildingType} for ID ${buildingId}`
+          `Found building type ${determinedBuildingType} for ID ${buildingId}`,
         );
       }
 
@@ -137,7 +139,7 @@ const RoomToRoomNavigation = () => {
               FloorRegistry.getRooms(determinedBuildingType, routeStartFloor) ||
               {};
             console.log(
-              `Got ${Object.keys(startRooms).length} rooms for start floor`
+              `Got ${Object.keys(startRooms).length} rooms for start floor`,
             );
             setStartFloorRooms(startRooms);
           }
@@ -147,7 +149,7 @@ const RoomToRoomNavigation = () => {
               FloorRegistry.getRooms(determinedBuildingType, routeEndFloor) ||
               {};
             console.log(
-              `Got ${Object.keys(endRooms).length} rooms for end floor`
+              `Got ${Object.keys(endRooms).length} rooms for end floor`,
             );
             setEndFloorRooms(endRooms);
           }
@@ -155,17 +157,17 @@ const RoomToRoomNavigation = () => {
           // 2. Load floor plans - using direct async/await instead of a separate function
           if (routeStartFloor && routeEndFloor) {
             console.log(
-              `Loading floor plans for ${determinedBuildingType} - floors ${routeStartFloor} and ${routeEndFloor}...`
+              `Loading floor plans for ${determinedBuildingType} - floors ${routeStartFloor} and ${routeEndFloor}...`,
             );
 
             // Load start floor plan
             const startSvg = await FloorRegistry.getFloorPlan(
               determinedBuildingType,
-              routeStartFloor
+              routeStartFloor,
             );
             if (startSvg) {
               console.log(
-                `Start floor SVG loaded successfully (${startSvg.length} characters)`
+                `Start floor SVG loaded successfully (${startSvg.length} characters)`,
               );
               setStartFloorPlan(startSvg);
             } else {
@@ -176,11 +178,11 @@ const RoomToRoomNavigation = () => {
             if (routeStartFloor !== routeEndFloor) {
               const endSvg = await FloorRegistry.getFloorPlan(
                 determinedBuildingType,
-                routeEndFloor
+                routeEndFloor,
               );
               if (endSvg) {
                 console.log(
-                  `End floor SVG loaded successfully (${endSvg.length} characters)`
+                  `End floor SVG loaded successfully (${endSvg.length} characters)`,
                 );
                 setEndFloorPlan(endSvg);
               } else {
@@ -199,7 +201,7 @@ const RoomToRoomNavigation = () => {
                   startRoom,
                   endRoom,
                   startRooms,
-                  endRooms
+                  endRooms,
                 );
               } catch (error) {
                 console.error("Error during direct path calculation:", error);
@@ -222,8 +224,6 @@ const RoomToRoomNavigation = () => {
     endFloorValue,
     startRoomValue,
     endRoomValue,
-    startRoomsValue,
-    endRoomsValue
   ) => {
     try {
       console.log("Direct path calculation with values:", {
@@ -241,18 +241,18 @@ const RoomToRoomNavigation = () => {
         !endRoomValue
       ) {
         console.error(
-          "Missing required navigation data for direct path calculation"
+          "Missing required navigation data for direct path calculation",
         );
         return;
       }
 
       const startFloorGraph = FloorRegistry.getGraph(
         buildingTypeValue,
-        startFloorValue
+        startFloorValue,
       );
       const endFloorGraph = FloorRegistry.getGraph(
         buildingTypeValue,
-        endFloorValue
+        endFloorValue,
       );
       const building = FloorRegistry.getBuilding(buildingTypeValue);
 
@@ -264,12 +264,12 @@ const RoomToRoomNavigation = () => {
       console.log(
         "Start floor graph loaded:",
         Object.keys(startFloorGraph).length,
-        "nodes"
+        "nodes",
       );
       console.log(
         "End floor graph loaded:",
         Object.keys(endFloorGraph).length,
-        "nodes"
+        "nodes",
       );
 
       // Find a good entrance node if "entrance" is provided
@@ -300,7 +300,7 @@ const RoomToRoomNavigation = () => {
         if (actualStartRoom === startRoomValue) {
           const firstNode = Object.keys(startFloorGraph)[0];
           console.log(
-            `No entrance node found, using ${firstNode} as fallback entrance`
+            `No entrance node found, using ${firstNode} as fallback entrance`,
           );
           actualStartRoom = firstNode;
         }
@@ -309,7 +309,7 @@ const RoomToRoomNavigation = () => {
       // Check if rooms exist in the graph
       if (!startFloorGraph[actualStartRoom]) {
         console.error(
-          `Start room ${actualStartRoom} not found in navigation graph`
+          `Start room ${actualStartRoom} not found in navigation graph`,
         );
         return;
       }
@@ -325,7 +325,7 @@ const RoomToRoomNavigation = () => {
         const directPath = findShortestPath(
           startFloorGraph,
           actualStartRoom,
-          endRoomValue
+          endRoomValue,
         );
 
         if (directPath.length < 2) {
@@ -357,11 +357,11 @@ const RoomToRoomNavigation = () => {
 
         const transportMethod = findTransportMethod(
           startFloorGraph,
-          endFloorGraph
+          endFloorGraph,
         );
         if (!transportMethod) {
           console.error(
-            `Cannot navigate between floors ${startFloorValue} and ${endFloorValue}`
+            `Cannot navigate between floors ${startFloorValue} and ${endFloorValue}`,
           );
           return;
         }
@@ -369,13 +369,13 @@ const RoomToRoomNavigation = () => {
         const startFloorTransportPath = findShortestPath(
           startFloorGraph,
           actualStartRoom,
-          transportMethod
+          transportMethod,
         );
 
         const endFloorTransportPath = findShortestPath(
           endFloorGraph,
           transportMethod,
-          endRoomValue
+          endRoomValue,
         );
 
         if (
@@ -447,7 +447,7 @@ const RoomToRoomNavigation = () => {
 
       if (determinedBuildingType) {
         console.log(
-          `Found building type ${determinedBuildingType} for ID ${buildingId}`
+          `Found building type ${determinedBuildingType} for ID ${buildingId}`,
         );
         setBuildingType(determinedBuildingType);
         setSelectedBuilding(buildingId);
@@ -460,7 +460,7 @@ const RoomToRoomNavigation = () => {
         if (!foundStartFloor && startRoom) {
           foundStartFloor = findFloorForRoom(determinedBuildingType, startRoom);
           console.log(
-            `Determined start floor: ${foundStartFloor} for room ${startRoom}`
+            `Determined start floor: ${foundStartFloor} for room ${startRoom}`,
           );
         }
 
@@ -468,7 +468,7 @@ const RoomToRoomNavigation = () => {
         if (!foundEndFloor && endRoom) {
           foundEndFloor = findFloorForRoom(determinedBuildingType, endRoom);
           console.log(
-            `Determined end floor: ${foundEndFloor} for room ${endRoom}`
+            `Determined end floor: ${foundEndFloor} for room ${endRoom}`,
           );
         }
 
@@ -477,7 +477,7 @@ const RoomToRoomNavigation = () => {
           setStartFloor(foundStartFloor);
           const startRooms = FloorRegistry.getRooms(
             determinedBuildingType,
-            foundStartFloor
+            foundStartFloor,
           );
           setStartFloorRooms(startRooms);
         }
@@ -486,7 +486,7 @@ const RoomToRoomNavigation = () => {
           setEndFloor(foundEndFloor);
           const endRooms = FloorRegistry.getRooms(
             determinedBuildingType,
-            foundEndFloor
+            foundEndFloor,
           );
           setEndFloorRooms(endRooms);
         }
@@ -527,7 +527,7 @@ const RoomToRoomNavigation = () => {
     console.log("Available building types:", buildingTypes);
 
     const type = buildingTypes.find(
-      (key) => FloorRegistry.getBuilding(key).id === buildingId
+      (key) => FloorRegistry.getBuilding(key).id === buildingId,
     );
 
     if (type) {
@@ -566,17 +566,17 @@ const RoomToRoomNavigation = () => {
 
     try {
       console.log(
-        `Loading floor plans for ${buildingType} - floors ${startFloor} and ${endFloor}...`
+        `Loading floor plans for ${buildingType} - floors ${startFloor} and ${endFloor}...`,
       );
 
       // Loading floor plans using the FloorRegistry
       const startSvg = await FloorRegistry.getFloorPlan(
         buildingType,
-        startFloor
+        startFloor,
       );
       if (startSvg) {
         console.log(
-          `Start floor SVG loaded successfully (${startSvg.length} characters)`
+          `Start floor SVG loaded successfully (${startSvg.length} characters)`,
         );
         setStartFloorPlan(startSvg);
       } else {
@@ -588,7 +588,7 @@ const RoomToRoomNavigation = () => {
         const endSvg = await FloorRegistry.getFloorPlan(buildingType, endFloor);
         if (endSvg) {
           console.log(
-            `End floor SVG loaded successfully (${endSvg.length} characters)`
+            `End floor SVG loaded successfully (${endSvg.length} characters)`,
           );
           setEndFloorPlan(endSvg);
         } else {
@@ -637,7 +637,7 @@ const RoomToRoomNavigation = () => {
   useEffect(() => {
     if (startFloor && endFloor) {
       console.log(
-        `Floor selection changed: ${startFloor} and ${endFloor}. Loading floor plans...`
+        `Floor selection changed: ${startFloor} and ${endFloor}. Loading floor plans...`,
       );
       loadFloorPlans();
     }
@@ -684,7 +684,7 @@ const RoomToRoomNavigation = () => {
     startFloorGraph,
     endFloorGraph,
     selectedStartRoom,
-    selectedEndRoom
+    selectedEndRoom,
   ) => {
     if (!selectedEndRoom) {
       return "Please select an end room";
@@ -695,7 +695,6 @@ const RoomToRoomNavigation = () => {
     }
 
     // For start room, handle entrance specially
-    let actualStartRoom = selectedStartRoom;
     if (
       selectedStartRoom === "entrance" ||
       selectedStartRoom === "main entrance"
@@ -714,7 +713,6 @@ const RoomToRoomNavigation = () => {
         for (const node of Object.keys(startFloorGraph)) {
           if (node.toLowerCase().includes(option)) {
             console.log(`Using "${node}" as entrance node for validation`);
-            actualStartRoom = node;
             return null; // Valid
           }
         }
@@ -739,12 +737,12 @@ const RoomToRoomNavigation = () => {
     selectedStartRoom,
     selectedEndRoom,
     startFloor,
-    buildingName
+    buildingName,
   ) => {
     const directPath = findShortestPath(
       startFloorGraph,
       selectedStartRoom,
-      selectedEndRoom
+      selectedEndRoom,
     );
 
     if (directPath.length < 2) {
@@ -795,14 +793,14 @@ const RoomToRoomNavigation = () => {
     selectedEndRoom,
     startFloor,
     endFloor,
-    buildingName
+    buildingName,
   ) => {
     // Find a transport method between floors
     const transportMethod = findTransportMethod(startFloorGraph, endFloorGraph);
 
     if (!transportMethod) {
       throw new Error(
-        `Cannot navigate between floors ${startFloor} and ${endFloor}`
+        `Cannot navigate between floors ${startFloor} and ${endFloor}`,
       );
     }
 
@@ -829,7 +827,7 @@ const RoomToRoomNavigation = () => {
         for (const node of Object.keys(startFloorGraph)) {
           if (node.toLowerCase().includes(option.toLowerCase())) {
             console.log(
-              `Using "${node}" as entrance node for path calculation`
+              `Using "${node}" as entrance node for path calculation`,
             );
             actualStartRoom = node;
             break;
@@ -847,51 +845,51 @@ const RoomToRoomNavigation = () => {
 
     // Calculate paths to and from transport method
     console.log(
-      `Calculating path from ${actualStartRoom} to ${transportMethod} on floor ${startFloor}`
+      `Calculating path from ${actualStartRoom} to ${transportMethod} on floor ${startFloor}`,
     );
     const startFloorTransportPath = findShortestPath(
       startFloorGraph,
       actualStartRoom,
-      transportMethod
+      transportMethod,
     );
 
     console.log(
-      `Calculating path from ${transportMethod} to ${selectedEndRoom} on floor ${endFloor}`
+      `Calculating path from ${transportMethod} to ${selectedEndRoom} on floor ${endFloor}`,
     );
     const endFloorTransportPath = findShortestPath(
       endFloorGraph,
       transportMethod,
-      selectedEndRoom
+      selectedEndRoom,
     );
 
     // Validate paths
     if (!startFloorTransportPath || startFloorTransportPath.length < 2) {
       console.error(
-        `Could not find path from ${actualStartRoom} to ${transportMethod} on floor ${startFloor}`
+        `Could not find path from ${actualStartRoom} to ${transportMethod} on floor ${startFloor}`,
       );
       console.log("Available nodes:", Object.keys(startFloorGraph).join(", "));
       throw new Error(
-        `Could not find path to ${transportMethod} on floor ${startFloor}`
+        `Could not find path to ${transportMethod} on floor ${startFloor}`,
       );
     }
 
     if (!endFloorTransportPath || endFloorTransportPath.length < 2) {
       console.error(
-        `Could not find path from ${transportMethod} to ${selectedEndRoom} on floor ${endFloor}`
+        `Could not find path from ${transportMethod} to ${selectedEndRoom} on floor ${endFloor}`,
       );
       console.log("Available nodes:", Object.keys(endFloorGraph).join(", "));
       throw new Error(
-        `Could not find path from ${transportMethod} on floor ${endFloor}`
+        `Could not find path from ${transportMethod} on floor ${endFloor}`,
       );
     }
 
     console.log(
       `Start floor path (${startFloorTransportPath.length} nodes):`,
-      startFloorTransportPath
+      startFloorTransportPath,
     );
     console.log(
       `End floor path (${endFloorTransportPath.length} nodes):`,
-      endFloorTransportPath
+      endFloorTransportPath,
     );
 
     // Generate navigation result
@@ -954,7 +952,7 @@ const RoomToRoomNavigation = () => {
           "Calculating path from",
           selectedStartRoom,
           "to",
-          selectedEndRoom
+          selectedEndRoom,
         );
         console.error(
           "Building type:",
@@ -962,10 +960,10 @@ const RoomToRoomNavigation = () => {
           "Start floor:",
           startFloor,
           "End floor:",
-          endFloor
+          endFloor,
         );
         alert(
-          "Missing navigation data. Please select building, floors, and rooms."
+          "Missing navigation data. Please select building, floors, and rooms.",
         );
         return;
       }
@@ -974,7 +972,7 @@ const RoomToRoomNavigation = () => {
         "Calculating path from",
         selectedStartRoom,
         "to",
-        selectedEndRoom
+        selectedEndRoom,
       );
       console.log(
         "Building type:",
@@ -982,7 +980,7 @@ const RoomToRoomNavigation = () => {
         "Start floor:",
         startFloor,
         "End floor:",
-        endFloor
+        endFloor,
       );
 
       const startFloorGraph = FloorRegistry.getGraph(buildingType, startFloor);
@@ -1004,19 +1002,19 @@ const RoomToRoomNavigation = () => {
       console.log(
         "Start floor graph loaded:",
         Object.keys(startFloorGraph).length,
-        "nodes"
+        "nodes",
       );
       console.log(
         "End floor graph loaded:",
         Object.keys(endFloorGraph).length,
-        "nodes"
+        "nodes",
       );
 
       const validationError = validateRoomSelection(
         startFloorGraph,
         endFloorGraph,
         selectedStartRoom,
-        selectedEndRoom
+        selectedEndRoom,
       );
 
       if (validationError) {
@@ -1034,7 +1032,7 @@ const RoomToRoomNavigation = () => {
             selectedStartRoom,
             selectedEndRoom,
             startFloor,
-            building.name
+            building.name,
           );
         } else {
           // Inter-floor navigation
@@ -1043,11 +1041,11 @@ const RoomToRoomNavigation = () => {
           // Log available nodes for debugging
           console.log(
             "Start floor nodes:",
-            JSON.stringify(Object.keys(startFloorGraph))
+            JSON.stringify(Object.keys(startFloorGraph)),
           );
           console.log(
             "End floor nodes:",
-            JSON.stringify(Object.keys(endFloorGraph))
+            JSON.stringify(Object.keys(endFloorGraph)),
           );
 
           result = handleInterFloorNavigation(
@@ -1057,7 +1055,7 @@ const RoomToRoomNavigation = () => {
             selectedEndRoom,
             startFloor,
             endFloor,
-            building.name
+            building.name,
           );
         }
 
@@ -1082,16 +1080,16 @@ const RoomToRoomNavigation = () => {
           "Start floor path (" +
             (result.startFloorPath?.length || 0) +
             " nodes):",
-          JSON.stringify(result.startFloorPath || [])
+          JSON.stringify(result.startFloorPath || []),
         );
         console.log(
           "End floor path (" + (result.endFloorPath?.length || 0) + " nodes):",
-          JSON.stringify(result.endFloorPath || [])
+          JSON.stringify(result.endFloorPath || []),
         );
         console.log(
           "Navigation steps:",
           result.navigationSteps.length,
-          "steps"
+          "steps",
         );
 
         // Update the state
@@ -1140,7 +1138,7 @@ const RoomToRoomNavigation = () => {
         setStep("navigation");
 
         alert(
-          `Unable to generate a detailed path: ${pathError.message}\nA simplified navigation guide will be shown instead.`
+          `Unable to generate a detailed path: ${pathError.message}\nA simplified navigation guide will be shown instead.`,
         );
 
         // Reload WebViews
@@ -1484,7 +1482,7 @@ const RoomToRoomNavigation = () => {
                 a.localeCompare(b, undefined, {
                   numeric: true,
                   sensitivity: "base",
-                })
+                }),
               )
               .map((roomId) => (
                 <TouchableOpacity
@@ -1511,7 +1509,7 @@ const RoomToRoomNavigation = () => {
                 a.localeCompare(b, undefined, {
                   numeric: true,
                   sensitivity: "base",
-                })
+                }),
               )
               .map((roomId) => (
                 <TouchableOpacity
@@ -1551,7 +1549,6 @@ const RoomToRoomNavigation = () => {
 
   // Render the navigation results screen
   const renderNavigation = () => {
-    const navigation = useNavigation();
     const { skipSelection } = route.params || {};
 
     return (
@@ -1576,7 +1573,7 @@ const RoomToRoomNavigation = () => {
                     html: generateFloorHtml(
                       startFloorPlan,
                       startFloorPath,
-                      startFloorRooms
+                      startFloorRooms,
                     ),
                   }}
                   style={styles.floorPlan}
@@ -1617,7 +1614,7 @@ const RoomToRoomNavigation = () => {
                       html: generateFloorHtml(
                         endFloorPlan,
                         endFloorPath,
-                        endFloorRooms
+                        endFloorRooms,
                       ),
                     }}
                     style={styles.floorPlan}

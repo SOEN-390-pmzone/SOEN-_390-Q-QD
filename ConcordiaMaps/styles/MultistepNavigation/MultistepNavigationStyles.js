@@ -7,7 +7,7 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   header: {
-    marginBottom: 16,
+    marginBottom: 10,
     alignItems: "center",
   },
   title: {
@@ -155,17 +155,17 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: "#ffffff",
+    backgroundColor: "#f5f5f5",
   },
   scrollContainer: {
     flex: 1,
     padding: 15,
   },
   content: {
-    padding: 15,
-    backgroundColor: "#f5f5f5",
-    borderRadius: 10,
-    marginVertical: 10,
+    flex: 1,
+    paddingHorizontal: 12,
+    paddingTop: 10,
+    paddingBottom: 60,
   },
   description: {
     fontSize: 16,
@@ -173,8 +173,11 @@ const styles = StyleSheet.create({
   },
   navigationContainer: {
     flex: 1,
-    padding: 16,
+    backgroundColor: "#f5f5f5",
+    paddingHorizontal: 12,
+    paddingTop: 10,
     paddingBottom: 100,
+    marginTop: 8,
   },
   transitionInfoContainer: {
     padding: 15,
@@ -259,13 +262,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    minWidth: 110, // Slightly smaller but still accessible
+    minWidth: 110,
     shadowColor: "#000000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3, // Increased for more visibility
+    shadowOpacity: 0.3,
     shadowRadius: 4,
-    elevation: 5, // Increased for more visibility
-    marginHorizontal: 10, // Add horizontal margins
+    elevation: 5,
   },
   navigationButtonText: {
     color: "#ffffff",
@@ -275,16 +277,21 @@ const styles = StyleSheet.create({
   },
 
   navigationButtonsContainer: {
-    width: "110%", // Ensure the buttons take full width
+    width: "100%",
     paddingVertical: 16,
-    backgroundColor: "#f5f5f5", // Change from transparent to match background
+    paddingHorizontal: 16,
+    backgroundColor: "#ffffff",
     borderTopWidth: 1,
     borderTopColor: "#e0e0e0",
-    position: "absolute", // Position at the bottom
-    bottom: 0,
+    position: "absolute",
+    bottom: -10,
     left: 0,
     right: 0,
-    zIndex: 10, // Ensure visibility
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 4,
   },
 
   navigationButtonDisabled: {
@@ -294,14 +301,14 @@ const styles = StyleSheet.create({
   },
   stepCard: {
     backgroundColor: "#ffffff",
-    borderRadius: 16,
-    padding: 12,
-    marginVertical: 8,
-    shadowColor: "#000000",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowRadius: 4,
+    elevation: 3,
   },
   indoorNavButton: {
     backgroundColor: "#912338",
@@ -383,7 +390,7 @@ const styles = StyleSheet.create({
   },
   stepsList: {
     flex: 1,
-    maxHeight: 250,
+    maxHeight: 400,
   },
   navigationStepItem: {
     flexDirection: "row",
@@ -393,18 +400,19 @@ const styles = StyleSheet.create({
     borderBottomColor: "#eee",
   },
   stepIndicator: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
-    backgroundColor: "#2196F3",
-    justifyContent: "center",
+    flexDirection: "row",
     alignItems: "center",
-    marginRight: 10,
   },
   stepNumber: {
     color: "#fff",
     fontSize: 14,
     fontWeight: "600",
+  },
+  stepIndicatorText: {
+    fontSize: 12,
+    color: "#666666",
+    marginLeft: 4,
+    fontWeight: "500",
   },
   stepInstructionText: {
     flex: 1,
@@ -449,12 +457,9 @@ const styles = StyleSheet.create({
   },
   navigationControls: {
     flexDirection: "row",
-    justifyContent: "space-around", // Changed to space-around for better centering
-    alignItems: "center", // Add this to center vertically
-    marginTop: 10, // Reduced from 20
-    marginBottom: 10, // Reduced from 24
-    paddingHorizontal: 16,
-    width: "100%", // Ensure the controls take full width
+    justifyContent: "space-between",
+    alignItems: "center",
+    width: "100%",
   },
 
   // Map styles
@@ -501,10 +506,6 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: 12,
     overflow: "hidden",
-  },
-  floorPlanWebView: {
-    flex: 1,
-    backgroundColor: "transparent",
   },
   floorSelectorContainer: {
     flexDirection: "row",
@@ -563,7 +564,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   directionsList: {
-    maxHeight: 160,
+    maxHeight: 200,
   },
   directionItem: {
     flexDirection: "row",
@@ -750,6 +751,13 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#333333",
   },
+  compactHeader: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 4,
+  },
   closeModalButton: {
     width: 30,
     height: 30,
@@ -781,6 +789,15 @@ const styles = StyleSheet.create({
   },
   previewStepsList: {
     marginTop: 4,
+  },
+  titleContainer: {
+    flex: 1,
+  },
+  compactTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 2,
   },
   previewStepItem: {
     flexDirection: "row",
