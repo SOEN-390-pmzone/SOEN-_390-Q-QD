@@ -4,6 +4,7 @@ import CalendarScreen from "../../components/CalendarScreen";
 import Header from "../../components/Header";
 import { NavigationContainer } from "@react-navigation/native";
 
+// Mock necessary modules
 jest.mock("expo-calendar", () => ({
   requestCalendarPermissionsAsync: jest
     .fn()
@@ -35,6 +36,8 @@ jest.mock("@expo/vector-icons", () => ({
   Ionicons: "Ionicons",
 }));
 
+
+// Test the calendarIcon button
 describe("Header", () => {
   it("opens the CalendarScreen when clicking on the calendar icon", async () => {
     const { getByTestId } = render(
@@ -53,6 +56,7 @@ describe("Header", () => {
 });
 
 describe("CalendarScreen", () => {
+  // Test the selecting multiple calendars functionality
   it("selects other calendars", async () => {
     const { getByText, getByTestId } = render(
       <NavigationContainer>
@@ -67,7 +71,6 @@ describe("CalendarScreen", () => {
       expect(getByText("Select Calendars")).toBeTruthy();
     });
 
-    // Fix: Wait for "Calendar 1" to be available before selecting it
     await waitFor(() => expect(getByText("Calendar 1")).toBeTruthy());
     const calendar1 = getByText("Calendar 1");
     fireEvent.press(calendar1);
@@ -80,6 +83,7 @@ describe("CalendarScreen", () => {
     });
   });
 
+  // Test previous days view
   it("shows events from previous days", async () => {
     const { getByText, getByTestId } = render(
       <NavigationContainer>
@@ -95,6 +99,7 @@ describe("CalendarScreen", () => {
     });
   });
 
+  // Test upcoming days view
   it("shows events for upcoming days", async () => {
     const { getByText, getByTestId } = render(
       <NavigationContainer>
@@ -110,8 +115,8 @@ describe("CalendarScreen", () => {
     });
   });
 
-  it("clicks on the Get Directions button and triggers an alert", async () => {
-    // Create a simple mock implementation instead of a spy
+  // Test the Get Directions button
+  it("clicks on the Get Directions button and closes the alert", async () => {
     const originalAlert = global.alert;
     global.alert = jest.fn();
 
@@ -121,18 +126,10 @@ describe("CalendarScreen", () => {
       </NavigationContainer>
     );
 
-    // Wait for the event to appear in the UI
-    await waitFor(() => {
-      expect(getByText("Event 1")).toBeTruthy();
-    });
+    await waitFor(() => getByText("Event 1"));
 
-    // Find the button by its text content instead of testID
-    const getDirectionsButton = getByText("Get Directions");
+    fireEvent.press(getByText("Get Directions"));
 
-    // Press the button
-    fireEvent.press(getDirectionsButton);
-
-    // Simple assertion to verify alert was called correctly
     expect(global.alert).toHaveBeenCalledWith("Get directions to Room 101");
 
     // Restore original alert
