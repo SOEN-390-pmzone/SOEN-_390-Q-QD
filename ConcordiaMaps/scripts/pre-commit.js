@@ -33,13 +33,13 @@ function runPreCommitChecks() {
   // Run Prettier on all relevant files
   runCommand(
     'npx prettier "*/*.{js,jsx,ts,tsx,json,css,scss,md}" --write --ignore-path .gitignore',
-    "Code formatting issues found. Please fix them and try again."
+    "Code formatting issues found. Please fix them and try again.",
   );
 
   // Run ESLint
   runCommand(
     "npx eslint . --ignore-pattern node_modules/ --ignore-pattern .expo/ --ignore-pattern .coverage/ --ignore-pattern coverage/",
-    "ESLint issues found. Please fix them and try again."
+    "ESLint issues found. Please fix them and try again.",
   );
 
   // Run tests
