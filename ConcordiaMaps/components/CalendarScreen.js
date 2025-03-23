@@ -5,8 +5,7 @@ import {
   FlatList,
   TouchableOpacity,
   Modal,
-  ScrollView,
-  Alert
+  ScrollView
 } from "react-native";
 import * as Calendar from "expo-calendar";
 import { format, addDays, subDays } from "date-fns";
@@ -64,7 +63,6 @@ const CalendarScreen = () => {
       startDate,
       endDate
     );
-    console.log("Fetched events:", events); // Add console log to verify fetched events
     setEvents(events);
   };
 
@@ -167,7 +165,7 @@ const CalendarScreen = () => {
                   testID="getClassDirectionsButton"
                   style={styles.classDirectionsButton}
                   onPress={() =>
-                    Alert.alert("Get directions to " + item.notes)
+                    alert("Get directions to " + item.notes)
                   }
                 >
                   <Text style={styles.classDirectionsButtonText}> Get Directions </Text>

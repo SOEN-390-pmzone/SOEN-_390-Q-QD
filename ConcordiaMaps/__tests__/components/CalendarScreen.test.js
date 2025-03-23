@@ -3,7 +3,6 @@ import { render, fireEvent, waitFor } from "@testing-library/react-native";
 import CalendarScreen from "../../components/CalendarScreen";
 import Header from "../../components/Header";
 import { NavigationContainer } from "@react-navigation/native";
-import { Alert } from "react-native";
 
 jest.mock("expo-calendar", () => ({
   requestCalendarPermissionsAsync: jest
@@ -111,37 +110,32 @@ describe("CalendarScreen", () => {
     });
   });
 
-  it("clicks on the Get Directions button and closes the alert", async () => {
-    // Mock the alert function - make sure it's defined before rendering
-    const alertMock = jest.fn();
-    global.alert = alertMock;
+  it("clicks on the Get Directions button and triggers an alert", async () => {
+    // Create a simple mock implementation instead of a spy
+    const originalAlert = global.alert;
+    global.alert = jest.fn();
 
-    const { getByText, getByTestId, debug } = render(
+    const { getByText } = render(
       <NavigationContainer>
         <CalendarScreen />
       </NavigationContainer>
     );
 
-    // Wait for the event to load
+    // Wait for the event to appear in the UI
     await waitFor(() => {
       expect(getByText("Event 1")).toBeTruthy();
     });
 
-    // Log to check if the button is found
-    debug();
+    // Find the button by its text content instead of testID
+    const getDirectionsButton = getByText("Get Directions");
 
-    // Find the "Get Directions" button and simulate a press
-    const getDirectionsButton = getByTestId("getClassDirectionsButton");
-    console.log("Button found:", getDirectionsButton);
-
-    // Check if alert has been called before pressing the button
-    console.log("Before press - alert called:", alertMock.mock.calls.length);
-
-    // Fire the press event on the button
+    // Press the button
     fireEvent.press(getDirectionsButton);
 
-    // Check if the alert was called with the expected message
-    console.log("After press - alert called:", alertMock.mock.calls.length);
-    expect(alertMock).toHaveBeenCalledWith("Get directions to Room 101");
+    // Simple assertion to verify alert was called correctly
+    expect(global.alert).toHaveBeenCalledWith("Get directions to Room 101");
+
+    // Restore original alert
+    global.alert = originalAlert;
   });
 });
