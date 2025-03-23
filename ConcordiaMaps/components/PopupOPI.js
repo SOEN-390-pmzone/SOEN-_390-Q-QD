@@ -3,9 +3,11 @@ import { Modal, View, Text, TouchableOpacity, Alert } from "react-native";
 import PropTypes from "prop-types";
 import styles from "../styles/DirectionBox.style"; // Use the same styles as the building popup
 
+const DEFAULT_NAME = "Cafe/Restaurant Name";
+const DEFAULT_ADDRESS = "Address not available";
+
 const PopupOPI = ({ isVisible, data = {}, onClose }) => {
-  const { name = "Cafe/Restaurant Name", address = "Address not available" } =
-    data;
+  const { name = DEFAULT_NAME, address = DEFAULT_ADDRESS } = data;
 
   return (
     <Modal

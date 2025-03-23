@@ -21,51 +21,12 @@ import {
 import convertToCoordinates from "../components/convertToCoordinates";
 import PropTypes from "prop-types";
 import PopupOPI from "../components/PopupOPI"; // Import the new popup component
+import { PointsOfInterest } from "../constants/OutdoorPtsOfDirections"; // Import the new Points of Interest data
 
 // Marker image assets for Restaurant and Cafe
-const restaurantMarker = require("../assets/restoICON.png");
-const cafeMarker = require("../assets/cafeICON.png");
 const customMarkerImage = require("../assets/PinLogo.png");
 
 // Example data for PointsOfInterest
-const PointsOfInterest = [
-  {
-    name: "Poulet Rouge",
-    coordinate: { latitude: 45.4947454, longitude: -73.5783503 },
-    address: "1623 Rue Sainte-Catherine, Montréal, QC H3H 1L8",
-    markerImage: restaurantMarker,
-  },
-  {
-    name: "Marche Newon",
-    coordinate: { latitude: 45.4943362, longitude: -73.5785438 },
-    address: "1616 Rue Sainte-Catherine 302 unit, Montréal, QC H3H 1L7",
-    markerImage: restaurantMarker,
-  },
-  {
-    name: "Tim Horton's",
-    coordinate: { latitude: 45.4948692, longitude: -73.5782373 },
-    address: "1611 Rue Sainte-Catherine , Montréal, QC H3H 1L8",
-    markerImage: cafeMarker,
-  },
-  {
-    name: "Subway",
-    coordinate: { latitude: 45.49601, longitude: -73.5801927 },
-    address: "2144 guy st, Montréal, QC H3H 2N4",
-    markerImage: restaurantMarker,
-  },
-  {
-    name: "Second Cup",
-    coordinate: { latitude: 45.4992233, longitude: -73.5735757 },
-    address: "Rue Sainte-Catherine ST W Suite 1166 , Montréal, QC H3B 1K1",
-    markerImage: cafeMarker,
-  },
-  {
-    name: "Java U",
-    coordinate: { latitude: 45.4958331, longitude: -73.5791174 },
-    address: "1455 Guy St , Montréal, QC H3H 2L5",
-    markerImage: cafeMarker,
-  },
-];
 
 function HomeScreen({ asyncKey = "Campus" }) {
   const loyolaPostalCode = process.env.EXPO_PUBLIC_LOYOLA_POSTAL_CODE;
