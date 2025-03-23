@@ -54,6 +54,24 @@ const CONCORDIA_BUILDINGS = [
   },
 ];
 
+export const getStepColor = (type) => {
+  switch (type) {
+    case "start":
+      return "#4CAF50"; // Green for start
+    case "elevator":
+    case "escalator":
+    case "stairs":
+    case "transport":
+      return "#FF9800"; // Orange for transport methods
+    case "end":
+      return "#F44336"; // Red for destination
+    case "error":
+      return "#F44336"; // Red for errors
+    default:
+      return "#2196F3"; // Blue for walking/default
+  }
+};
+
 const MultistepNavigationScreen = () => {
   const navigation = useNavigation();
 
@@ -150,24 +168,6 @@ const MultistepNavigationScreen = () => {
       sessionTokenRef.current = "";
     };
   }, []);
-
-  const getStepColor = (type) => {
-    switch (type) {
-      case "start":
-        return "#4CAF50"; // Green for start
-      case "elevator":
-      case "escalator":
-      case "stairs":
-      case "transport":
-        return "#FF9800"; // Orange for transport methods
-      case "end":
-        return "#F44336"; // Red for destination
-      case "error":
-        return "#F44336"; // Red for errors
-      default:
-        return "#2196F3"; // Blue for walking/default
-    }
-  };
 
   // Handle existing navigation plan if passed as parameter
   useEffect(() => {
@@ -1349,10 +1349,11 @@ const MultistepNavigationScreen = () => {
               : `room ${currentStep.startRoom}`}{" "}
             to room {currentStep.endRoom} in {buildingName}
           </Text>
-
           <Text style={styles.indoorDetailsText}>
-            • Start Floor: {currentStep.startFloor}
-            {"\n"}• End Floor: {currentStep.endFloor}
+            • Start Floor:{" "}
+            <Text testID="start-floor">{currentStep.startFloor}</Text>
+            {"\n"}• End Floor:{" "}
+            <Text testID="end-floor">{currentStep.endFloor}</Text>
             {"\n"}• Building: {buildingName}
           </Text>
 
@@ -1880,20 +1881,16 @@ const MultistepNavigationScreen = () => {
       <View style={{ flex: 1, paddingBottom: 70 }}>
         {/* Back button at the top */}
         <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => {
-            // Reset navigation state
-            setNavigationPlan(null);
-            setCurrentStepIndex(0);
-            setOutdoorDirections([]);
-            setOutdoorRoute([]);
-            setShowIndoorNavigation(false);
-            setIndoorNavigationParams(null);
-            setExpandedMap(false);
-          }}
+          testID="previous-button" // Add this line
+          style={[
+            styles.navigationButton,
+            currentStepIndex === 0 && styles.navigationButtonDisabled,
+          ]}
+          onPress={navigateToPreviousStep}
+          disabled={currentStepIndex === 0}
         >
-          <MaterialIcons name="arrow-back" size={20} color="#912338" />
-          <Text style={styles.backButtonText}>Change Route</Text>
+          <MaterialIcons name="arrow-back" size={22} color="white" />
+          <Text style={styles.navigationButtonText}>Previous</Text>
         </TouchableOpacity>
 
         <View style={[styles.stepCard, { marginTop: 5 }]}>
@@ -1940,6 +1937,7 @@ const MultistepNavigationScreen = () => {
             </View>
 
             <TouchableOpacity
+              testID="next-button" // Add this line
               style={[
                 styles.navigationButton,
                 currentStepIndex >= navigationPlan.steps.length - 1 &&
@@ -2178,7 +2176,10 @@ const MultistepNavigationScreen = () => {
   };
 
   return (
-    <SafeAreaView style={[{ flex: 1, backgroundColor: "#f5f5f5" }]}>
+    <SafeAreaView
+      style={[{ flex: 1, backgroundColor: "#f5f5f5" }]}
+      testID="navigation-screen"
+    >
       <Header />
       <NavBar />
       <View
