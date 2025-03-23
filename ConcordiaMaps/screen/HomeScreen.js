@@ -26,8 +26,6 @@ import { PointsOfInterest } from "../constants/OutdoorPtsOfDirections"; // Impor
 // Marker image assets for Restaurant and Cafe
 const customMarkerImage = require("../assets/PinLogo.png");
 
-// Example data for PointsOfInterest
-
 function HomeScreen({ asyncKey = "Campus" }) {
   const loyolaPostalCode = process.env.EXPO_PUBLIC_LOYOLA_POSTAL_CODE;
   const sgwPostalCode = process.env.EXPO_PUBLIC_SGW_POSTAL_CODE;

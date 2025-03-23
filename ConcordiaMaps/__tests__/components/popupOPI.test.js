@@ -69,4 +69,12 @@ describe("<PopupOPI/>", () => {
 
     alertSpy.mockRestore(); // Restore original Alert.alert function
   });
+  it("handles completely omitted data prop by using defaults", () => {
+    const { getByText } = render(
+      <PopupOPI isVisible={true} onClose={mockOnClose} />,
+    );
+
+    expect(getByText("Cafe/Restaurant Name")).toBeTruthy();
+    expect(getByText("Address not available")).toBeTruthy();
+  });
 });
