@@ -37,7 +37,6 @@ function HomeScreen({ asyncKey = "Campus" }) {
   const mapRef = useRef(null);
   const toggleModalTime = "10000";
 
-
   useEffect(() => {
     const fetchLastCampus = async () => {
       const campus = await getFromAsyncStorage(asyncKey, sgwPostalCode);
@@ -92,7 +91,6 @@ function HomeScreen({ asyncKey = "Campus" }) {
     }
   }, [coordinates]);
 
-
   const handleChangeCampuses = () => {
     setPostalCode((prevPostalCode) =>
       prevPostalCode === sgwPostalCode ? loyolaPostalCode : sgwPostalCode,
@@ -135,7 +133,6 @@ function HomeScreen({ asyncKey = "Campus" }) {
       return () => clearTimeout(timer); // Cleanup the timer if the component unmounts
     }
   }, [modalState]);
-
 
   // Homescreen() return
   return (
@@ -190,7 +187,8 @@ function HomeScreen({ asyncKey = "Campus" }) {
               >
                 <Image
                   source={customMarkerImage}
-                  style={styles.customMarkerImage}/>
+                  style={styles.customMarkerImage}
+                />
               </Marker>
             ))}
             <BuildingColoring />
@@ -200,12 +198,13 @@ function HomeScreen({ asyncKey = "Campus" }) {
                   latitude: selectedLocation.latitude,
                   longitude: selectedLocation.longitude,
                 }}
-                title="Selected Location"/>
+                title="Selected Location"
+              />
             )}
             <ShuttleStop />
             <LiveBusTracker mapRef={mapRef} />
           </MapView>
-          
+
           <View style={styles.toggleView}>
             <TouchableOpacity
               testID="change-campus-button"
@@ -235,10 +234,8 @@ function HomeScreen({ asyncKey = "Campus" }) {
   );
 }
 
-
 HomeScreen.propTypes = {
   asyncKey: PropTypes.string,
 };
-
 
 export default HomeScreen;

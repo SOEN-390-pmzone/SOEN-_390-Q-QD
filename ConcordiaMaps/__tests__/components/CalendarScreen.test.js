@@ -36,26 +36,41 @@ jest.mock("@expo/vector-icons", () => ({
   Ionicons: "Ionicons",
 }));
 
+const mockNavigate = jest.fn();
+
+jest.mock("@react-navigation/native", () => {
+  const actualNav = jest.requireActual("@react-navigation/native");
+  return {
+    ...actualNav,
+    useNavigation: () => ({
+      navigate: mockNavigate,
+    }),
+  };
+});
 
 // Test the calendarIcon button
 describe("Header", () => {
-  it("opens the CalendarScreen when clicking on the calendar icon", async () => {
-    const { getByTestId } = render(
-      <NavigationContainer>
-        <Header />
-      </NavigationContainer>
-    );
+  beforeEach(() => {
+    // Clear the mock before each test
+    mockNavigate.mockClear();
+  });
+
+  it("opens the CalendarScreen when clicking on the calendar icon", () => {
+    const { getByTestId } = render(<Header />);
 
     const calendarButton = getByTestId("calendarButton");
     fireEvent.press(calendarButton);
 
-    await waitFor(() => {
-      expect(getByTestId("calendarButton")).toBeTruthy();
-    });
+    expect(mockNavigate).toHaveBeenCalledWith("Calendar");
   });
 });
 
 describe("CalendarScreen", () => {
+  // Reset mocks before each test
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   // Test the selecting multiple calendars functionality
   it("selects other calendars", async () => {
     const { getByText, getByTestId } = render(
@@ -64,20 +79,16 @@ describe("CalendarScreen", () => {
       </NavigationContainer>
     );
 
-    const selectBox = getByTestId("selectCalendarButton");
-    fireEvent.press(selectBox);
-
-    await waitFor(() => {
-      expect(getByText("Select Calendars")).toBeTruthy();
-    });
-
-    await waitFor(() => expect(getByText("Calendar 1")).toBeTruthy());
-    const calendar1 = getByText("Calendar 1");
-    fireEvent.press(calendar1);
-
-    const doneButton = getByText("Done");
-    fireEvent.press(doneButton);
-
+    await waitFor(() => getByTestId("selectCalendarButton"));
+    
+    fireEvent.press(getByTestId("selectCalendarButton"));
+    
+    await waitFor(() => getByText("Select Calendars"));
+    
+    fireEvent.press(getByText("Calendar 1"));
+    
+    fireEvent.press(getByText("Done"));
+    
     await waitFor(() => {
       expect(getByText("Select your calendars (1)")).toBeTruthy();
     });
@@ -85,15 +96,16 @@ describe("CalendarScreen", () => {
 
   // Test previous days view
   it("shows events from previous days", async () => {
-    const { getByText, getByTestId } = render(
+    const { getByText } = render(
       <NavigationContainer>
         <CalendarScreen />
       </NavigationContainer>
     );
-
-    const previousDayButton = getByText("Previous Day");
-    fireEvent.press(previousDayButton);
-
+    
+    await waitFor(() => getByText("Previous Day"));
+    
+    fireEvent.press(getByText("Previous Day"));
+    
     await waitFor(() => {
       expect(getByText("No events for today.")).toBeTruthy();
     });
@@ -101,15 +113,16 @@ describe("CalendarScreen", () => {
 
   // Test upcoming days view
   it("shows events for upcoming days", async () => {
-    const { getByText, getByTestId } = render(
+    const { getByText } = render(
       <NavigationContainer>
         <CalendarScreen />
       </NavigationContainer>
     );
-
-    const nextDayButton = getByText("Next Day");
-    fireEvent.press(nextDayButton);
-
+    
+    await waitFor(() => getByText("Next Day"));
+    
+    fireEvent.press(getByText("Next Day"));
+    
     await waitFor(() => {
       expect(getByText("No events for today.")).toBeTruthy();
     });
@@ -117,22 +130,25 @@ describe("CalendarScreen", () => {
 
   // Test the Get Directions button
   it("clicks on the Get Directions button and closes the alert", async () => {
+    // Mock the alert function
     const originalAlert = global.alert;
     global.alert = jest.fn();
 
-    const { getByText } = render(
-      <NavigationContainer>
-        <CalendarScreen />
-      </NavigationContainer>
-    );
-
-    await waitFor(() => getByText("Event 1"));
-
-    fireEvent.press(getByText("Get Directions"));
-
-    expect(global.alert).toHaveBeenCalledWith("Get directions to Room 101");
-
-    // Restore original alert
-    global.alert = originalAlert;
+    try {
+      const { getByText } = render(
+        <NavigationContainer>
+          <CalendarScreen />
+        </NavigationContainer>
+      );
+      
+      await waitFor(() => getByText("Event 1"));
+      
+      fireEvent.press(getByText("Get Directions"));
+      
+      expect(global.alert).toHaveBeenCalledWith("Get directions to Room 101");
+    } finally {
+      // Always restore the original alert function
+      global.alert = originalAlert;
+    }
   });
 });

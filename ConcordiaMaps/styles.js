@@ -267,7 +267,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     paddingVertical: 5,
     maxWidth: 160,
-    alignItems: "center"
+    alignItems: "center",
   },
   classDirectionsButtonText: {
     color: "#912338",

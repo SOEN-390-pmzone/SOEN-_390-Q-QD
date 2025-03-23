@@ -5,7 +5,7 @@ import {
   FlatList,
   TouchableOpacity,
   Modal,
-  ScrollView
+  ScrollView,
 } from "react-native";
 import * as Calendar from "expo-calendar";
 import { format, addDays, subDays } from "date-fns";
@@ -38,7 +38,7 @@ const CalendarScreen = () => {
 
   const fetchCalendars = async () => {
     const availableCalendars = await Calendar.getCalendarsAsync(
-      Calendar.EntityTypes.EVENT
+      Calendar.EntityTypes.EVENT,
     );
     setCalendars(availableCalendars);
 
@@ -61,14 +61,14 @@ const CalendarScreen = () => {
     const events = await Calendar.getEventsAsync(
       selectedCalendarIds,
       startDate,
-      endDate
+      endDate,
     );
     setEvents(events);
   };
 
   const toggleCalendarSelection = (id) => {
     setSelectedCalendarIds((prev) =>
-      prev.includes(id) ? prev.filter((calId) => calId !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((calId) => calId !== id) : [...prev, id],
     );
   };
 
@@ -160,15 +160,16 @@ const CalendarScreen = () => {
                   {format(new Date(item.startDate), "hh:mm a")} -{" "}
                   {format(new Date(item.endDate), "hh:mm a")}
                 </Text>
-                
+
                 <TouchableOpacity
                   testID="getClassDirectionsButton"
                   style={styles.classDirectionsButton}
-                  onPress={() =>
-                    alert("Get directions to " + item.notes)
-                  }
+                  onPress={() => alert("Get directions to " + item.notes)}
                 >
-                  <Text style={styles.classDirectionsButtonText}> Get Directions </Text>
+                  <Text style={styles.classDirectionsButtonText}>
+                    {" "}
+                    Get Directions{" "}
+                  </Text>
                 </TouchableOpacity>
               </View>
             )}

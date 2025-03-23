@@ -27,7 +27,10 @@ function Header() {
           />
         </TouchableOpacity>
         <Text style={styles.headerText}>ConcordiaMaps</Text>
-        <TouchableOpacity testID="calendarButton" onPress={() => handleCalendarPress()}>
+        <TouchableOpacity
+          testID="calendarButton"
+          onPress={() => handleCalendarPress()}
+        >
           <Image
             source={require("../assets/calendarIcon.png")}
             style={styles.calendarIcon}
