@@ -42,7 +42,7 @@ function HomeScreen({ asyncKey = "Campus" }) {
   const [, setMapRegion] = useState(null);
   const borderColor = "#912338";
   const mapRef = useRef(null);
-  const toggleModalTime = "10000";
+  const TOGGLE_MODAL_TIMEOUT = 10000;
 
   // State for OPI (Points of Interest) popup
   const [opiPopupVisible, setOpiPopupVisible] = useState(false);
@@ -143,7 +143,7 @@ function HomeScreen({ asyncKey = "Campus" }) {
     if (modalState) {
       const timer = setTimeout(() => {
         setModalState(false);
-      }, toggleModalTime);
+      }, TOGGLE_MODAL_TIMEOUT);
 
       return () => clearTimeout(timer);
     }
@@ -160,7 +160,7 @@ function HomeScreen({ asyncKey = "Campus" }) {
         <>
           <TemporaryModal
             text="Press the button to switch campuses"
-            time={toggleModalTime}
+            time={TOGGLE_MODAL_TIMEOUT}
             modalState={modalState}
             onRequestClose={() => setModalState(false)}
             TestID="toggleModal"
