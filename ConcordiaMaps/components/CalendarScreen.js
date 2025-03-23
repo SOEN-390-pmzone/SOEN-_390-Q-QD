@@ -6,11 +6,11 @@ import {
   TouchableOpacity,
   Modal,
   ScrollView,
+  Alert
 } from "react-native";
 import * as Calendar from "expo-calendar";
 import { format, addDays, subDays } from "date-fns";
 import styles from "../styles";
-import Header from "../components/Header";
 import { Ionicons } from "@expo/vector-icons";
 
 const CalendarScreen = () => {
@@ -64,6 +64,7 @@ const CalendarScreen = () => {
       startDate,
       endDate
     );
+    console.log("Fetched events:", events); // Add console log to verify fetched events
     setEvents(events);
   };
 
@@ -75,7 +76,6 @@ const CalendarScreen = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: "white" }]}>
-      <Header />
       <View style={{ padding: 20 }}>
         <Text style={styles.dateText}>
           {format(currentDate, "MMMM d, yyyy")}
@@ -85,7 +85,7 @@ const CalendarScreen = () => {
         <TouchableOpacity
           style={styles.selectBox}
           onPress={() => setModalVisible(true)}
-          testID="calendarButton"
+          testID="selectCalendarButton"
         >
           <Text style={styles.selectBoxText}>
             Select your calendars ({selectedCalendarIds.length})
@@ -164,9 +164,10 @@ const CalendarScreen = () => {
                 </Text>
                 
                 <TouchableOpacity
+                  testID="getClassDirectionsButton"
                   style={styles.classDirectionsButton}
                   onPress={() =>
-                    alert("Get directions to " + item.notes)
+                    Alert.alert("Get directions to " + item.notes)
                   }
                 >
                   <Text style={styles.classDirectionsButtonText}> Get Directions </Text>
