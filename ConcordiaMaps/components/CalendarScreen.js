@@ -47,17 +47,23 @@ const CalendarScreen = () => {
     setSelectedCalendarIds(availableCalendars.map((cal) => cal.id));
   };
 
+  const getStartAndEndOfDay = (date) => {
+    const startDate = new Date(date);
+    startDate.setHours(0, 0, 0, 0);
+
+    const endDate = new Date(date);
+    endDate.setHours(23, 59, 59, 999);
+
+    return { startDate, endDate };
+  };
+
   const fetchCalendarEvents = async () => {
     if (selectedCalendarIds.length === 0) {
       setEvents([]);
       return;
     }
 
-    const startDate = new Date(currentDate);
-    startDate.setHours(0, 0, 0, 0);
-
-    const endDate = new Date(currentDate);
-    endDate.setHours(23, 59, 59, 999);
+    const { startDate, endDate } = getStartAndEndOfDay(currentDate);
 
     const events = await Calendar.getEventsAsync(
       selectedCalendarIds,
@@ -157,7 +163,9 @@ const CalendarScreen = () => {
               <View style={styles.eventCard}>
                 <Text style={styles.eventTitle}>{item.title}</Text>
                 {item.notes && (
-                  <Text style={styles.eventInfo}>{item.notes}</Text>
+                  <Text style={styles.eventInfo}>
+                    {item.notes ?? "No additionnal information"}
+                  </Text>
                 )}
                 <Text style={styles.eventInfo}>
                   {format(new Date(item.startDate), "hh:mm a")} -{" "}
@@ -167,7 +175,9 @@ const CalendarScreen = () => {
                 <TouchableOpacity
                   testID="getClassDirectionsButton"
                   style={styles.classDirectionsButton}
-                  onPress={() => alert("Get directions to " + item.notes)}
+                  onPress={() =>
+                    alert("Get directions to " + (item.notes ?? ""))
+                  }
                 >
                   <Text style={styles.classDirectionsButtonText}>
                     {" "}
