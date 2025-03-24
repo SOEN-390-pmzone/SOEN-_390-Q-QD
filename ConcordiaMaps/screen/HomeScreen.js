@@ -229,6 +229,14 @@ function HomeScreen({ asyncKey = "Campus" }) {
         <Text>Loading...</Text>
       )}
       {error ? <Text>Error: {error}</Text> : null}
+
+      {/* Add navigation options here */}
+      <View>
+        <Text>Get directions</Text>
+        <Text>Outdoor Points of Interest</Text>
+        <Text>Smart Planner</Text>
+      </View>
+
       <Footer />
     </View>
   );

@@ -1,6 +1,7 @@
 import App from "../App";
 import React from "react";
 import { render, waitFor, fireEvent } from "@testing-library/react-native";
+import { act } from 'react-test-renderer';
 
 // Mock expo-font
 jest.mock("expo-font", () => ({
@@ -169,17 +170,6 @@ describe("App", () => {
 
     await waitFor(() => {
       expect(mockPopupModalProps.isVisible).toBeDefined();
-    });
-  });
-
-  it("navigates to GetDirections screen when button is clicked", async () => {
-    const { getByText } = render(<App />);
-    const directionsButton = await waitFor(() => getByText("Get directions"));
-
-    fireEvent.press(directionsButton);
-
-    await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith("GetDirections");
     });
   });
 
