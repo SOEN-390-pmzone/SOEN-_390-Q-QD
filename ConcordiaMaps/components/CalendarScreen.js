@@ -1,3 +1,4 @@
+import Header from "../components/Header";
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -74,6 +75,8 @@ const CalendarScreen = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: "white" }]}>
+      <Header />
+
       <View style={{ padding: 20 }}>
         <Text style={styles.dateText}>
           {format(currentDate, "MMMM d, yyyy")}
