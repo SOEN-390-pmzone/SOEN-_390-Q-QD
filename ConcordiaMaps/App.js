@@ -14,6 +14,7 @@ import BuildingSelector from "./components/IndoorNavigation/BuildingSelector";
 import RoomToRoomNavigation from "./components/IndoorNavigation/RoomToRoomNavigation";
 import TunnelNavigation from "./components/IndoorNavigation/TunnelNavigation";
 import PropTypes from "prop-types";
+import CalendarScreen from "./components/CalendarScreen";
 
 // Create Context for modal data and visibility
 export const ModalContext = createContext();
@@ -83,6 +84,8 @@ export default function App() {
               name="TunnelNavigation"
               component={TunnelNavigation}
             />
+
+            <Stack.Screen name="Calendar" component={CalendarScreen} />
           </Stack.Navigator>
 
           <PopupModalWrapper

@@ -237,6 +237,126 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
   },
+  calendarIcon: {
+    width: 30,
+    height: 30,
+    marginHorizontal: 10,
+  },
+  dateText: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 20,
+    color: "black",
+  },
+  selectBox: {
+    backgroundColor: "#912338",
+    padding: 12,
+    borderRadius: 10,
+    alignItems: "center",
+    marginBottom: 15,
+  },
+  selectBoxText: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    width: "80%",
+    backgroundColor: "white",
+    padding: 20,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  calendarItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ddd",
+  },
+  calendarText: {
+    marginLeft: 10,
+    fontSize: 16,
+  },
+  doneButton: {
+    backgroundColor: "#912338",
+    paddingVertical: 12,
+    paddingHorizontal: 25,
+    borderRadius: 10,
+    alignItems: "center",
+    marginTop: 15,
+  },
+  doneButtonText: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+  navigationButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 15,
+    marginTop: 20,
+  },
+
+  navigationButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 8,
+    width: "45%",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  navigationButtonText: {
+    color: "black",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  eventCard: {
+    backgroundColor: "#912338",
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  eventTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#FFFFFF",
+    marginBottom: 5,
+  },
+  eventInfo: {
+    fontSize: 14,
+    color: "#F5F5F5",
+    marginBottom: 5,
+  },
+  classDirectionsButtonText: {
+    color: "#912338",
+    fontWeight: "bold",
+  },
+  classDirectionsButton: {
+    backgroundColor: "white",
+    borderRadius: 20,
+    paddingHorizontal: 30,
+    paddingVertical: 5,
+    maxWidth: 160,
+    alignItems: "center",
+  },
 });
 
 export default styles;
