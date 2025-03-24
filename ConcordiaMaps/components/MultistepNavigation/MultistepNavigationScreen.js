@@ -779,8 +779,9 @@ const MultistepNavigationScreen = () => {
   const getBuildingTypeFromId = (buildingId) => {
     if (!buildingId) return "HallBuilding"; // Default
 
-    const id = buildingId.toUpperCase();
+    const id = String(buildingId).toUpperCase();
 
+    // Map to exact building types expected by FloorRegistry
     if (id === "H" || id.includes("HALL")) return "HallBuilding";
     if (id === "LB" || id.includes("LIBRARY") || id.includes("MCCONNELL"))
       return "Library";
@@ -788,11 +789,11 @@ const MultistepNavigationScreen = () => {
       return "JMSB";
     if (id === "EV" || id.includes("ENGINEER")) return "EV";
 
-    // Default to Hall Building if no match
+    // Add more mappings as needed for other buildings
     console.log(
       `No specific building type found for ${buildingId}, using default.`,
     );
-    return "HallBuilding";
+    return "HallBuilding"; // Default to Hall Building if no match
   };
 
   // Extract floor from room ID (e.g. "H-920" => "9")
@@ -809,19 +810,32 @@ const MultistepNavigationScreen = () => {
   };
 
   // Normalize room ID to match format in floor data
+  // Normalize room ID to match format in floor data
   const normalizeRoomId = (roomId) => {
     if (!roomId) return roomId;
 
     // Handle entrance specially
-    if (roomId.toLowerCase() === "entrance") return "entrance";
+    if (typeof roomId === "string" && roomId.toLowerCase() === "entrance")
+      return "entrance";
 
     // Handle common variations for entrance
-    if (["main entrance", "main", "lobby"].includes(roomId.toLowerCase())) {
+    if (
+      typeof roomId === "string" &&
+      ["main entrance", "main", "lobby"].includes(roomId.toLowerCase())
+    ) {
       return "entrance";
     }
 
-    // Remove hyphens between building code and room number (e.g. H-903 → H903)
-    return roomId.replace(/^([A-Za-z]+)-(\d+)$/, "$1$2");
+    // Make sure we're working with a string
+    const roomIdStr = String(roomId);
+
+    // For Hall Building: Convert H-903 format to H903 format
+    if (roomIdStr.match(/^H-\d+$/i)) {
+      return roomIdStr.replace(/^(H)-(\d+)$/i, "$1$2").toUpperCase();
+    }
+
+    // For other buildings, follow similar pattern
+    return roomIdStr.replace(/^([A-Za-z]+)-(\d+)$/, "$1$2").toUpperCase();
   };
 
   // Handle indoor navigation steps
@@ -838,13 +852,29 @@ const MultistepNavigationScreen = () => {
       }
 
       // Format room IDs properly
-      const normalizedStartRoom = normalizeRoomId(step.startRoom);
+      let normalizedStartRoom = normalizeRoomId(step.startRoom);
       const normalizedEndRoom = normalizeRoomId(step.endRoom);
+
+      // Handle special case for entrance - don't map it here,
+      // let RoomToRoomNavigation handle the mapping based on available nodes
+      // This gives it more flexibility to work with the actual graph
+
+      // Map building IDs directly to their proper types in FloorRegistry format
+      let mappedBuildingType = step.buildingType;
+      if (step.buildingId === "H") {
+        mappedBuildingType = "HallBuilding";
+      } else if (step.buildingId === "LB") {
+        mappedBuildingType = "Library";
+      } else if (step.buildingId === "MB") {
+        mappedBuildingType = "JMSB";
+      } else if (step.buildingId === "EV") {
+        mappedBuildingType = "EV";
+      }
 
       // Log the parameters before navigation
       console.log("Navigating with parameters:", {
         buildingId: step.buildingId,
-        buildingType: step.buildingType,
+        buildingType: mappedBuildingType,
         startRoom: normalizedStartRoom,
         endRoom: normalizedEndRoom,
         startFloor: step.startFloor,
@@ -854,12 +884,12 @@ const MultistepNavigationScreen = () => {
       // Navigate to RoomToRoomNavigation with correctly formatted parameters
       navigation.navigate("RoomToRoomNavigation", {
         buildingId: step.buildingId,
-        buildingType: step.buildingType, // Make sure to pass this explicitly
-        startRoom: normalizedStartRoom,
+        buildingType: mappedBuildingType,
+        startRoom: normalizedStartRoom, // Pass entrance as is
         endRoom: normalizedEndRoom,
         startFloor: step.startFloor,
         endFloor: step.endFloor,
-        skipSelection: true, // This should bypass the selection screens
+        skipSelection: true,
         returnScreen: "MultistepNavigation",
         returnParams: {
           navigationPlan: updatedPlan,
@@ -871,7 +901,7 @@ const MultistepNavigationScreen = () => {
       // If there's an error, show the indoor navigation modal as a fallback
       setIndoorNavigationParams({
         buildingId: step.buildingId,
-        buildingType: step.buildingType,
+        buildingType: getBuildingTypeFromId(step.buildingId),
         startRoom: normalizeRoomId(step.startRoom),
         endRoom: normalizeRoomId(step.endRoom),
         startFloor: step.startFloor,
@@ -1881,16 +1911,23 @@ const MultistepNavigationScreen = () => {
       <View style={{ flex: 1, paddingBottom: 70 }}>
         {/* Back button at the top */}
         <TouchableOpacity
-          testID="previous-button" // Add this line
+          testID="change-route-button"
           style={[
             styles.navigationButton,
-            currentStepIndex === 0 && styles.navigationButtonDisabled,
+            { backgroundColor: "#007bff" }, // Different color to distinguish it
           ]}
-          onPress={navigateToPreviousStep}
-          disabled={currentStepIndex === 0}
+          onPress={() => {
+            // Reset navigation plan to return to the route selection form
+            setNavigationPlan(null);
+            setCurrentStepIndex(0);
+            setOutdoorDirections([]);
+            setOutdoorRoute([]);
+            setShowIndoorNavigation(false);
+            setIndoorNavigationParams(null);
+          }}
         >
-          <MaterialIcons name="arrow-back" size={22} color="white" />
-          <Text style={styles.navigationButtonText}>Previous</Text>
+          <MaterialIcons name="edit" size={22} color="white" />
+          <Text style={styles.navigationButtonText}>Change Route</Text>
         </TouchableOpacity>
 
         <View style={[styles.stepCard, { marginTop: 5 }]}>
