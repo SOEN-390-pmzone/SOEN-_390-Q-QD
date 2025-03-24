@@ -37,3 +37,5 @@ yarn-error.*
 
 # android folder
 android/
+
+coverage/
