@@ -34,7 +34,7 @@ const transitionNavigationStrategy = (navigation, step) => {
   };
 
   // Navigate to MultistepNavigationScreen to show the transition
-  navigation.navigate("MultistepNavigation", {
+  navigation.navigate("MultistepNavigationScreen", {
     navigationPlan: navigationPlan,
   });
 };
@@ -77,8 +77,7 @@ const indoorNavigationStrategy = (navigation, step) => {
       { directRouting: true },
     );
 
-    // Navigate using the plan
-    navigation.navigate("MultistepNavigation", {
+    navigation.navigate("MultistepNavigationScreen", {
       navigationPlan: navigationPlan,
     });
   }
@@ -168,7 +167,7 @@ const combinedNavigationStrategy = (navigation, step) => {
   };
 
   // Navigate to MultistepNavigationScreen with navigation plan
-  navigation.navigate("MultistepNavigation", {
+  navigation.navigate("MultistepNavigationScreen", {
     navigationPlan: navigationPlan,
   });
 };
@@ -372,12 +371,11 @@ class NavigationStrategyService {
 
     // Check if we're dealing with a full navigation plan
     if (step.steps && Array.isArray(step.steps)) {
-      // This is a navigation plan, not a single step
       console.log(
         "Navigating with multi-step plan:",
         step.title || "Untitled Plan",
       );
-      navigation.navigate("MultistepNavigation", {
+      navigation.navigate("MultistepNavigationScreen", {
         navigationPlan: step,
       });
       return;

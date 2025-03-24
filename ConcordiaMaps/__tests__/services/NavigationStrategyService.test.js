@@ -150,7 +150,7 @@ describe("NavigationStrategyService", () => {
       NavigationStrategyService.navigateToStep(mockNavigation, plan);
 
       expect(mockNavigation.navigate).toHaveBeenCalledWith(
-        "MultistepNavigation",
+        "MultistepNavigationScreen",
         { navigationPlan: plan },
       );
     });
@@ -166,7 +166,7 @@ describe("NavigationStrategyService", () => {
       NavigationStrategyService.navigateToStep(mockNavigation, step);
 
       expect(mockNavigation.navigate).toHaveBeenCalledWith(
-        "MultistepNavigation",
+        "MultistepNavigationScreen",
         expect.anything(),
       );
     });
@@ -219,7 +219,7 @@ describe("NavigationStrategyService", () => {
       NavigationStrategyService.navigateToStep(mockNavigation, step);
 
       expect(mockNavigation.navigate).toHaveBeenCalledWith(
-        "MultistepNavigation",
+        "MultistepNavigationScreen",
         expect.anything(),
       );
     });
@@ -248,7 +248,7 @@ describe("NavigationStrategyService", () => {
       NavigationStrategyService.navigateToStep(mockNavigation, step);
 
       expect(mockNavigation.navigate).toHaveBeenCalledWith(
-        "MultistepNavigation",
+        "MultistepNavigationScreen",
         expect.anything(),
       );
     });
