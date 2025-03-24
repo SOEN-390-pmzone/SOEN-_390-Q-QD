@@ -25,17 +25,11 @@ import MapMarkers from "../components/MapMarkers";
 import PopupOPI from "../components/PopupOPI"; // Import the new popup component
 import { PointsOfInterest } from "../constants/OutdoorPtsOfDirections"; // Import the new Points of Interest data
 
-// Marker image assets for Restaurant and Cafe
-const customMarkerImage = require("../assets/PinLogo.png");
-
 function HomeScreen({ asyncKey = "Campus" }) {
   const loyolaPostalCode = process.env.EXPO_PUBLIC_LOYOLA_POSTAL_CODE;
   const sgwPostalCode = process.env.EXPO_PUBLIC_SGW_POSTAL_CODE;
 
   const location = useContext(LocationContext);
-
-  const { toggleModal, setModalData } = useContext(ModalContext);
-
 
   const [postalCode, setPostalCode] = useState(null);
   const [coordinates, setCoordinates] = useState(null);
@@ -124,15 +118,6 @@ function HomeScreen({ asyncKey = "Campus" }) {
       mapRef.current?.animateToRegion(region, 1000);
     }, 100);
   };
-  const handleMarkerPress = (building) => {
-    setModalData({
-      name: building.name,
-      coordinate: building.coordinate,
-      address: building.address,
-      fullBuildingName: building.fullBuildingName,
-    });
-    toggleModal();
-  };
 
   const handleOPIMarkerPress = (poi) => {
     setSelectedOPI(poi);
@@ -190,23 +175,7 @@ function HomeScreen({ asyncKey = "Campus" }) {
             watchUserLocation={true}
             onRegionChangeComplete={(region) => setMapRegion(region)}
           >
-
-            {Building.map((building) => (
-              <Marker
-                key={`${building.name}-${building.coordinate.latitude}-${building.coordinate.longitude}`}
-                testID={`marker-${building.name?.toLowerCase().replace(/\s+/g, "-") || building.id}`}
-                coordinate={building.coordinate}
-                title={building.name}
-                address={building.address}
-                fullBuildingName={building.fullBuildingName}
-                onPress={() => handleMarkerPress(building)}
-              >
-                <Image
-                  source={customMarkerImage}
-                  style={styles.customMarkerImage}
-                />
-              </Marker>
-            ))}
+            <MapMarkers />
             {PointsOfInterest.map((poi) => (
               <Marker
                 key={poi.name}
