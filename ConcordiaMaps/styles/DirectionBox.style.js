@@ -96,18 +96,21 @@ const styles = StyleSheet.create({
   },
   buttonsContainer: {
     flexDirection: "row",
-    justifyContent: "center",
+    justifyContent: "space-between",
+    flexWrap: "wrap",
     width: "100%",
+    paddingHorizontal: 5,
   },
   closeButton: {
     backgroundColor: "white",
     paddingVertical: 8,
-    paddingHorizontal: 10,
+    paddingHorizontal: 12,
     borderRadius: 5,
     borderWidth: 1.2,
     borderColor: "black",
     marginTop: 10,
-    marginRight: 5,
+    flex: 1,
+    marginHorizontal: 4,
   },
   closeButtonText: {
     color: "black",
@@ -117,10 +120,11 @@ const styles = StyleSheet.create({
   getDirectionsButton: {
     backgroundColor: "#990033",
     paddingVertical: 8,
-    paddingHorizontal: 10,
+    paddingHorizontal: 12,
     borderRadius: 5,
     marginTop: 10,
-    marginLeft: 5,
+    flex: 1,
+    marginHorizontal: 4,
   },
   getDirectionsButton1: {
     backgroundColor: "#4285F4",
