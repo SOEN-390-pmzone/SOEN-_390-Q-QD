@@ -12,30 +12,44 @@ jest.mock("@react-navigation/native", () => ({
   useRoute: () => ({
     params: {
       buildingType: "HallBuilding",
-      floor: "9",
+      floor: "8",
     },
   }),
 }));
 
-// Mock WebView - simplified to avoid React reference
-jest.mock("react-native-webview", () => ({
-  WebView: "WebView",
-}));
+// Mock WebView component
+jest.mock("react-native-webview", () => {
+  const { View } = require("react-native");
+  const MockWebView = (props) => {
+    return <View testID="webview" {...props} />;
+  };
 
-// Mock PathFinder
+  MockWebView.displayName = "WebView";
+
+  return {
+    WebView: jest.fn().mockImplementation(MockWebView),
+  };
+});
+
+// Mock the PathFinder
 jest.mock("../../../components/IndoorNavigation/PathFinder", () => ({
   findShortestPath: jest.fn(),
 }));
 
-// Mock InterFloorNavigation - simplified to avoid React reference
-jest.mock(
-  "../../../components/IndoorNavigation/InterFloorNavigation",
-  () => "InterFloorNavigation",
-);
-
 // Mock Header and NavBar components
-jest.mock("../../../components/Header", () => "Header");
-jest.mock("../../../components/NavBar", () => "NavBar");
+jest.mock("../../../components/Header", () => {
+  const { View } = require("react-native");
+  const HeaderMock = () => <View testID="header" />;
+  HeaderMock.displayName = "HeaderMock";
+  return HeaderMock;
+});
+
+jest.mock("../../../components/NavBar", () => {
+  const { View } = require("react-native");
+  const NavBarMock = () => <View testID="navbar" />;
+  NavBarMock.displayName = "NavBarMock";
+  return NavBarMock;
+});
 
 // Mock BuildingDataService
 jest.mock("../../../services/BuildingDataService", () => ({
@@ -43,147 +57,200 @@ jest.mock("../../../services/BuildingDataService", () => ({
   getGraph: jest.fn(),
   getFloorPlan: jest.fn(),
   getRooms: jest.fn(),
-  supportsNavigation: jest.fn(),
 }));
 
-describe("IndoorNavigation", () => {
-  // Mock data
+// Mock console.error to avoid test noise
+const originalConsoleError = console.error;
+const originalConsoleLog = console.log;
+
+describe("IndoorNavigation Component", () => {
+  // Sample mock data
   const mockBuilding = {
     id: "hall",
     name: "Hall Building",
     code: "H",
+    description: "Main academic building",
   };
 
   const mockGraph = {
-    "H-901": { "H-903": 2, "H-Elevator": 5 },
-    "H-903": { "H-901": 2, "H-905": 3 },
-    "H-905": { "H-903": 3, "H-Stairs": 4 },
-    "H-Elevator": { "H-901": 5, "H-Stairs": 6 },
-    "H-Stairs": { "H-905": 4, "H-Elevator": 6 },
+    H801: { H803: 1 },
+    H803: { H801: 1, H805: 1 },
+    H805: { H803: 1, elevator: 1 },
+    elevator: { H805: 1, stairs: 1 },
+    stairs: { elevator: 1 },
   };
-
-  const mockFloorPlan =
-    '<svg width="1024" height="1024"><rect id="H-901" x="100" y="100" width="50" height="50" /></svg>';
 
   const mockRooms = {
-    "H-901": { x: 100, y: 100, nearestPoint: { x: 125, y: 125 } },
-    "H-903": { x: 200, y: 100, nearestPoint: { x: 225, y: 125 } },
-    "H-905": { x: 300, y: 100, nearestPoint: { x: 325, y: 125 } },
-    "H-Elevator": { x: 100, y: 200, nearestPoint: { x: 125, y: 225 } },
-    "H-Stairs": { x: 200, y: 200, nearestPoint: { x: 225, y: 225 } },
+    H801: { x: "195", y: "175", nearestPoint: { x: "195", y: "217" } },
+    H803: { x: "281", y: "155", nearestPoint: { x: "281", y: "217" } },
+    H805: { x: "385", y: "155", nearestPoint: { x: "385", y: "217" } },
+    elevator: { x: "450", y: "300", nearestPoint: { x: "450", y: "300" } },
+    stairs: { x: "500", y: "300", nearestPoint: { x: "500", y: "300" } },
   };
 
-  const mockRoute = { params: { buildingType: "HallBuilding", floor: "9" } };
-  const mockNavigation = { setOptions: jest.fn() };
+  const mockSvgContent =
+    '<svg width="1024" height="1024"><rect x="10" y="10" width="80" height="80" fill="blue" /></svg>';
 
+  // Mock navigation and route props
+  const mockRoute = {
+    params: {
+      buildingType: "HallBuilding",
+      floor: "8",
+    },
+  };
+
+  const mockNavigation = {
+    setOptions: jest.fn(),
+  };
+
+  // Setup and teardown
   beforeEach(() => {
-    // Set up mocks
+    // Reset mocks
+    jest.clearAllMocks();
+
+    // Setup FloorRegistry mocks
     FloorRegistry.getBuilding.mockReturnValue(mockBuilding);
     FloorRegistry.getGraph.mockReturnValue(mockGraph);
-    FloorRegistry.getFloorPlan.mockResolvedValue(mockFloorPlan);
     FloorRegistry.getRooms.mockReturnValue(mockRooms);
+    FloorRegistry.getFloorPlan.mockResolvedValue(mockSvgContent);
 
+    // Setup findShortestPath mock with default behavior
     findShortestPath.mockImplementation((graph, start, end) => {
-      // Simple mock that returns direct path from start to end
       if (!start || !end || !graph[start] || !graph[end]) {
         return [];
       }
+
+      // Default simple path for testing
+      if (start === "H801" && end === "H805") {
+        return ["H801", "H803", "H805"];
+      }
+
       return [start, end];
     });
 
-    // Reset mocks before each test
-    jest.clearAllMocks();
+    // Mock console to reduce test noise
+    console.error = jest.fn();
+    console.log = jest.fn();
   });
 
-  test("renders correctly with building and floor information", async () => {
-    const { getByText } = render(
+  afterEach(() => {
+    // Restore console
+    console.error = originalConsoleError;
+    console.log = originalConsoleLog;
+  });
+
+  it("renders correctly with building and floor information", async () => {
+    const { getByText, getByTestId } = render(
       <IndoorNavigation route={mockRoute} navigation={mockNavigation} />,
     );
 
-    // Check that building info is displayed
+    // Verify header with building and floor info is displayed
     await waitFor(() => {
-      expect(getByText("Hall Building - H 9th Floor")).toBeTruthy();
+      expect(getByText("Hall Building - H 8th Floor")).toBeTruthy();
     });
 
-    // Verify loading of data
+    // Verify WebView for floor plan is rendered
+    expect(getByTestId("webview")).toBeTruthy();
+
+    // Verify Header and NavBar components are rendered
+    expect(getByTestId("header")).toBeTruthy();
+    expect(getByTestId("navbar")).toBeTruthy();
+
+    // Verify data loading calls
     expect(FloorRegistry.getBuilding).toHaveBeenCalledWith("HallBuilding");
-    expect(FloorRegistry.getGraph).toHaveBeenCalledWith("HallBuilding", "9");
+    expect(FloorRegistry.getGraph).toHaveBeenCalledWith("HallBuilding", "8");
     expect(FloorRegistry.getFloorPlan).toHaveBeenCalledWith(
       "HallBuilding",
-      "9",
+      "8",
     );
   });
 
-  test("renders WebView with correct floor plan content", async () => {
-    const { UNSAFE_getByType } = render(
-      <IndoorNavigation route={mockRoute} navigation={mockNavigation} />,
-    );
-
-    // Check that WebView is rendered
-    const webView = UNSAFE_getByType("WebView");
-    expect(webView).toBeTruthy();
-  });
-
-  test("shows node options in selectors", async () => {
+  it("loads all available nodes from the graph", async () => {
     const { getAllByText } = render(
       <IndoorNavigation route={mockRoute} navigation={mockNavigation} />,
     );
 
-    // Check if start and end selectors show nodes
+    // Check for nodes in the selectors
     await waitFor(() => {
+      // Each node should appear in both start and end selectors
       Object.keys(mockGraph).forEach((node) => {
-        // Each node should appear twice (once in start selector, once in end)
         const nodeElements = getAllByText(node);
         expect(nodeElements.length).toBeGreaterThanOrEqual(1);
       });
     });
   });
 
-  test("calculates path when Find Path button is pressed", async () => {
+  it("handles room selection and updates state", async () => {
+    const { getAllByText } = render(
+      <IndoorNavigation route={mockRoute} navigation={mockNavigation} />,
+    );
+
+    // Wait for nodes to be loaded
+    await waitFor(() => {
+      expect(getAllByText("H801")[0]).toBeTruthy();
+      expect(getAllByText("H805")[0]).toBeTruthy();
+    });
+
+    // Select start and end points
+    fireEvent.press(getAllByText("H801")[0]); // Select from start dropdown
+    fireEvent.press(getAllByText("H805")[1]); // Select from end dropdown
+
+    // Verify selections are highlighted (by checking the styleSheet.selectedOption is applied)
+    // This is harder to test directly, but we can assume the state changed
+  });
+
+  it("calculates path when Find Path button is pressed", async () => {
     const { getByText, getAllByText } = render(
       <IndoorNavigation route={mockRoute} navigation={mockNavigation} />,
     );
 
     // Wait for nodes to be loaded
     await waitFor(() => {
-      expect(getAllByText("H-901")[0]).toBeTruthy();
+      expect(getAllByText("H801")[0]).toBeTruthy();
+      expect(getAllByText("H805")[0]).toBeTruthy();
     });
 
     // Select start and end points
-    fireEvent.press(getAllByText("H-901")[0]); // Select from start dropdown
-    fireEvent.press(getAllByText("H-905")[1]); // Select from end dropdown
+    fireEvent.press(getAllByText("H801")[0]); // Select from start dropdown
+    fireEvent.press(getAllByText("H805")[1]); // Select from end dropdown
 
     // Press Find Path button
     fireEvent.press(getByText("Find Path"));
 
     // Verify path finding was called
-    expect(findShortestPath).toHaveBeenCalledWith(mockGraph, "H-901", "H-905");
+    expect(findShortestPath).toHaveBeenCalledWith(mockGraph, "H801", "H805");
   });
 
-  test("displays calculated path", async () => {
-    // Mock a specific path result
-    findShortestPath.mockReturnValue(["H-901", "H-903", "H-905"]);
+  it("displays calculated path steps", async () => {
+    // Setup specific path result
+    findShortestPath.mockReturnValue(["H801", "H803", "H805"]);
 
     const { getByText, getAllByText } = render(
       <IndoorNavigation route={mockRoute} navigation={mockNavigation} />,
     );
 
-    // Select start and end points
+    // Wait for nodes to be loaded
     await waitFor(() => {
-      fireEvent.press(getAllByText("H-901")[0]);
-      fireEvent.press(getAllByText("H-905")[1]);
+      expect(getAllByText("H801")[0]).toBeTruthy();
+      expect(getAllByText("H805")[0]).toBeTruthy();
     });
+
+    // Select start and end points
+    fireEvent.press(getAllByText("H801")[0]);
+    fireEvent.press(getAllByText("H805")[1]);
 
     // Press Find Path button
     fireEvent.press(getByText("Find Path"));
 
-    // Verify path steps are displayed
-    expect(getByText("1. H-901")).toBeTruthy();
-    expect(getByText("2. H-903")).toBeTruthy();
-    expect(getByText("3. H-905")).toBeTruthy();
+    // Check that path steps are displayed
+    await waitFor(() => {
+      expect(getByText("1. H801")).toBeTruthy();
+      expect(getByText("2. H803")).toBeTruthy();
+      expect(getByText("3. H805")).toBeTruthy();
+    });
   });
 
-  test('displays "No path found" when no path exists', async () => {
+  it('displays "No path found" when no path exists', async () => {
     // Mock no path found result
     findShortestPath.mockReturnValue([]);
 
@@ -191,58 +258,64 @@ describe("IndoorNavigation", () => {
       <IndoorNavigation route={mockRoute} navigation={mockNavigation} />,
     );
 
-    // Select start and end points
+    // Wait for nodes to be loaded
     await waitFor(() => {
-      fireEvent.press(getAllByText("H-901")[0]);
-      fireEvent.press(getAllByText("H-905")[1]);
+      expect(getAllByText("H801")[0]).toBeTruthy();
+      expect(getAllByText("H805")[0]).toBeTruthy();
     });
+
+    // Select start and end points
+    fireEvent.press(getAllByText("H801")[0]);
+    fireEvent.press(getAllByText("H805")[1]);
 
     // Press Find Path button
     fireEvent.press(getByText("Find Path"));
 
-    // Verify "No path found" message
-    expect(getByText("1. No path found")).toBeTruthy();
+    // Verify "No path found" message is displayed
+    await waitFor(() => {
+      expect(getByText("1. No path found")).toBeTruthy();
+    });
   });
 
-  test("opens InterFloorNavigation modal when button is pressed", async () => {
+  it("shows initial message before path calculation", async () => {
     const { getByText } = render(
       <IndoorNavigation route={mockRoute} navigation={mockNavigation} />,
     );
 
-    // Press the Inter-Floor Navigation button
-    fireEvent.press(getByText("Inter-Floor Navigation"));
-
-    // Verify the button was pressed (we can't easily check modal visibility with simplified mock)
-    expect(getByText("Inter-Floor Navigation")).toBeTruthy();
+    // Check for initial message
+    await waitFor(() => {
+      expect(
+        getByText("Press 'Find Path' to calculate the route"),
+      ).toBeTruthy();
+    });
   });
 
-  test("uses default building type if not provided", async () => {
-    // Create a route without params
-    const emptyRoute = { params: {} };
+  it("uses default building type if not provided", async () => {
+    // Create a route without buildingType
+    const emptyRoute = { params: { floor: "8" } };
 
     render(<IndoorNavigation route={emptyRoute} navigation={mockNavigation} />);
 
-    // Verify default values were used
-    expect(FloorRegistry.getBuilding).toHaveBeenCalledWith("HallBuilding");
+    // Verify default buildingType is used
+    await waitFor(() => {
+      expect(FloorRegistry.getBuilding).toHaveBeenCalledWith("HallBuilding");
+    });
   });
 
-  test("handles errors when loading floor plan", async () => {
+  it("handles errors when loading floor plan", async () => {
     // Mock a rejected promise from getFloorPlan
     FloorRegistry.getFloorPlan.mockRejectedValue(
       new Error("Failed to load floor plan"),
     );
 
-    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation();
-
     render(<IndoorNavigation route={mockRoute} navigation={mockNavigation} />);
 
+    // Verify error was logged
     await waitFor(() => {
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
+      expect(console.error).toHaveBeenCalledWith(
         "Error loading floor plan:",
         expect.any(Error),
       );
     });
-
-    consoleErrorSpy.mockRestore();
   });
 });

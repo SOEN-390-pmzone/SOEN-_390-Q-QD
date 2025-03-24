@@ -2,17 +2,30 @@ import React, { useState, useEffect, useRef } from "react";
 import { View, Text, TouchableOpacity, ScrollView } from "react-native";
 import { WebView } from "react-native-webview";
 import { useRoute, useNavigation } from "@react-navigation/native";
-import { findShortestPath } from "./PathFinder";
 import FloorRegistry from "../../services/BuildingDataService";
 import Header from "../Header";
 import NavBar from "../NavBar";
 import styles from "../../styles/IndoorNavigation/RoomtoRoomNavigationStyles";
 import ExpandedFloorPlanModal from "./ExpandedFloorPlan";
+import NavigationSteps from "./NavigationSteps";
+
+// Import extracted services
+import { generateFloorHtml } from "../../services/FloorPlanService";
+import {
+  findBuildingTypeFromId,
+  findFloorForRoom,
+  validateRoomSelection,
+} from "../../services/NavigationValidationService";
+import {
+  // calculateNavigationPath,
+  handleSameFloorNavigation,
+  handleInterFloorNavigation,
+  // findTransportMethod
+} from "../../services/PathCalculationService";
 
 const RoomToRoomNavigation = () => {
   const route = useRoute();
-
-  const navigation = useNavigation();
+  const navigation = useNavigation(); // Moved hook to top level of component
 
   // Extract route parameters
   const {
@@ -55,395 +68,13 @@ const RoomToRoomNavigation = () => {
   // Available buildings
   const buildings = FloorRegistry.getBuildings();
 
-  // Function to find buildingType from buildingId
-  const findBuildingTypeFromId = (id) => {
-    const buildingTypes = Object.keys(FloorRegistry.getAllBuildings());
-    return buildingTypes.find(
-      (key) => FloorRegistry.getBuilding(key).id === id,
-    );
-  };
-
-  // Function to find which floor a room is on
-  const findFloorForRoom = (buildingType, roomId) => {
-    const building = FloorRegistry.getBuilding(buildingType);
-    if (!building) return null;
-
-    // Check each floor for the room
-    for (const floorId in building.floors) {
-      const rooms = FloorRegistry.getRooms(buildingType, floorId);
-      if (rooms && roomId in rooms) {
-        return floorId;
-      }
-    }
-    return null;
-  };
-
-  useEffect(() => {
-    if (route.params?.skipSelection) {
-      const {
-        buildingId,
-        buildingType: routeBuildingType,
-        startRoom,
-        endRoom,
-        startFloor: routeStartFloor,
-        endFloor: routeEndFloor,
-      } = route.params;
-
-      console.log("Skipping selection, using provided parameters:", {
-        buildingId,
-        buildingType: routeBuildingType,
-        startRoom,
-        endRoom,
-        startFloor: routeStartFloor,
-        endFloor: routeEndFloor,
-      });
-
-      // Set all state values in a single batch to avoid race conditions
-      let determinedBuildingType = routeBuildingType;
-      if (!determinedBuildingType && buildingId) {
-        determinedBuildingType = findBuildingTypeFromId(buildingId);
-        console.log(
-          `Found building type ${determinedBuildingType} for ID ${buildingId}`,
-        );
-      }
-
-      if (!determinedBuildingType) {
-        console.error("Could not determine building type");
-        return;
-      }
-
-      // Set step to navigation immediately to avoid UI flashes
-      setStep("navigation");
-
-      // Set all required state values
-      setBuildingType(determinedBuildingType);
-      setSelectedBuilding(buildingId || "");
-      setStartFloor(routeStartFloor || "");
-      setEndFloor(routeEndFloor || "");
-      setSelectedStartRoom(startRoom || "");
-      setSelectedEndRoom(endRoom || "");
-
-      // Set initialization complete
-      setInitializationComplete(true);
-
-      // Use Promise to ensure sequential execution
-      const loadData = async () => {
-        try {
-          // 1. Load room data first
-          console.log("Loading rooms data...");
-          let startRooms = {};
-          let endRooms = {};
-
-          if (routeStartFloor) {
-            startRooms =
-              FloorRegistry.getRooms(determinedBuildingType, routeStartFloor) ||
-              {};
-            console.log(
-              `Got ${Object.keys(startRooms).length} rooms for start floor`,
-            );
-            setStartFloorRooms(startRooms);
-          }
-
-          if (routeEndFloor) {
-            endRooms =
-              FloorRegistry.getRooms(determinedBuildingType, routeEndFloor) ||
-              {};
-            console.log(
-              `Got ${Object.keys(endRooms).length} rooms for end floor`,
-            );
-            setEndFloorRooms(endRooms);
-          }
-
-          // 2. Load floor plans - using direct async/await instead of a separate function
-          if (routeStartFloor && routeEndFloor) {
-            console.log(
-              `Loading floor plans for ${determinedBuildingType} - floors ${routeStartFloor} and ${routeEndFloor}...`,
-            );
-
-            // Load start floor plan
-            const startSvg = await FloorRegistry.getFloorPlan(
-              determinedBuildingType,
-              routeStartFloor,
-            );
-            if (startSvg) {
-              console.log(
-                `Start floor SVG loaded successfully (${startSvg.length} characters)`,
-              );
-              setStartFloorPlan(startSvg);
-            } else {
-              console.error("Failed to load start floor SVG");
-            }
-
-            // Load end floor plan if different from start floor
-            if (routeStartFloor !== routeEndFloor) {
-              const endSvg = await FloorRegistry.getFloorPlan(
-                determinedBuildingType,
-                routeEndFloor,
-              );
-              if (endSvg) {
-                console.log(
-                  `End floor SVG loaded successfully (${endSvg.length} characters)`,
-                );
-                setEndFloorPlan(endSvg);
-              } else {
-                console.error("Failed to load end floor SVG");
-              }
-            }
-
-            // 3. Calculate path after a delay to ensure state is updated
-            setTimeout(() => {
-              console.log("Calculating path...");
-              try {
-                calculatePathDirectly(
-                  determinedBuildingType,
-                  routeStartFloor,
-                  routeEndFloor,
-                  startRoom,
-                  endRoom,
-                  startRooms,
-                  endRooms,
-                );
-              } catch (error) {
-                console.error("Error during direct path calculation:", error);
-              }
-            }, 800);
-          }
-        } catch (error) {
-          console.error("Error in data loading sequence:", error);
-        }
-      };
-
-      // Start the loading sequence
-      loadData();
-    }
-  }, [route.params]);
-
-  const calculatePathDirectly = (
-    buildingTypeValue,
-    startFloorValue,
-    endFloorValue,
-    startRoomValue,
-    endRoomValue,
-  ) => {
-    try {
-      console.log("Direct path calculation with values:", {
-        buildingType: buildingTypeValue,
-        startFloor: startFloorValue,
-        endFloor: endFloorValue,
-        startRoom: startRoomValue,
-        endRoom: endRoomValue,
-      });
-
-      if (
-        !buildingTypeValue ||
-        !startFloorValue ||
-        !endFloorValue ||
-        !endRoomValue
-      ) {
-        console.error(
-          "Missing required navigation data for direct path calculation",
-        );
-        return;
-      }
-
-      const startFloorGraph = FloorRegistry.getGraph(
-        buildingTypeValue,
-        startFloorValue,
-      );
-      const endFloorGraph = FloorRegistry.getGraph(
-        buildingTypeValue,
-        endFloorValue,
-      );
-      const building = FloorRegistry.getBuilding(buildingTypeValue);
-
-      if (!startFloorGraph || !endFloorGraph || !building) {
-        console.error("Could not retrieve required graph or building data");
-        return;
-      }
-
-      console.log(
-        "Start floor graph loaded:",
-        Object.keys(startFloorGraph).length,
-        "nodes",
-      );
-      console.log(
-        "End floor graph loaded:",
-        Object.keys(endFloorGraph).length,
-        "nodes",
-      );
-
-      // Find a good entrance node if "entrance" is provided
-      let actualStartRoom = startRoomValue;
-      if (startRoomValue === "entrance" || startRoomValue === "main entrance") {
-        // Try to find a suitable entrance node
-        const entranceOptions = [
-          "entrance",
-          "main entrance",
-          "main",
-          "lobby",
-          "hall",
-          "foyer",
-        ];
-
-        for (const option of entranceOptions) {
-          for (const node of Object.keys(startFloorGraph)) {
-            if (node.toLowerCase().includes(option)) {
-              console.log(`Using "${node}" as entrance node`);
-              actualStartRoom = node;
-              break;
-            }
-          }
-          if (actualStartRoom !== startRoomValue) break;
-        }
-
-        // If no matching entrance found, use the first node as fallback
-        if (actualStartRoom === startRoomValue) {
-          const firstNode = Object.keys(startFloorGraph)[0];
-          console.log(
-            `No entrance node found, using ${firstNode} as fallback entrance`,
-          );
-          actualStartRoom = firstNode;
-        }
-      }
-
-      // Check if rooms exist in the graph
-      if (!startFloorGraph[actualStartRoom]) {
-        console.error(
-          `Start room ${actualStartRoom} not found in navigation graph`,
-        );
-        return;
-      }
-
-      if (!endFloorGraph[endRoomValue]) {
-        console.error(`End room ${endRoomValue} not found in navigation graph`);
-        return;
-      }
-
-      let result;
-      if (startFloorValue === endFloorValue) {
-        // Same floor navigation
-        const directPath = findShortestPath(
-          startFloorGraph,
-          actualStartRoom,
-          endRoomValue,
-        );
-
-        if (directPath.length < 2) {
-          console.error("Could not find a path between these rooms");
-          return;
-        }
-
-        result = {
-          startFloorPath: directPath,
-          endFloorPath: [],
-          navigationSteps: [
-            {
-              type: "start",
-              text: `Start at ${startRoomValue === "entrance" ? "entrance" : actualStartRoom} on floor ${startFloorValue} of ${building.name}`,
-            },
-            ...directPath.slice(1, -1).map((node) => ({
-              type: "walk",
-              text: `Go to ${node}`,
-            })),
-            {
-              type: "end",
-              text: `Arrive at destination: ${endRoomValue}`,
-            },
-          ],
-        };
-      } else {
-        // Inter-floor navigation
-        console.log("Finding transport method between floors");
-
-        const transportMethod = findTransportMethod(
-          startFloorGraph,
-          endFloorGraph,
-        );
-        if (!transportMethod) {
-          console.error(
-            `Cannot navigate between floors ${startFloorValue} and ${endFloorValue}`,
-          );
-          return;
-        }
-
-        const startFloorTransportPath = findShortestPath(
-          startFloorGraph,
-          actualStartRoom,
-          transportMethod,
-        );
-
-        const endFloorTransportPath = findShortestPath(
-          endFloorGraph,
-          transportMethod,
-          endRoomValue,
-        );
-
-        if (
-          startFloorTransportPath.length < 2 ||
-          endFloorTransportPath.length < 2
-        ) {
-          console.error("Could not find a complete path between these rooms");
-          return;
-        }
-
-        result = {
-          startFloorPath: startFloorTransportPath,
-          endFloorPath: endFloorTransportPath,
-          navigationSteps: [
-            {
-              type: "start",
-              text: `Start at ${startRoomValue === "entrance" ? "entrance" : actualStartRoom} on floor ${startFloorValue} of ${building.name}`,
-            },
-            ...startFloorTransportPath.slice(1).map((node, index) => ({
-              type: "walk",
-              text:
-                index === startFloorTransportPath.length - 2
-                  ? `Arrive at ${transportMethod} on floor ${startFloorValue}`
-                  : `Go to ${node}`,
-            })),
-            {
-              type: transportMethod,
-              text: `Take ${transportMethod} to floor ${endFloorValue}`,
-            },
-            ...endFloorTransportPath.slice(1).map((node, index) => ({
-              type: "walk",
-              text:
-                index === 0
-                  ? `Start from ${transportMethod} on floor ${endFloorValue}`
-                  : `Go to ${node}`,
-            })),
-            {
-              type: "end",
-              text: `Arrive at destination: ${endRoomValue}`,
-            },
-          ],
-        };
-      }
-
-      console.log("Path calculation successful");
-      console.log("Start floor path:", result.startFloorPath);
-      console.log("End floor path:", result.endFloorPath);
-      console.log("Navigation steps:", result.navigationSteps.length, "steps");
-
-      // Update state with results
-      setStartFloorPath(result.startFloorPath);
-      setEndFloorPath(result.endFloorPath);
-      setNavigationSteps(result.navigationSteps);
-
-      // Reload WebViews after path data is set
-      setTimeout(() => {
-        if (startFloorWebViewRef.current) startFloorWebViewRef.current.reload();
-        if (endFloorWebViewRef.current) endFloorWebViewRef.current.reload();
-      }, 300);
-    } catch (error) {
-      console.error("Error in direct path calculation:", error);
-    }
-  };
-
   // Initialize from route params on component mount
   useEffect(() => {
     if (buildingId) {
-      const determinedBuildingType = findBuildingTypeFromId(buildingId);
+      const determinedBuildingType = findBuildingTypeFromId(
+        buildingId,
+        FloorRegistry,
+      );
 
       if (determinedBuildingType) {
         console.log(
@@ -458,7 +89,11 @@ const RoomToRoomNavigation = () => {
 
         // If no start floor provided but have start room, find the floor
         if (!foundStartFloor && startRoom) {
-          foundStartFloor = findFloorForRoom(determinedBuildingType, startRoom);
+          foundStartFloor = findFloorForRoom(
+            determinedBuildingType,
+            startRoom,
+            FloorRegistry,
+          );
           console.log(
             `Determined start floor: ${foundStartFloor} for room ${startRoom}`,
           );
@@ -466,7 +101,11 @@ const RoomToRoomNavigation = () => {
 
         // If no end floor provided but have end room, find the floor
         if (!foundEndFloor && endRoom) {
-          foundEndFloor = findFloorForRoom(determinedBuildingType, endRoom);
+          foundEndFloor = findFloorForRoom(
+            determinedBuildingType,
+            endRoom,
+            FloorRegistry,
+          );
           console.log(
             `Determined end floor: ${foundEndFloor} for room ${endRoom}`,
           );
@@ -679,265 +318,7 @@ const RoomToRoomNavigation = () => {
     }
   };
 
-  // Break out validation into separate function
-  const validateRoomSelection = (
-    startFloorGraph,
-    endFloorGraph,
-    selectedStartRoom,
-    selectedEndRoom,
-  ) => {
-    if (!selectedEndRoom) {
-      return "Please select an end room";
-    }
-
-    if (!endFloorGraph[selectedEndRoom]) {
-      return `End room ${selectedEndRoom} not found in navigation graph`;
-    }
-
-    // For start room, handle entrance specially
-    if (
-      selectedStartRoom === "entrance" ||
-      selectedStartRoom === "main entrance"
-    ) {
-      // Try to find a suitable entrance node
-      const entranceOptions = [
-        "entrance",
-        "main entrance",
-        "main",
-        "lobby",
-        "hall",
-        "foyer",
-      ];
-
-      for (const option of entranceOptions) {
-        for (const node of Object.keys(startFloorGraph)) {
-          if (node.toLowerCase().includes(option)) {
-            console.log(`Using "${node}" as entrance node for validation`);
-            return null; // Valid
-          }
-        }
-      }
-
-      // If no entrance found but we have nodes, use the first one
-      if (Object.keys(startFloorGraph).length > 0) {
-        return null; // Consider it valid, we'll use a fallback
-      }
-
-      return "Could not find a suitable entrance point";
-    } else if (!startFloorGraph[selectedStartRoom]) {
-      return `Start room ${selectedStartRoom} not found in navigation graph`;
-    }
-
-    return null; // Valid
-  };
-
-  // Handle same floor navigation
-  const handleSameFloorNavigation = (
-    startFloorGraph,
-    selectedStartRoom,
-    selectedEndRoom,
-    startFloor,
-    buildingName,
-  ) => {
-    const directPath = findShortestPath(
-      startFloorGraph,
-      selectedStartRoom,
-      selectedEndRoom,
-    );
-
-    if (directPath.length < 2) {
-      throw new Error("Could not find a path between these rooms");
-    }
-
-    return {
-      startFloorPath: directPath,
-      endFloorPath: [],
-      navigationSteps: [
-        {
-          type: "start",
-          text: `Start at room ${selectedStartRoom} on floor ${startFloor} of ${buildingName}`,
-        },
-        ...directPath.slice(1, -1).map((node) => ({
-          type: "walk",
-          text: `Go to ${node}`,
-        })),
-        {
-          type: "end",
-          text: `Arrive at destination: ${selectedEndRoom}`,
-        },
-      ],
-    };
-  };
-
-  // Find available transportation method
-  const findTransportMethod = (startFloorGraph, endFloorGraph) => {
-    const startNodes = new Set(Object.keys(startFloorGraph));
-    const endNodes = new Set(Object.keys(endFloorGraph));
-
-    const transportMethods = ["escalator", "elevator", "stairs"];
-
-    for (const method of transportMethods) {
-      if (startNodes.has(method) && endNodes.has(method)) {
-        return method;
-      }
-    }
-
-    return null;
-  };
-
-  // Handle inter-floor navigation
-  const handleInterFloorNavigation = (
-    startFloorGraph,
-    endFloorGraph,
-    selectedStartRoom,
-    selectedEndRoom,
-    startFloor,
-    endFloor,
-    buildingName,
-  ) => {
-    // Find a transport method between floors
-    const transportMethod = findTransportMethod(startFloorGraph, endFloorGraph);
-
-    if (!transportMethod) {
-      throw new Error(
-        `Cannot navigate between floors ${startFloor} and ${endFloor}`,
-      );
-    }
-
-    console.log(`Found transport method: ${transportMethod}`);
-
-    // Handle entrance and other special cases
-    let actualStartRoom = selectedStartRoom;
-    if (
-      selectedStartRoom === "entrance" ||
-      selectedStartRoom === "main entrance"
-    ) {
-      const entranceOptions = [
-        "entrance",
-        "main entrance",
-        "main",
-        "lobby",
-        "hall",
-        "foyer",
-        "entrance-",
-      ];
-
-      // Look for suitable entrance nodes
-      for (const option of entranceOptions) {
-        for (const node of Object.keys(startFloorGraph)) {
-          if (node.toLowerCase().includes(option.toLowerCase())) {
-            console.log(
-              `Using "${node}" as entrance node for path calculation`,
-            );
-            actualStartRoom = node;
-            break;
-          }
-        }
-        if (actualStartRoom !== selectedStartRoom) break;
-      }
-
-      // Fallback if no entrance node found
-      if (actualStartRoom === selectedStartRoom) {
-        actualStartRoom = Object.keys(startFloorGraph)[0];
-        console.log(`No entrance found, using ${actualStartRoom} as fallback`);
-      }
-    }
-
-    // Calculate paths to and from transport method
-    console.log(
-      `Calculating path from ${actualStartRoom} to ${transportMethod} on floor ${startFloor}`,
-    );
-    const startFloorTransportPath = findShortestPath(
-      startFloorGraph,
-      actualStartRoom,
-      transportMethod,
-    );
-
-    console.log(
-      `Calculating path from ${transportMethod} to ${selectedEndRoom} on floor ${endFloor}`,
-    );
-    const endFloorTransportPath = findShortestPath(
-      endFloorGraph,
-      transportMethod,
-      selectedEndRoom,
-    );
-
-    // Validate paths
-    if (!startFloorTransportPath || startFloorTransportPath.length < 2) {
-      console.error(
-        `Could not find path from ${actualStartRoom} to ${transportMethod} on floor ${startFloor}`,
-      );
-      console.log("Available nodes:", Object.keys(startFloorGraph).join(", "));
-      throw new Error(
-        `Could not find path to ${transportMethod} on floor ${startFloor}`,
-      );
-    }
-
-    if (!endFloorTransportPath || endFloorTransportPath.length < 2) {
-      console.error(
-        `Could not find path from ${transportMethod} to ${selectedEndRoom} on floor ${endFloor}`,
-      );
-      console.log("Available nodes:", Object.keys(endFloorGraph).join(", "));
-      throw new Error(
-        `Could not find path from ${transportMethod} on floor ${endFloor}`,
-      );
-    }
-
-    console.log(
-      `Start floor path (${startFloorTransportPath.length} nodes):`,
-      startFloorTransportPath,
-    );
-    console.log(
-      `End floor path (${endFloorTransportPath.length} nodes):`,
-      endFloorTransportPath,
-    );
-
-    // Generate navigation result
-    return {
-      startFloorPath: startFloorTransportPath,
-      endFloorPath: endFloorTransportPath,
-      navigationSteps: [
-        {
-          type: "start",
-          text: `Start at ${
-            selectedStartRoom === actualStartRoom
-              ? selectedStartRoom
-              : `${selectedStartRoom} (using ${actualStartRoom})`
-          } on floor ${startFloor} of ${buildingName}`,
-        },
-        ...startFloorTransportPath.slice(1).map((node, index) => ({
-          type: "walk",
-          text:
-            index === startFloorTransportPath.length - 2
-              ? `Arrive at ${transportMethod} on floor ${startFloor}`
-              : `Go to ${node}`,
-        })),
-        {
-          type: transportMethod.toLowerCase().includes("elevator")
-            ? "elevator"
-            : transportMethod.toLowerCase().includes("stairs")
-              ? "stairs"
-              : transportMethod.toLowerCase().includes("escalator")
-                ? "escalator"
-                : "transport",
-          text: `Take ${transportMethod} to floor ${endFloor}`,
-        },
-        ...endFloorTransportPath.slice(1).map((node, index) => ({
-          type: "walk",
-          text:
-            index === 0
-              ? `Start from ${transportMethod} on floor ${endFloor}`
-              : `Go to ${node}`,
-        })),
-        {
-          type: "end",
-          text: `Arrive at destination: ${selectedEndRoom}`,
-        },
-      ],
-    };
-  };
-
-  // Main calculatePath function with reduced complexity
+  // Main calculatePath function (refactored)
   const calculatePath = () => {
     try {
       // Verify all required data is available
@@ -987,18 +368,6 @@ const RoomToRoomNavigation = () => {
       const endFloorGraph = FloorRegistry.getGraph(buildingType, endFloor);
       const building = FloorRegistry.getBuilding(buildingType);
 
-      if (!startFloorGraph) {
-        console.error(`No graph found for floor ${startFloor}`);
-        alert(`Failed to load floor data for ${startFloor}`);
-        return;
-      }
-
-      if (!endFloorGraph) {
-        console.error(`No graph found for floor ${endFloor}`);
-        alert(`Failed to load floor data for ${endFloor}`);
-        return;
-      }
-
       console.log(
         "Start floor graph loaded:",
         Object.keys(startFloorGraph).length,
@@ -1024,355 +393,68 @@ const RoomToRoomNavigation = () => {
       }
 
       let result;
-      try {
-        // Same floor navigation
-        if (startFloor === endFloor) {
-          result = handleSameFloorNavigation(
-            startFloorGraph,
-            selectedStartRoom,
-            selectedEndRoom,
-            startFloor,
-            building.name,
-          );
-        } else {
-          // Inter-floor navigation
-          console.log("Finding transport method between floors");
-
-          // Log available nodes for debugging
-          console.log(
-            "Start floor nodes:",
-            JSON.stringify(Object.keys(startFloorGraph)),
-          );
-          console.log(
-            "End floor nodes:",
-            JSON.stringify(Object.keys(endFloorGraph)),
-          );
-
-          result = handleInterFloorNavigation(
-            startFloorGraph,
-            endFloorGraph,
-            selectedStartRoom,
-            selectedEndRoom,
-            startFloor,
-            endFloor,
-            building.name,
-          );
-        }
-
-        // Ensure we have a valid result
-        if (
-          !result ||
-          !result.navigationSteps ||
-          result.navigationSteps.length === 0
-        ) {
-          throw new Error("Failed to generate navigation steps");
-        }
-
-        if (
-          startFloor !== endFloor &&
-          (!result.startFloorPath || !result.endFloorPath)
-        ) {
-          throw new Error("Failed to generate complete path");
-        }
-
-        console.log("Path calculation successful");
+      // Use the appropriate path calculation function
+      if (startFloor === endFloor) {
+        result = handleSameFloorNavigation(
+          startFloorGraph,
+          selectedStartRoom,
+          selectedEndRoom,
+          startFloor,
+          building.name,
+        );
+      } else {
+        console.log("Finding transport method between floors");
         console.log(
-          "Start floor path (" +
-            (result.startFloorPath?.length || 0) +
-            " nodes):",
-          JSON.stringify(result.startFloorPath || []),
+          "Start floor nodes:",
+          JSON.stringify(Object.keys(startFloorGraph)),
         );
         console.log(
-          "End floor path (" + (result.endFloorPath?.length || 0) + " nodes):",
-          JSON.stringify(result.endFloorPath || []),
-        );
-        console.log(
-          "Navigation steps:",
-          result.navigationSteps.length,
-          "steps",
+          "End floor nodes:",
+          JSON.stringify(Object.keys(endFloorGraph)),
         );
 
-        // Update the state
-        setStartFloorPath(result.startFloorPath || []);
-        setEndFloorPath(result.endFloorPath || []);
-        setNavigationSteps(result.navigationSteps);
-        setStep("navigation");
-
-        // Reload WebViews
-        setTimeout(() => {
-          if (startFloorWebViewRef.current)
-            startFloorWebViewRef.current.reload();
-          if (endFloorWebViewRef.current) endFloorWebViewRef.current.reload();
-        }, 500);
-      } catch (pathError) {
-        console.error("Error in path calculation:", pathError);
-
-        // If we can't find a full path but have basic information,
-        // we'll create a simplified navigation experience
-        const fallbackSteps = [
-          {
-            type: "start",
-            text: `Start at ${selectedStartRoom} on floor ${startFloor} of ${building.name}`,
-          },
-        ];
-
-        if (startFloor !== endFloor) {
-          fallbackSteps.push({
-            type: "info",
-            text: `Look for elevator, stairs or escalator to go to floor ${endFloor}`,
-          });
-          fallbackSteps.push({
-            type: "transport",
-            text: `Take elevator/stairs to floor ${endFloor}`,
-          });
-        }
-
-        fallbackSteps.push({
-          type: "end",
-          text: `Find room ${selectedEndRoom} on floor ${endFloor}`,
-        });
-
-        setNavigationSteps(fallbackSteps);
-        setStartFloorPath([]);
-        setEndFloorPath([]);
-        setStep("navigation");
-
-        alert(
-          `Unable to generate a detailed path: ${pathError.message}\nA simplified navigation guide will be shown instead.`,
+        result = handleInterFloorNavigation(
+          startFloorGraph,
+          endFloorGraph,
+          selectedStartRoom,
+          selectedEndRoom,
+          startFloor,
+          endFloor,
+          building.name,
         );
-
-        // Reload WebViews
-        setTimeout(() => {
-          if (startFloorWebViewRef.current)
-            startFloorWebViewRef.current.reload();
-          if (endFloorWebViewRef.current) endFloorWebViewRef.current.reload();
-        }, 500);
       }
+
+      console.log("Path calculation successful");
+      console.log(
+        "Start floor path (" + result.startFloorPath.length + " nodes):",
+        JSON.stringify(result.startFloorPath),
+      );
+      console.log(
+        "End floor path (" + result.endFloorPath.length + " nodes):",
+        JSON.stringify(result.endFloorPath),
+      );
+      console.log("Navigation steps:", result.navigationSteps.length, "steps");
+
+      setStartFloorPath(result.startFloorPath);
+      setEndFloorPath(result.endFloorPath);
+      setNavigationSteps(result.navigationSteps);
+      setStep("navigation");
+
+      // Reload WebViews
+      setTimeout(() => {
+        if (startFloorWebViewRef.current) startFloorWebViewRef.current.reload();
+        if (endFloorWebViewRef.current) endFloorWebViewRef.current.reload();
+      }, 500);
     } catch (error) {
       console.error("Error calculating path:", error);
-      alert(`Navigation error: ${error.message}`);
+      alert(error.message);
     }
-  };
-
-  // Generate HTML for floor visualization with path
-  const generateFloorHtml = (floorPlan, pathNodes = [], rooms = {}) => {
-    // Prepare path data by converting node names to coordinates
-    const pathCoordinates = pathNodes
-      .map((node) => (rooms[node] ? rooms[node] : null))
-      .filter((coord) => coord !== null);
-
-    // Serialize path data for safe injection into HTML
-    const pathDataJson = JSON.stringify(pathCoordinates);
-
-    return `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=yes">
-          <style>
-            body, html {
-              margin: 0;
-              padding: 0;
-              height: 100%;
-              width: 100%;
-              overflow: hidden;
-              touch-action: manipulation;
-            }
-
-            #svg-container {
-              width: 100%;
-              height: 100%;
-              display: flex;
-              justify-content: center;
-              align-items: center;
-              overflow: hidden;
-              position: relative;
-              background-color: #f5f5f5;
-            }
-
-            svg {
-              max-width: 100%;
-              max-height: 100%;
-              width: auto !important;
-              height: auto !important;
-              display: block;
-              visibility: hidden; /* Start hidden and show when ready */
-            }
-
-            .navigation-path { 
-              fill: none;
-              stroke: #912338; 
-              stroke-width: 4; 
-              stroke-linecap: round;
-              stroke-linejoin: round;
-              stroke-dasharray: 10,5;
-              animation: dash 1s linear infinite;
-            }
-            
-            @keyframes dash {
-              to {
-                stroke-dashoffset: -15;
-              }
-            }
-            
-            .room-highlight {
-              fill: #912338;
-              fill-opacity: 0.5;
-              stroke: #912338;
-              stroke-width: 2;
-              rx: 5;
-              ry: 5;
-            }
-            
-            /* Loading indicator */
-            #loader {
-              border: 5px solid #f3f3f3;
-              border-top: 5px solid #912338;
-              border-radius: 50%;
-              width: 30px;
-              height: 30px;
-              animation: spin 1s linear infinite;
-              position: absolute;
-              top: 50%;
-              left: 50%;
-              margin-top: -15px;
-              margin-left: -15px;
-              z-index: 100;
-            }
-            
-            @keyframes spin {
-              0% { transform: rotate(0deg); }
-              100% { transform: rotate(360deg); }
-            }
-          </style>
-          <script>
-            // Make initialization more robust with retry mechanism
-            let initAttempts = 0;
-            const maxAttempts = 5;
-            let svgInitialized = false;
-            
-            document.addEventListener('DOMContentLoaded', function() {
-              const loader = document.getElementById('loader');
-              
-              function initializeSVG() {
-                if (svgInitialized) return; // Prevent multiple initializations
-                
-                const svg = document.querySelector('svg');
-                if (!svg && initAttempts < maxAttempts) {
-                  console.log('SVG element not found, retry attempt ' + (initAttempts + 1));
-                  initAttempts++;
-                  setTimeout(initializeSVG, 200);
-                  return;
-                }
-                
-                if (!svg) {
-                  console.error('SVG element not found after ' + maxAttempts + ' attempts');
-                  if (loader && loader.parentNode) {
-                    loader.parentNode.removeChild(loader);
-                  }
-                  return;
-                }
-                
-                try {
-                  // Remove loading indicator
-                  if (loader && loader.parentNode) {
-                    loader.parentNode.removeChild(loader);
-                  }
-
-                  // Set viewBox if not already set
-                  if (!svg.getAttribute('viewBox')) {
-                    const bbox = svg.getBBox();
-                    svg.setAttribute('viewBox', \`\${bbox.x} \${bbox.y} \${bbox.width} \${bbox.height}\`);
-                  }
-                  
-                  // Set preserveAspectRatio to see the full floor plan
-                  svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
-                  
-                  // Function to visualize the path
-                  function visualizePath(coordinates) {
-                    if (!coordinates || coordinates.length < 2) {
-                      console.warn('Not enough coordinates to draw path');
-                      return;
-                    }
-                    
-                    // Create SVG path element
-                    const svgNS = "http://www.w3.org/2000/svg";
-                    const pathElement = document.createElementNS(svgNS, "path");
-                    pathElement.classList.add('navigation-path');
-                    
-                    // Build the path data string
-                    let pathData = '';
-                    
-                    coordinates.forEach((coord, index) => {
-                      if (!coord || !coord.nearestPoint) {
-                        console.warn('Invalid coordinate at index', index);
-                        return;
-                      }
-                      
-                      const point = coord.nearestPoint;
-                      if (index === 0) {
-                        // Move to the first point
-                        pathData += \`M \${point.x} \${point.y}\`;
-                      } else {
-                        // Line to subsequent points
-                        pathData += \`L \${point.x} \${point.y}\`;
-                      }
-                    });
-                    
-                    if (pathData === '') {
-                      console.warn('No valid path data could be generated');
-                      return;
-                    }
-                    
-                    // Set path attributes
-                    pathElement.setAttribute('d', pathData);
-                    
-                    // Add to SVG
-                    svg.appendChild(pathElement);
-                    
-                    console.log('Path drawn with', coordinates.length, 'points');
-                  }
-
-                  // Get path coordinates and draw
-                  const pathCoordinates = ${pathDataJson};
-                  visualizePath(pathCoordinates);
-                  
-                  // Make SVG visible after everything is ready
-                  svg.style.visibility = 'visible';
-                  svgInitialized = true;
-                } catch (error) {
-                  console.error('Error in SVG initialization:', error);
-                  if (svg) svg.style.visibility = 'visible'; // Show SVG even if there was an error
-                }
-              }
-              
-              // Initialize with a delay to ensure DOM is ready
-              setTimeout(initializeSVG, 300);
-            });
-            
-            // Prevent reinitializing on resize
-            window.addEventListener('resize', function() {
-              const svg = document.querySelector('svg');
-              if (svg) {
-                svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
-              }
-            });
-          </script>
-        </head>
-        <body>
-          <div id="svg-container">
-            <div id="loader"></div>
-            ${floorPlan || '<div style="color:red;padding:20px;text-align:center;">No SVG loaded</div>'}
-          </div>
-        </body>
-      </html>
-    `;
   };
 
   // Render the building selection screen
   const renderBuildingSelection = () => (
     <View style={styles.sectionContainer}>
-      <Text style={styles.sectionTitle}>Select a Building</Text>
+      <Text style={styles.sectionTitle}>Select Building</Text>
       <ScrollView style={styles.scrollContainer}>
         {buildings.map((building) => (
           <TouchableOpacity
@@ -1547,7 +629,7 @@ const RoomToRoomNavigation = () => {
     </View>
   );
 
-  // Render the navigation results screen
+  // Render the navigation results screen (using NavigationSteps component)
   const renderNavigation = () => {
     const { skipSelection } = route.params || {};
 
@@ -1597,7 +679,7 @@ const RoomToRoomNavigation = () => {
               </View>
             </View>
 
-            {startFloor !== endFloor && endFloorPlan && (
+            {startFloor !== endFloor && !!endFloorPlan ? (
               <View style={styles.floorPlanContainer}>
                 <Text style={styles.floorColumnTitle}>Floor {endFloor}</Text>
                 <TouchableOpacity
@@ -1637,25 +719,11 @@ const RoomToRoomNavigation = () => {
                   />
                 </View>
               </View>
-            )}
+            ) : null}
           </View>
 
-          <View style={styles.stepsContainer}>
-            <Text style={styles.stepsTitle}>Navigation Steps</Text>
-            <ScrollView style={styles.stepsList}>
-              {navigationSteps.map((step, index) => (
-                <View key={index} style={styles.stepItem}>
-                  <View
-                    style={[
-                      styles.stepDot,
-                      { backgroundColor: getStepColor(step.type) },
-                    ]}
-                  />
-                  <Text style={styles.stepText}>{step.text}</Text>
-                </View>
-              ))}
-            </ScrollView>
-          </View>
+          {/* Use the extracted NavigationSteps component */}
+          <NavigationSteps steps={navigationSteps} />
         </View>
 
         {/* Conditional rendering for back button based on how this screen was opened */}
@@ -1678,10 +746,10 @@ const RoomToRoomNavigation = () => {
     );
   };
 
+  // Render expanded floor plan modal
   const renderExpandedFloorPlan = () => {
     if (!expandedFloor) return null;
 
-    // Determine which floor's data to use based on expandedFloor value
     const isStartFloor = expandedFloor === startFloor;
     const floorPlan = isStartFloor ? startFloorPlan : endFloorPlan;
     const pathNodes = isStartFloor ? startFloorPath : endFloorPath;
@@ -1704,24 +772,6 @@ const RoomToRoomNavigation = () => {
         }}
       />
     );
-  };
-
-  // Helper function to get color for navigation step type
-  const getStepColor = (type) => {
-    switch (type) {
-      case "start":
-        return "#4CAF50"; // Green
-      case "end":
-        return "#F44336"; // Red
-      case "escalator":
-        return "#2196F3"; // Blue
-      case "elevator":
-        return "#9C27B0"; // Purple
-      case "stairs":
-        return "#FF9800"; // Orange
-      default:
-        return "#912338"; // Maroon
-    }
   };
 
   // Main render method
