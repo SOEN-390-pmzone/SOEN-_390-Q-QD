@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Planner - Task Parser</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        .task-input {
+            margin-bottom: 10px;
+            display: flex;
+        }
+        .task-input input {
+            flex-grow: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        #add-task {
+            background-color: #2ecc71;
+        }
+        #add-task:hover {
+            background-color: #27ae60;
+        }
+        #result {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            min-height: 200px;
+            white-space: pre-wrap;
+            display: none;
+        }
+        .loading {
+            text-align: center;
+            margin: 20px 0;
+            display: none;
+        }
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: #09f;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        pre {
+            overflow-x: auto;
+        }
+        #task-container {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .examples {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+        }
+        .example-item {
+            cursor: pointer;
+            padding: 5px;
+            margin: 5px 0;
+            color: #3498db;
+        }
+        .example-item:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>Smart Planner - Task Parser</h1>
+    <p>Enter your tasks below to parse them with the Gemini LLM model:</p>
+    
+    <div id="task-container">
+        <div class="task-input">
+            <input type="text" placeholder="Enter a task description..." class="task-text">
+            <button class="remove-task">Remove</button>
+        </div>
+    </div>
+    
+    <div>
+        <button id="add-task">Add Another Task</button>
+        <button id="parse-tasks">Parse Tasks</button>
+    </div>
+    
+    <div class="loading">
+        <div class="spinner"></div>
+        <p>Analyzing tasks with Gemini...</p>
+    </div>
+    
+    <div id="result">
+        <h3>Parsed Results:</h3>
+        <pre id="result-json"></pre>
+    </div>
+    
+    <div class="examples">
+        <h3>Example Tasks:</h3>
+        <p>Click on an example to add it to your task list:</p>
+        <div class="example-item">Attend Professor Smith's office hours in H820 at 2pm tomorrow for 30 minutes</div>
+        <div class="example-item">Study for 2 hours at the Webster Library</div>
+        <div class="example-item">Get coffee at Starbucks on Mackay Street before class</div>
+        <div class="example-item">Meet with my group for project work in EV Building room 3.101 from 3-5pm on Friday</div>
+        <div class="example-item">Buy textbook at Concordia Bookstore in LB building</div>
+        <div class="example-item">Attend COMP 346 lecture in H-110 on Wednesday at 10:15am</div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const taskContainer = document.getElementById('task-container');
+            const addTaskButton = document.getElementById('add-task');
+            const parseTasksButton = document.getElementById('parse-tasks');
+            const resultDiv = document.getElementById('result');
+            const resultJson = document.getElementById('result-json');
+            const loadingDiv = document.querySelector('.loading');
+            const exampleItems = document.querySelectorAll('.example-item');
+            
+            // Add task input
+            addTaskButton.addEventListener('click', function() {
+                const taskInput = document.createElement('div');
+                taskInput.className = 'task-input';
+                taskInput.innerHTML = `
+                    <input type="text" placeholder="Enter a task description..." class="task-text">
+                    <button class="remove-task">Remove</button>
+                `;
+                taskContainer.appendChild(taskInput);
+                
+                // Add event listener to the new remove button
+                const removeButton = taskInput.querySelector('.remove-task');
+                removeButton.addEventListener('click', function() {
+                    taskInput.remove();
+                });
+            });
+            
+            // Remove task
+            taskContainer.addEventListener('click', function(e) {
+                if (e.target.classList.contains('remove-task')) {
+                    // Don't remove if it's the last task input
+                    if (taskContainer.querySelectorAll('.task-input').length > 1) {
+                        e.target.parentElement.remove();
+                    }
+                }
+            });
+            
+            // Parse tasks
+            parseTasksButton.addEventListener('click', async function() {
+                const taskInputs = document.querySelectorAll('.task-text');
+                const tasks = Array.from(taskInputs).map(input => input.value).filter(text => text.trim() !== '');
+                
+                if (tasks.length === 0) {
+                    alert('Please enter at least one task.');
+                    return;
+                }
+                
+                // Show loading indicator
+                loadingDiv.style.display = 'block';
+                resultDiv.style.display = 'none';
+                
+                try {
+                    const response = await fetch('/api/smart-planner/parse-tasks', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ tasks }),
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    
+                    // Display the result
+                    resultJson.textContent = JSON.stringify(data, null, 2);
+                    resultDiv.style.display = 'block';
+                } catch (error) {
+                    console.error('Error:', error);
+                    resultJson.textContent = `Error: ${error.message}`;
+                    resultDiv.style.display = 'block';
+                } finally {
+                    // Hide loading indicator
+                    loadingDiv.style.display = 'none';
+                }
+            });
+            
+            // Example items
+            exampleItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    // Find the first empty input or the last input
+                    const inputs = document.querySelectorAll('.task-text');
+                    let targetInput = null;
+                    
+                    for (let input of inputs) {
+                        if (!input.value.trim()) {
+                            targetInput = input;
+                            break;
+                        }
+                    }
+                    
+                    if (!targetInput) {
+                        // No empty input found, add a new one
+                        addTaskButton.click();
+                        targetInput = document.querySelector('.task-text:last-child');
+                    }
+                    
+                    targetInput.value = item.textContent;
+                });
+            });
+        });
+    </script>
+</body>
+</html>
