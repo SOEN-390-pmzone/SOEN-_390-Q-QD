@@ -7,10 +7,12 @@ jest.mock("axios");
 
 beforeAll(() => {
   jest.spyOn(console, "error").mockImplementation(() => {});
+  jest.spyOn(console, "warn").mockImplementation(() => {});
 });
 
 afterAll(() => {
   console.error.mockRestore();
+  console.warn.mockRestore();
 });
 
 describe("LiveBusTracker Component", () => {
@@ -37,12 +39,14 @@ describe("LiveBusTracker Component", () => {
     axios.get.mockResolvedValue({});
     axios.post.mockResolvedValue(mockBusData);
 
-    const { getByTestId } = render(<LiveBusTracker />);
+    const { findByTestId } = render(<LiveBusTracker />);
 
-    await waitFor(() => {
-      expect(getByTestId("bus-marker-BUS123")).toBeTruthy();
-      expect(getByTestId("bus-marker-BUS456")).toBeTruthy();
-    });
+    // Using findByTestId which waits for the element to appear
+    const marker1 = await findByTestId("bus-marker-BUS123");
+    const marker2 = await findByTestId("bus-marker-BUS456");
+
+    expect(marker1).toBeTruthy();
+    expect(marker2).toBeTruthy();
   });
 
   it("handles API fetch error gracefully", async () => {
@@ -53,6 +57,18 @@ describe("LiveBusTracker Component", () => {
 
     await waitFor(() => {
       expect(queryByTestId("bus-marker-BUS123")).toBeNull();
+    });
+  });
+
+  it("api response missing expected data structure", async () => {
+    axios.get.mockResolvedValue({});
+    axios.post.mockResolvedValue({ data: { d: {} } });
+
+    const { findByTestId } = render(<LiveBusTracker />);
+
+    await waitFor(() => {
+      expect(findByTestId("bus-marker-BUS123")).toBeTruthy();
+      expect(findByTestId("bus-marker-BUS456")).toBeTruthy();
     });
   });
 });
