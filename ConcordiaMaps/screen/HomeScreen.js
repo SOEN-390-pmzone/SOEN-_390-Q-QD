@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef, useContext } from "react";
 import { View, Text, TouchableOpacity, Image } from "react-native";
 import MapView, { Marker } from "react-native-maps";
-import NavBar from "../components/NavBar";
 import Header from "../components/Header";
 import TemporaryModal from "../components/temporaryModal";
 import { LocationContext } from "../contexts/LocationContext";
 import Footer from "../components/Footer";
 import styles from "../styles";
+const customMarkerImage = require("../assets/PinLogo.png");
 import { Building } from "../components/MapMarkers";
 import { ModalContext } from "../App";
 import BuildingColoring from "../components/buildingColoring";
@@ -20,31 +20,22 @@ import {
 } from "../components/AsyncPersistence";
 import convertToCoordinates from "../components/convertToCoordinates";
 import PropTypes from "prop-types";
-import PopupOPI from "../components/PopupOPI"; // Import the new popup component
-import { PointsOfInterest } from "../constants/OutdoorPtsOfDirections"; // Import the new Points of Interest data
-
-// Marker image assets for Restaurant and Cafe
-const customMarkerImage = require("../assets/PinLogo.png");
 
 function HomeScreen({ asyncKey = "Campus" }) {
   const loyolaPostalCode = process.env.EXPO_PUBLIC_LOYOLA_POSTAL_CODE;
   const sgwPostalCode = process.env.EXPO_PUBLIC_SGW_POSTAL_CODE;
 
   const location = useContext(LocationContext);
-  const { toggleModal, setModalData } = useContext(ModalContext);
+  const { toggleModal, setModalData } = useContext(ModalContext); // Access setModalData
 
   const [postalCode, setPostalCode] = useState(null);
   const [coordinates, setCoordinates] = useState(null);
   const [error, setError] = useState("");
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [, setMapRegion] = useState(null);
-  const borderColor = "#912338";
+  const borderColor = "#912338"; // Initial border color (red)
   const mapRef = useRef(null);
-  const TOGGLE_MODAL_TIMEOUT = 10000;
-
-  // State for OPI (Points of Interest) popup
-  const [opiPopupVisible, setOpiPopupVisible] = useState(false);
-  const [selectedOPI, setSelectedOPI] = useState(null);
+  const toggleModalTime = "10000";
 
   useEffect(() => {
     const fetchLastCampus = async () => {
@@ -96,7 +87,7 @@ function HomeScreen({ asyncKey = "Campus" }) {
           longitudeDelta: 0.01,
         },
         2500,
-      );
+      ); // Duration of the animation in milliseconds
     }
   }, [coordinates]);
 
@@ -121,19 +112,15 @@ function HomeScreen({ asyncKey = "Campus" }) {
     }, 100);
   };
 
+  // Function to handle marker press and pass data to the modal
   const handleMarkerPress = (building) => {
     setModalData({
       name: building.name,
-      coordinate: building.coordinate,
+      coordinate: building.coordinat,
       address: building.address,
       fullBuildingName: building.fullBuildingName,
-    });
-    toggleModal();
-  };
-
-  const handleOPIMarkerPress = (poi) => {
-    setSelectedOPI(poi);
-    setOpiPopupVisible(true);
+    }); // Update modalData
+    toggleModal(); // Show modal
   };
 
   const [modalState, setModalState] = useState(true);
@@ -141,16 +128,16 @@ function HomeScreen({ asyncKey = "Campus" }) {
     if (modalState) {
       const timer = setTimeout(() => {
         setModalState(false);
-      }, TOGGLE_MODAL_TIMEOUT);
+      }, toggleModalTime); // Modal will disappear after 3 seconds
 
-      return () => clearTimeout(timer);
+      return () => clearTimeout(timer); // Cleanup the timer if the component unmounts
     }
   }, [modalState]);
 
+  // Homescreen() return
   return (
     <View style={styles.container} testID="home-screen">
       <Header />
-      <NavBar />
       <FloatingSearchBar onPlaceSelect={handlePlaceSelect} />
       {error ? <Text testID="error-message">{error}</Text> : null}
 
@@ -158,7 +145,7 @@ function HomeScreen({ asyncKey = "Campus" }) {
         <>
           <TemporaryModal
             text="Press the button to switch campuses"
-            time={TOGGLE_MODAL_TIMEOUT}
+            time={toggleModalTime}
             modalState={modalState}
             onRequestClose={() => setModalState(false)}
             TestID="toggleModal"
@@ -177,7 +164,7 @@ function HomeScreen({ asyncKey = "Campus" }) {
                     longitudeDelta: 0.005,
                   }
                 : {
-                    latitude: coordinates.latitude,
+                    latitude: coordinates.latitude, // Default center (SGW campus)
                     longitude: coordinates.longitude,
                     latitudeDelta: 0.01,
                     longitudeDelta: 0.01,
@@ -204,20 +191,6 @@ function HomeScreen({ asyncKey = "Campus" }) {
                 />
               </Marker>
             ))}
-            {PointsOfInterest.map((poi) => (
-              <Marker
-                key={poi.name}
-                coordinate={poi.coordinate}
-                title={poi.name}
-                description={poi.address}
-                onPress={() => handleOPIMarkerPress(poi)}
-              >
-                <Image
-                  source={poi.markerImage}
-                  style={styles.customMarkerImage}
-                />
-              </Marker>
-            ))}
             <BuildingColoring />
             {selectedLocation && (
               <Marker
@@ -231,6 +204,7 @@ function HomeScreen({ asyncKey = "Campus" }) {
             <ShuttleStop />
             <LiveBusTracker mapRef={mapRef} />
           </MapView>
+
           <View style={styles.toggleView}>
             <TouchableOpacity
               testID="change-campus-button"
@@ -245,7 +219,7 @@ function HomeScreen({ asyncKey = "Campus" }) {
               <Image
                 style={styles.buttonImage}
                 source={require("../assets/ToggleButton.png")}
-                resizeMode={"cover"}
+                resizeMode={"cover"} // cover or contain its up to you view look
               />
             </TouchableOpacity>
           </View>
@@ -255,14 +229,15 @@ function HomeScreen({ asyncKey = "Campus" }) {
         <Text>Loading...</Text>
       )}
       {error ? <Text>Error: {error}</Text> : null}
-      <Footer />
 
-      {/* OPI Popup */}
-      <PopupOPI
-        isVisible={opiPopupVisible}
-        data={selectedOPI || { name: "", address: "" }}
-        onClose={() => setOpiPopupVisible(false)}
-      />
+      {/* Add navigation options here */}
+      <View>
+        <Text>Get directions</Text>
+        <Text>Outdoor Points of Interest</Text>
+        <Text>Smart Planner</Text>
+      </View>
+
+      <Footer />
     </View>
   );
 }

@@ -70,8 +70,6 @@ const GetDirections = () => {
 
   const { getStepsInHTML, getPolyline } = useGoogleMapDirections();
   const [useCurrentLocation, setUseCurrentLocation] = useState(true);
-  const [originText, setOriginText] = useState("");
-  const [destinationText, setDestinationText] = useState("");
 
   // Set initial location from context
   useEffect(() => {
@@ -206,6 +204,7 @@ const GetDirections = () => {
     }
   }, [location, useCurrentLocation]);
 
+  // Update the FloatingSearchBar for origin
   return (
     <View style={styles.container}>
       <Header />
@@ -214,34 +213,26 @@ const GetDirections = () => {
         {!isInNavigationMode && (
           <View>
             <FloatingSearchBar
-              onPlaceSelect={(location, displayName) => {
-                setUseCurrentLocation(false);
+              onPlaceSelect={(location) => {
+                setUseCurrentLocation(false); // Disable auto-update when manual location entered
                 setOrigin(location);
-                setOriginText(displayName);
               }}
               placeholder={
                 useCurrentLocation ? "Using Current Location" : "Enter Origin"
               }
               style={styles.searchBar}
-              value={originText}
-              onChangeText={setOriginText}
-              onFocus={() => {
-                setIsDirectionsBoxCollapsed(true); // Collapse box when search is focused
-              }}
+              initialValue={
+                useCurrentLocation && origin
+                  ? `Current Location (${origin.latitude.toFixed(4)}, ${origin.longitude.toFixed(4)})`
+                  : ""
+              }
             />
-
             <FloatingSearchBar
-              onPlaceSelect={(location, displayName) => {
+              onPlaceSelect={(location) => {
                 setDestination(location);
-                setDestinationText(displayName);
               }}
               placeholder="Enter Destination"
               style={[styles.searchBar, { marginTop: 10 }]}
-              value={destinationText}
-              onChangeText={setDestinationText}
-              onFocus={() => {
-                setIsDirectionsBoxCollapsed(true); // Collapse box when search is focused
-              }}
             />
             <View style={styles.modes}>
               <Button

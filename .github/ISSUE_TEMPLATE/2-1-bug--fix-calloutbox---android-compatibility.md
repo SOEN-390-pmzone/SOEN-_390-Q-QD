@@ -1,9 +1,10 @@
 ---
-name: "2.1 Bug: Fix Calloutbox + Android Compatibility"
+name: '2.1 Bug: Fix Calloutbox + Android Compatibility'
 about: Create a report to help us improve
-title: ""
-labels: ""
+title: ''
+labels: ''
 assignees: JeremyVieira, shanvinluo
+
 ---
 
 **Describe the bug**

@@ -13,7 +13,7 @@ describe("NavBar Component", () => {
   it("toggles the menu when hamburger button is pressed", () => {
     const { getByTestId, getByText } = render(<NavBar />);
 
-    const hamburgerButton = getByTestId("hamburger-button");
+    const hamburgerButton = getByTestId("hamburger-menu");
     fireEvent.press(hamburgerButton);
 
     expect(getByText("Login")).toBeTruthy();

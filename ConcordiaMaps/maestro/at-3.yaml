@@ -1,9 +1,0 @@
-appId: com.anonymous.ConcordiaMaps
----
-- launchApp
-- assertVisible: "Legend"
-- tapOn:
-    id: change-campus-button
-- assertVisible: "Vanier Extension"
-- tapOn:
-    id: change-campus-button

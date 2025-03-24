@@ -2,7 +2,7 @@ import React from "react";
 import { render, fireEvent } from "@testing-library/react-native";
 import Header from "../../components/Header";
 import { useNavigation } from "@react-navigation/native";
-import { Alert } from "react-native";
+import { Alert, Animated } from "react-native";
 
 // Mock the navigation and Alert modules
 jest.mock("@react-navigation/native", () => ({
@@ -43,6 +43,58 @@ describe("Header Component", () => {
     const { getByText } = render(<Header />);
 
     expect(getByText("ConcordiaMaps")).toBeTruthy();
+  });
+
+  test("toggles menu when hamburger button is pressed", () => {
+    const mockStart = jest.fn((callback) => callback && callback());
+    const mockTiming = jest.fn(() => ({ start: mockStart }));
+
+    // Save original implementation
+    const originalTiming = Animated.timing;
+
+    // Replace with mock
+    Animated.timing = mockTiming;
+
+    try {
+      const { getByTestId } = render(<Header />);
+
+      const hamburgerButton = getByTestId("hamburger-button");
+
+      // Initial state should be closed (isOpen = false)
+      expect(mockTiming).not.toHaveBeenCalled();
+
+      // Open the menu
+      fireEvent.press(hamburgerButton);
+
+      // Verify Animated.timing was called with correct parameters
+      expect(mockTiming).toHaveBeenCalledWith(
+        expect.any(Object), // animation value
+        {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        },
+      );
+
+      // Close the menu
+      fireEvent.press(hamburgerButton);
+
+      // Verify Animated.timing was called again with toValue: 0
+      expect(mockTiming).toHaveBeenCalledWith(
+        expect.any(Object), // animation value
+        {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: true,
+        },
+      );
+
+      // Verify start was called twice (once for each press)
+      expect(mockStart).toHaveBeenCalledTimes(2);
+    } finally {
+      // Restore original implementation
+      Animated.timing = originalTiming;
+    }
   });
 
   test("handles navigation to Home correctly", () => {
