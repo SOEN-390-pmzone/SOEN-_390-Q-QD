@@ -1,0 +1,573 @@
+<!doctype html>
+<html lang="en" xml:lang="en">
+  <head>
+    <title>SVG Map Graph Builder</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+      }
+
+      #container {
+        display: flex;
+        height: 100vh;
+      }
+
+      #svgContainer {
+        flex: 1;
+        overflow: auto;
+        position: relative;
+      }
+
+      #controlPanel {
+        width: 350px;
+        background: #f5f5f5;
+        padding: 15px;
+        border-left: 1px solid #ccc;
+        display: flex;
+        flex-direction: column;
+        overflow: auto;
+      }
+
+      #nodeList {
+        margin-bottom: 15px;
+        height: 400px;
+        overflow-y: auto;
+        border: 1px solid #ddd;
+        padding: 10px;
+      }
+
+      #graphOutput {
+        width: 100%;
+        height: 300px;
+        resize: vertical;
+        font-family: monospace;
+        margin-top: 10px;
+      }
+
+      .node-item {
+        margin-bottom: 5px;
+        padding: 5px;
+        background: #e0e0e0;
+        border-radius: 3px;
+        cursor: pointer;
+      }
+
+      .node-item:hover {
+        background: #d0d0d0;
+      }
+
+      .node-item.selected {
+        background: #b8e0ff;
+      }
+
+      .connection-panel {
+        margin-top: 15px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        background: #fff;
+      }
+
+      #statusMessage {
+        color: #0066cc;
+        font-weight: bold;
+        margin: 10px 0;
+      }
+
+      button {
+        padding: 8px 12px;
+        margin: 5px;
+        border: none;
+        background: #4285f4;
+        color: white;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background: #3b78e7;
+      }
+
+      button:disabled {
+        background: #cccccc;
+        cursor: not-allowed;
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+      }
+
+      .modal-content {
+        background-color: white;
+        padding: 20px;
+        border-radius: 5px;
+        min-width: 300px;
+      }
+
+      select,
+      input {
+        padding: 5px;
+        margin: 5px 0;
+        width: 100%;
+      }
+
+      .highlight {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background-color: rgba(255, 0, 0, 0.5);
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="container">
+      <div id="svgContainer">
+        <object
+          id="svgObject"
+          type="image/svg+xml"
+          data="MB-2.svg"
+          width="100%"
+        >
+          <p>
+            Your browser does not support SVGs. You can view the floor plan
+            <a href="MB-2.svg">here</a>.
+          </p>
+        </object>
+      </div>
+
+      <div id="controlPanel">
+        <h2>Map Graph Builder</h2>
+
+        <div id="statusMessage">Click on the map to add a node</div>
+
+        <button id="addNodeBtn">Add Node</button>
+
+        <h3 style="margin-bottom: 0">Node List</h3>
+        <div id="nodeList">
+          <!-- Nodes will be listed here -->
+          <div class="node-item-placeholder">No nodes added yet</div>
+        </div>
+
+        <div>
+          <p>
+            Select a node from the list above, then select other nodes to
+            connect them
+          </p>
+          <div>
+            class="connection-panel">
+            <h3>Create Connections</h3>
+            <p>
+              Select a no
+              <button id="connectBtn" disabled>Connect Selected Nodes</button>
+              <button id="clearSelectionBtn" disabled>Clear Selection</button>
+            </p>
+          </div>
+        </div>
+
+        <h3>Graph Output:</h3>
+        <textarea id="graphOutput" readonly></textarea>
+
+        <div class="actions">
+          <button id="exportBtn">Export Graph</button>
+          <button id="clearAllBtn">Clear All</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Connection Modal -->
+    <div id="connectionModal" class="modal">
+      <div class="modal-content">
+        <h3>Set Connection Distance</h3>
+        <p id="connectionModalText">Connection from Node1 to Node2</p>
+        <select id="distanceSelect">
+          <option value="0.5">Very Close (0.5)</option>
+          <option value="1" selected>Normal (1)</option>
+          <option value="2">Far (2)</option>
+          <option value="custom">Custom Value...</option>
+        </select>
+        <div id="customDistanceContainer" style="display: none">
+          <input
+            type="number"
+            id="customDistanceInput"
+            step="0.1"
+            min="0.1"
+            value="1"
+          />
+        </div>
+        <div style="margin-top: 15px; text-align: right">
+          <button id="saveConnectionBtn">Save Connection</button>
+          <button id="cancelConnectionBtn">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Graph data structure
+      const graphData = {};
+      // Track node coordinates
+      const nodeCoordinates = {};
+      // Currently selected nodes for connection
+      let selectedNodes = [];
+      // Current mode (add node, connect nodes)
+      let currentMode = "add";
+      // Track highlights
+      const highlights = [];
+
+      // Initialize when SVG is loaded
+      document
+        .getElementById("svgObject")
+        .addEventListener("load", function () {
+          const svgDoc = this.contentDocument;
+          const svgContainer = document.getElementById("svgContainer");
+
+          svgDoc.addEventListener("click", function (e) {
+            if (currentMode === "add") {
+              const svgRect = document
+                .getElementById("svgObject")
+                .getBoundingClientRect();
+              const scrollX =
+                window.pageXOffset || document.documentElement.scrollLeft;
+              const scrollY =
+                window.pageYOffset || document.documentElement.scrollTop;
+
+              const x = Math.round(e.clientX - svgRect.left + scrollX);
+              const y = Math.round(e.clientY - svgRect.top + scrollY);
+
+              // Store for node creation
+              sessionStorage.setItem("lastClickX", x);
+              sessionStorage.setItem("lastClickY", y);
+
+              // Show highlight
+              const highlight = document.createElement("div");
+              highlight.className = "highlight";
+              highlight.style.left = x + "px";
+              highlight.style.top = y + "px";
+              svgContainer.appendChild(highlight);
+              highlights.push(highlight);
+
+              // Update status
+              document.getElementById("statusMessage").textContent =
+                'Click "Add Node" to add a node at this location';
+            }
+          });
+        });
+
+      // Add Node button
+      document
+        .getElementById("addNodeBtn")
+        .addEventListener("click", function () {
+          const x = sessionStorage.getItem("lastClickX");
+          const y = sessionStorage.getItem("lastClickY");
+
+          if (!x || !y) {
+            alert("Please click on the map first");
+            return;
+          }
+
+          const nodeName = prompt(
+            "Enter node name (e.g., H903, elevator, etc.):",
+          );
+          if (!nodeName) return;
+
+          // Add to graph data
+          if (!graphData[nodeName]) {
+            graphData[nodeName] = {};
+            // Store coordinates
+            nodeCoordinates[nodeName] = { x, y };
+            // Add to node list
+            updateNodeList();
+            // Update graph output
+            updateGraphOutput();
+
+            // Clear placeholder if exists
+            const placeholder = document.querySelector(
+              ".node-item-placeholder",
+            );
+            if (placeholder) placeholder.remove();
+
+            // Clear temporary highlights
+            clearHighlights();
+
+            // Add permanent highlight for this node
+            addNodeHighlight(nodeName, x, y);
+
+            // Update status
+            document.getElementById("statusMessage").textContent =
+              "Node added. Click on map to add another or select nodes to connect.";
+          } else {
+            alert("Node with this name already exists!");
+          }
+
+          // Clear stored coordinates
+          sessionStorage.removeItem("lastClickX");
+          sessionStorage.removeItem("lastClickY");
+        });
+
+      // Update node list in UI
+      function updateNodeList() {
+        const nodeList = document.getElementById("nodeList");
+        nodeList.innerHTML = "";
+
+        Object.keys(graphData)
+          .sort()
+          .forEach((nodeName) => {
+            const nodeItem = document.createElement("div");
+            nodeItem.className = "node-item";
+            nodeItem.textContent = nodeName;
+            nodeItem.dataset.name = nodeName;
+
+            nodeItem.addEventListener("click", function () {
+              const name = this.dataset.name;
+              toggleNodeSelection(name, this);
+            });
+
+            nodeList.appendChild(nodeItem);
+          });
+
+        updateButtonStates();
+      }
+
+      // Toggle node selection
+      function toggleNodeSelection(nodeName, element) {
+        if (element.classList.contains("selected")) {
+          // Deselect
+          element.classList.remove("selected");
+          selectedNodes = selectedNodes.filter((n) => n !== nodeName);
+        } else {
+          // Select
+          element.classList.add("selected");
+          selectedNodes.push(nodeName);
+        }
+
+        updateButtonStates();
+
+        if (selectedNodes.length === 1) {
+          document.getElementById("statusMessage").textContent =
+            `Selected: ${nodeName}. Select another node to connect it to.`;
+        } else if (selectedNodes.length > 1) {
+          document.getElementById("statusMessage").textContent =
+            `${selectedNodes.length} nodes selected. Click "Connect" to create connections.`;
+        } else {
+          document.getElementById("statusMessage").textContent =
+            "Select a node to start creating connections.";
+        }
+      }
+
+      // Update button states based on selections
+      function updateButtonStates() {
+        const connectBtn = document.getElementById("connectBtn");
+        const clearSelectionBtn = document.getElementById("clearSelectionBtn");
+
+        connectBtn.disabled = selectedNodes.length < 2;
+        clearSelectionBtn.disabled = selectedNodes.length === 0;
+      }
+
+      // Clear selection button
+      document
+        .getElementById("clearSelectionBtn")
+        .addEventListener("click", function () {
+          clearSelection();
+        });
+
+      // Clear selection
+      function clearSelection() {
+        document.querySelectorAll(".node-item.selected").forEach((node) => {
+          node.classList.remove("selected");
+        });
+        selectedNodes = [];
+        updateButtonStates();
+        document.getElementById("statusMessage").textContent =
+          "Selection cleared. Select nodes to connect.";
+      }
+
+      // Connect button
+      document
+        .getElementById("connectBtn")
+        .addEventListener("click", function () {
+          if (selectedNodes.length < 2) {
+            alert("Please select at least 2 nodes to connect");
+            return;
+          }
+
+          showConnectionModal();
+        });
+
+      // Show connection modal
+      function showConnectionModal() {
+        const modal = document.getElementById("connectionModal");
+        modal.style.display = "flex";
+
+        const connectionText = selectedNodes.join(" and ");
+        document.getElementById("connectionModalText").textContent =
+          `Create connections between: ${connectionText}`;
+
+        // Handle custom distance select
+        document
+          .getElementById("distanceSelect")
+          .addEventListener("change", function () {
+            const customDistanceContainer = document.getElementById(
+              "customDistanceContainer",
+            );
+            if (this.value === "custom") {
+              customDistanceContainer.style.display = "block";
+            } else {
+              customDistanceContainer.style.display = "none";
+            }
+          });
+      }
+
+      // Save connection button
+      document
+        .getElementById("saveConnectionBtn")
+        .addEventListener("click", function () {
+          let distance;
+          const distanceSelect = document.getElementById("distanceSelect");
+          if (distanceSelect.value === "custom") {
+            distance = parseFloat(
+              document.getElementById("customDistanceInput").value,
+            );
+            if (isNaN(distance) || distance <= 0) {
+              alert("Please enter a valid positive number for distance");
+              return;
+            }
+          } else {
+            distance = parseFloat(distanceSelect.value);
+          }
+
+          // Create connections between all selected nodes
+          for (let i = 0; i < selectedNodes.length; i++) {
+            for (let j = 0; j < selectedNodes.length; j++) {
+              if (i !== j) {
+                if (!graphData[selectedNodes[i]]) {
+                  graphData[selectedNodes[i]] = {};
+                }
+                graphData[selectedNodes[i]][selectedNodes[j]] = distance;
+              }
+            }
+          }
+
+          // Update graph output
+          updateGraphOutput();
+
+          // Close modal
+          document.getElementById("connectionModal").style.display = "none";
+
+          // Clear selection
+          clearSelection();
+
+          // Update status
+          document.getElementById("statusMessage").textContent =
+            "Connections created successfully.";
+        });
+
+      // Cancel connection button
+      document
+        .getElementById("cancelConnectionBtn")
+        .addEventListener("click", function () {
+          document.getElementById("connectionModal").style.display = "none";
+        });
+
+      // Update graph output
+      function updateGraphOutput() {
+        const output = {};
+        for (const node in graphData) {
+          if (Object.keys(graphData[node]).length > 0) {
+            output[node] = graphData[node];
+          }
+        }
+
+        document.getElementById("graphOutput").value = JSON.stringify(
+          output,
+          null,
+          4,
+        );
+      }
+
+      // Export graph button
+      document
+        .getElementById("exportBtn")
+        .addEventListener("click", function () {
+          const graphText = document.getElementById("graphOutput").value;
+          if (!graphText.trim()) {
+            alert("No graph data to export");
+            return;
+          }
+
+          const blob = new Blob([graphText], { type: "application/json" });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = "map-graph.json";
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+
+          document.getElementById("statusMessage").textContent =
+            "Graph exported successfully.";
+        });
+
+      // Clear all button
+      document
+        .getElementById("clearAllBtn")
+        .addEventListener("click", function () {
+          if (
+            confirm("Are you sure you want to clear all nodes and connections?")
+          ) {
+            Object.keys(graphData).forEach((key) => delete graphData[key]);
+            clearHighlights();
+            updateNodeList();
+            updateGraphOutput();
+            clearSelection();
+
+            // Add placeholder back
+            const nodeList = document.getElementById("nodeList");
+            if (nodeList.children.length === 0) {
+              const placeholder = document.createElement("div");
+              placeholder.className = "node-item-placeholder";
+              placeholder.textContent = "No nodes added yet";
+              nodeList.appendChild(placeholder);
+            }
+
+            document.getElementById("statusMessage").textContent =
+              "All data cleared. Click on the map to start again.";
+          }
+        });
+
+      // Clear temporary highlights
+      function clearHighlights() {
+        highlights.forEach((highlight) => {
+          if (highlight && highlight.parentNode) {
+            highlight.parentNode.removeChild(highlight);
+          }
+        });
+        highlights.length = 0;
+      }
+
+      // Add permanent highlight for a node
+      function addNodeHighlight(nodeName, x, y) {
+        const svgContainer = document.getElementById("svgContainer");
+        const highlight = document.createElement("div");
+        highlight.className = "highlight";
+        highlight.style.left = x + "px";
+        highlight.style.top = y + "px";
+        highlight.style.backgroundColor = "rgba(0,128,255,0.5)";
+        highlight.title = nodeName;
+        svgContainer.appendChild(highlight);
+      }
+    </script>
+  </body>
+</html>
