@@ -89,14 +89,6 @@ export default function App() {
               name="MultistepNavigationScreen"
               component={MultistepNavigationScreen}
             />
-            <Stack.Screen
-              name="MultistepNavigation"
-              component={MultistepNavigationScreen}
-              options={{
-                title: "Navigation",
-                headerShown: true,
-              }}
-            />
           </Stack.Navigator>
 
           <PopupModalWrapper
