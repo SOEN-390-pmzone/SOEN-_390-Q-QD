@@ -1,7 +1,6 @@
 import App from "../App";
 import React from "react";
-import { render, waitFor, fireEvent } from "@testing-library/react-native";
-import { act } from 'react-test-renderer';
+import { render, waitFor } from "@testing-library/react-native";
 
 // Mock expo-font
 jest.mock("expo-font", () => ({

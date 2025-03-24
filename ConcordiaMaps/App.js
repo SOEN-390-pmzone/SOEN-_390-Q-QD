@@ -6,7 +6,7 @@ import { LocationProvider } from "./contexts/LocationContext";
 import PopupModal from "./components/PopupModal";
 import styles from "./styles";
 import GetDirections from "./components/GetDirections";
-import CalendarScreen from "./components/CalendarScreen"; // Import CalendarScreen
+import CalendarScreen from "./components/CalendarScreen";
 
 // Create Context for modal data and visibility
 export const ModalContext = createContext();

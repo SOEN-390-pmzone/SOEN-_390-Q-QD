@@ -3,6 +3,7 @@ import { render, fireEvent, waitFor } from "@testing-library/react-native";
 import CalendarScreen from "../../components/CalendarScreen";
 import Header from "../../components/Header";
 import { NavigationContainer } from "@react-navigation/native";
+import * as Calendar from "expo-calendar";
 
 // Mock necessary modules
 jest.mock("expo-calendar", () => ({
@@ -71,24 +72,62 @@ describe("CalendarScreen", () => {
     jest.clearAllMocks();
   });
 
+  // Test the fetching of calendars
+  it("shows alert when calendar permissions are denied", async () => {
+    // Mock the alert function
+    const originalAlert = global.alert;
+    global.alert = jest.fn();
+
+    // Directly modify the mock implementation for this test only
+    Calendar.requestCalendarPermissionsAsync.mockImplementationOnce(() =>
+      Promise.resolve({ status: "denied" }),
+    );
+
+    try {
+      render(
+        <NavigationContainer>
+          <CalendarScreen />
+        </NavigationContainer>,
+      );
+
+      // Wait for the alert to be called with a longer timeout
+      await waitFor(
+        () => {
+          expect(global.alert).toHaveBeenCalledWith(
+            "Permission to access the calendar was denied.",
+          );
+        },
+        { timeout: 3000 },
+      ); // Increase timeout to give enough time
+    } finally {
+      // Restore original alert
+      global.alert = originalAlert;
+
+      // Reset the mock to return granted for other tests
+      Calendar.requestCalendarPermissionsAsync.mockImplementation(() =>
+        Promise.resolve({ status: "granted" }),
+      );
+    }
+  });
+
   // Test the selecting multiple calendars functionality
   it("selects other calendars", async () => {
     const { getByText, getByTestId } = render(
       <NavigationContainer>
         <CalendarScreen />
-      </NavigationContainer>
+      </NavigationContainer>,
     );
 
     await waitFor(() => getByTestId("selectCalendarButton"));
-    
+
     fireEvent.press(getByTestId("selectCalendarButton"));
-    
+
     await waitFor(() => getByText("Select Calendars"));
-    
+
     fireEvent.press(getByText("Calendar 1"));
-    
+
     fireEvent.press(getByText("Done"));
-    
+
     await waitFor(() => {
       expect(getByText("Select your calendars (1)")).toBeTruthy();
     });
@@ -99,13 +138,13 @@ describe("CalendarScreen", () => {
     const { getByText } = render(
       <NavigationContainer>
         <CalendarScreen />
-      </NavigationContainer>
+      </NavigationContainer>,
     );
-    
+
     await waitFor(() => getByText("Previous Day"));
-    
+
     fireEvent.press(getByText("Previous Day"));
-    
+
     await waitFor(() => {
       expect(getByText("No events for today.")).toBeTruthy();
     });
@@ -116,13 +155,13 @@ describe("CalendarScreen", () => {
     const { getByText } = render(
       <NavigationContainer>
         <CalendarScreen />
-      </NavigationContainer>
+      </NavigationContainer>,
     );
-    
+
     await waitFor(() => getByText("Next Day"));
-    
+
     fireEvent.press(getByText("Next Day"));
-    
+
     await waitFor(() => {
       expect(getByText("No events for today.")).toBeTruthy();
     });
@@ -138,13 +177,13 @@ describe("CalendarScreen", () => {
       const { getByText } = render(
         <NavigationContainer>
           <CalendarScreen />
-        </NavigationContainer>
+        </NavigationContainer>,
       );
-      
+
       await waitFor(() => getByText("Event 1"));
-      
+
       fireEvent.press(getByText("Get Directions"));
-      
+
       expect(global.alert).toHaveBeenCalledWith("Get directions to Room 101");
     } finally {
       // Always restore the original alert function
