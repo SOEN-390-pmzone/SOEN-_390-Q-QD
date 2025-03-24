@@ -1,6 +1,6 @@
 import App from "../App";
 import React from "react";
-import { render, waitFor, fireEvent } from "@testing-library/react-native";
+import { render, waitFor, fireEvent, act } from "@testing-library/react-native";
 
 // Mock expo-font
 jest.mock("expo-font", () => ({
@@ -174,13 +174,25 @@ describe("App", () => {
 
   it("navigates to GetDirections screen when button is clicked", async () => {
     const { getByText } = render(<App />);
+
+    // Wait for the button to be rendered first
     const directionsButton = await waitFor(() => getByText("Get directions"));
 
-    fireEvent.press(directionsButton);
+    // Ensure the button is found before proceeding
+    expect(directionsButton).toBeTruthy();
 
-    await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith("GetDirections");
+    // Use act to properly handle the event and state updates
+    await act(async () => {
+      fireEvent.press(directionsButton);
     });
+
+    // Allow more time for navigation to complete
+    await waitFor(
+      () => {
+        expect(mockNavigate).toHaveBeenCalledWith("GetDirections");
+      },
+      { timeout: 2000 },
+    );
   });
 
   it("provides LocationProvider to child components", async () => {
