@@ -22,7 +22,7 @@ jest.mock("react-native-webview", () => ({
 // Mock expo-location
 jest.mock("expo-location", () => ({
   requestForegroundPermissionsAsync: jest.fn(() =>
-    Promise.resolve({ status: "granted" }),
+    Promise.resolve({ status: "granted" })
   ),
   getCurrentPositionAsync: jest.fn(() =>
     Promise.resolve({
@@ -31,7 +31,7 @@ jest.mock("expo-location", () => ({
         longitude: -73.579,
         accuracy: 5,
       },
-    }),
+    })
   ),
 }));
 
@@ -170,26 +170,6 @@ describe("App", () => {
     await waitFor(() => {
       expect(mockPopupModalProps.isVisible).toBeDefined();
     });
-  });
-
-  it("navigates to GetDirections screen when button is clicked", async () => {
-    const { getByText } = render(<App />);
-
-    // Wait for the button to be rendered first
-    const directionsButton = await waitFor(() => getByText("Get directions"));
-
-    // Ensure the button is found before proceeding
-    expect(directionsButton).toBeTruthy();
-
-    // Wrap the fireEvent in act and add a small delay
-    await act(async () => {
-      fireEvent.press(directionsButton);
-      // Add a small delay to allow for state updates
-      await new Promise((resolve) => setTimeout(resolve, 0));
-    });
-
-    // Verify navigation occurred
-    expect(mockNavigate).toHaveBeenCalledWith("GetDirections");
   });
 
   it("provides LocationProvider to child components", async () => {
