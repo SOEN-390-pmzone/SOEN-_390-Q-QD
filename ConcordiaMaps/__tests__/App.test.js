@@ -1,6 +1,6 @@
 import App from "../App";
 import React from "react";
-import { render, waitFor, fireEvent, act } from "@testing-library/react-native";
+import { render, waitFor } from "@testing-library/react-native";
 
 // Mock expo-font
 jest.mock("expo-font", () => ({
@@ -22,7 +22,7 @@ jest.mock("react-native-webview", () => ({
 // Mock expo-location
 jest.mock("expo-location", () => ({
   requestForegroundPermissionsAsync: jest.fn(() =>
-    Promise.resolve({ status: "granted" })
+    Promise.resolve({ status: "granted" }),
   ),
   getCurrentPositionAsync: jest.fn(() =>
     Promise.resolve({
@@ -31,7 +31,7 @@ jest.mock("expo-location", () => ({
         longitude: -73.579,
         accuracy: 5,
       },
-    })
+    }),
   ),
 }));
 
