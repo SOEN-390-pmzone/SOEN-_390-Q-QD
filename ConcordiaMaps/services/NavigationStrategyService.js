@@ -18,7 +18,7 @@ const transitionNavigationStrategy = (navigation, step) => {
     currentStep: 0,
     steps: [
       {
-        id: `step_${Math.random().toString(36).substr(2, 9)}`,
+        id: `step_${crypto.randomUUID()}`,
         type: "transition",
         title: `Navigate from Floor ${step.startFloor} to Floor ${step.endFloor}`,
         buildingId: step.buildingId,
@@ -183,7 +183,7 @@ class NavigationStrategyService {
    */
   static createIndoorRoute(buildingId, startRoom, endRoom, options = {}) {
     // Generate a unique ID for this navigation plan
-    const navigationId = `nav_${Math.random().toString(36).substr(2, 9)}`;
+    const navigationId = `nav_${crypto.randomUUID()}`;
 
     // Check if the rooms are on the same floor
     const startFloor = this._extractFloorFromRoom(startRoom);
@@ -312,14 +312,32 @@ class NavigationStrategyService {
       return parts.length > 2 ? parts[2] : "1";
     }
 
+    // For JMSB rooms in format "1.293"
+    if (/^\d+\.\d+$/.test(roomId)) {
+      return roomId.split(".")[0];
+    }
+
+    // For MB-1-293 format
+    const mbMatch = roomId.match(/^MB-(\d+)-\d+$/i);
+    if (mbMatch && mbMatch[1]) {
+      return mbMatch[1];
+    }
+
+    // For MB-1.293 format
+    const mbDotMatch = roomId.match(/^MB-(\d+)\.\d+$/i);
+    if (mbDotMatch && mbDotMatch[1]) {
+      return mbDotMatch[1];
+    }
+
     // For classroom IDs like "H-920" (9th floor) or "H920"
-    const match = roomId.match(/[A-Za-z]+-?(\d)(\d+)/);
+    // Anchored pattern with reasonable limits
+    const match = roomId.match(/^[A-Za-z]{1,3}-?(\d)(\d{1,3})$/i);
     if (match && match[1]) {
       return match[1];
     }
 
     // Alternative format like "920" or "9thFloor"
-    const directMatch = roomId.match(/^(\d)/);
+    const directMatch = roomId.match(/^(\d)\d*$/);
     if (directMatch) {
       return directMatch[1];
     }
@@ -336,7 +354,7 @@ class NavigationStrategyService {
    * @returns {Object} Navigation plan for inter-floor navigation
    */
   static createInterFloorRoute(buildingId, startFloor, endFloor, options = {}) {
-    const navigationId = `nav_${Math.random().toString(36).substr(2, 9)}`;
+    const navigationId = `nav_${crypto.randomUUID()}`;
 
     return {
       id: navigationId,

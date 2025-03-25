@@ -1114,17 +1114,49 @@ const MultistepNavigationScreen = () => {
     return "HallBuilding"; // Default to Hall Building if no match
   };
 
-  // Extract floor from room ID (e.g. "H-920" => "9")
+  // Extract floor from room ID (e.g. "H-920" => "9", "1.293" => "1")
   const getFloorFromRoomId = (roomId) => {
     if (!roomId || typeof roomId !== "string") return "1";
 
-    // Try to extract floor number from room number
-    const match = roomId.match(/[A-Za-z]+-?(\d)(\d+)/);
-    if (match && match[1]) {
-      return match[1];
+    // Special case for non-numeric room identifiers
+    if (
+      /^(entrance|lobby|main lobby|main entrance|elevator|stairs|escalator|toilet)$/i.test(
+        roomId,
+      )
+    ) {
+      return "1"; // Default these to first floor
     }
 
-    return "1"; // Default to first floor
+    // For JMSB rooms in format "1.293"
+    if (/^\d+\.\d+$/.test(roomId)) {
+      return roomId.split(".")[0];
+    }
+
+    // For MB-1-293 format
+    const mbMatch = roomId.match(/^MB-(\d+)-\d+$/i);
+    if (mbMatch && mbMatch[1]) {
+      return mbMatch[1];
+    }
+
+    // For MB-1.293 format
+    const mbDotMatch = roomId.match(/^MB-(\d+)\.\d+$/i);
+    if (mbDotMatch && mbDotMatch[1]) {
+      return mbDotMatch[1];
+    }
+
+    // For standard room formats like H-920 or H920
+    const standardMatch = roomId.match(/^[A-Za-z]+-?(\d)(\d+)$/i);
+    if (standardMatch && standardMatch[1]) {
+      return standardMatch[1];
+    }
+
+    // For simple numbered rooms like "101" (1st floor)
+    const simpleMatch = roomId.match(/^(\d)(\d+)$/);
+    if (simpleMatch && simpleMatch[1]) {
+      return simpleMatch[1];
+    }
+
+    return "1"; // Default to first floor if no pattern matches
   };
 
   // Normalize room ID to match format in floor data
