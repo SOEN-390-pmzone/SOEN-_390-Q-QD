@@ -1140,14 +1140,25 @@ const MultistepNavigationScreen = () => {
       return roomId.split(".")[0];
     }
 
-    const floorNumber =
-      roomId.match(/^MB-(\d+)-\d+$/i)?.[1] ||
+    const floorNumber = (() => {
+      // For MB-1-293 format
+      let match = /^MB-(\d+)-\d+$/i.exec(roomId);
+      if (match) return match[1];
+
       // For MB-1.293 format
-      roomId.match(/^MB-(\d+)\.\d+$/i)?.[1] ||
+      match = /^MB-(\d+)\.\d+$/i.exec(roomId);
+      if (match) return match[1];
+
       // For standard room formats like H-920 or H920
-      roomId.match(/^[A-Za-z]+-?(\d)(\d+)$/i)?.[1] ||
+      match = /^[A-Za-z]+-?(\d)(\d+)$/i.exec(roomId);
+      if (match) return match[1];
+
       // For simple numbered rooms like "101" (1st floor)
-      roomId.match(/^(\d)(\d+)$/)?.[1];
+      match = /^(\d)(\d+)$/.exec(roomId);
+      if (match) return match[1];
+
+      return null;
+    })();
 
     if (floorNumber) {
       return floorNumber;
@@ -1987,13 +1998,19 @@ const MultistepNavigationScreen = () => {
 
                         if (originBuilding.id === "MB") {
                           // Special handling for MB rooms
-                          if (text.match(/^\d+\.\d+$/)) {
-                            // Already in format like 1.293
+                          let match;
+
+                          // Try matching format like 1.293
+                          match = /^\d+\.\d+$/.exec(text);
+                          if (match) {
                             formattedRoom = `MB-${text}`;
-                          } else if (text.match(/^\d+-\d+$/)) {
-                            // Format like 1-293, convert to MB-1-293
+                          }
+                          // Try matching format like 1-293
+                          else if ((match = /^\d+-\d+$/.exec(text))) {
                             formattedRoom = `MB-${text}`;
-                          } else if (!text.startsWith("MB-")) {
+                          }
+                          // If doesn't start with MB-, add the prefix
+                          else if (!text.startsWith("MB-")) {
                             formattedRoom = `MB-${text}`;
                           } else {
                             formattedRoom = text;
@@ -2048,12 +2065,10 @@ const MultistepNavigationScreen = () => {
                     />
                     {invalidOriginRoom && (
                       <Text style={styles.errorText}>
-                        {originBuilding.id === "MB"
-                          ? `Room not found. Try a format like 1.293 or 1-293.`
-                          : originBuilding.id === "VE" ||
-                              originBuilding.id === "EV"
-                            ? `Room not found. Try a room number or "elevator"/"stairs".`
-                            : `This room doesn't exist in ${originBuilding.name}`}
+                        {getErrorMessageForRoom(
+                          originBuilding.id,
+                          originBuilding.name,
+                        )}
                       </Text>
                     )}
                   </>
@@ -2301,6 +2316,15 @@ const MultistepNavigationScreen = () => {
     );
   };
 
+  const getErrorMessageForRoom = (buildingId, buildingName) => {
+    if (buildingId === "MB") {
+      return "Room not found. Try a format like 1.293 or 1-293.";
+    }
+    if (buildingId === "VE" || buildingId === "EV") {
+      return 'Room not found. Try a room number or "elevator"/"stairs".';
+    }
+    return `This room doesn't exist in ${buildingName}`;
+  };
   // Render outdoor step UI with map and directions
   const renderOutdoorStep = () => {
     const currentStep = navigationPlan.steps[currentStepIndex];
@@ -2363,22 +2387,31 @@ const MultistepNavigationScreen = () => {
             </View>
           ) : outdoorDirections.length > 0 ? (
             <ScrollView style={styles.directionsList}>
-              {outdoorDirections.map((direction, index) => (
-                <View key={`dir-${index}`} style={styles.directionItem}>
-                  <Text style={styles.directionNumber}>{index + 1}</Text>
-                  <View style={styles.directionContent}>
-                    <Text style={styles.directionText}>
-                      {direction.formatted_text ||
-                        parseHtmlInstructions(direction.html_instructions)}
-                    </Text>
-                    {direction.distance && (
-                      <Text style={styles.distanceText}>
-                        {direction.distance}
+              {outdoorDirections.map((direction, index) => {
+                // Generate a unique key combining relevant data
+                const directionKey = `${direction.distance || ""}-${direction.formatted_text || direction.html_instructions}-${Array.from(
+                  new Uint8Array(4),
+                )
+                  .map((b) => b.toString(16))
+                  .join("")}`;
+
+                return (
+                  <View key={directionKey} style={styles.directionItem}>
+                    <Text style={styles.directionNumber}>{index + 1}</Text>
+                    <View style={styles.directionContent}>
+                      <Text style={styles.directionText}>
+                        {direction.formatted_text ||
+                          parseHtmlInstructions(direction.html_instructions)}
                       </Text>
-                    )}
+                      {direction.distance && (
+                        <Text style={styles.distanceText}>
+                          {direction.distance}
+                        </Text>
+                      )}
+                    </View>
                   </View>
-                </View>
-              ))}
+                );
+              })}
             </ScrollView>
           ) : (
             <Text style={styles.noDirectionsText}>
@@ -2424,9 +2457,9 @@ const MultistepNavigationScreen = () => {
 
           {/* Display step details based on type */}
           {currentStep.type === "outdoor" ? (
-            renderOutdoorStep(currentStep)
+            renderOutdoorStep()
           ) : currentStep.type === "indoor" ? (
-            renderIndoorStep(currentStep)
+            renderIndoorStep()
           ) : (
             <View style={styles.stepContentContainer}>
               <Text style={styles.noDirectionsText}>
@@ -2504,8 +2537,7 @@ const MultistepNavigationScreen = () => {
     const validPoints = Array.isArray(pathPoints)
       ? pathPoints.filter(
           (p) =>
-            p &&
-            p.nearestPoint &&
+            p?.nearestPoint &&
             typeof p.nearestPoint.x === "number" &&
             typeof p.nearestPoint.y === "number",
         )
