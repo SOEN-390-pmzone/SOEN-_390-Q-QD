@@ -21,6 +21,7 @@ import {
 } from "../components/AsyncPersistence";
 import convertToCoordinates from "../components/convertToCoordinates";
 import PropTypes from "prop-types";
+import findBuilding from "../components/userInPolygon";
 
 function HomeScreen({ asyncKey = "Campus" }) {
   const loyolaPostalCode = process.env.EXPO_PUBLIC_LOYOLA_POSTAL_CODE;
@@ -37,9 +38,9 @@ function HomeScreen({ asyncKey = "Campus" }) {
   const borderColor = "#912338"; // Initial border color (red)
   const mapRef = useRef(null);
   const toggleModalTime = "10000";
-
   useEffect(() => {
     const fetchLastCampus = async () => {
+      console.log(findBuilding());
       const campus = await getFromAsyncStorage(asyncKey, sgwPostalCode);
       setPostalCode(campus);
       const coords = await convertToCoordinates(campus);

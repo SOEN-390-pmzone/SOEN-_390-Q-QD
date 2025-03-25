@@ -5,7 +5,6 @@ import styles from "../styles";
 import { Alert } from "react-native";
 import ShuttleSchedule from "./ShuttleSchedule";
 import { navigationItems } from "../constants/configuration/navigationItems";
-
 function NavBar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScheduleVisible, setIsScheduleVisible] = useState(false);
@@ -22,20 +21,20 @@ function NavBar() {
   };
 
   // Process the menu items and attach the concrete implementations
-  const menuItems = navigationItems.map(item => {
+  const menuItems = navigationItems.map((item) => {
     let action;
-    
+
     // Determine action based on actionType
     switch (item.actionType) {
-      case 'navigate':
+      case "navigate":
         action = () => navigation.navigate(item.screen);
         break;
-      case 'alert':
+      case "alert":
         action = () => Alert.alert(`You clicked: ${item.label}`);
         break;
-      case 'custom':
+      case "custom":
         // Special case for shuttle schedule
-        if (item.id === 'shuttle') {
+        if (item.id === "shuttle") {
           action = () => setIsScheduleVisible(true);
         } else {
           action = () => Alert.alert(`Custom action for: ${item.label}`);
@@ -44,10 +43,10 @@ function NavBar() {
       default:
         action = () => Alert.alert(`No action defined for: ${item.label}`);
     }
-    
+
     return {
       ...item,
-      action
+      action,
     };
   });
 
