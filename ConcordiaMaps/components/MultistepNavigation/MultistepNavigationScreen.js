@@ -53,6 +53,16 @@ const CONCORDIA_BUILDINGS = [
     name: "Engineering & Visual Arts Complex",
     address: "1515 St. Catherine St. Ouest",
   },
+  {
+    id: "VL",
+    name: "Vanier Library",
+    address: "7141 Sherbrooke St. W",
+  },
+  {
+    id: "VE",
+    name: "Vanier Extension",
+    address: "7141 Sherbrooke St. W",
+  },
 ];
 
 export const getStepColor = (type) => {
@@ -111,13 +121,73 @@ const MultistepNavigationScreen = () => {
     const building = FloorRegistry.getBuilding(buildingType);
     if (!building || !building.floors) return [];
 
+    // Always add common room types for all buildings
+    const commonRooms = [
+      "entrance",
+      "elevator",
+      "stairs",
+      "escalator",
+      "toilet",
+      "women_washroom",
+      "men_washroom",
+      "water_fountain",
+    ];
+
     // Gather all rooms from all floors
-    const validRooms = [];
+    const validRooms = [...commonRooms];
     Object.values(building.floors).forEach((floor) => {
       if (floor && floor.rooms) {
         // Add all room IDs from this floor
         Object.keys(floor.rooms).forEach((roomId) => {
           validRooms.push(roomId);
+
+          // For JMSB building, also add MB-prefixed versions to accommodate user input
+          if (buildingId === "MB") {
+            // For room IDs like 1.293, also add MB-1.293 and MB-1-293
+            if (/^\d+\.\d+$/.test(roomId)) {
+              const floorNum = roomId.split(".")[0];
+              const roomNum = roomId.split(".")[1];
+              validRooms.push(`MB-${roomId}`);
+              validRooms.push(`MB-${floorNum}-${roomNum}`);
+            }
+          }
+
+          // For Vanier Extension building
+          if (buildingId === "VE") {
+            // Add formats like VE-191
+            if (/^\d+$/.test(roomId)) {
+              validRooms.push(`VE-${roomId}`);
+            }
+          }
+
+          // For Vanier Library building
+          if (buildingId === "VL") {
+            // Add formats like VL-101
+            if (/^\d+$/.test(roomId)) {
+              validRooms.push(`VL-${roomId}`);
+            }
+          }
+
+          // For EV Building
+          if (buildingId === "EV") {
+            // Add formats like EV-200
+            if (/^\d+$/.test(roomId)) {
+              validRooms.push(`EV-${roomId}`);
+            }
+          }
+
+          // For Hall Building, add H-prefixed versions
+          if (buildingId === "H") {
+            // Add formats like H-801
+            if (/^\d+$/.test(roomId)) {
+              validRooms.push(`H-${roomId}`);
+            }
+            // Add formats for H801
+            if (/^H\d+$/.test(roomId)) {
+              const roomNum = roomId.replace(/^H/, "");
+              validRooms.push(`H-${roomNum}`);
+            }
+          }
         });
       }
     });
@@ -130,10 +200,90 @@ const MultistepNavigationScreen = () => {
     if (!buildingId || !roomId) return false;
 
     // Special case for entrance
-    if (roomId.toLowerCase() === "entrance") return true;
+    if (
+      ["entrance", "main lobby", "lobby", "main entrance"].includes(
+        roomId.toLowerCase()
+      )
+    )
+      return true;
+
+    // Handle common facility types across buildings
+    if (
+      [
+        "elevator",
+        "stairs",
+        "escalator",
+        "toilet",
+        "main-stairs",
+        "stairs_ne",
+        "stairs_nw",
+        "stairs_se",
+        "stairs_sw",
+        "water_fountain",
+        "women_washroom",
+        "men_washroom",
+      ].includes(roomId.toLowerCase())
+    )
+      return true;
 
     const validRooms = getValidRoomsForBuilding(buildingId);
+
+    // Debug output to check available rooms for a building
+    console.log(
+      `Checking room ${roomId} against ${validRooms.length} valid rooms for ${buildingId}`
+    );
+
+    // First try direct match
+    if (validRooms.includes(roomId)) return true;
+
+    // Try normalized version
     const normalizedRoomId = normalizeRoomId(roomId);
+    if (validRooms.includes(normalizedRoomId)) return true;
+
+    // For JMSB building, try both formats
+    if (buildingId === "MB") {
+      // Try MB-1.293 format
+      if (roomId.match(/^MB-\d+\.\d+$/i)) {
+        const justNumber = roomId.replace(/^MB-/i, "");
+        return validRooms.includes(justNumber);
+      }
+
+      // Try MB-1-293 format
+      if (roomId.match(/^MB-\d+-\d+$/i)) {
+        const parts = roomId.match(/^MB-(\d+)-(\d+)$/i);
+        if (parts && parts.length === 3) {
+          const dotFormat = `${parts[1]}.${parts[2]}`;
+          return validRooms.includes(dotFormat);
+        }
+      }
+    }
+
+    // For Vanier Extension (VE) building
+    if (buildingId === "VE") {
+      // Try VE-191 format
+      if (roomId.match(/^VE-\d+$/i)) {
+        const justNumber = roomId.replace(/^VE-/i, "");
+        return validRooms.includes(justNumber);
+      }
+    }
+
+    // For EV building
+    if (buildingId === "EV") {
+      // Try EV-191 format
+      if (roomId.match(/^EV-\d+$/i)) {
+        const justNumber = roomId.replace(/^EV-/i, "");
+        return validRooms.includes(justNumber);
+      }
+    }
+
+    // For VL (Vanier Library) building
+    if (buildingId === "VL") {
+      // Try VL-101 format
+      if (roomId.match(/^VL-\d+$/i)) {
+        const justNumber = roomId.replace(/^VL-/i, "");
+        return validRooms.includes(justNumber);
+      }
+    }
 
     return validRooms.includes(normalizedRoomId);
   };
@@ -151,7 +301,7 @@ const MultistepNavigationScreen = () => {
   const [originBuilding, setOriginBuilding] = useState(null);
   const [originRoom, setOriginRoom] = useState("");
   const [originBuildingSuggestions, setOriginBuildingSuggestions] = useState(
-    [],
+    []
   );
   const [showOriginBuildingSuggestions, setShowOriginBuildingSuggestions] =
     useState(false);
@@ -241,7 +391,7 @@ const MultistepNavigationScreen = () => {
         try {
           // Add region and components parameters to bias results to Montreal, Canada
           const geocodeResponse = await fetch(
-            `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(step.startPoint)}&key=${GOOGLE_MAPS_API_KEY}&region=ca&components=country:ca|locality:montreal`,
+            `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(step.startPoint)}&key=${GOOGLE_MAPS_API_KEY}&region=ca&components=country:ca|locality:montreal`
           );
           const geocodeData = await geocodeResponse.json();
 
@@ -289,7 +439,7 @@ const MultistepNavigationScreen = () => {
             b.id.toUpperCase() === step.startPoint.toUpperCase() ||
             step.startPoint.toUpperCase().includes(b.id.toUpperCase()) ||
             b.name.toUpperCase().includes(step.startPoint.toUpperCase()) ||
-            step.startPoint.toUpperCase().includes(b.name.toUpperCase()),
+            step.startPoint.toUpperCase().includes(b.name.toUpperCase())
         );
 
         if (startBuilding) {
@@ -305,7 +455,7 @@ const MultistepNavigationScreen = () => {
           }
           console.log(
             `Using hardcoded coordinates for ${startBuilding.id}:`,
-            originCoords,
+            originCoords
           );
         }
       }
@@ -316,7 +466,7 @@ const MultistepNavigationScreen = () => {
         if (typeof step.endPoint === "string") {
           // Check if it's a building ID first
           const destinationBuilding = CONCORDIA_BUILDINGS.find(
-            (b) => b.id === step.endPoint || b.name.includes(step.endPoint),
+            (b) => b.id === step.endPoint || b.name.includes(step.endPoint)
           );
 
           if (destinationBuilding) {
@@ -338,7 +488,7 @@ const MultistepNavigationScreen = () => {
               // Try to geocode the building address
               try {
                 const geocodeResponse = await fetch(
-                  `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(step.endPoint)}&key=${GOOGLE_MAPS_API_KEY}&region=ca&components=country:ca|locality:montreal`,
+                  `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(step.endPoint)}&key=${GOOGLE_MAPS_API_KEY}&region=ca&components=country:ca|locality:montreal`
                 );
                 const geocodeData = await geocodeResponse.json();
 
@@ -357,7 +507,7 @@ const MultistepNavigationScreen = () => {
             // If not a building ID, try to geocode as address
             try {
               const geocodeResponse = await fetch(
-                `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(step.endPoint)}&key=${GOOGLE_MAPS_API_KEY}&region=ca&components=country:ca|locality:montreal`,
+                `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(step.endPoint)}&key=${GOOGLE_MAPS_API_KEY}&region=ca&components=country:ca|locality:montreal`
               );
               const geocodeData = await geocodeResponse.json();
 
@@ -388,19 +538,19 @@ const MultistepNavigationScreen = () => {
         "Fetching directions from",
         originCoords,
         "to",
-        destinationCoords,
+        destinationCoords
       );
 
       // Get directions and polyline using your existing hook
       const directions = await getStepsInHTML(
         originCoords,
         destinationCoords,
-        "walking",
+        "walking"
       );
       const route = await getPolyline(
         originCoords,
         destinationCoords,
-        "walking",
+        "walking"
       );
 
       if (directions && directions.length > 0) {
@@ -489,13 +639,13 @@ const MultistepNavigationScreen = () => {
         locationParam = `&location=${userLocation.latitude},${userLocation.longitude}&radius=5000`;
       } else {
         console.warn(
-          "User location not available. Searching without location bias.",
+          "User location not available. Searching without location bias."
         );
       }
 
       // Use the session token to prevent caching of search results
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_MAPS_API_KEY}&components=country:ca${locationParam}&sessiontoken=${sessionTokenRef.current}`,
+        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_MAPS_API_KEY}&components=country:ca${locationParam}&sessiontoken=${sessionTokenRef.current}`
       );
 
       const { predictions } = await response.json();
@@ -525,13 +675,13 @@ const MultistepNavigationScreen = () => {
         locationParam = `&location=${userLocation.latitude},${userLocation.longitude}&radius=5000`;
       } else {
         console.warn(
-          "User location not available. Searching without location bias.",
+          "User location not available. Searching without location bias."
         );
       }
 
       // Use the session token to prevent caching of search results
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_MAPS_API_KEY}&components=country:ca${locationParam}&sessiontoken=${sessionTokenRef.current}`,
+        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_MAPS_API_KEY}&components=country:ca${locationParam}&sessiontoken=${sessionTokenRef.current}`
       );
 
       const { predictions } = await response.json();
@@ -547,7 +697,7 @@ const MultistepNavigationScreen = () => {
   const handleOriginSelection = async (placeId, description) => {
     try {
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry,formatted_address&key=${GOOGLE_MAPS_API_KEY}&sessiontoken=${sessionTokenRef.current}`,
+        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry,formatted_address&key=${GOOGLE_MAPS_API_KEY}&sessiontoken=${sessionTokenRef.current}`
       );
       const { result } = await response.json();
       if (result?.geometry?.location) {
@@ -573,7 +723,7 @@ const MultistepNavigationScreen = () => {
   const handleDestinationSelection = async (placeId, description) => {
     try {
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry,formatted_address&key=${GOOGLE_MAPS_API_KEY}&sessiontoken=${sessionTokenRef.current}`,
+        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry,formatted_address&key=${GOOGLE_MAPS_API_KEY}&sessiontoken=${sessionTokenRef.current}`
       );
       const { result } = await response.json();
 
@@ -599,7 +749,7 @@ const MultistepNavigationScreen = () => {
     const filtered = CONCORDIA_BUILDINGS.filter(
       (building) =>
         building.name.toLowerCase().includes(text.toLowerCase()) ||
-        building.id.toLowerCase().includes(text.toLowerCase()),
+        building.id.toLowerCase().includes(text.toLowerCase())
     );
     setBuildingSuggestions(filtered);
     setShowBuildingSuggestions(filtered.length > 0);
@@ -610,7 +760,7 @@ const MultistepNavigationScreen = () => {
     const filtered = CONCORDIA_BUILDINGS.filter(
       (building) =>
         building.name.toLowerCase().includes(text.toLowerCase()) ||
-        building.id.toLowerCase().includes(text.toLowerCase()),
+        building.id.toLowerCase().includes(text.toLowerCase())
     );
     setOriginBuildingSuggestions(filtered);
     setShowOriginBuildingSuggestions(filtered.length > 0);
@@ -640,7 +790,7 @@ const MultistepNavigationScreen = () => {
 
       // Find building details
       const foundBuilding = CONCORDIA_BUILDINGS.find(
-        (b) => b.id === buildingCode,
+        (b) => b.id === buildingCode
       );
 
       if (foundBuilding) {
@@ -686,7 +836,7 @@ const MultistepNavigationScreen = () => {
 
       // Find building details
       const foundBuilding = CONCORDIA_BUILDINGS.find(
-        (b) => b.id === buildingCode,
+        (b) => b.id === buildingCode
       );
 
       if (foundBuilding) {
@@ -891,11 +1041,14 @@ const MultistepNavigationScreen = () => {
       return "Library";
     if (id === "MB" || id.includes("MOLSON") || id.includes("JMSB"))
       return "JMSB";
-    if (id === "EV" || id.includes("ENGINEER")) return "EV";
+    if (id === "EV") return "EVBuilding";
+    if (id === "VE" || (id.includes("VANIER") && id.includes("EXTENSION")))
+      return "VanierExtension";
+    if (id === "VL" || (id.includes("VANIER") && id.includes("LIBRARY")))
+      return "VanierLibrary";
 
-    // Add more mappings as needed for other buildings
     console.log(
-      `No specific building type found for ${buildingId}, using default.`,
+      `No specific building type found for ${buildingId}, using default.`
     );
     return "HallBuilding"; // Default to Hall Building if no match
   };
@@ -925,9 +1078,11 @@ const MultistepNavigationScreen = () => {
     // Handle common variations for entrance
     if (
       typeof roomId === "string" &&
-      ["main entrance", "main", "lobby"].includes(roomId.toLowerCase())
+      ["main entrance", "main", "lobby", "main lobby"].includes(
+        roomId.toLowerCase()
+      )
     ) {
-      return "entrance";
+      return "Main lobby"; // Match the format in h1.js for Hall Building
     }
 
     // Make sure we're working with a string
@@ -936,6 +1091,47 @@ const MultistepNavigationScreen = () => {
     // For Hall Building: Convert H-903 format to H903 format
     if (roomIdStr.match(/^H-\d+$/i)) {
       return roomIdStr.replace(/^(H)-(\d+)$/i, "$1$2").toUpperCase();
+    }
+
+    // For JMSB (MB) building: Format like 1.293 directly
+    if (roomIdStr.match(/^MB-\d+\.\d+$/i)) {
+      return roomIdStr.replace(/^MB-(\d+\.\d+)$/i, "$1");
+    }
+
+    // For JMSB (MB) building: Convert MB-1-293 format to 1.293 format
+    if (roomIdStr.match(/^MB-\d+-\d+$/i)) {
+      return roomIdStr.replace(/^MB-(\d+)-(\d+)$/i, "$1.$2");
+    }
+
+    // For VE building: Convert VE-191 format to 191 format
+    if (roomIdStr.match(/^VE-\d+$/i)) {
+      return roomIdStr.replace(/^VE-(\d+)$/i, "$1");
+    }
+
+    // For VL building: Convert VL-101 format to 101 format
+    if (roomIdStr.match(/^VL-\d+$/i)) {
+      return roomIdStr.replace(/^VL-(\d+)$/i, "$1");
+    }
+
+    // For EV building: Convert EV-200 format to 200 format
+    if (roomIdStr.match(/^EV-\d+$/i)) {
+      return roomIdStr.replace(/^EV-(\d+)$/i, "$1");
+    }
+
+    // Handle other special room types like stairs, elevator, toilet, etc.
+    const specialRooms = [
+      "stairs",
+      "elevator",
+      "toilet",
+      "water_fountain",
+      "escalator",
+      "women_washroom",
+      "men_washroom",
+    ];
+    for (const special of specialRooms) {
+      if (roomIdStr.toLowerCase().includes(special.toLowerCase())) {
+        return special;
+      }
     }
 
     // For other buildings, follow similar pattern
@@ -1021,7 +1217,7 @@ const MultistepNavigationScreen = () => {
       ) {
         // Don't automatically show the modal on return - let user click button again if needed
         console.log(
-          "Returned to MultistepNavigation with indoor navigation data",
+          "Returned to MultistepNavigation with indoor navigation data"
         );
       }
     });
@@ -1158,7 +1354,7 @@ const MultistepNavigationScreen = () => {
         acc.longitude += point.longitude / outdoorRoute.length;
         return acc;
       },
-      { latitude: 0, longitude: 0 },
+      { latitude: 0, longitude: 0 }
     );
 
     // Convert route to Google Maps format
@@ -1294,7 +1490,7 @@ const MultistepNavigationScreen = () => {
                         source={{
                           html: generateFloorHtml(
                             indoorFloorPlans.start,
-                            indoorPaths?.start || [],
+                            indoorPaths?.start || []
                           ),
                         }}
                         style={styles.floorPlanWebView}
@@ -1336,7 +1532,7 @@ const MultistepNavigationScreen = () => {
                           source={{
                             html: generateFloorHtml(
                               indoorFloorPlans.end,
-                              indoorPaths?.end || [],
+                              indoorPaths?.end || []
                             ),
                           }}
                           style={styles.floorPlanWebView}
@@ -1674,28 +1870,91 @@ const MultistepNavigationScreen = () => {
                         { marginTop: 8 },
                         invalidOriginRoom && styles.invalidInput,
                       ]}
-                      placeholder={`Enter room number in ${originBuilding.name}`}
+                      placeholder={
+                        originBuilding.id === "MB"
+                          ? `Enter room number (e.g. 1.293 or 1-293)`
+                          : originBuilding.id === "VE"
+                            ? `Enter room number (e.g. 101 or stairs)`
+                            : originBuilding.id === "VL"
+                              ? `Enter room number (e.g. 101 or elevator)`
+                              : originBuilding.id === "EV"
+                                ? `Enter room number (e.g. 200 or stairs)`
+                                : `Enter room number in ${originBuilding.name}`
+                      }
                       value={originRoom}
                       onChangeText={(text) => {
-                        // Format the room ID properly
-                        const formattedRoom = !text.includes(
-                          `${originBuilding.id}-`,
-                        )
-                          ? `${originBuilding.id}-${text}`
-                          : text;
+                        // Format the room ID properly based on building type
+                        let formattedRoom;
+
+                        if (originBuilding.id === "MB") {
+                          // Special handling for MB rooms
+                          if (text.match(/^\d+\.\d+$/)) {
+                            // Already in format like 1.293
+                            formattedRoom = `MB-${text}`;
+                          } else if (text.match(/^\d+-\d+$/)) {
+                            // Format like 1-293, convert to MB-1-293
+                            formattedRoom = `MB-${text}`;
+                          } else if (!text.startsWith("MB-")) {
+                            formattedRoom = `MB-${text}`;
+                          } else {
+                            formattedRoom = text;
+                          }
+                        } else if (
+                          originBuilding.id === "VE" ||
+                          originBuilding.id === "VL" ||
+                          originBuilding.id === "EV"
+                        ) {
+                          // Handle special rooms for Vanier Extension, Vanier Library and EV Building
+                          const specialRooms = [
+                            "stairs",
+                            "elevator",
+                            "toilet",
+                            "escalator",
+                            "water_fountain",
+                          ];
+
+                          if (specialRooms.includes(text.toLowerCase())) {
+                            formattedRoom = text.toLowerCase();
+                          } else if (text.match(/^\d+$/)) {
+                            // Just a number like "101" - prefix with building code
+                            formattedRoom = `${originBuilding.id}-${text}`;
+                          } else if (
+                            !text.includes(`${originBuilding.id}-`) &&
+                            !specialRooms.includes(text.toLowerCase())
+                          ) {
+                            // Any other input without building prefix
+                            formattedRoom = `${originBuilding.id}-${text}`;
+                          } else {
+                            // Keep as is if already has building prefix
+                            formattedRoom = text;
+                          }
+                        } else {
+                          // Default handling for other buildings
+                          formattedRoom = !text.includes(
+                            `${originBuilding.id}-`
+                          )
+                            ? `${originBuilding.id}-${text}`
+                            : text;
+                        }
+
                         setOriginRoom(formattedRoom);
 
                         // Check if it's a valid room
                         const isValid = isValidRoom(
                           originBuilding.id,
-                          formattedRoom,
+                          formattedRoom
                         );
                         setInvalidOriginRoom(!isValid && text.length > 0);
                       }}
                     />
                     {invalidOriginRoom && (
                       <Text style={styles.errorText}>
-                        This room doesn&apos;t exist in {originBuilding.name}
+                        {originBuilding.id === "MB"
+                          ? `Room not found. Try a format like 1.293 or 1-293.`
+                          : originBuilding.id === "VE" ||
+                              originBuilding.id === "EV"
+                            ? `Room not found. Try a room number or "elevator"/"stairs".`
+                            : `This room doesn't exist in ${originBuilding.name}`}
                       </Text>
                     )}
                   </>
@@ -1821,7 +2080,7 @@ const MultistepNavigationScreen = () => {
                         onPress={() =>
                           handleDestinationSelection(
                             item.place_id,
-                            item.description,
+                            item.description
                           )
                         }
                         style={styles.predictionItem}
@@ -2149,7 +2408,7 @@ const MultistepNavigationScreen = () => {
             p &&
             p.nearestPoint &&
             typeof p.nearestPoint.x === "number" &&
-            typeof p.nearestPoint.y === "number",
+            typeof p.nearestPoint.y === "number"
         )
       : [];
 
@@ -2158,7 +2417,7 @@ const MultistepNavigationScreen = () => {
       validPoints.map((p) => ({
         x: p.nearestPoint.x,
         y: p.nearestPoint.y,
-      })),
+      }))
     );
 
     return `
