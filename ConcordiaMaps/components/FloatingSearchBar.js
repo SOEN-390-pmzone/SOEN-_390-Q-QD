@@ -182,7 +182,10 @@ const FloatingSearchBar = ({
         <TextInput
           ref={inputRef}
           value={displayValue}
-          onChangeText={searchPlaces}
+          onChangeText={(text) => {
+            if (onChangeText) onChangeText(text);
+            searchPlaces(text);
+          }}
           placeholder={placeholder || "Search for a place..."}
           style={styles.input}
           onFocus={onFocus}
