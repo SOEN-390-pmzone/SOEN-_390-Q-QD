@@ -27,6 +27,7 @@ import {
 import Header from "../Header";
 import NavBar from "../NavBar";
 import Footer from "../Footer";
+import FloorRegistry from "../../services/BuildingDataService";
 
 // List of Concordia buildings for suggestions
 const CONCORDIA_BUILDINGS = [
@@ -92,6 +93,50 @@ const MultistepNavigationScreen = () => {
   const [indoorNavigationParams, setIndoorNavigationParams] = useState(null);
 
   const [navigationSteps] = useState([]);
+
+  // State to track available rooms for building/validation
+  const [availableOriginRooms, setAvailableOriginRooms] = useState([]);
+  const [availableDestRooms, setAvailableDestRooms] = useState([]);
+  const [invalidOriginRoom, setInvalidOriginRoom] = useState(false);
+  const [invalidDestinationRoom, setInvalidDestinationRoom] = useState(false);
+
+  // Get all valid rooms for a building
+  const getValidRoomsForBuilding = (buildingId) => {
+    if (!buildingId) return [];
+
+    const buildingType = getBuildingTypeFromId(buildingId);
+    if (!buildingType) return [];
+
+    // Get all floors for the building
+    const building = FloorRegistry.getBuilding(buildingType);
+    if (!building || !building.floors) return [];
+
+    // Gather all rooms from all floors
+    const validRooms = [];
+    Object.values(building.floors).forEach((floor) => {
+      if (floor && floor.rooms) {
+        // Add all room IDs from this floor
+        Object.keys(floor.rooms).forEach((roomId) => {
+          validRooms.push(roomId);
+        });
+      }
+    });
+
+    return validRooms;
+  };
+
+  // Validate if a room exists in the building
+  const isValidRoom = (buildingId, roomId) => {
+    if (!buildingId || !roomId) return false;
+
+    // Special case for entrance
+    if (roomId.toLowerCase() === "entrance") return true;
+
+    const validRooms = getValidRoomsForBuilding(buildingId);
+    const normalizedRoomId = normalizeRoomId(roomId);
+
+    return validRooms.includes(normalizedRoomId);
+  };
 
   // Origin search state
   const [origin, setOrigin] = useState("");
@@ -576,6 +621,12 @@ const MultistepNavigationScreen = () => {
     setOriginBuilding(building);
     setOrigin(building.name);
     setShowOriginBuildingSuggestions(false);
+
+    // Load available rooms for this building
+    const validRooms = getValidRoomsForBuilding(building.id);
+    console.log(`Available origin rooms: ${availableOriginRooms.length}`);
+    setAvailableOriginRooms(validRooms);
+    setInvalidOriginRoom(false);
   };
 
   // Parse origin into building and room
@@ -653,6 +704,12 @@ const MultistepNavigationScreen = () => {
     setBuilding(building);
     setDestination(building.name);
     setShowBuildingSuggestions(false);
+
+    // Load available rooms for this building
+    const validRooms = getValidRoomsForBuilding(building.id);
+    console.log(`Available destination rooms: ${availableDestRooms.length}`);
+    setAvailableDestRooms(validRooms);
+    setInvalidDestinationRoom(false);
   };
 
   // Create navigation plan from inputs
@@ -675,14 +732,26 @@ const MultistepNavigationScreen = () => {
       originAddress = originDetails.formatted_address || origin;
     } else {
       // Origin is a classroom
-      if (!originBuilding || !originRoom) {
-        alert("Please enter a valid origin building and room");
+      if (!originBuilding) {
+        alert("Please enter a valid origin building");
         return;
       }
+
+      // If a room is specified, validate it
+      if (originRoom && originRoom !== "entrance") {
+        if (!isValidRoom(originBuilding.id, originRoom)) {
+          setInvalidOriginRoom(true);
+          alert(`Room ${originRoom} doesn't exist in ${originBuilding.name}`);
+          return;
+        }
+      }
+
       originCoords = getCoordinatesForClassroom(originBuilding);
       originBuildingId = originBuilding.id;
-      originRoomId = originRoom;
-      originAddress = `${originRoom}, ${originBuilding.name}`;
+      originRoomId = originRoom || "entrance"; // Default to entrance if no room
+      originAddress = originRoom
+        ? `${originRoom}, ${originBuilding.name}`
+        : `${originBuilding.name} entrance`;
     }
 
     // Get destination details
@@ -690,6 +759,41 @@ const MultistepNavigationScreen = () => {
     let destinationAddress = null;
     let destinationBuildingId = null;
     let destinationRoomId = null;
+
+    if (destinationInputType === "location") {
+      if (!destinationDetails) {
+        alert("Please enter a valid destination address");
+        return;
+      }
+      destinationCoords = {
+        latitude: destinationDetails.latitude,
+        longitude: destinationDetails.longitude,
+      };
+      destinationAddress = destinationDetails.formatted_address || destination;
+    } else {
+      // Destination is a classroom
+      if (!building) {
+        alert("Please enter a valid destination building");
+        return;
+      }
+
+      // If a room is specified, validate it
+      if (room) {
+        if (!isValidRoom(building.id, room)) {
+          setInvalidDestinationRoom(true);
+          alert(`Room ${room} doesn't exist in ${building.name}`);
+          return;
+        }
+      } else {
+        alert("Please enter a room number");
+        return;
+      }
+
+      destinationCoords = getCoordinatesForClassroom(building);
+      destinationBuildingId = building.id;
+      destinationRoomId = room;
+      destinationAddress = `${room}, ${building.name}`;
+    }
 
     if (destinationInputType === "location") {
       if (!destinationDetails) {
@@ -854,10 +958,6 @@ const MultistepNavigationScreen = () => {
       // Format room IDs properly
       let normalizedStartRoom = normalizeRoomId(step.startRoom);
       const normalizedEndRoom = normalizeRoomId(step.endRoom);
-
-      // Handle special case for entrance - don't map it here,
-      // let RoomToRoomNavigation handle the mapping based on available nodes
-      // This gives it more flexibility to work with the actual graph
 
       // Map building IDs directly to their proper types in FloorRegistry format
       let mappedBuildingType = step.buildingType;
@@ -1567,20 +1667,38 @@ const MultistepNavigationScreen = () => {
                 />
 
                 {originBuilding && (
-                  <TextInput
-                    style={[styles.roomInput, { marginTop: 8 }]}
-                    placeholder={`Enter room number in ${originBuilding.name}`}
-                    value={originRoom}
-                    onChangeText={(text) => {
-                      // Only add the building prefix if it's not already there
-                      if (!text.includes(`${originBuilding.id}-`)) {
-                        setOriginRoom(`${originBuilding.id}-${text}`);
-                      } else {
-                        setOriginRoom(text);
-                      }
-                    }}
-                    keyboardType="numeric"
-                  />
+                  <>
+                    <TextInput
+                      style={[
+                        styles.roomInput,
+                        { marginTop: 8 },
+                        invalidOriginRoom && styles.invalidInput,
+                      ]}
+                      placeholder={`Enter room number in ${originBuilding.name}`}
+                      value={originRoom}
+                      onChangeText={(text) => {
+                        // Format the room ID properly
+                        const formattedRoom = !text.includes(
+                          `${originBuilding.id}-`,
+                        )
+                          ? `${originBuilding.id}-${text}`
+                          : text;
+                        setOriginRoom(formattedRoom);
+
+                        // Check if it's a valid room
+                        const isValid = isValidRoom(
+                          originBuilding.id,
+                          formattedRoom,
+                        );
+                        setInvalidOriginRoom(!isValid && text.length > 0);
+                      }}
+                    />
+                    {invalidOriginRoom && (
+                      <Text style={styles.errorText}>
+                        This room doesn&apos;t exist in {originBuilding.name}
+                      </Text>
+                    )}
+                  </>
                 )}
 
                 {showOriginBuildingSuggestions && (
@@ -1732,20 +1850,33 @@ const MultistepNavigationScreen = () => {
                 />
 
                 {building && (
-                  <TextInput
-                    style={[styles.roomInput, { marginTop: 8 }]}
-                    placeholder={`Enter room number in ${building.name}`}
-                    value={room}
-                    onChangeText={(text) => {
-                      // Only add the building prefix if it's not already there
-                      if (!text.includes(`${building.id}-`)) {
-                        setRoom(`${building.id}-${text}`);
-                      } else {
-                        setRoom(text);
-                      }
-                    }}
-                    keyboardType="numeric"
-                  />
+                  <>
+                    <TextInput
+                      style={[
+                        styles.roomInput,
+                        { marginTop: 8 },
+                        invalidDestinationRoom && styles.invalidInput,
+                      ]}
+                      placeholder={`Enter room number in ${building.name}`}
+                      value={room}
+                      onChangeText={(text) => {
+                        // Format the room ID properly
+                        const formattedRoom = !text.includes(`${building.id}-`)
+                          ? `${building.id}-${text}`
+                          : text;
+                        setRoom(formattedRoom);
+
+                        // Check if it's a valid room
+                        const isValid = isValidRoom(building.id, formattedRoom);
+                        setInvalidDestinationRoom(!isValid && text.length > 0);
+                      }}
+                    />
+                    {invalidDestinationRoom && (
+                      <Text style={styles.errorText}>
+                        This room doesn&apos;t exist in {building.name}
+                      </Text>
+                    )}
+                  </>
                 )}
                 {showBuildingSuggestions && (
                   <ScrollView
@@ -2123,7 +2254,7 @@ const MultistepNavigationScreen = () => {
           
           // Setup SVG viewBox if needed
           try {
-            if (!svg.getAttribute('viewBox')) {
+            if (!svg.getAttribute("viewBox")) {
               // Wait a moment for SVG to render
               setTimeout(() => {
                 const bbox = svg.getBBox();
