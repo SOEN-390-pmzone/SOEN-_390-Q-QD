@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1742414378535" clover="3.2.0">
-  <project timestamp="1742414378535" name="All files">
+<coverage generated="1742939536078" clover="3.2.0">
+  <project timestamp="1742939536078" name="All files">
     <metrics statements="483" coveredstatements="441" conditionals="234" coveredconditionals="197" methods="124" coveredmethods="118" elements="841" coveredelements="756" complexity="0" loc="483" ncloc="483" packages="8" files="27" classes="27"/>
     <package name="ConcordiaMaps">
       <metrics statements="10" coveredstatements="10" conditionals="0" coveredconditionals="0" methods="3" coveredmethods="3"/>
@@ -334,20 +334,20 @@
         <line num="135" count="48" type="stmt"/>
         <line num="136" count="48" type="stmt"/>
         <line num="138" count="48" type="stmt"/>
-        <line num="140" count="1064" type="cond" truecount="4" falsecount="0"/>
+        <line num="140" count="1232" type="cond" truecount="4" falsecount="0"/>
         <line num="141" count="1" type="stmt"/>
         <line num="142" count="1" type="stmt"/>
-        <line num="146" count="1063" type="stmt"/>
-        <line num="149" count="1063" type="cond" truecount="1" falsecount="1"/>
-        <line num="151" count="1063" type="stmt"/>
-        <line num="152" count="1063" type="stmt"/>
-        <line num="153" count="1063" type="stmt"/>
-        <line num="156" count="1063" type="cond" truecount="2" falsecount="0"/>
+        <line num="146" count="1231" type="stmt"/>
+        <line num="149" count="1231" type="cond" truecount="1" falsecount="1"/>
+        <line num="151" count="1231" type="stmt"/>
+        <line num="152" count="1231" type="stmt"/>
+        <line num="153" count="1231" type="stmt"/>
+        <line num="156" count="1231" type="cond" truecount="2" falsecount="0"/>
         <line num="164" count="3" type="stmt"/>
-        <line num="168" count="1060" type="cond" truecount="4" falsecount="0"/>
-        <line num="169" count="1060" type="cond" truecount="4" falsecount="0"/>
-        <line num="171" count="1060" type="stmt"/>
-        <line num="173" count="1060" type="cond" truecount="2" falsecount="0"/>
+        <line num="168" count="1228" type="cond" truecount="4" falsecount="0"/>
+        <line num="169" count="1228" type="cond" truecount="4" falsecount="0"/>
+        <line num="171" count="1228" type="stmt"/>
+        <line num="173" count="1228" type="cond" truecount="2" falsecount="0"/>
         <line num="176" count="16" type="stmt"/>
         <line num="180" count="118" type="stmt"/>
         <line num="181" count="118" type="stmt"/>

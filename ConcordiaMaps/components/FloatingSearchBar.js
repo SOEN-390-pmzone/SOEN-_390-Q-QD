@@ -19,8 +19,7 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [predictions, setPredictions] = useState([]);
   const [loading, setLoading] = useState(false);
-  // eslint-disable-next-line no-unused-vars
-  const [selectedLocation, setSelectedLocation] = useState(""); // reason: necessary fo running the appropriate tests.
+  const setSelectedLocationDescription = useState("")[1];
   const [userLocation, setUserLocation] = useState(null);
   const sessionTokenRef = useRef("");
 
@@ -76,7 +75,7 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
 
   const searchPlaces = async (text) => {
     setSearchQuery(text);
-    setSelectedLocation("");
+    setSelectedLocationDescription("");
     if (text.length < 3) {
       setPredictions([]);
       return;
@@ -89,13 +88,13 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
         locationParam = `&location=${userLocation.latitude},${userLocation.longitude}&radius=5000`;
       } else {
         console.warn(
-          "User location not available. Searching without location bias.",
+          "User location not available. Searching without location bias."
         );
       }
 
       //use the session token to prevent caching of search results
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_MAPS_API_KEY}&components=country:ca${locationParam}&sessiontoken=${sessionTokenRef.current}`,
+        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_MAPS_API_KEY}&components=country:ca${locationParam}&sessiontoken=${sessionTokenRef.current}`
       );
 
       const { predictions } = await response.json();
@@ -110,7 +109,7 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
   const handleSelection = async (placeId, description) => {
     try {
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry&key=${GOOGLE_MAPS_API_KEY}&sessiontoken=${sessionTokenRef.current}`,
+        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry&key=${GOOGLE_MAPS_API_KEY}&sessiontoken=${sessionTokenRef.current}`
       );
       const { result } = await response.json();
       if (result?.geometry?.location) {
@@ -119,7 +118,7 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
           longitude: result.geometry.location.lng,
         });
         setSearchQuery(description);
-        setSelectedLocation(description);
+        setSelectedLocationDescription(description);
         setPredictions([]);
 
         // Use the function defined above
@@ -145,7 +144,7 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
           <TouchableOpacity
             onPress={() => {
               setSearchQuery("");
-              setSelectedLocation("");
+              setSelectedLocationDescription("");
               setPredictions([]);
             }}
           >
