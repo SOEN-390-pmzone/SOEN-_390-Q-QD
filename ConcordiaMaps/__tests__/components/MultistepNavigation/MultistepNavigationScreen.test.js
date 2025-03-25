@@ -776,16 +776,16 @@ describe("MultistepNavigationScreen", () => {
         expect.objectContaining({
           buildingId: "H",
           buildingType: "HallBuilding",
-          startRoom: "entrance",
-          endRoom: "H920", // Note: no hyphen in room number
+          startRoom: "Main lobby", // Changed from "entrance" to "Main lobby"
+          endRoom: "H920", // Expect "H920" without hyphen as that's how normalizeRoomId formats it
           startFloor: "1",
           endFloor: "9",
           skipSelection: true,
-          returnScreen: "MultistepNavigation",
         }),
       );
     });
   });
+
   test("handles parseOriginClassroom with Hall Building full name", async () => {
     // Testing parseOriginClassroom with full building name (lines ~1300-1320)
     const { getAllByText, getByPlaceholderText } = render(
