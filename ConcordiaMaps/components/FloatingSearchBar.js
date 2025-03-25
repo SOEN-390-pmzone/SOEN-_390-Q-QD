@@ -25,6 +25,7 @@ const FloatingSearchBar = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [predictions, setPredictions] = useState([]);
   const [loading, setLoading] = useState(false);
+  const setSelectedLocationDescription = useState("")[1];
   const [userLocation, setUserLocation] = useState(null);
   const sessionTokenRef = useRef("");
   const inputRef = useRef(null); // Add ref for TextInput
@@ -96,12 +97,10 @@ const FloatingSearchBar = ({
         }
 
         let location = await Location.getCurrentPositionAsync({});
-        const userCoords = {
+        setUserLocation({
           latitude: location.coords.latitude,
           longitude: location.coords.longitude,
-        };
-
-        setUserLocation(userCoords);
+        });
       } catch (error) {
         console.error("Error getting location:", error);
       }
@@ -110,10 +109,7 @@ const FloatingSearchBar = ({
 
   const searchPlaces = async (text) => {
     setSearchQuery(text);
-    if (onChangeText) {
-      onChangeText(text);
-    }
-
+    setSelectedLocationDescription("");
     if (text.length < 3) {
       setPredictions([]);
       return;
@@ -151,20 +147,12 @@ const FloatingSearchBar = ({
       );
       const { result } = await response.json();
       if (result?.geometry?.location) {
-        // Pass both location and description to parent
-        onPlaceSelect(
-          {
-            latitude: result.geometry.location.lat,
-            longitude: result.geometry.location.lng,
-          },
-          description,
-        );
-
-        // Update the display value
-        if (onChangeText) {
-          onChangeText(description);
-        }
-
+        onPlaceSelect({
+          latitude: result.geometry.location.lat,
+          longitude: result.geometry.location.lng,
+        });
+        setSearchQuery(description);
+        setSelectedLocationDescription(description);
         setPredictions([]);
         setSearchQuery(description);
 
@@ -194,7 +182,10 @@ const FloatingSearchBar = ({
         <TextInput
           ref={inputRef}
           value={displayValue}
-          onChangeText={searchPlaces}
+          onChangeText={(text) => {
+            if (onChangeText) onChangeText(text);
+            searchPlaces(text);
+          }}
           placeholder={placeholder || "Search for a place..."}
           style={styles.input}
           onFocus={onFocus}
@@ -204,6 +195,7 @@ const FloatingSearchBar = ({
           <TouchableOpacity
             onPress={() => {
               setSearchQuery("");
+              setSelectedLocationDescription("");
               setPredictions([]);
               if (onChangeText) {
                 onChangeText("");
