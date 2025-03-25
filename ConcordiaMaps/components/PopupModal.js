@@ -3,8 +3,24 @@ import { Modal, View, Text, TouchableOpacity, Alert } from "react-native";
 import PropTypes from "prop-types";
 import styles from "../styles/DirectionBox.style";
 
-const PopupModal = ({ isVisible, data, onClose }) => {
-  const { name, fullBuildingName, address } = data;
+// Building to floor selector mapping
+const INDOOR_NAVIGATION_BUILDINGS = {
+  "Henry F. Hall": "HallBuilding",
+  "John Molson School Of Business": "JMSB",
+};
+
+const PopupModal = ({ isVisible, data, onClose, navigation }) => {
+  const handleFloorSelector = () => {
+    onClose(); // Close the modal first
+    const buildingType = INDOOR_NAVIGATION_BUILDINGS[data.name];
+    navigation.navigate("FloorSelector", {
+      buildingName: data.name,
+      buildingType: buildingType,
+    });
+  };
+
+  // Check if the building has indoor navigation available
+  const hasIndoorNavigation = data && data.name in INDOOR_NAVIGATION_BUILDINGS;
 
   return (
     <Modal
@@ -15,13 +31,9 @@ const PopupModal = ({ isVisible, data, onClose }) => {
     >
       <View style={styles.modalOverlay}>
         <View style={styles.modalContainer}>
-          <Text style={styles.modalTitle}>{name || "Building Name"}</Text>
-          <Text style={styles.modalText1}>
-            {fullBuildingName || "Full Building Name"}
-          </Text>
-          <Text style={styles.modalText}>
-            {address || "Address not available"}
-          </Text>
+          <Text style={styles.modalTitle}>{data?.name}</Text>
+          <Text style={styles.modalText1}>{data?.fullBuildingName}</Text>
+          <Text style={styles.modalText}>{data?.address}</Text>
 
           <View style={styles.buttonsContainer}>
             <TouchableOpacity style={styles.closeButton} onPress={onClose}>
@@ -36,6 +48,17 @@ const PopupModal = ({ isVisible, data, onClose }) => {
             >
               <Text style={styles.getDirectionsButtonText}>Get Directions</Text>
             </TouchableOpacity>
+
+            {hasIndoorNavigation && (
+              <TouchableOpacity
+                style={styles.getDirectionsButton}
+                onPress={handleFloorSelector}
+              >
+                <Text style={styles.getDirectionsButtonText}>
+                  Floor Selector
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
 
           {[
@@ -44,7 +67,7 @@ const PopupModal = ({ isVisible, data, onClose }) => {
             "Vanier Library",
             "Central Building",
             "Vanier Extension",
-          ].includes(name) && (
+          ].includes(data?.name) && (
             <TouchableOpacity
               style={styles.getDirectionsButton1}
               onPress={() =>
@@ -70,6 +93,7 @@ PopupModal.propTypes = {
     address: PropTypes.string,
   }).isRequired,
   onClose: PropTypes.func.isRequired,
+  navigation: PropTypes.object.isRequired,
 };
 
 export default PopupModal;

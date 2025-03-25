@@ -1,10 +1,9 @@
 ---
 name: Weekend Shuttle Schedule Bug
 about: Create a report to help us improve
-title: ''
-labels: ''
-assignees: ''
-
+title: ""
+labels: ""
+assignees: ""
 ---
 
 **Describe the bug**

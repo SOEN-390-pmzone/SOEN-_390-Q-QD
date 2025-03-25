@@ -16,9 +16,22 @@ describe("PopupModal Component", () => {
 
   const mockOnClose = jest.fn();
 
+  // Create a mock navigation object
+  const mockNavigation = {
+    navigate: jest.fn(),
+    goBack: jest.fn(),
+    setOptions: jest.fn(),
+    // Add any other navigation methods you might need
+  };
+
   test("renders correctly when visible", () => {
     render(
-      <PopupModal isVisible={true} data={mockData} onClose={mockOnClose} />,
+      <PopupModal
+        isVisible={true}
+        data={mockData}
+        onClose={mockOnClose}
+        navigation={mockNavigation}
+      />,
     );
 
     // Check if modal content is displayed
@@ -29,7 +42,12 @@ describe("PopupModal Component", () => {
 
   test("does not render when not visible", () => {
     const { queryByText } = render(
-      <PopupModal isVisible={false} data={mockData} onClose={mockOnClose} />,
+      <PopupModal
+        isVisible={false}
+        data={mockData}
+        onClose={mockOnClose}
+        navigation={mockNavigation}
+      />,
     );
 
     // Ensure modal content is NOT present
@@ -38,7 +56,12 @@ describe("PopupModal Component", () => {
 
   test("calls onClose when close button is pressed", () => {
     render(
-      <PopupModal isVisible={true} data={mockData} onClose={mockOnClose} />,
+      <PopupModal
+        isVisible={true}
+        data={mockData}
+        onClose={mockOnClose}
+        navigation={mockNavigation}
+      />,
     );
 
     const closeButton = screen.getByText("Close");
@@ -49,7 +72,12 @@ describe("PopupModal Component", () => {
 
   test("triggers alert when get directions button is pressed", () => {
     render(
-      <PopupModal isVisible={true} data={mockData} onClose={mockOnClose} />,
+      <PopupModal
+        isVisible={true}
+        data={mockData}
+        onClose={mockOnClose}
+        navigation={mockNavigation}
+      />,
     );
 
     const getDirectionsButton = screen.getByText("Get Directions");
