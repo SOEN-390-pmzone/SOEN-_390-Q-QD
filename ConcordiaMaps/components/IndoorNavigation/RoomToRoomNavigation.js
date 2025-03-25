@@ -774,7 +774,6 @@ const RoomToRoomNavigation = () => {
                   domStorageEnabled={true}
                   cacheEnabled={false}
                   incognito={true}
-                  key={`start-${startFloor}-${startFloorPath.length}`} // Add a key to control remounting
                 />
               </View>
             </View>
@@ -868,7 +867,6 @@ const RoomToRoomNavigation = () => {
           onLoadEnd: () => console.log("Modal WebView loaded"),
           cacheEnabled: false,
           incognito: true,
-          key: `expanded-${expandedFloor}-${pathNodes.length}`,
         }}
       />
     );
