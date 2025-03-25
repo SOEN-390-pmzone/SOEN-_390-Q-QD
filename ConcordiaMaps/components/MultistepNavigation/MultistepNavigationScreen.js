@@ -202,7 +202,7 @@ const MultistepNavigationScreen = () => {
     // Special case for entrance
     if (
       ["entrance", "main lobby", "lobby", "main entrance"].includes(
-        roomId.toLowerCase(),
+        roomId.toLowerCase()
       )
     )
       return true;
@@ -230,7 +230,7 @@ const MultistepNavigationScreen = () => {
 
     // Debug output to check available rooms for a building
     console.log(
-      `Checking room ${roomId} against ${validRooms.length} valid rooms for ${buildingId}`,
+      `Checking room ${roomId} against ${validRooms.length} valid rooms for ${buildingId}`
     );
 
     // First try direct match
@@ -301,7 +301,7 @@ const MultistepNavigationScreen = () => {
   const [originBuilding, setOriginBuilding] = useState(null);
   const [originRoom, setOriginRoom] = useState("");
   const [originBuildingSuggestions, setOriginBuildingSuggestions] = useState(
-    [],
+    []
   );
   const [showOriginBuildingSuggestions, setShowOriginBuildingSuggestions] =
     useState(false);
@@ -391,7 +391,7 @@ const MultistepNavigationScreen = () => {
         try {
           // Add region and components parameters to bias results to Montreal, Canada
           const geocodeResponse = await fetch(
-            `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(step.startPoint)}&key=${GOOGLE_MAPS_API_KEY}&region=ca&components=country:ca|locality:montreal`,
+            `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(step.startPoint)}&key=${GOOGLE_MAPS_API_KEY}&region=ca&components=country:ca|locality:montreal`
           );
           const geocodeData = await geocodeResponse.json();
 
@@ -435,7 +435,7 @@ const MultistepNavigationScreen = () => {
             b.id.toUpperCase() === step.startPoint.toUpperCase() ||
             step.startPoint.toUpperCase().includes(b.id.toUpperCase()) ||
             b.name.toUpperCase().includes(step.startPoint.toUpperCase()) ||
-            step.startPoint.toUpperCase().includes(b.name.toUpperCase()),
+            step.startPoint.toUpperCase().includes(b.name.toUpperCase())
         );
 
         if (startBuilding) {
@@ -451,7 +451,7 @@ const MultistepNavigationScreen = () => {
           }
           console.log(
             `Using hardcoded coordinates for ${startBuilding.id}:`,
-            originCoords,
+            originCoords
           );
         }
       }
@@ -462,7 +462,7 @@ const MultistepNavigationScreen = () => {
         if (typeof step.endPoint === "string") {
           // Check if it's a building ID first
           const destinationBuilding = CONCORDIA_BUILDINGS.find(
-            (b) => b.id === step.endPoint || b.name.includes(step.endPoint),
+            (b) => b.id === step.endPoint || b.name.includes(step.endPoint)
           );
 
           if (destinationBuilding) {
@@ -484,7 +484,7 @@ const MultistepNavigationScreen = () => {
               // Try to geocode the building address
               try {
                 const geocodeResponse = await fetch(
-                  `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(step.endPoint)}&key=${GOOGLE_MAPS_API_KEY}&region=ca&components=country:ca|locality:montreal`,
+                  `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(step.endPoint)}&key=${GOOGLE_MAPS_API_KEY}&region=ca&components=country:ca|locality:montreal`
                 );
                 const geocodeData = await geocodeResponse.json();
 
@@ -503,7 +503,7 @@ const MultistepNavigationScreen = () => {
             // If not a building ID, try to geocode as address
             try {
               const geocodeResponse = await fetch(
-                `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(step.endPoint)}&key=${GOOGLE_MAPS_API_KEY}&region=ca&components=country:ca|locality:montreal`,
+                `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(step.endPoint)}&key=${GOOGLE_MAPS_API_KEY}&region=ca&components=country:ca|locality:montreal`
               );
               const geocodeData = await geocodeResponse.json();
 
@@ -534,19 +534,19 @@ const MultistepNavigationScreen = () => {
         "Fetching directions from",
         originCoords,
         "to",
-        destinationCoords,
+        destinationCoords
       );
 
       // Get directions and polyline using your existing hook
       const directions = await getStepsInHTML(
         originCoords,
         destinationCoords,
-        "walking",
+        "walking"
       );
       const route = await getPolyline(
         originCoords,
         destinationCoords,
-        "walking",
+        "walking"
       );
 
       if (directions && directions.length > 0) {
@@ -635,13 +635,13 @@ const MultistepNavigationScreen = () => {
         locationParam = `&location=${userLocation.latitude},${userLocation.longitude}&radius=5000`;
       } else {
         console.warn(
-          "User location not available. Searching without location bias.",
+          "User location not available. Searching without location bias."
         );
       }
 
       // Use the session token to prevent caching of search results
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_MAPS_API_KEY}&components=country:ca${locationParam}&sessiontoken=${sessionTokenRef.current}`,
+        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_MAPS_API_KEY}&components=country:ca${locationParam}&sessiontoken=${sessionTokenRef.current}`
       );
 
       const { predictions } = await response.json();
@@ -671,13 +671,13 @@ const MultistepNavigationScreen = () => {
         locationParam = `&location=${userLocation.latitude},${userLocation.longitude}&radius=5000`;
       } else {
         console.warn(
-          "User location not available. Searching without location bias.",
+          "User location not available. Searching without location bias."
         );
       }
 
       // Use the session token to prevent caching of search results
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_MAPS_API_KEY}&components=country:ca${locationParam}&sessiontoken=${sessionTokenRef.current}`,
+        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_MAPS_API_KEY}&components=country:ca${locationParam}&sessiontoken=${sessionTokenRef.current}`
       );
 
       const { predictions } = await response.json();
@@ -693,7 +693,7 @@ const MultistepNavigationScreen = () => {
   const handleOriginSelection = async (placeId, description) => {
     try {
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry,formatted_address&key=${GOOGLE_MAPS_API_KEY}&sessiontoken=${sessionTokenRef.current}`,
+        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry,formatted_address&key=${GOOGLE_MAPS_API_KEY}&sessiontoken=${sessionTokenRef.current}`
       );
       const { result } = await response.json();
       if (result?.geometry?.location) {
@@ -719,7 +719,7 @@ const MultistepNavigationScreen = () => {
   const handleDestinationSelection = async (placeId, description) => {
     try {
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry,formatted_address&key=${GOOGLE_MAPS_API_KEY}&sessiontoken=${sessionTokenRef.current}`,
+        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry,formatted_address&key=${GOOGLE_MAPS_API_KEY}&sessiontoken=${sessionTokenRef.current}`
       );
       const { result } = await response.json();
 
@@ -745,7 +745,7 @@ const MultistepNavigationScreen = () => {
     const filtered = CONCORDIA_BUILDINGS.filter(
       (building) =>
         building.name.toLowerCase().includes(text.toLowerCase()) ||
-        building.id.toLowerCase().includes(text.toLowerCase()),
+        building.id.toLowerCase().includes(text.toLowerCase())
     );
     setBuildingSuggestions(filtered);
     setShowBuildingSuggestions(filtered.length > 0);
@@ -756,7 +756,7 @@ const MultistepNavigationScreen = () => {
     const filtered = CONCORDIA_BUILDINGS.filter(
       (building) =>
         building.name.toLowerCase().includes(text.toLowerCase()) ||
-        building.id.toLowerCase().includes(text.toLowerCase()),
+        building.id.toLowerCase().includes(text.toLowerCase())
     );
     setOriginBuildingSuggestions(filtered);
     setShowOriginBuildingSuggestions(filtered.length > 0);
@@ -786,7 +786,7 @@ const MultistepNavigationScreen = () => {
 
       // Find building details
       const foundBuilding = CONCORDIA_BUILDINGS.find(
-        (b) => b.id === buildingCode,
+        (b) => b.id === buildingCode
       );
 
       if (foundBuilding) {
@@ -819,6 +819,18 @@ const MultistepNavigationScreen = () => {
     return coordinates;
   };
 
+  const getOriginRoomPlaceholder = (buildingId) => {
+    if (buildingId === "VE") {
+      return `Enter room number (e.g. 101 or stairs)`;
+    } else if (buildingId === "VL") {
+      return `Enter room number (e.g. 101 or elevator)`;
+    } else if (buildingId === "EV") {
+      return `Enter room number (e.g. 200 or stairs)`;
+    } else {
+      return `Enter room number in ${originBuilding.name}`;
+    }
+  };
+
   // Parse destination into building and room
   const parseDestination = (text) => {
     setDestination(text);
@@ -832,7 +844,7 @@ const MultistepNavigationScreen = () => {
 
       // Find building details
       const foundBuilding = CONCORDIA_BUILDINGS.find(
-        (b) => b.id === buildingCode,
+        (b) => b.id === buildingCode
       );
 
       if (foundBuilding) {
@@ -1105,7 +1117,7 @@ const MultistepNavigationScreen = () => {
       return "VanierLibrary";
 
     console.log(
-      `No specific building type found for ${buildingId}, using default.`,
+      `No specific building type found for ${buildingId}, using default.`
     );
     return "HallBuilding"; // Default to Hall Building if no match
   };
@@ -1117,7 +1129,7 @@ const MultistepNavigationScreen = () => {
     // Special case for non-numeric room identifiers
     if (
       /^(entrance|lobby|main lobby|main entrance|elevator|stairs|escalator|toilet)$/i.test(
-        roomId,
+        roomId
       )
     ) {
       return "1"; // Default these to first floor
@@ -1128,28 +1140,17 @@ const MultistepNavigationScreen = () => {
       return roomId.split(".")[0];
     }
 
-    // For MB-1-293 format
-    const mbMatch = roomId.match(/^MB-(\d+)-\d+$/i);
-    if (mbMatch && mbMatch[1]) {
-      return mbMatch[1];
-    }
+    const floorNumber =
+      roomId.match(/^MB-(\d+)-\d+$/i)?.[1] ||
+      // For MB-1.293 format
+      roomId.match(/^MB-(\d+)\.\d+$/i)?.[1] ||
+      // For standard room formats like H-920 or H920
+      roomId.match(/^[A-Za-z]+-?(\d)(\d+)$/i)?.[1] ||
+      // For simple numbered rooms like "101" (1st floor)
+      roomId.match(/^(\d)(\d+)$/)?.[1];
 
-    // For MB-1.293 format
-    const mbDotMatch = roomId.match(/^MB-(\d+)\.\d+$/i);
-    if (mbDotMatch && mbDotMatch[1]) {
-      return mbDotMatch[1];
-    }
-
-    // For standard room formats like H-920 or H920
-    const standardMatch = roomId.match(/^[A-Za-z]+-?(\d)(\d+)$/i);
-    if (standardMatch && standardMatch[1]) {
-      return standardMatch[1];
-    }
-
-    // For simple numbered rooms like "101" (1st floor)
-    const simpleMatch = roomId.match(/^(\d)(\d+)$/);
-    if (simpleMatch && simpleMatch[1]) {
-      return simpleMatch[1];
+    if (floorNumber) {
+      return floorNumber;
     }
 
     return "1"; // Default to first floor if no pattern matches
@@ -1163,45 +1164,51 @@ const MultistepNavigationScreen = () => {
     if (
       typeof roomId === "string" &&
       ["entrance", "main entrance", "main", "lobby", "main lobby"].includes(
-        roomId.toLowerCase(),
+        roomId.toLowerCase()
       )
     ) {
       // For Hall Building, "Main lobby" seems to be the correct format
       return "Main lobby";
     }
 
-    // Rest of the function remains the same...
     // Make sure we're working with a string
     const roomIdStr = String(roomId);
 
-    // For Hall Building: Convert H-903 format to H903 format
-    if (roomIdStr.match(/^H-\d+$/i)) {
-      return roomIdStr.replace(/^(H)-(\d+)$/i, "$1$2").toUpperCase();
-    }
+    // Array of regex patterns and their replacement logic
+    const patterns = [
+      // For Hall Building: Convert H-903 format to H903 format
+      {
+        regex: /^(H)-(\d+)$/i,
+        replace: (match, p1, p2) => `${p1}${p2}`.toUpperCase(),
+      },
+      // For JMSB (MB) building: Format like 1.293 directly
+      {
+        regex: /^MB-(\d+\.\d+)$/i,
+        replace: (match, p1) => p1,
+      },
+      // For JMSB (MB) building: Convert MB-1-293 format to 1.293 format
+      {
+        regex: /^MB-(\d+)-(\d+)$/i,
+        replace: (match, p1, p2) => `${p1}.${p2}`,
+      },
+      // For VE building: Convert VE-191 format to 191 format
+      {
+        regex: /^VE-(\d+)$/i,
+        replace: (match, p1) => p1,
+      },
+      // For VL building: Convert VL-101 format to 101 format
+      {
+        regex: /^VL-(\d+)$/i,
+        replace: (match, p1) => p1,
+      },
+    ];
 
-    // For JMSB (MB) building: Format like 1.293 directly
-    if (roomIdStr.match(/^MB-\d+\.\d+$/i)) {
-      return roomIdStr.replace(/^MB-(\d+\.\d+)$/i, "$1");
-    }
-
-    // For JMSB (MB) building: Convert MB-1-293 format to 1.293 format
-    if (roomIdStr.match(/^MB-\d+-\d+$/i)) {
-      return roomIdStr.replace(/^MB-(\d+)-(\d+)$/i, "$1.$2");
-    }
-
-    // For VE building: Convert VE-191 format to 191 format
-    if (roomIdStr.match(/^VE-\d+$/i)) {
-      return roomIdStr.replace(/^VE-(\d+)$/i, "$1");
-    }
-
-    // For VL building: Convert VL-101 format to 101 format
-    if (roomIdStr.match(/^VL-\d+$/i)) {
-      return roomIdStr.replace(/^VL-(\d+)$/i, "$1");
-    }
-
-    // For EV building: Convert EV-200 format to 200 format
-    if (roomIdStr.match(/^EV-\d+$/i)) {
-      return roomIdStr.replace(/^EV-(\d+)$/i, "$1");
+    // Try each pattern in sequence
+    for (const pattern of patterns) {
+      const match = pattern.regex.exec(roomIdStr);
+      if (match) {
+        return pattern.replace(...match);
+      }
     }
 
     // Handle other special room types like stairs, elevator, toilet, etc.
@@ -1319,7 +1326,7 @@ const MultistepNavigationScreen = () => {
       ) {
         // Don't automatically show the modal on return - let user click button again if needed
         console.log(
-          "Returned to MultistepNavigation with indoor navigation data",
+          "Returned to MultistepNavigation with indoor navigation data"
         );
       }
     });
@@ -1456,7 +1463,7 @@ const MultistepNavigationScreen = () => {
         acc.longitude += point.longitude / outdoorRoute.length;
         return acc;
       },
-      { latitude: 0, longitude: 0 },
+      { latitude: 0, longitude: 0 }
     );
 
     // Convert route to Google Maps format
@@ -1592,7 +1599,7 @@ const MultistepNavigationScreen = () => {
                         source={{
                           html: generateFloorHtml(
                             indoorFloorPlans.start,
-                            indoorPaths?.start || [],
+                            indoorPaths?.start || []
                           ),
                         }}
                         style={styles.floorPlanWebView}
@@ -1634,7 +1641,7 @@ const MultistepNavigationScreen = () => {
                           source={{
                             html: generateFloorHtml(
                               indoorFloorPlans.end,
-                              indoorPaths?.end || [],
+                              indoorPaths?.end || []
                             ),
                           }}
                           style={styles.floorPlanWebView}
@@ -1972,17 +1979,7 @@ const MultistepNavigationScreen = () => {
                         { marginTop: 8 },
                         invalidOriginRoom && styles.invalidInput,
                       ]}
-                      placeholder={
-                        originBuilding.id === "MB"
-                          ? `Enter room number (e.g. 1.293 or 1-293)`
-                          : originBuilding.id === "VE"
-                            ? `Enter room number (e.g. 101 or stairs)`
-                            : originBuilding.id === "VL"
-                              ? `Enter room number (e.g. 101 or elevator)`
-                              : originBuilding.id === "EV"
-                                ? `Enter room number (e.g. 200 or stairs)`
-                                : `Enter room number in ${originBuilding.name}`
-                      }
+                      placeholder={getOriginRoomPlaceholder(originBuilding.id)}
                       value={originRoom}
                       onChangeText={(text) => {
                         // Format the room ID properly based on building type
@@ -2033,7 +2030,7 @@ const MultistepNavigationScreen = () => {
                         } else {
                           // Default handling for other buildings
                           formattedRoom = !text.includes(
-                            `${originBuilding.id}-`,
+                            `${originBuilding.id}-`
                           )
                             ? `${originBuilding.id}-${text}`
                             : text;
@@ -2044,7 +2041,7 @@ const MultistepNavigationScreen = () => {
                         // Check if it's a valid room
                         const isValid = isValidRoom(
                           originBuilding.id,
-                          formattedRoom,
+                          formattedRoom
                         );
                         setInvalidOriginRoom(!isValid && text.length > 0);
                       }}
@@ -2182,7 +2179,7 @@ const MultistepNavigationScreen = () => {
                         onPress={() =>
                           handleDestinationSelection(
                             item.place_id,
-                            item.description,
+                            item.description
                           )
                         }
                         style={styles.predictionItem}
@@ -2510,7 +2507,7 @@ const MultistepNavigationScreen = () => {
             p &&
             p.nearestPoint &&
             typeof p.nearestPoint.x === "number" &&
-            typeof p.nearestPoint.y === "number",
+            typeof p.nearestPoint.y === "number"
         )
       : [];
 
@@ -2519,7 +2516,7 @@ const MultistepNavigationScreen = () => {
       validPoints.map((p) => ({
         x: p.nearestPoint.x,
         y: p.nearestPoint.y,
-      })),
+      }))
     );
 
     return `
