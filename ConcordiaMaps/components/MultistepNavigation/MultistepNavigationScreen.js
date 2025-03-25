@@ -119,7 +119,7 @@ const MultistepNavigationScreen = () => {
 
     // Get all floors for the building
     const building = FloorRegistry.getBuilding(buildingType);
-    if (!building || !building.floors) return [];
+    if (!building?.floors) return [];
 
     // Always add common room types for all buildings
     const commonRooms = [
@@ -408,11 +408,7 @@ const MultistepNavigationScreen = () => {
         } catch (geocodeError) {
           console.error("Error geocoding startPoint:", geocodeError);
         }
-      } else if (
-        step.startPoint &&
-        step.startPoint.latitude &&
-        step.startPoint.longitude
-      ) {
+      } else if (step.startPoint?.latitude && step.startPoint?.longitude) {
         // If startPoint is already coordinates, use directly
         originCoords = step.startPoint;
         console.log("Using startPoint coordinates:", originCoords);
