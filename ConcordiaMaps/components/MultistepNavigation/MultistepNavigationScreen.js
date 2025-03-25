@@ -136,7 +136,7 @@ const MultistepNavigationScreen = () => {
     // Gather all rooms from all floors
     const validRooms = [...commonRooms];
     Object.values(building.floors).forEach((floor) => {
-      if (floor && floor.rooms) {
+      if (floor?.rooms) {
         // Add all room IDs from this floor
         Object.keys(floor.rooms).forEach((roomId) => {
           validRooms.push(roomId);
