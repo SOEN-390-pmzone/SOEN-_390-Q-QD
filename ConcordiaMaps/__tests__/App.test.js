@@ -181,18 +181,15 @@ describe("App", () => {
     // Ensure the button is found before proceeding
     expect(directionsButton).toBeTruthy();
 
-    // Use act to properly handle the event and state updates
+    // Wrap the fireEvent in act and add a small delay
     await act(async () => {
       fireEvent.press(directionsButton);
+      // Add a small delay to allow for state updates
+      await new Promise((resolve) => setTimeout(resolve, 0));
     });
 
-    // Allow more time for navigation to complete
-    await waitFor(
-      () => {
-        expect(mockNavigate).toHaveBeenCalledWith("GetDirections");
-      },
-      { timeout: 2000 },
-    );
+    // Verify navigation occurred
+    expect(mockNavigate).toHaveBeenCalledWith("GetDirections");
   });
 
   it("provides LocationProvider to child components", async () => {
