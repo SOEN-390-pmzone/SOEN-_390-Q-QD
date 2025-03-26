@@ -81,19 +81,19 @@ class FloorRegistry {
     let floor = "1"; // Default floor
 
     // For Hall Building rooms like H-920, H920
-    const hallMatch = roomId.match(/h[-]?(\d)/i);
+    const hallMatch = roomId.match(/^h-?(\d)/i);
     if (hallMatch) {
       return hallMatch[1];
     }
 
     // For MB/JMSB rooms like 1.293 or 1-293
-    const mbMatch = roomId.match(/^(?:mb[-]?)?(\d+)[.-]/i);
+    const mbMatch = roomId.match(/^(mb-?)?(\d+)[.-]/i);
     if (mbMatch) {
-      return mbMatch[1];
+      return mbMatch[2]; // Changed index to account for modified capture group
     }
 
     // For other buildings with room numbers like VE-101, VL-201, etc.
-    const generalMatch = roomId.match(/(?:[a-z]+[-]?)?(\d)(?:\d{2})/i);
+    const generalMatch = roomId.match(/^[a-z]{1,3}-?(\d)\d{2}/i);
     if (generalMatch) {
       return generalMatch[1];
     }
