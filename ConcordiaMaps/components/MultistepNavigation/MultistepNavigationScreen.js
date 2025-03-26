@@ -20,6 +20,7 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import * as Crypto from "expo-crypto";
 import { useGoogleMapDirections } from "../../hooks/useGoogleMapDirections";
 import styles from "../../styles/MultistepNavigation/MultistepNavigationStyles";
+import { generateFloorHtml } from "../../services/FloorPlanService";
 import {
   calculatePath,
   loadFloorPlans,
@@ -84,6 +85,8 @@ export const getStepColor = (type) => {
 };
 
 const MultistepNavigationScreen = () => {
+  const { geocodeAddress, getStepsInHTML, getPolyline } =
+    useGoogleMapDirections();
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -94,7 +97,6 @@ const MultistepNavigationScreen = () => {
 
   const route = useRoute();
   const GOOGLE_MAPS_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
-  const { getStepsInHTML, getPolyline } = useGoogleMapDirections();
 
   // Indoor navigation state
   const [indoorFloorPlans] = useState({});
@@ -205,39 +207,23 @@ const MultistepNavigationScreen = () => {
     setLoadingDirections(true);
 
     try {
-      // Use step's explicitly defined startPoint if available
+      // IMPROVED: Use geocodeAddress method from hook to handle address-to-coordinates conversion
       let originCoords;
+      let destinationCoords;
 
+      // Handle origin coordinates
       if (step.startPoint && typeof step.startPoint === "string") {
-        // If startPoint is an address, try to geocode it
         try {
-          // Add region and components parameters to bias results to Montreal, Canada
-          const geocodeResponse = await fetch(
-            `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(step.startPoint)}&key=${GOOGLE_MAPS_API_KEY}&region=ca&components=country:ca|locality:montreal`,
-          );
-          const geocodeData = await geocodeResponse.json();
-
-          if (geocodeData.results && geocodeData.results.length > 0) {
-            const location = geocodeData.results[0].geometry.location;
-            originCoords = {
-              latitude: location.lat,
-              longitude: location.lng,
-            };
-            console.log("Using geocoded startPoint:", originCoords);
-          } else {
-            console.error("Failed to geocode startPoint address");
-          }
+          // Use the hook's geocodeAddress function for cleaner code
+          originCoords = await geocodeAddress(step.startPoint);
+          console.log("Using geocoded startPoint:", originCoords);
         } catch (geocodeError) {
           console.error("Error geocoding startPoint:", geocodeError);
         }
       } else if (step.startPoint?.latitude && step.startPoint?.longitude) {
-        // If startPoint is already coordinates, use directly
         originCoords = step.startPoint;
         console.log("Using startPoint coordinates:", originCoords);
-      }
-
-      // If no valid originCoords found yet, use originDetails if available
-      if (!originCoords && originDetails) {
+      } else if (originDetails) {
         originCoords = {
           latitude: originDetails.latitude,
           longitude: originDetails.longitude,
@@ -245,13 +231,12 @@ const MultistepNavigationScreen = () => {
         console.log("Using originDetails:", originCoords);
       }
 
-      // Only fall back to user location if we still don't have valid coordinates
+      // If we still don't have origin coordinates, try looking up building coordinates
       if (
         !originCoords &&
         step.startPoint &&
         typeof step.startPoint === "string"
       ) {
-        // Try to use a building ID if possible
         const startBuilding = CONCORDIA_BUILDINGS.find(
           (b) =>
             b.id.toUpperCase() === step.startPoint.toUpperCase() ||
@@ -261,93 +246,49 @@ const MultistepNavigationScreen = () => {
         );
 
         if (startBuilding) {
-          // Use hardcoded coordinates for known buildings
-          if (startBuilding.id === "H") {
-            originCoords = { latitude: 45.497092, longitude: -73.5788 };
-          } else if (startBuilding.id === "MB") {
-            originCoords = { latitude: 45.495304, longitude: -73.577893 };
-          } else if (startBuilding.id === "EV") {
-            originCoords = { latitude: 45.495655, longitude: -73.578025 };
-          } else if (startBuilding.id === "LB") {
-            originCoords = { latitude: 45.49674, longitude: -73.57785 };
-          }
+          // Use the direct building coordinates getter from FloorRegistry
+          originCoords = FloorRegistry.getCoordinatesForBuilding(
+            startBuilding.id,
+          );
           console.log(
-            `Using hardcoded coordinates for ${startBuilding.id}:`,
+            `Using coordinates for ${startBuilding.id}:`,
             originCoords,
           );
         }
       }
 
-      // Find the destination building coordinates
-      let destinationCoords;
+      // Handle destination coordinates with similar pattern
       if (step.endPoint) {
         if (typeof step.endPoint === "string") {
-          // Check if it's a building ID first
-          const destinationBuilding = CONCORDIA_BUILDINGS.find(
-            (b) => b.id === step.endPoint || b.name.includes(step.endPoint),
-          );
+          // Try to geocode the address directly using the hook
+          try {
+            destinationCoords = await geocodeAddress(step.endPoint);
+            console.log("Using geocoded endPoint:", destinationCoords);
+          } catch (geocodeError) {
+            console.error("Error geocoding endPoint:", geocodeError);
 
-          if (destinationBuilding) {
-            if (destinationBuilding.id === "H") {
-              destinationCoords = { latitude: 45.497092, longitude: -73.5788 };
-            } else if (destinationBuilding.id === "MB") {
-              destinationCoords = {
-                latitude: 45.495304,
-                longitude: -73.579044,
-              };
-            } else if (destinationBuilding.id === "EV") {
-              destinationCoords = {
-                latitude: 45.495655,
-                longitude: -73.578025,
-              };
-            } else if (destinationBuilding.id === "LB") {
-              destinationCoords = { latitude: 45.49674, longitude: -73.57785 };
-            } else {
-              // Try to geocode the building address
-              try {
-                const geocodeResponse = await fetch(
-                  `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(step.endPoint)}&key=${GOOGLE_MAPS_API_KEY}&region=ca&components=country:ca|locality:montreal`,
-                );
-                const geocodeData = await geocodeResponse.json();
+            // Fallback to checking if it's a building
+            const destinationBuilding = CONCORDIA_BUILDINGS.find(
+              (b) => b.id === step.endPoint || b.name.includes(step.endPoint),
+            );
 
-                if (geocodeData.results && geocodeData.results.length > 0) {
-                  const location = geocodeData.results[0].geometry.location;
-                  destinationCoords = {
-                    latitude: location.lat,
-                    longitude: location.lng,
-                  };
-                }
-              } catch (error) {
-                console.error("Failed to geocode building address:", error);
-              }
-            }
-          } else {
-            // If not a building ID, try to geocode as address
-            try {
-              const geocodeResponse = await fetch(
-                `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(step.endPoint)}&key=${GOOGLE_MAPS_API_KEY}&region=ca&components=country:ca|locality:montreal`,
+            if (destinationBuilding) {
+              destinationCoords = FloorRegistry.getCoordinatesForBuilding(
+                destinationBuilding.id,
               );
-              const geocodeData = await geocodeResponse.json();
-
-              if (geocodeData.results && geocodeData.results.length > 0) {
-                const location = geocodeData.results[0].geometry.location;
-                destinationCoords = {
-                  latitude: location.lat,
-                  longitude: location.lng,
-                };
-              }
-            } catch (error) {
-              console.error("Failed to geocode destination address:", error);
+              console.log(
+                `Using coordinates for ${destinationBuilding.id}:`,
+                destinationCoords,
+              );
             }
           }
         } else if (step.endPoint.latitude && step.endPoint.longitude) {
-          // If endPoint is already coordinates, use directly
           destinationCoords = step.endPoint;
         }
       }
 
-      if (!destinationCoords) {
-        console.error("Could not determine destination coordinates");
+      if (!originCoords || !destinationCoords) {
+        console.error("Could not determine origin or destination coordinates");
         setLoadingDirections(false);
         return;
       }
@@ -359,12 +300,13 @@ const MultistepNavigationScreen = () => {
         destinationCoords,
       );
 
-      // Get directions and polyline using your existing hook
+      // Get directions using the hook methods
       const directions = await getStepsInHTML(
         originCoords,
         destinationCoords,
         "walking",
       );
+
       const route = await getPolyline(
         originCoords,
         destinationCoords,
@@ -393,6 +335,7 @@ const MultistepNavigationScreen = () => {
 
         setOutdoorDirections(formattedDirections);
       } else {
+        // Provide fallback if no directions returned
         setOutdoorDirections([
           {
             distance: "approx. 250m",
@@ -1303,6 +1246,7 @@ const MultistepNavigationScreen = () => {
                           html: generateFloorHtml(
                             indoorFloorPlans.start,
                             indoorPaths?.start || [],
+                            {},
                           ),
                         }}
                         style={styles.floorPlanWebView}
@@ -1345,6 +1289,7 @@ const MultistepNavigationScreen = () => {
                             html: generateFloorHtml(
                               indoorFloorPlans.end,
                               indoorPaths?.end || [],
+                              {},
                             ),
                           }}
                           style={styles.floorPlanWebView}
@@ -2200,195 +2145,6 @@ const MultistepNavigationScreen = () => {
 
   const shouldShowIndoorNavigation = () => {
     return showIndoorNavigation && indoorNavigationParams !== null;
-  };
-
-  // Generate HTML for floor visualization with path
-  const generateFloorHtml = (floorPlan = "", pathPoints = []) => {
-    // If no floor plan is provided, return a placeholder
-    if (!floorPlan) {
-      return `
-      <html>
-        <body style="display:flex;justify-content:center;align-items:center;height:100vh;margin:0;background:#f5f5f5;">
-          <div style="text-align:center;">
-            <p style="color:#666;font-family:Arial,sans-serif;">Floor plan not available</p>
-          </div>
-        </body>
-      </html>
-    `;
-    }
-
-    // Filter out invalid points to prevent rendering errors
-    const validPoints = Array.isArray(pathPoints)
-      ? pathPoints.filter(
-          (p) =>
-            p?.nearestPoint &&
-            typeof p.nearestPoint.x === "number" &&
-            typeof p.nearestPoint.y === "number",
-        )
-      : [];
-
-    // Format path data for injection into JavaScript
-    const pointsData = JSON.stringify(
-      validPoints.map((p) => ({
-        x: p.nearestPoint.x,
-        y: p.nearestPoint.y,
-      })),
-    );
-
-    return `
-  <!DOCTYPE html>
-  <html>
-    <head>
-      <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-      <style>
-        body, html {
-          margin: 0;
-          padding: 0;
-          height: 100%;
-          width: 100%;
-          overflow: hidden;
-        }
-
-        #container {
-          width: 100%;
-          height: 100%;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          background-color: #f5f5f5;
-          position: relative;
-        }
-        
-        svg {
-          max-width: 100%;
-          max-height: 100%;
-          visibility: hidden;
-        }
-        
-        .path {
-          fill: none;
-          stroke: #912338; 
-          stroke-width: 4;
-          stroke-linecap: round;
-          stroke-dasharray: 8, 4;
-          animation: dash 1s linear infinite;
-        }
-        
-        @keyframes dash {
-          to { stroke-dashoffset: -12; }
-        }
-        
-        #loader {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          width: 30px;
-          height: 30px;
-          border: 3px solid #f3f3f3;
-          border-top: 3px solid #912338;
-          border-radius: 50%;
-          animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-          0% { transform: translate(-50%, -50%) rotate(0deg); }
-          100% { transform: translate(-50%, -50%) rotate(360deg); }
-        }
-        
-        #error {
-          display: none;
-          color: red;
-          text-align: center;
-          padding: 20px;
-          font-family: Arial, sans-serif;
-        }
-      </style>
-    </head>
-    <body>
-      <div id="container">
-        <div id="loader"></div>
-        <div id="error">Error loading floor plan</div>
-        ${floorPlan}
-      </div>
-      
-      <script>
-        // Wait for the DOM to be ready
-        document.addEventListener('DOMContentLoaded', function() {
-          const loader = document.getElementById('loader');
-          const errorMsg = document.getElementById('error');
-          const svg = document.querySelector('svg');
-          
-          // If no SVG is found, show error message
-          if (!svg) {
-            if (loader) loader.style.display = 'none';
-            if (errorMsg) errorMsg.style.display = 'block';
-            return;
-          }
-          
-          // Setup SVG viewBox if needed
-          try {
-            if (!svg.getAttribute("viewBox")) {
-              // Wait a moment for SVG to render
-              setTimeout(() => {
-                const bbox = svg.getBBox();
-                svg.setAttribute('viewBox', \`\${bbox.x} \${bbox.y} \${bbox.width} \${bbox.height}\`);
-                svg.style.visibility = 'visible';
-                
-                // Draw path if points are available
-                const points = ${pointsData};
-                if (points && points.length >= 2) {
-                  drawPath(points);
-                }
-                
-                // Hide loader
-                if (loader) loader.style.display = 'none';
-              }, 300);
-            } else {
-              svg.style.visibility = 'visible';
-              
-              // Draw path if points are available
-              const points = ${pointsData};
-              if (points && points.length >= 2) {
-                drawPath(points);
-              }
-              
-              // Hide loader
-              if (loader) loader.style.display = 'none';
-            }
-          } catch (e) {
-            // In case of error, still show SVG and hide loader
-            console.error('Error setting up SVG:', e);
-            svg.style.visibility = 'visible';
-            if (loader) loader.style.display = 'none';
-          }
-          
-          // Function to draw path on SVG
-          function drawPath(points) {
-            if (!points || points.length < 2) return;
-            
-            try {
-              // Create path element
-              const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-              path.classList.add('path');
-              
-              // Generate path data
-              let d = \`M\${points[0].x},\${points[0].y}\`;
-              for (let i = 1; i < points.length; i++) {
-                d += \` L\${points[i].x},\${points[i].y}\`;
-              }
-              
-              path.setAttribute('d', d);
-              svg.appendChild(path);
-            } catch (e) {
-              console.error('Error drawing path:', e);
-            }
-          }
-        });
-      </script>
-    </body>
-  </html>
-`;
   };
 
   // Render expanded map modal
