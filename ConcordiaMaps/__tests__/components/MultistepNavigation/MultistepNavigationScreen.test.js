@@ -1950,43 +1950,114 @@ describe("MultistepNavigationScreen", () => {
     }
   });
 
-  test("handles multiple building types correctly", () => {
-    const buildingTypes = ["H", "LB", "MB", "EV"];
+  test("handles multiple building types correctly", async () => {
+    // Mock the FloorRegistry.getBuildingTypeFromId method before using it
+    const FloorRegistry = require("../../../services/BuildingDataService");
+    // Create a mock implementation for getBuildingTypeFromId
+    FloorRegistry.getBuildingTypeFromId = jest
+      .fn()
+      .mockImplementation((buildingId) => {
+        // Return appropriate building types based on buildingId
+        if (buildingId === "H") return "HallBuilding";
+        if (buildingId === "LB") return "Library";
+        if (buildingId === "MB") return "JMSB";
+        if (buildingId === "EV") return "EVBuilding";
+        return "HallBuilding"; // Default case
+      });
 
-    buildingTypes.forEach((type) => {
+    // Define the building types we want to test
+    const buildingTypes = [
+      {
+        id: "H",
+        name: "Hall Building",
+        roomFormat: "H-920",
+      },
+      {
+        id: "LB",
+        name: "Webster Library",
+        roomFormat: "LB-301",
+      },
+      {
+        id: "MB",
+        name: "John Molson Building",
+        roomFormat: "MB-1.293",
+      },
+      {
+        id: "EV",
+        name: "EV Building",
+        roomFormat: "EV-200",
+      },
+    ];
+
+    // For each building type, we'll create a navigation plan and verify it renders correctly
+    for (const building of buildingTypes) {
+      // Create a navigation plan for indoor navigation within the building
       const navigationPlan = {
         steps: [
           {
             type: "indoor",
-            buildingId: type,
-            startRoom: `${type}-920`,
-            endRoom: `${type}-925`,
+            buildingId: building.id,
+            buildingType: FloorRegistry.getBuildingTypeFromId(building.id),
+            startRoom: `${building.roomFormat}`,
+            endRoom: `${building.id}-${building.roomFormat.split("-")[1].replace("920", "925")}`, // Just change the room number
+            startFloor: "9",
+            endFloor: "9",
           },
         ],
       };
 
+      // Set up mock route parameters with our navigation plan
       useRoute.mockReturnValue({ params: { navigationPlan } });
-      const { getByTestId, getAllByText } = render(
+
+      // Render the component
+      const { queryByTestId, getAllByText, unmount } = render(
         <MultistepNavigationScreen />,
       );
 
-      // Verify the component renders successfully with the building ID
-      expect(getByTestId("navigation-screen")).toBeTruthy();
+      // Verify navigation screen renders
+      expect(queryByTestId("navigation-screen")).toBeTruthy();
 
-      // Create a mapping of building types to their expected text patterns
-      const buildingPatterns = {
-        H: /Hall Building/,
-        LB: /J\.W\. McConnell Building/,
-        MB: /John Molson Building/,
-        EV: /Engineering/,
-      };
+      // Verify that both the room information and building name are displayed
+      await waitFor(() => {
+        const displayedTexts = getAllByText(/.+/).map(
+          (element) => element.props.children,
+        );
 
-      // Verify at least one element contains the expected building name
-      const matchingElements = getAllByText(buildingPatterns[type]);
-      expect(matchingElements.length).toBeGreaterThan(0);
+        // Check if any text contains the room format
+        const roomFormatFound = displayedTexts.some((text) => {
+          // Handle both string and array of children
+          if (typeof text === "string") {
+            return text.includes(building.roomFormat);
+          } else if (Array.isArray(text)) {
+            return text.some(
+              (child) =>
+                typeof child === "string" &&
+                child.includes(building.roomFormat),
+            );
+          }
+          return false;
+        });
+        expect(roomFormatFound).toBe(true);
 
-      cleanup();
-    });
+        // Check if any text contains the building name
+        const buildingNameFound = displayedTexts.some((text) => {
+          // Handle both string and array of children
+          if (typeof text === "string") {
+            return text.includes(building.name);
+          } else if (Array.isArray(text)) {
+            return text.some(
+              (child) =>
+                typeof child === "string" && child.includes(building.name),
+            );
+          }
+          return false;
+        });
+        expect(buildingNameFound).toBe(true);
+      });
+
+      // Clean up after each iteration to prevent conflicts between tests
+      unmount();
+    }
   });
 
   test("handles WebView load errors and message events", async () => {

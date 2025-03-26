@@ -110,184 +110,6 @@ const MultistepNavigationScreen = () => {
   const [invalidOriginRoom, setInvalidOriginRoom] = useState(false);
   const [invalidDestinationRoom, setInvalidDestinationRoom] = useState(false);
 
-  // Get all valid rooms for a building
-  const getValidRoomsForBuilding = (buildingId) => {
-    if (!buildingId) return [];
-
-    const buildingType = getBuildingTypeFromId(buildingId);
-    if (!buildingType) return [];
-
-    // Get all floors for the building
-    const building = FloorRegistry.getBuilding(buildingType);
-    if (!building?.floors) return [];
-
-    // Always add common room types for all buildings
-    const commonRooms = [
-      "entrance",
-      "elevator",
-      "stairs",
-      "escalator",
-      "toilet",
-      "women_washroom",
-      "men_washroom",
-      "water_fountain",
-    ];
-
-    // Gather all rooms from all floors
-    const validRooms = [...commonRooms];
-    Object.values(building.floors).forEach((floor) => {
-      if (floor?.rooms) {
-        // Add all room IDs from this floor
-        Object.keys(floor.rooms).forEach((roomId) => {
-          validRooms.push(roomId);
-
-          // For JMSB building, also add MB-prefixed versions to accommodate user input
-          if (buildingId === "MB") {
-            // For room IDs like 1.293, also add MB-1.293 and MB-1-293
-            if (/^\d+\.\d+$/.test(roomId)) {
-              const floorNum = roomId.split(".")[0];
-              const roomNum = roomId.split(".")[1];
-              validRooms.push(`MB-${roomId}`);
-              validRooms.push(`MB-${floorNum}-${roomNum}`);
-            }
-          }
-
-          // For Vanier Extension building
-          if (buildingId === "VE") {
-            // Add formats like VE-191
-            if (/^\d+$/.test(roomId)) {
-              validRooms.push(`VE-${roomId}`);
-            }
-          }
-
-          // For Vanier Library building
-          if (buildingId === "VL") {
-            // Add formats like VL-101
-            if (/^\d+$/.test(roomId)) {
-              validRooms.push(`VL-${roomId}`);
-            }
-          }
-
-          // For EV Building
-          if (buildingId === "EV") {
-            // Add formats like EV-200
-            if (/^\d+$/.test(roomId)) {
-              validRooms.push(`EV-${roomId}`);
-            }
-          }
-
-          // For Hall Building, add H-prefixed versions
-          if (buildingId === "H") {
-            // Add formats like H-801
-            if (/^\d+$/.test(roomId)) {
-              validRooms.push(`H-${roomId}`);
-            }
-            // Add formats for H801
-            if (/^H\d+$/.test(roomId)) {
-              const roomNum = roomId.replace(/^H/, "");
-              validRooms.push(`H-${roomNum}`);
-            }
-          }
-        });
-      }
-    });
-
-    return validRooms;
-  };
-
-  // Validate if a room exists in the building
-  const isValidRoom = (buildingId, roomId) => {
-    if (!buildingId || !roomId) return false;
-
-    // Special case for entrance
-    if (
-      ["entrance", "main lobby", "lobby", "main entrance"].includes(
-        roomId.toLowerCase(),
-      )
-    )
-      return true;
-
-    // Handle common facility types across buildings
-    if (
-      [
-        "elevator",
-        "stairs",
-        "escalator",
-        "toilet",
-        "main-stairs",
-        "stairs_ne",
-        "stairs_nw",
-        "stairs_se",
-        "stairs_sw",
-        "water_fountain",
-        "women_washroom",
-        "men_washroom",
-      ].includes(roomId.toLowerCase())
-    )
-      return true;
-
-    const validRooms = getValidRoomsForBuilding(buildingId);
-
-    // Debug output to check available rooms for a building
-    console.log(
-      `Checking room ${roomId} against ${validRooms.length} valid rooms for ${buildingId}`,
-    );
-
-    // First try direct match
-    if (validRooms.includes(roomId)) return true;
-
-    // Try normalized version
-    const normalizedRoomId = normalizeRoomId(roomId);
-    if (validRooms.includes(normalizedRoomId)) return true;
-
-    // For JMSB building, try both formats
-    if (buildingId === "MB") {
-      // Try MB-1.293 format
-      if (roomId.match(/^MB-\d+\.\d+$/i)) {
-        const justNumber = roomId.replace(/^MB-/i, "");
-        return validRooms.includes(justNumber);
-      }
-
-      // Try MB-1-293 format
-      if (roomId.match(/^MB-\d+-\d+$/i)) {
-        const parts = roomId.match(/^MB-(\d+)-(\d+)$/i);
-        if (parts && parts.length === 3) {
-          const dotFormat = `${parts[1]}.${parts[2]}`;
-          return validRooms.includes(dotFormat);
-        }
-      }
-    }
-
-    // For Vanier Extension (VE) building
-    if (buildingId === "VE") {
-      // Try VE-191 format
-      if (roomId.match(/^VE-\d+$/i)) {
-        const justNumber = roomId.replace(/^VE-/i, "");
-        return validRooms.includes(justNumber);
-      }
-    }
-
-    // For EV building
-    if (buildingId === "EV") {
-      // Try EV-191 format
-      if (roomId.match(/^EV-\d+$/i)) {
-        const justNumber = roomId.replace(/^EV-/i, "");
-        return validRooms.includes(justNumber);
-      }
-    }
-
-    // For VL (Vanier Library) building
-    if (buildingId === "VL") {
-      // Try VL-101 format
-      if (roomId.match(/^VL-\d+$/i)) {
-        const justNumber = roomId.replace(/^VL-/i, "");
-        return validRooms.includes(justNumber);
-      }
-    }
-
-    return validRooms.includes(normalizedRoomId);
-  };
-
   // Origin search state
   const [origin, setOrigin] = useState("");
   const [originSearchQuery, setOriginSearchQuery] = useState("");
@@ -769,7 +591,7 @@ const MultistepNavigationScreen = () => {
     setShowOriginBuildingSuggestions(false);
 
     // Load available rooms for this building
-    const validRooms = getValidRoomsForBuilding(building.id);
+    const validRooms = FloorRegistry.getValidRoomsForBuilding(building.id);
     console.log(`Available origin rooms: ${availableOriginRooms.length}`);
     setAvailableOriginRooms(validRooms);
     setInvalidOriginRoom(false);
@@ -801,34 +623,8 @@ const MultistepNavigationScreen = () => {
 
   // Get coordinates for a classroom
   const getCoordinatesForClassroom = (building) => {
-    // Default coordinates based on the building
-    let coordinates = null;
-
     if (!building) return null;
-
-    if (building.id === "H") {
-      coordinates = { latitude: 45.497092, longitude: -73.5788 };
-    } else if (building.id === "MB") {
-      coordinates = { latitude: 45.495304, longitude: -73.577893 };
-    } else if (building.id === "EV") {
-      coordinates = { latitude: 45.495655, longitude: -73.578025 };
-    } else if (building.id === "LB") {
-      coordinates = { latitude: 45.49674, longitude: -73.57785 };
-    }
-
-    return coordinates;
-  };
-
-  const getOriginRoomPlaceholder = (buildingId) => {
-    if (buildingId === "VE") {
-      return `Enter room number (e.g. 101 or stairs)`;
-    } else if (buildingId === "VL") {
-      return `Enter room number (e.g. 101 or elevator)`;
-    } else if (buildingId === "EV") {
-      return `Enter room number (e.g. 200 or stairs)`;
-    } else {
-      return `Enter room number in ${originBuilding.name}`;
-    }
+    return FloorRegistry.getCoordinatesForBuilding(building.id);
   };
 
   // Parse destination into building and room
@@ -864,7 +660,7 @@ const MultistepNavigationScreen = () => {
     setShowBuildingSuggestions(false);
 
     // Load available rooms for this building
-    const validRooms = getValidRoomsForBuilding(building.id);
+    const validRooms = FloorRegistry.getValidRoomsForBuilding(building.id);
     console.log(`Available destination rooms: ${availableDestRooms.length}`);
     setAvailableDestRooms(validRooms);
     setInvalidDestinationRoom(false);
@@ -896,12 +692,15 @@ const MultistepNavigationScreen = () => {
       }
 
       // If a room is specified, validate it
-      if (originRoom && originRoom !== "entrance") {
-        if (!isValidRoom(originBuilding.id, originRoom)) {
+      if (originRoom) {
+        if (!FloorRegistry.isValidRoom(originBuilding.id, originRoom)) {
           setInvalidOriginRoom(true);
           alert(`Room ${originRoom} doesn't exist in ${originBuilding.name}`);
           return;
         }
+      } else {
+        alert("Please enter a room number");
+        return;
       }
 
       originCoords = getCoordinatesForClassroom(originBuilding);
@@ -937,7 +736,7 @@ const MultistepNavigationScreen = () => {
 
       // If a room is specified, validate it
       if (room) {
-        if (!isValidRoom(building.id, room)) {
+        if (!FloorRegistry.isValidRoom(building.id, room)) {
           setInvalidDestinationRoom(true);
           alert(`Room ${room} doesn't exist in ${building.name}`);
           return;
@@ -969,11 +768,11 @@ const MultistepNavigationScreen = () => {
         type: "indoor",
         title: `Navigate inside ${originBuilding.name}`,
         buildingId: originBuildingId,
-        buildingType: getBuildingTypeFromId(originBuildingId),
+        buildingType: FloorRegistry.getBuildingTypeFromId(originBuildingId),
         startRoom: originRoomId,
         endRoom: destinationRoomId,
-        startFloor: getFloorFromRoomId(originRoomId),
-        endFloor: getFloorFromRoomId(destinationRoomId),
+        startFloor: FloorRegistry.extractFloorFromRoom(originRoomId),
+        endFloor: FloorRegistry.extractFloorFromRoom(destinationRoomId),
         isComplete: false,
       });
     }
@@ -984,11 +783,11 @@ const MultistepNavigationScreen = () => {
         type: "indoor",
         title: `Exit ${originBuilding.name}`,
         buildingId: originBuildingId,
-        buildingType: getBuildingTypeFromId(originBuildingId),
+        buildingType: FloorRegistry.getBuildingTypeFromId(originBuildingId),
         startRoom: originRoomId,
         // Use "Main lobby" instead of "entrance" as it's more likely to be in the navigation graph
         endRoom: "Main lobby",
-        startFloor: getFloorFromRoomId(originRoomId),
+        startFloor: FloorRegistry.extractFloorFromRoom(originRoomId),
         endFloor: "1", // Assume entrance is on first floor
         isComplete: false,
       });
@@ -1022,11 +821,13 @@ const MultistepNavigationScreen = () => {
         type: "indoor",
         title: `Navigate to room ${destinationRoomId} in ${building.name}`,
         buildingId: destinationBuildingId,
-        buildingType: getBuildingTypeFromId(destinationBuildingId),
+        buildingType: FloorRegistry.getBuildingTypeFromId(
+          destinationBuildingId,
+        ),
         startRoom: "entrance", // Default entry point
         endRoom: destinationRoomId,
         startFloor: "1", // Assume entrance is on first floor
-        endFloor: getFloorFromRoomId(destinationRoomId),
+        endFloor: FloorRegistry.extractFloorFromRoom(destinationRoomId),
         isComplete: false,
       });
     }
@@ -1041,10 +842,10 @@ const MultistepNavigationScreen = () => {
         type: "indoor",
         title: `Exit ${originBuilding.name}`,
         buildingId: originBuildingId,
-        buildingType: getBuildingTypeFromId(originBuildingId),
+        buildingType: FloorRegistry.getBuildingTypeFromId(originBuildingId),
         startRoom: originRoomId,
         endRoom: "entrance",
-        startFloor: getFloorFromRoomId(originRoomId),
+        startFloor: FloorRegistry.extractFloorFromRoom(originRoomId),
         endFloor: "1", // Assume entrance is on first floor
         isComplete: false,
       });
@@ -1065,11 +866,13 @@ const MultistepNavigationScreen = () => {
         type: "indoor",
         title: `Navigate to room ${destinationRoomId} in ${building.name}`,
         buildingId: destinationBuildingId,
-        buildingType: getBuildingTypeFromId(destinationBuildingId),
+        buildingType: FloorRegistry.getBuildingTypeFromId(
+          destinationBuildingId,
+        ),
         startRoom: "entrance", // Default entry point
         endRoom: destinationRoomId,
         startFloor: "1", // Assume entrance is on first floor
-        endFloor: getFloorFromRoomId(destinationRoomId),
+        endFloor: FloorRegistry.extractFloorFromRoom(destinationRoomId),
         isComplete: false,
       });
     }
@@ -1098,150 +901,6 @@ const MultistepNavigationScreen = () => {
     setIsLoading(false);
   };
 
-  // Get building type from building ID
-  const getBuildingTypeFromId = (buildingId) => {
-    if (!buildingId) return "HallBuilding"; // Default
-
-    const id = String(buildingId).toUpperCase();
-
-    // Map to exact building types expected by FloorRegistry
-    if (id === "H" || id.includes("HALL")) return "HallBuilding";
-    if (id === "LB" || id.includes("LIBRARY") || id.includes("MCCONNELL"))
-      return "Library";
-    if (id === "MB" || id.includes("MOLSON") || id.includes("JMSB"))
-      return "JMSB";
-    if (id === "EV") return "EVBuilding";
-    if (id === "VE" || (id.includes("VANIER") && id.includes("EXTENSION")))
-      return "VanierExtension";
-    if (id === "VL" || (id.includes("VANIER") && id.includes("LIBRARY")))
-      return "VanierLibrary";
-
-    console.log(
-      `No specific building type found for ${buildingId}, using default.`,
-    );
-    return "HallBuilding"; // Default to Hall Building if no match
-  };
-
-  // Extract floor from room ID (e.g. "H-920" => "9", "1.293" => "1")
-  const getFloorFromRoomId = (roomId) => {
-    if (!roomId || typeof roomId !== "string") return "1";
-
-    // Special case for non-numeric room identifiers
-    if (
-      /^(entrance|lobby|main lobby|main entrance|elevator|stairs|escalator|toilet)$/i.test(
-        roomId,
-      )
-    ) {
-      return "1"; // Default these to first floor
-    }
-
-    // For JMSB rooms in format "1.293"
-    if (/^\d+\.\d+$/.test(roomId)) {
-      return roomId.split(".")[0];
-    }
-
-    const floorNumber = (() => {
-      // For MB-1-293 format
-      let match = /^MB-(\d+)-\d+$/i.exec(roomId);
-      if (match) return match[1];
-
-      // For MB-1.293 format
-      match = /^MB-(\d+)\.\d+$/i.exec(roomId);
-      if (match) return match[1];
-
-      // For standard room formats like H-920 or H920
-      match = /^[A-Za-z]+-?(\d)(\d+)$/i.exec(roomId);
-      if (match) return match[1];
-
-      // For simple numbered rooms like "101" (1st floor)
-      match = /^(\d)(\d+)$/.exec(roomId);
-      if (match) return match[1];
-
-      return null;
-    })();
-
-    if (floorNumber) {
-      return floorNumber;
-    }
-
-    return "1"; // Default to first floor if no pattern matches
-  };
-
-  // Normalize room ID to match format in floor data
-  const normalizeRoomId = (roomId) => {
-    if (!roomId) return roomId;
-
-    // Handle entrance specially with multiple options to increase chances of finding a match
-    if (
-      typeof roomId === "string" &&
-      ["entrance", "main entrance", "main", "lobby", "main lobby"].includes(
-        roomId.toLowerCase(),
-      )
-    ) {
-      // For Hall Building, "Main lobby" seems to be the correct format
-      return "Main lobby";
-    }
-
-    // Make sure we're working with a string
-    const roomIdStr = String(roomId);
-
-    // Array of regex patterns and their replacement logic
-    const patterns = [
-      // For Hall Building: Convert H-903 format to H903 format
-      {
-        regex: /^(H)-(\d+)$/i,
-        replace: (match, p1, p2) => `${p1}${p2}`.toUpperCase(),
-      },
-      // For JMSB (MB) building: Format like 1.293 directly
-      {
-        regex: /^MB-(\d+\.\d+)$/i,
-        replace: (match, p1) => p1,
-      },
-      // For JMSB (MB) building: Convert MB-1-293 format to 1.293 format
-      {
-        regex: /^MB-(\d+)-(\d+)$/i,
-        replace: (match, p1, p2) => `${p1}.${p2}`,
-      },
-      // For VE building: Convert VE-191 format to 191 format
-      {
-        regex: /^VE-(\d+)$/i,
-        replace: (match, p1) => p1,
-      },
-      // For VL building: Convert VL-101 format to 101 format
-      {
-        regex: /^VL-(\d+)$/i,
-        replace: (match, p1) => p1,
-      },
-    ];
-
-    // Try each pattern in sequence
-    for (const pattern of patterns) {
-      const match = pattern.regex.exec(roomIdStr);
-      if (match) {
-        return pattern.replace(...match);
-      }
-    }
-
-    // Handle other special room types like stairs, elevator, toilet, etc.
-    const specialRooms = [
-      "stairs",
-      "elevator",
-      "toilet",
-      "water_fountain",
-      "escalator",
-      "women_washroom",
-      "men_washroom",
-    ];
-    for (const special of specialRooms) {
-      if (roomIdStr.toLowerCase().includes(special.toLowerCase())) {
-        return special;
-      }
-    }
-
-    // For other buildings, follow similar pattern
-    return roomIdStr.replace(/^([A-Za-z]+)-(\d+)$/, "$1$2").toUpperCase();
-  };
-
   // Handle indoor navigation steps
   const handleIndoorNavigation = (step) => {
     console.log("Opening indoor navigation for step:", step);
@@ -1255,21 +914,53 @@ const MultistepNavigationScreen = () => {
         setNavigationPlan(updatedPlan);
       }
 
-      // Format room IDs properly
-      let normalizedStartRoom = normalizeRoomId(step.startRoom);
-
-      // Handle endRoom specifically for entrance/exit cases
+      // Format room IDs properly with building-specific handling
+      let normalizedStartRoom;
       let normalizedEndRoom;
-      if (
-        step.endRoom === "entrance" ||
-        step.endRoom === "Main lobby" ||
-        step.endRoom.toLowerCase() === "main entrance" ||
-        step.endRoom.toLowerCase() === "lobby"
-      ) {
-        // For exit navigation, use "Main lobby" as it's most likely to exist in navigation graphs
-        normalizedEndRoom = "Main lobby";
+
+      // Handle building-specific entrance/lobby names
+      if (step.buildingId === "MB") {
+        // For JMSB building
+        if (
+          ["entrance", "main lobby", "main entrance", "lobby"].includes(
+            step.startRoom.toLowerCase(),
+          )
+        ) {
+          normalizedStartRoom = "main hall"; // JMSB uses "main hall" based on the available nodes
+        } else {
+          normalizedStartRoom = FloorRegistry.normalizeRoomId(step.startRoom);
+        }
+
+        if (
+          ["entrance", "main lobby", "main entrance", "lobby"].includes(
+            step.endRoom.toLowerCase(),
+          )
+        ) {
+          normalizedEndRoom = "main hall"; // JMSB uses "main hall" based on the available nodes
+        } else {
+          normalizedEndRoom = FloorRegistry.normalizeRoomId(step.endRoom);
+        }
       } else {
-        normalizedEndRoom = normalizeRoomId(step.endRoom);
+        // For other buildings (Hall, etc.)
+        if (
+          ["entrance", "main entrance", "lobby"].includes(
+            step.startRoom.toLowerCase(),
+          )
+        ) {
+          normalizedStartRoom = "Main lobby"; // Hall building uses "Main lobby"
+        } else {
+          normalizedStartRoom = FloorRegistry.normalizeRoomId(step.startRoom);
+        }
+
+        if (
+          ["entrance", "main entrance", "lobby"].includes(
+            step.endRoom.toLowerCase(),
+          )
+        ) {
+          normalizedEndRoom = "Main lobby"; // Hall building uses "Main lobby"
+        } else {
+          normalizedEndRoom = FloorRegistry.normalizeRoomId(step.endRoom);
+        }
       }
 
       // Map building IDs directly to their proper types in FloorRegistry format
@@ -1281,7 +972,11 @@ const MultistepNavigationScreen = () => {
       } else if (step.buildingId === "MB") {
         mappedBuildingType = "JMSB";
       } else if (step.buildingId === "EV") {
-        mappedBuildingType = "EV";
+        mappedBuildingType = "EVBuilding";
+      } else if (step.buildingId === "VE") {
+        mappedBuildingType = "VanierExtension";
+      } else if (step.buildingId === "VL") {
+        mappedBuildingType = "VanierLibrary";
       }
 
       // Log the parameters before navigation
@@ -1313,13 +1008,10 @@ const MultistepNavigationScreen = () => {
       console.error("Error in handleIndoorNavigation:", err);
       // If there's an error, show the indoor navigation modal as a fallback
       setIndoorNavigationParams({
-        buildingId: step.buildingId,
-        buildingType: getBuildingTypeFromId(step.buildingId),
-        startRoom: normalizeRoomId(step.startRoom),
-        endRoom:
-          step.endRoom === "entrance"
-            ? "Main lobby"
-            : normalizeRoomId(step.endRoom),
+        buildingType: FloorRegistry.getBuildingTypeFromId(step.buildingId),
+        // Update fallback for JMSB to use "main hall" instead of "entrance"
+        startRoom: step.buildingId === "MB" ? "main hall" : "Main lobby",
+        endRoom: FloorRegistry.normalizeRoomId(step.endRoom),
         startFloor: step.startFloor,
         endFloor: step.endFloor,
       });
@@ -1736,8 +1428,8 @@ const MultistepNavigationScreen = () => {
                   navigation.navigate("RoomToRoomNavigation", {
                     buildingId: step.buildingId,
                     buildingType: step.buildingType,
-                    startRoom: normalizeRoomId(step.startRoom),
-                    endRoom: normalizeRoomId(step.endRoom),
+                    startRoom: FloorRegistry.normalizeRoomId(step.startRoom),
+                    endRoom: FloorRegistry.normalizeRoomId(step.endRoom),
                     startFloor: step.startFloor,
                     endFloor: step.endFloor,
                     skipSelection: true,
@@ -1764,7 +1456,9 @@ const MultistepNavigationScreen = () => {
   // Render indoor step UI with button to open RoomToRoomNavigation
   const renderIndoorStep = () => {
     const currentStep = navigationPlan.steps[currentStepIndex];
-    const buildingName = getReadableBuildingName(currentStep.buildingId);
+    const buildingName = FloorRegistry.getReadableBuildingName(
+      currentStep.buildingId,
+    );
 
     return (
       <View style={styles.stepContentContainer}>
@@ -1823,12 +1517,6 @@ const MultistepNavigationScreen = () => {
         )}
       </View>
     );
-  };
-
-  // Get readable building name
-  const getReadableBuildingName = (buildingId) => {
-    const building = CONCORDIA_BUILDINGS.find((b) => b.id === buildingId);
-    return building ? building.name : buildingId;
   };
 
   // Render navigation form if no plan is active
@@ -1990,7 +1678,9 @@ const MultistepNavigationScreen = () => {
                         { marginTop: 8 },
                         invalidOriginRoom && styles.invalidInput,
                       ]}
-                      placeholder={getOriginRoomPlaceholder(originBuilding.id)}
+                      placeholder={FloorRegistry.getRoomPlaceholder(
+                        originBuilding.id,
+                      )}
                       value={originRoom}
                       onChangeText={(text) => {
                         // Format the room ID properly based on building type
@@ -2056,7 +1746,7 @@ const MultistepNavigationScreen = () => {
                         setOriginRoom(formattedRoom);
 
                         // Check if it's a valid room
-                        const isValid = isValidRoom(
+                        const isValid = FloorRegistry.isValidRoom(
                           originBuilding.id,
                           formattedRoom,
                         );
@@ -2065,7 +1755,7 @@ const MultistepNavigationScreen = () => {
                     />
                     {invalidOriginRoom && (
                       <Text style={styles.errorText}>
-                        {getErrorMessageForRoom(
+                        {FloorRegistry.getErrorMessageForRoom(
                           originBuilding.id,
                           originBuilding.name,
                         )}
@@ -2240,7 +1930,10 @@ const MultistepNavigationScreen = () => {
                         setRoom(formattedRoom);
 
                         // Check if it's a valid room
-                        const isValid = isValidRoom(building.id, formattedRoom);
+                        const isValid = FloorRegistry.isValidRoom(
+                          building.id,
+                          formattedRoom,
+                        );
                         setInvalidDestinationRoom(!isValid && text.length > 0);
                       }}
                     />
@@ -2316,15 +2009,6 @@ const MultistepNavigationScreen = () => {
     );
   };
 
-  const getErrorMessageForRoom = (buildingId, buildingName) => {
-    if (buildingId === "MB") {
-      return "Room not found. Try a format like 1.293 or 1-293.";
-    }
-    if (buildingId === "VE" || buildingId === "EV") {
-      return 'Room not found. Try a room number or "elevator"/"stairs".';
-    }
-    return `This room doesn't exist in ${buildingName}`;
-  };
   // Render outdoor step UI with map and directions
   const renderOutdoorStep = () => {
     const currentStep = navigationPlan.steps[currentStepIndex];
