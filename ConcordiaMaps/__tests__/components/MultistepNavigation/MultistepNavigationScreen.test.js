@@ -4359,162 +4359,169 @@ describe("MultistepNavigationScreen", () => {
     });
   });
 
-jest.mock("../../../services/BuildingDataService", () => ({
-  getRooms: jest.fn(),
-  getBuilding: jest.fn(),
-}));
+  jest.mock("../../../services/BuildingDataService", () => ({
+    getRooms: jest.fn(),
+    getBuilding: jest.fn(),
+  }));
 
-const FloorRegistry = require("../../../services/BuildingDataService");
+  const FloorRegistry = require("../../../services/BuildingDataService");
 
-test("validates all MB building room formats correctly", async () => {
-  // Mock the FloorRegistry to return known data
-  const mockGetRooms = jest.fn().mockImplementation(() => {
-    // Return rooms in dot format like 1.293
-    return {
-      "1.293": { name: "1.293" },
-      "2.301": { name: "2.301" }
-    };
-  });
-  
-  FloorRegistry.getRooms = mockGetRooms;
-  FloorRegistry.getBuilding = jest.fn().mockReturnValue({
-    id: "mb",
-    floors: { "1": {}, "2": {} },
-  });
-  
-  
-  // Now we'll call the isValidRoom function with various formats
-  
-  // Create a reference to isValidRoom that we can call
-  // Since we can't access the function directly in a test, we'll use internals
-  // Note: In a real implementation, you might need to set this up differently
-  const isValidRoom = (buildingId, roomId) => {
-    // This recreates the specific validation logic we want to test
-    const validRooms = ["1.293", "2.301"];
-    
-    // Test the MB-1.293 format
-    if (buildingId === "MB") {
-      if (roomId.match(/^MB-\d+\.\d+$/i)) {
-        const justNumber = roomId.replace(/^MB-/i, "");
-        return validRooms.includes(justNumber);
-      }
-      
-      // Test the MB-1-293 format
-      if (roomId.match(/^MB-\d+-\d+$/i)) {
-        const parts = roomId.match(/^MB-(\d+)-(\d+)$/i);
-        if (parts && parts.length === 3) {
-          const dotFormat = `${parts[1]}.${parts[2]}`;
-          return validRooms.includes(dotFormat);
+  test("validates all MB building room formats correctly", async () => {
+    // Mock the FloorRegistry to return known data
+    const mockGetRooms = jest.fn().mockImplementation(() => {
+      // Return rooms in dot format like 1.293
+      return {
+        1.293: { name: "1.293" },
+        2.301: { name: "2.301" },
+      };
+    });
+
+    FloorRegistry.getRooms = mockGetRooms;
+    FloorRegistry.getBuilding = jest.fn().mockReturnValue({
+      id: "mb",
+      floors: { 1: {}, 2: {} },
+    });
+
+    // Now we'll call the isValidRoom function with various formats
+
+    // Create a reference to isValidRoom that we can call
+    // Since we can't access the function directly in a test, we'll use internals
+    // Note: In a real implementation, you might need to set this up differently
+    const isValidRoom = (buildingId, roomId) => {
+      // This recreates the specific validation logic we want to test
+      const validRooms = ["1.293", "2.301"];
+
+      // Test the MB-1.293 format
+      if (buildingId === "MB") {
+        if (roomId.match(/^MB-\d+\.\d+$/i)) {
+          const justNumber = roomId.replace(/^MB-/i, "");
+          return validRooms.includes(justNumber);
+        }
+
+        // Test the MB-1-293 format
+        if (roomId.match(/^MB-\d+-\d+$/i)) {
+          const parts = roomId.match(/^MB-(\d+)-(\d+)$/i);
+          if (parts && parts.length === 3) {
+            const dotFormat = `${parts[1]}.${parts[2]}`;
+            return validRooms.includes(dotFormat);
+          }
         }
       }
-    }
-    
-    return validRooms.includes(roomId);
-  };
-  
-  // Test MB-1.293 format (direct match)
-  expect(isValidRoom("MB", "MB-1.293")).toBe(true);
-  
-  // Test MB-1-293 format (converted to 1.293)
-  expect(isValidRoom("MB", "MB-1-293")).toBe(true);
-  
-  // Test non-existent room
-  expect(isValidRoom("MB", "MB-3.100")).toBe(false);
-  expect(isValidRoom("MB", "MB-3-100")).toBe(false);
-  
-  // Test invalid format
-  expect(isValidRoom("MB", "MB1293")).toBe(false);
-});
 
-test("handles destination building geocoding for unknown building IDs", async () => {
-  // Setup environment with API key
-  const originalEnv = process.env;
-  process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY = "test_api_key";
-  
-  // Mock console methods to track calls
-  const mockConsoleError = jest.spyOn(console, "error").mockImplementation(() => {});
-  
-  // Create a navigation plan with a custom building ID that will trigger geocoding
-  const navigationPlan = {
-    steps: [
-      {
-        type: "outdoor",
-        startPoint: { latitude: 45.496, longitude: -73.577 },
-        endPoint: "CUSTOM_BUILDING", // Custom building ID not in hardcoded list
-        startAddress: "Starting Point",
-        endAddress: "Custom Building",
-      },
-    ],
-  };
+      return validRooms.includes(roomId);
+    };
 
-  useRoute.mockReturnValue({ params: { navigationPlan } });
+    // Test MB-1.293 format (direct match)
+    expect(isValidRoom("MB", "MB-1.293")).toBe(true);
 
-  // Setup fetch mock for successful geocoding
-  global.fetch = jest.fn().mockImplementation((url) => {
-    if (url.includes("geocode")) {
-      return Promise.resolve({
-        json: () => Promise.resolve({
-          results: [
-            {
-              geometry: {
-                location: { lat: 45.500, lng: -73.580 }
-              }
-            }
-          ]
-        })
-      });
-    }
-    return Promise.resolve({ json: () => Promise.resolve({}) });
+    // Test MB-1-293 format (converted to 1.293)
+    expect(isValidRoom("MB", "MB-1-293")).toBe(true);
+
+    // Test non-existent room
+    expect(isValidRoom("MB", "MB-3.100")).toBe(false);
+    expect(isValidRoom("MB", "MB-3-100")).toBe(false);
+
+    // Test invalid format
+    expect(isValidRoom("MB", "MB1293")).toBe(false);
   });
 
-  // Render component to trigger fetchOutdoorDirections
-  render(<MultistepNavigationScreen />);
+  test("handles destination building geocoding for unknown building IDs", async () => {
+    // Setup environment with API key
+    const originalEnv = process.env;
+    process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY = "test_api_key";
 
-  // Verify geocoding API was called
-  await waitFor(() => {
-    const geocodeCalls = global.fetch.mock.calls.filter(
-      call => call[0].includes("geocode") && call[0].includes("CUSTOM_BUILDING")
-    );
-    expect(geocodeCalls.length).toBeGreaterThan(0);
+    // Mock console methods to track calls
+    const mockConsoleError = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+
+    // Create a navigation plan with a custom building ID that will trigger geocoding
+    const navigationPlan = {
+      steps: [
+        {
+          type: "outdoor",
+          startPoint: { latitude: 45.496, longitude: -73.577 },
+          endPoint: "CUSTOM_BUILDING", // Custom building ID not in hardcoded list
+          startAddress: "Starting Point",
+          endAddress: "Custom Building",
+        },
+      ],
+    };
+
+    useRoute.mockReturnValue({ params: { navigationPlan } });
+
+    // Setup fetch mock for successful geocoding
+    global.fetch = jest.fn().mockImplementation((url) => {
+      if (url.includes("geocode")) {
+        return Promise.resolve({
+          json: () =>
+            Promise.resolve({
+              results: [
+                {
+                  geometry: {
+                    location: { lat: 45.5, lng: -73.58 },
+                  },
+                },
+              ],
+            }),
+        });
+      }
+      return Promise.resolve({ json: () => Promise.resolve({}) });
+    });
+
+    // Render component to trigger fetchOutdoorDirections
+    render(<MultistepNavigationScreen />);
+
+    // Verify geocoding API was called
+    await waitFor(() => {
+      const geocodeCalls = global.fetch.mock.calls.filter(
+        (call) =>
+          call[0].includes("geocode") && call[0].includes("CUSTOM_BUILDING"),
+      );
+      expect(geocodeCalls.length).toBeGreaterThan(0);
+    });
+
+    // Verify directions were fetched with the geocoded coordinates
+    await waitFor(() => {
+      expect(mockGetPolyline).toHaveBeenCalledWith(
+        { latitude: 45.496, longitude: -73.577 },
+        { latitude: 45.5, longitude: -73.58 }, // These should match the geocoded coordinates
+        "walking",
+      );
+    });
+
+    // Test error handling in geocoding
+    global.fetch.mockReset();
+    global.fetch.mockImplementation((url) => {
+      if (url.includes("geocode")) {
+        // Make sure this specific error is logged
+        setTimeout(() => {
+          console.error(
+            "Failed to geocode building address:",
+            new Error("Geocoding API error"),
+          );
+        }, 0);
+        return Promise.reject(new Error("Geocoding API error"));
+      }
+      return Promise.resolve({ json: () => Promise.resolve({}) });
+    });
+
+    // Re-render to trigger the error path
+    const { unmount } = render(<MultistepNavigationScreen />);
+
+    // Verify error was logged, with a more specific approach
+    await waitFor(() => {
+      const errorCalled = mockConsoleError.mock.calls.some(
+        (call) =>
+          call[0] === "Failed to geocode building address:" &&
+          call[1] instanceof Error,
+      );
+      expect(errorCalled).toBe(true);
+    });
+
+    // Cleanup
+    mockConsoleError.mockRestore();
+    process.env = originalEnv;
+    unmount();
   });
-
-  // Verify directions were fetched with the geocoded coordinates
-  await waitFor(() => {
-    expect(mockGetPolyline).toHaveBeenCalledWith(
-      { latitude: 45.496, longitude: -73.577 },
-      { latitude: 45.500, longitude: -73.580 }, // These should match the geocoded coordinates
-      "walking"
-    );
-  });
-
-  // Test error handling in geocoding
-  global.fetch.mockReset();
-  global.fetch.mockImplementation((url) => {
-    if (url.includes("geocode")) {
-      // Make sure this specific error is logged
-      setTimeout(() => {
-        console.error("Failed to geocode building address:", new Error("Geocoding API error"));
-      }, 0);
-      return Promise.reject(new Error("Geocoding API error"));
-    }
-    return Promise.resolve({ json: () => Promise.resolve({}) });
-  });
-
-  // Re-render to trigger the error path
-  const { unmount } = render(<MultistepNavigationScreen />);
-
-  // Verify error was logged, with a more specific approach
-  await waitFor(() => {
-    const errorCalled = mockConsoleError.mock.calls.some(
-      call => call[0] === "Failed to geocode building address:" && call[1] instanceof Error
-    );
-    expect(errorCalled).toBe(true);
-  });
-
-  // Cleanup
-  mockConsoleError.mockRestore();
-  process.env = originalEnv;
-  unmount();
-});
-  
 });
