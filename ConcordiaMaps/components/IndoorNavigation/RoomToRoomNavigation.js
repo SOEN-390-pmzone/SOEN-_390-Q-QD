@@ -24,8 +24,9 @@ import {
 } from "../../services/PathCalculationService";
 
 import {
-  getEntranceOptions,
   validateNodeExists,
+  resolveEntranceNode,
+  NODE_TYPES,
 } from "../../services/NavigationUtilsService";
 
 const RoomToRoomNavigation = () => {
@@ -402,42 +403,20 @@ const RoomToRoomNavigation = () => {
       let resolvedStartRoom = selectedStartRoom;
 
       // Find a suitable entrance node based on the building type and available nodes
-      if (selectedStartRoom === "entrance") {
-        if (buildingType === "HallBuilding" && startFloor === "1") {
-          // Use the utility function instead of duplicated filter logic
-          const entranceOptions = getEntranceOptions(availableNodes);
+      if (selectedStartRoom === NODE_TYPES.ENTRANCE) {
+        // Use the extracted function to resolve the entrance node
+        const entranceNode = resolveEntranceNode(
+          buildingType,
+          startFloor,
+          availableNodes,
+        );
 
-          if (entranceOptions.length > 0) {
-            resolvedStartRoom = entranceOptions[0];
-            console.log("Mapped 'entrance' to node:", resolvedStartRoom);
-          } else if (availableNodes.length > 0) {
-            // If no suitable entrance node found, use the first available node
-            resolvedStartRoom = availableNodes[0];
-            console.log(
-              "No specific entrance node found, using first available node:",
-              resolvedStartRoom,
-            );
-          } else {
-            console.error("No nodes available in start floor graph");
-            alert("No navigation nodes available on floor 1");
-            return;
-          }
+        if (entranceNode) {
+          resolvedStartRoom = entranceNode;
+          console.log("Mapped 'entrance' to node:", resolvedStartRoom);
         } else {
-          // For other buildings, use similar logic
-          const availableNodes = Object.keys(startFloorGraph);
-          if (availableNodes.length > 0) {
-            const entranceOptions = getEntranceOptions(availableNodes);
-
-            resolvedStartRoom =
-              entranceOptions.length > 0
-                ? entranceOptions[0]
-                : availableNodes[0];
-            console.log("Mapped 'entrance' to:", resolvedStartRoom);
-          } else {
-            console.error("No nodes available in start floor graph");
-            alert("No navigation nodes available on selected floor");
-            return;
-          }
+          alert(`No navigation nodes available on floor ${startFloor}`);
+          return;
         }
       }
 

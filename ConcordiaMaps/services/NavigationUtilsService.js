@@ -2,6 +2,31 @@
  * Utility service for navigation-related helper functions
  */
 
+// Constants to replace magic literals
+export const BUILDINGS = {
+  HALL: "HallBuilding",
+  H: "H",
+  JMSB: "JMSB",
+  MB: "MB",
+  EV: "EVBuilding",
+  LIBRARY: "Library",
+  VANIER: "VanierExtension",
+};
+
+export const FLOORS = {
+  FIRST: "1",
+  SECOND: "2",
+  EIGHTH: "8",
+  NINTH: "9",
+  TUNNEL: "T",
+};
+
+export const NODE_TYPES = {
+  ENTRANCE: "entrance",
+  MAIN_LOBBY: "Main lobby",
+  MAIN_HALL: "main hall",
+};
+
 /**
  * Finds entrance-related nodes in a list of nodes
  * @param {Array<string>} nodes - Array of node names/IDs
@@ -38,32 +63,65 @@ export const validateNodeExists = (graph, node) => {
  */
 export const mapGenericNodeToBuildingSpecific = (buildingType, nodeType) => {
   if (
-    nodeType.toLowerCase() !== "entrance" &&
+    nodeType.toLowerCase() !== NODE_TYPES.ENTRANCE &&
     nodeType.toLowerCase() !== "main entrance" &&
     nodeType.toLowerCase() !== "lobby" &&
-    nodeType.toLowerCase() !== "main lobby"
+    nodeType.toLowerCase() !== NODE_TYPES.MAIN_LOBBY.toLowerCase()
   ) {
     return nodeType; // Return as is if not an entrance type
   }
 
   // Building-specific mappings
   switch (buildingType) {
+    case BUILDINGS.JMSB:
+    case BUILDINGS.MB:
     case "JMSB":
     case "MB":
-      return "main hall";
+      return NODE_TYPES.MAIN_HALL;
+    case BUILDINGS.HALL:
+    case BUILDINGS.H:
     case "HallBuilding":
     case "H":
-      return "Main lobby";
+      return NODE_TYPES.MAIN_LOBBY;
+    case BUILDINGS.EV:
     case "EVBuilding":
     case "EV":
       return "main entrance";
-    default: {
-      // Default fallback - return first available option
-      const options = ["Main lobby", "main hall", "entrance", "lobby"];
-      // Return the first option as default
-      return options[0];
+    default:
+      // Match the expected behavior in tests
+      // Default to Main lobby for unknown buildings
+      return NODE_TYPES.MAIN_LOBBY;
+  }
+};
+
+/**
+ * Resolves an entrance node based on building type and available nodes
+ * @param {string} buildingType - Type of building (e.g., "HallBuilding")
+ * @param {string} floorId - Floor identifier (e.g., "1")
+ * @param {Array<string>} availableNodes - List of available nodes in the graph
+ * @returns {string} - Resolved entrance node
+ */
+export const resolveEntranceNode = (buildingType, floorId, availableNodes) => {
+  // Special case for Hall Building first floor
+  if (buildingType === BUILDINGS.HALL && floorId === FLOORS.FIRST) {
+    // Use the utility function to find entrance-related nodes
+    const entranceOptions = getEntranceOptions(availableNodes);
+
+    if (entranceOptions.length > 0) {
+      console.log("Found entrance node:", entranceOptions[0]);
+      return entranceOptions[0];
     }
   }
+
+  // For other buildings or if no entrance nodes found
+  if (availableNodes.length > 0) {
+    const entranceOptions = getEntranceOptions(availableNodes);
+    return entranceOptions.length > 0 ? entranceOptions[0] : availableNodes[0];
+  }
+
+  // If no nodes available, return a default
+  console.error("No nodes available in floor graph");
+  return null;
 };
 
 /**
