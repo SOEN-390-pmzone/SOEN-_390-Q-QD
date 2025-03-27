@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, Image, View, Text } from "react-native";
+import { Image, View, Text } from "react-native";
 import { Marker } from "react-native-maps";
 import axios from "axios";
+import styles from "../styles/LiveBusTrackerStyles";
 
 // Import the bus icon image for use in markers
 const busIcon = require("../assets/Shuttle.png");
@@ -90,27 +91,5 @@ const LiveBusTracker = () => {
     </>
   );
 };
-
-// Styles for the bus marker image and error display
-const styles = StyleSheet.create({
-  markerImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-  },
-  errorContainer: {
-    position: "absolute",
-    bottom: 20,
-    left: 20,
-    right: 20,
-    backgroundColor: "rgba(255,0,0,0.8)",
-    padding: 10,
-    borderRadius: 5,
-  },
-  errorText: {
-    color: "white",
-    textAlign: "center",
-  },
-});
 
 export default LiveBusTracker;
