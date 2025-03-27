@@ -6,13 +6,12 @@ import {
   act,
   cleanup,
 } from "@testing-library/react-native";
-import MultistepNavigationScreen, {
-  getStepColor,
-} from "../../../components/MultistepNavigation/MultistepNavigationScreen";
 import * as Location from "expo-location";
 import { useGoogleMapDirections } from "../../../hooks/useGoogleMapDirections";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import * as Crypto from "expo-crypto";
+import MultistepNavigationScreen from "../../../components/MultistepNavigation/MultistepNavigationScreen";
+import { getStepColor } from "../../../services/NavigationStylesService";
 
 jest.mock("../../../components/IndoorNavigation/RoomToRoomNavigation", () => {
   const MockRoomToRoomNavigation = () => null;
@@ -1422,15 +1421,15 @@ describe("MultistepNavigationScreen", () => {
   test("handles step color assignment for different step types", () => {
     // Test colors for different step types
     const stepTypes = {
-      start: "#4CAF50",
-      elevator: "#FF9800",
-      escalator: "#FF9800",
-      stairs: "#FF9800",
-      transport: "#FF9800",
-      end: "#F44336",
-      error: "#F44336",
-      walking: "#2196F3",
-      default: "#2196F3",
+      start: "#4CAF50", // Green
+      elevator: "#9C27B0", // Purple
+      escalator: "#2196F3", // Blue
+      stairs: "#FF9800", // Orange
+      transport: "#912338", // Maroon (default)
+      end: "#F44336", // Red
+      error: "#912338", // Maroon (default)
+      walking: "#912338", // Maroon (default)
+      default: "#912338", // Maroon (default)
     };
 
     // Verify each step type gets correct color
@@ -1482,15 +1481,15 @@ describe("MultistepNavigationScreen", () => {
 
   test("checks getStepColor function for different step types", () => {
     const stepTypes = {
-      start: "#4CAF50",
-      elevator: "#FF9800",
-      escalator: "#FF9800",
-      stairs: "#FF9800",
-      transport: "#FF9800",
-      end: "#F44336",
-      error: "#F44336",
-      walking: "#2196F3",
-      default: "#2196F3",
+      start: "#4CAF50", // Green
+      elevator: "#9C27B0", // Purple
+      escalator: "#2196F3", // Blue
+      stairs: "#FF9800", // Orange
+      transport: "#912338", // Maroon (default)
+      end: "#F44336", // Red
+      error: "#912338", // Maroon (default)
+      walking: "#912338", // Maroon (default)
+      default: "#912338", // Maroon (default)
     };
 
     Object.entries(stepTypes).forEach(([type, expectedColor]) => {
@@ -3963,21 +3962,21 @@ describe("MultistepNavigationScreen", () => {
   );
 
   test("getStepColor returns correct colors for all step types", () => {
-    // Import the function directly from the file
+    // Import directly from NavigationStylesService instead
     const {
       getStepColor,
-    } = require("../../../components/MultistepNavigation/MultistepNavigationScreen");
+    } = require("../../../services/NavigationStylesService");
 
     // Test all possible branches
     expect(getStepColor("start")).toBe("#4CAF50");
-    expect(getStepColor("elevator")).toBe("#FF9800");
-    expect(getStepColor("escalator")).toBe("#FF9800");
+    expect(getStepColor("elevator")).toBe("#9C27B0");
+    expect(getStepColor("escalator")).toBe("#2196F3");
     expect(getStepColor("stairs")).toBe("#FF9800");
-    expect(getStepColor("transport")).toBe("#FF9800");
+    expect(getStepColor("transport")).toBe("#912338");
     expect(getStepColor("end")).toBe("#F44336");
-    expect(getStepColor("error")).toBe("#F44336");
-    expect(getStepColor("walking")).toBe("#2196F3"); // Default case
-    expect(getStepColor(undefined)).toBe("#2196F3"); // Default case
+    expect(getStepColor("error")).toBe("#912338");
+    expect(getStepColor("walking")).toBe("#912338");
+    expect(getStepColor(undefined)).toBe("#912338");
   });
 
   test("parseHtmlInstructions correctly removes all HTML tags", () => {

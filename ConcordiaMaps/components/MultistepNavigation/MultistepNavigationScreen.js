@@ -29,60 +29,8 @@ import Header from "../Header";
 import NavBar from "../NavBar";
 import Footer from "../Footer";
 import FloorRegistry from "../../services/BuildingDataService";
-
-// List of Concordia buildings for suggestions
-const CONCORDIA_BUILDINGS = [
-  {
-    id: "H",
-    name: "Hall Building",
-    address: "1455 De Maisonneuve Blvd. Ouest",
-    latitude: 45.497092,
-    longitude: -73.5788,
-  },
-  {
-    id: "LB",
-    name: "J.W. McConnell Building",
-    address: "1400 De Maisonneuve Blvd. Ouest",
-  },
-  {
-    id: "MB",
-    name: "John Molson Building",
-    address: "1450 Guy St.",
-  },
-  {
-    id: "EV",
-    name: "Engineering & Visual Arts Complex",
-    address: "1515 St. Catherine St. Ouest",
-  },
-  {
-    id: "VL",
-    name: "Vanier Library",
-    address: "7141 Sherbrooke St. W",
-  },
-  {
-    id: "VE",
-    name: "Vanier Extension",
-    address: "7141 Sherbrooke St. W",
-  },
-];
-
-export const getStepColor = (type) => {
-  switch (type) {
-    case "start":
-      return "#4CAF50"; // Green for start
-    case "elevator":
-    case "escalator":
-    case "stairs":
-    case "transport":
-      return "#FF9800"; // Orange for transport methods
-    case "end":
-      return "#F44336"; // Red for destination
-    case "error":
-      return "#F44336"; // Red for errors
-    default:
-      return "#2196F3"; // Blue for walking/default
-  }
-};
+import { CONCORDIA_BUILDINGS } from "../../services/BuildingDataService";
+import { getStepColor } from "../../services/NavigationStylesService";
 
 const MultistepNavigationScreen = () => {
   const { geocodeAddress, getStepsInHTML, getPolyline } =
@@ -1469,36 +1417,23 @@ const MultistepNavigationScreen = () => {
     return (
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{ flex: 1 }}
+        style={styles.container}
         keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0}
       >
         <ScrollView
-          style={{ flex: 1 }}
-          contentContainerStyle={{
-            paddingVertical: 20,
-            paddingHorizontal: 16,
-            paddingBottom: 120, // Extra padding at bottom for keyboard
-          }}
+          style={styles.scrollContainer}
+          contentContainerStyle={styles.formContainer}
         >
           {/* Title section */}
-          <View style={{ marginBottom: 24, alignItems: "center" }}>
-            <Text style={{ fontSize: 22, fontWeight: "bold", color: "#333" }}>
-              Plan Your Route
-            </Text>
-            <Text
-              style={{
-                fontSize: 14,
-                color: "#666",
-                marginTop: 4,
-                textAlign: "center",
-              }}
-            >
+          <View style={styles.header}>
+            <Text style={styles.title}>Plan Your Route</Text>
+            <Text style={styles.subtitle}>
               Enter your starting point and destination
             </Text>
           </View>
 
           {/* Origin Input Section with Toggle */}
-          <View style={[styles.inputGroup, { marginBottom: 24 }]}>
+          <View style={styles.inputGroup}>
             <View style={styles.inputHeader}>
               <Text style={styles.label}>Starting Point</Text>
               <View style={styles.toggleContainer}>
@@ -1581,7 +1516,7 @@ const MultistepNavigationScreen = () => {
 
                 {originPredictions.length > 0 && (
                   <ScrollView
-                    style={[styles.predictionsList, { maxHeight: 150 }]}
+                    style={styles.predictionsList}
                     nestedScrollEnabled={true}
                   >
                     {originPredictions.map((item) => (
@@ -1711,7 +1646,7 @@ const MultistepNavigationScreen = () => {
 
                 {showOriginBuildingSuggestions && (
                   <ScrollView
-                    style={[styles.suggestionsContainer, { maxHeight: 150 }]}
+                    style={styles.suggestionsContainer}
                     nestedScrollEnabled={true}
                   >
                     {originBuildingSuggestions.map((item) => (
@@ -1735,7 +1670,7 @@ const MultistepNavigationScreen = () => {
           </View>
 
           {/* Destination Input Section with Toggle */}
-          <View style={[styles.inputGroup, { marginBottom: 24 }]}>
+          <View style={styles.inputGroup}>
             <View style={styles.inputHeader}>
               <Text style={styles.label}>Destination</Text>
               <View style={styles.toggleContainer}>
@@ -1820,7 +1755,7 @@ const MultistepNavigationScreen = () => {
                 </View>
                 {destinationPredictions.length > 0 && (
                   <ScrollView
-                    style={[styles.predictionsList, { maxHeight: 150 }]}
+                    style={styles.predictionsList}
                     nestedScrollEnabled={true}
                   >
                     {destinationPredictions.map((item) => (
@@ -1891,7 +1826,7 @@ const MultistepNavigationScreen = () => {
                 )}
                 {showBuildingSuggestions && (
                   <ScrollView
-                    style={[styles.suggestionsContainer, { maxHeight: 150 }]}
+                    style={styles.suggestionsContainer}
                     nestedScrollEnabled={true}
                   >
                     {buildingSuggestions.map((item) => (
@@ -1917,15 +1852,6 @@ const MultistepNavigationScreen = () => {
           <TouchableOpacity
             style={[
               styles.button,
-              {
-                marginTop: 12,
-                height: 50,
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.1,
-                shadowRadius: 3,
-                elevation: 3,
-              },
               ((originInputType === "location" && !originDetails) ||
                 (originInputType === "classroom" && !originBuilding) ||
                 (destinationInputType === "location" && !destinationDetails) ||
@@ -1944,9 +1870,7 @@ const MultistepNavigationScreen = () => {
             {isLoading ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={[styles.buttonText, { fontSize: 16 }]}>
-                Start Navigation
-              </Text>
+              <Text style={styles.buttonText}>Start Navigation</Text>
             )}
           </TouchableOpacity>
         </ScrollView>
@@ -2174,22 +2098,10 @@ const MultistepNavigationScreen = () => {
   };
 
   return (
-    <SafeAreaView
-      style={[{ flex: 1, backgroundColor: "#f5f5f5" }]}
-      testID="navigation-screen"
-    >
+    <SafeAreaView style={styles.safeAreaContainer} testID="navigation-screen">
       <Header />
       <NavBar />
-      <View
-        style={[
-          styles.navigationContainer,
-          {
-            flex: 1,
-            paddingTop: 10,
-            paddingBottom: 60,
-          },
-        ]}
-      >
+      <View style={styles.navigationContainer}>
         {navigationPlan ? renderNavigationSteps() : renderNavigationForm()}
         {expandedMap && renderExpandedMap()}
         {shouldShowIndoorNavigation() && renderIndoorNavigation()}

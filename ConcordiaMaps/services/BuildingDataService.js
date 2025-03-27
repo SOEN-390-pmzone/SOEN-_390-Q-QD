@@ -38,6 +38,41 @@ import {
 
 import SVGs from "../assets/svg/SVGtoString";
 
+export const CONCORDIA_BUILDINGS = [
+  {
+    id: "H",
+    name: "Hall Building",
+    address: "1455 De Maisonneuve Blvd. Ouest",
+    latitude: 45.497092,
+    longitude: -73.5788,
+  },
+  {
+    id: "LB",
+    name: "J.W. McConnell Building",
+    address: "1400 De Maisonneuve Blvd. Ouest",
+  },
+  {
+    id: "MB",
+    name: "John Molson Building",
+    address: "1450 Guy St.",
+  },
+  {
+    id: "EV",
+    name: "Engineering & Visual Arts Complex",
+    address: "1515 St. Catherine St. Ouest",
+  },
+  {
+    id: "VL",
+    name: "Vanier Library",
+    address: "7141 Sherbrooke St. W",
+  },
+  {
+    id: "VE",
+    name: "Vanier Extension",
+    address: "7141 Sherbrooke St. W",
+  },
+];
+
 class FloorRegistry {
   // Get building type from building ID
   static getBuildingTypeFromId(buildingId) {
