@@ -17,7 +17,6 @@ import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { WebView } from "react-native-webview";
 import NavigationStrategyService from "../../services/NavigationStrategyService";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import * as Crypto from "expo-crypto";
 import { useGoogleMapDirections } from "../../hooks/useGoogleMapDirections";
 import styles from "../../styles/MultistepNavigation/MultistepNavigationStyles";
 import { generateFloorHtml } from "../../services/FloorPlanService";
@@ -33,7 +32,7 @@ import { CONCORDIA_BUILDINGS } from "../../services/BuildingDataService";
 import { getStepColor } from "../../services/NavigationStylesService";
 
 const MultistepNavigationScreen = () => {
-  const { geocodeAddress, getStepsInHTML, getPolyline } =
+  const { geocodeAddress, getStepsInHTML, getPolyline, generateRandomToken } =
     useGoogleMapDirections();
   const navigation = useNavigation();
 
@@ -101,40 +100,24 @@ const MultistepNavigationScreen = () => {
   // WebView ref
   const mapWebViewRef = useRef(null);
 
-  // Generate a random session token for Google Places API
-  const generateRandomToken = async () => {
-    try {
-      // Generate random bytes
-      const randomBytes = await Crypto.getRandomBytesAsync(16);
-
-      // Convert to base64 string
-      let base64 = "";
-      for (const byte of randomBytes) {
-        base64 += String.fromCharCode(byte);
-      }
-      base64 = btoa(base64);
-
-      // Remove non-alphanumeric characters and trim to length
-      return base64.replace(/[+/=]/g, "").substring(0, 16);
-    } catch (error) {
-      console.error("Error generating random token:", error);
-    }
-  };
-
   // Generate a new session token when component mounts
   useEffect(() => {
     const setupToken = async () => {
-      const token = await generateRandomToken();
-      sessionTokenRef.current = token;
+      try {
+        // Use the destructured generateRandomToken from the hook
+        const token = await generateRandomToken();
+        sessionTokenRef.current = token;
+      } catch (error) {
+        console.error("Error generating token:", error);
+      }
     };
 
     setupToken();
 
     return () => {
-      // Clear session token on unmount
-      sessionTokenRef.current = "";
+      // Cleanup if needed
     };
-  }, []);
+  }, [generateRandomToken]);
 
   // Handle existing navigation plan if passed as parameter
   useEffect(() => {

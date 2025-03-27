@@ -1,7 +1,26 @@
 const GOOGLE_MAPS_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
 import polyline from "@mapbox/polyline"; //? To use the polyline decoding
+import * as Crypto from "expo-crypto"; //? To generate a random token
 
 export const useGoogleMapDirections = () => {
+  const generateRandomToken = async () => {
+    try {
+      // Generate random bytes
+      const randomBytes = await Crypto.getRandomBytesAsync(16);
+
+      // Convert to base64 string
+      let base64 = "";
+      for (const byte of randomBytes) {
+        base64 += String.fromCharCode(byte);
+      }
+      base64 = btoa(base64);
+
+      // Remove non-alphanumeric characters and trim to length
+      return base64.replace(/[+/=]/g, "").substring(0, 16);
+    } catch (error) {
+      console.error("Error generating random token:", error);
+    }
+  };
   //? To turn a text address into its longitude and latitude coordinates
   const geocodeAddress = async (address) => {
     try {
@@ -139,5 +158,6 @@ export const useGoogleMapDirections = () => {
     getStepsInHTML,
     getDirections,
     getPolyline,
+    generateRandomToken,
   };
 };

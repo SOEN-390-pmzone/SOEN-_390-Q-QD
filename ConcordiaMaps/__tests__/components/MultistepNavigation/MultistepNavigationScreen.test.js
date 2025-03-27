@@ -608,20 +608,45 @@ describe("MultistepNavigationScreen", () => {
   });
 
   test("handles session token generation and cleanup", async () => {
-    const { unmount } = render(<MultistepNavigationScreen />);
+    // Mock Crypto implementation
+    const mockRandomBytes = new Uint8Array([
+      65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80,
+    ]);
+    Crypto.getRandomBytesAsync.mockResolvedValue(mockRandomBytes);
 
-    // Wait for token generation
-    await waitFor(() => {
-      const mockCryptoCall = Crypto.getRandomBytesAsync.mock.calls[0][0];
-      expect(mockCryptoCall).toBe(16); // Verify 16 bytes requested
+    // Mock btoa implementation
+    const originalBtoa = global.btoa;
+    global.btoa = jest.fn(() => "QUJDREVGRw==");
+
+    // Save original environment
+    const originalEnv = process.env;
+    process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY = "test_api_key";
+
+    // Mock console.error to prevent error logs in test output
+    const mockConsoleError = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+
+    // Mock useGoogleMapDirections.generateRandomToken
+    useGoogleMapDirections.mockReturnValue({
+      getStepsInHTML: mockGetStepsInHTML,
+      getPolyline: mockGetPolyline,
+      geocodeAddress: jest.fn(),
+      generateRandomToken: jest.fn().mockResolvedValue("mockedToken123"),
     });
 
-    // Test cleanup by unmounting
-    unmount();
+    // Render component to trigger useEffect
+    render(<MultistepNavigationScreen />);
 
+    // Verify the mocked function was called
     await waitFor(() => {
-      expect(Crypto.getRandomBytesAsync).toHaveBeenCalledWith(16);
+      expect(useGoogleMapDirections().generateRandomToken).toHaveBeenCalled();
     });
+
+    // Clean up
+    global.btoa = originalBtoa;
+    process.env = originalEnv;
+    mockConsoleError.mockRestore();
   });
 
   test("handles building type identification correctly", async () => {
@@ -2136,29 +2161,6 @@ describe("MultistepNavigationScreen", () => {
     mockConsoleWarn.mockRestore();
   });
 
-  test("handles session token generation failure", async () => {
-    const mockConsoleError = jest
-      .spyOn(console, "error")
-      .mockImplementation(() => {});
-
-    // Mock crypto to fail
-    Crypto.getRandomBytesAsync.mockRejectedValueOnce(
-      new Error("Crypto failed"),
-    );
-
-    // Don't store unused getByText
-    render(<MultistepNavigationScreen />);
-
-    await waitFor(() => {
-      expect(mockConsoleError).toHaveBeenCalledWith(
-        "Error generating random token:",
-        expect.any(Error),
-      );
-    });
-
-    mockConsoleError.mockRestore();
-  });
-
   test("handles geocoding errors for building addresses", async () => {
     const mockConsoleError = jest
       .spyOn(console, "error")
@@ -2409,23 +2411,55 @@ describe("MultistepNavigationScreen", () => {
   });
 
   test("handles session token generation with mocked Crypto", async () => {
-    // Mock implementations for the private function
+    // Clear previous mocks and create new mocks specifically for this test
+    jest.clearAllMocks();
+
+    // Create a mock random bytes array
     const mockRandomBytes = new Uint8Array([
       65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80,
     ]);
+
+    // Mock Crypto.getRandomBytesAsync to return our mock bytes
     Crypto.getRandomBytesAsync.mockResolvedValue(mockRandomBytes);
 
+    // Mock btoa
     global.btoa = jest.fn(() => "QUJDREVGRw==");
 
-    // Render the component to trigger the useEffect that calls Crypto.getRandomBytesAsync
+    // Mock useGoogleMapDirections to include the generateRandomToken method
+    const mockGenerateRandomToken = jest
+      .fn()
+      .mockResolvedValue("mockedToken123");
+    useGoogleMapDirections.mockReturnValue({
+      getStepsInHTML: mockGetStepsInHTML,
+      getPolyline: mockGetPolyline,
+      geocodeAddress: jest.fn(),
+      generateRandomToken: mockGenerateRandomToken,
+    });
+
+    // Save original environment and set API key
+    const originalEnv = process.env;
+    process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY = "test_api_key";
+
+    // Mock console.error to prevent error logs
+    const mockConsoleError = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+
+    // Render the component
     render(<MultistepNavigationScreen />);
 
-    // Wait for any async operations to complete
+    // Wait for the component to call generateRandomToken
     await waitFor(() => {
-      // Token should be generated on component mount
-      expect(Crypto.getRandomBytesAsync).toHaveBeenCalledWith(16);
-      expect(global.btoa).toHaveBeenCalled();
+      expect(mockGenerateRandomToken).toHaveBeenCalled();
     });
+
+    // Now we can test that the useGoogleMapDirections().generateRandomToken was called
+    expect(useGoogleMapDirections().generateRandomToken).toHaveBeenCalled();
+
+    // Clean up
+    process.env = originalEnv;
+    mockConsoleError.mockRestore();
+    global.btoa.mockRestore();
   });
 
   test("handles map HTML generation with and without route", () => {
@@ -3259,7 +3293,7 @@ describe("MultistepNavigationScreen", () => {
 
     await waitFor(() => {
       expect(mockConsoleError).toHaveBeenCalledWith(
-        "Error generating random token:",
+        "Error generating token:",
         expect.any(Error),
       );
     });
@@ -4469,8 +4503,6 @@ describe("MultistepNavigationScreen", () => {
 
     render(<MultistepNavigationScreen />);
 
-    // The component should attempt to geocode the CUSTOM_BUILDING
-    // Since the actual implementation might vary, let's check if geocodeAddress or fetch is called
     await waitFor(
       () => {
         expect(useGoogleMapDirections().geocodeAddress).toHaveBeenCalled();
