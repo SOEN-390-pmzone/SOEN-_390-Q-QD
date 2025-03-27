@@ -23,6 +23,11 @@ import {
   // findTransportMethod
 } from "../../services/PathCalculationService";
 
+import {
+  getEntranceOptions,
+  validateNodeExists,
+} from "../../services/NavigationUtilsService";
+
 const RoomToRoomNavigation = () => {
   const route = useRoute();
   const navigation = useNavigation(); // Moved hook to top level of component
@@ -393,32 +398,24 @@ const RoomToRoomNavigation = () => {
         Object.keys(endFloorGraph).length,
         "nodes",
       );
-
       // Map 'entrance' to an actual node in the graph if needed
-      let actualStartRoom = selectedStartRoom;
-      if (actualStartRoom === "entrance") {
-        // Find a suitable entrance node based on the building type and available nodes
+      let resolvedStartRoom = selectedStartRoom;
+
+      // Find a suitable entrance node based on the building type and available nodes
+      if (selectedStartRoom === "entrance") {
         if (buildingType === "HallBuilding" && startFloor === "1") {
-          // Check for specific entrance-related nodes
-          const entranceOptions = availableNodes.filter(
-            (node) =>
-              node.includes("ENTRANCE") ||
-              node.includes("LOBBY") ||
-              node.includes("HALL") ||
-              node.includes("DOOR") ||
-              node.includes("ELEVATOR") ||
-              node.includes("STAIRS"),
-          );
+          // Use the utility function instead of duplicated filter logic
+          const entranceOptions = getEntranceOptions(availableNodes);
 
           if (entranceOptions.length > 0) {
-            actualStartRoom = entranceOptions[0];
-            console.log("Mapped 'entrance' to node:", actualStartRoom);
+            resolvedStartRoom = entranceOptions[0];
+            console.log("Mapped 'entrance' to node:", resolvedStartRoom);
           } else if (availableNodes.length > 0) {
             // If no suitable entrance node found, use the first available node
-            actualStartRoom = availableNodes[0];
+            resolvedStartRoom = availableNodes[0];
             console.log(
               "No specific entrance node found, using first available node:",
-              actualStartRoom,
+              resolvedStartRoom,
             );
           } else {
             console.error("No nodes available in start floor graph");
@@ -429,20 +426,13 @@ const RoomToRoomNavigation = () => {
           // For other buildings, use similar logic
           const availableNodes = Object.keys(startFloorGraph);
           if (availableNodes.length > 0) {
-            const entranceOptions = availableNodes.filter(
-              (node) =>
-                node.includes("ENTRANCE") ||
-                node.includes("LOBBY") ||
-                node.includes("DOOR") ||
-                node.includes("ELEVATOR") ||
-                node.includes("STAIRS"),
-            );
+            const entranceOptions = getEntranceOptions(availableNodes);
 
-            actualStartRoom =
+            resolvedStartRoom =
               entranceOptions.length > 0
                 ? entranceOptions[0]
                 : availableNodes[0];
-            console.log("Mapped 'entrance' to:", actualStartRoom);
+            console.log("Mapped 'entrance' to:", resolvedStartRoom);
           } else {
             console.error("No nodes available in start floor graph");
             alert("No navigation nodes available on selected floor");
@@ -452,7 +442,7 @@ const RoomToRoomNavigation = () => {
       }
 
       // Also check if the end room exists
-      if (!Object.keys(endFloorGraph).includes(selectedEndRoom)) {
+      if (!validateNodeExists(endFloorGraph, selectedEndRoom)) {
         console.error(
           "End room not found in navigation graph:",
           selectedEndRoom,
@@ -477,12 +467,15 @@ const RoomToRoomNavigation = () => {
         }
       }
 
-      console.log("Using start room:", actualStartRoom);
+      console.log("Using start room:", resolvedStartRoom);
       console.log("Using end room:", selectedEndRoom);
 
       // Make sure the mapped nodes actually exist in the graph
-      if (!Object.keys(startFloorGraph).includes(actualStartRoom)) {
-        console.error("Mapped start room not found in graph:", actualStartRoom);
+      if (!validateNodeExists(startFloorGraph, resolvedStartRoom)) {
+        console.error(
+          "Mapped start room not found in graph:",
+          resolvedStartRoom,
+        );
         alert(`Unable to find a valid starting point on floor ${startFloor}`);
         return;
       }
@@ -490,7 +483,7 @@ const RoomToRoomNavigation = () => {
       const validationError = validateRoomSelection(
         startFloorGraph,
         endFloorGraph,
-        actualStartRoom,
+        resolvedStartRoom,
         selectedEndRoom,
       );
 
@@ -505,7 +498,7 @@ const RoomToRoomNavigation = () => {
       if (startFloor === endFloor) {
         result = handleSameFloorNavigation(
           startFloorGraph,
-          actualStartRoom,
+          resolvedStartRoom,
           selectedEndRoom,
           startFloor,
           building.name,
@@ -516,7 +509,7 @@ const RoomToRoomNavigation = () => {
         result = handleInterFloorNavigation(
           startFloorGraph,
           endFloorGraph,
-          actualStartRoom,
+          resolvedStartRoom,
           selectedEndRoom,
           startFloor,
           endFloor,
