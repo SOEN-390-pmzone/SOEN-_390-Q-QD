@@ -116,21 +116,24 @@ class FloorRegistry {
     let floor = "1"; // Default floor
 
     // For Hall Building rooms like H-920, H920
-    const hallMatch = roomId.match(/^h-?(\d)/i);
-    if (hallMatch) {
-      return hallMatch[1];
+    const hallRegex = /^h-?(\d)/i;
+    const hallResult = hallRegex.exec(roomId);
+    if (hallResult) {
+      return hallResult[1];
     }
 
     // For MB/JMSB rooms like 1.293 or 1-293
-    const mbMatch = roomId.match(/^(mb-?)?(\d+)[.-]/i);
-    if (mbMatch) {
-      return mbMatch[2]; // Changed index to account for modified capture group
+    const mbRegex = /^(mb-?)?(\d+)[.-]/i;
+    const mbResult = mbRegex.exec(roomId);
+    if (mbResult) {
+      return mbResult[2]; // Using index 2 for the capture group
     }
 
     // For other buildings with room numbers like VE-101, VL-201, etc.
-    const generalMatch = roomId.match(/^[a-z]{1,3}-?(\d)\d{2}/i);
-    if (generalMatch) {
-      return generalMatch[1];
+    const generalRegex = /^[a-z]{1,3}-?(\d)\d{2}/i;
+    const generalResult = generalRegex.exec(roomId);
+    if (generalResult) {
+      return generalResult[1];
     }
 
     return floor;
@@ -236,59 +239,39 @@ class FloorRegistry {
 
     // Gather all rooms from all floors
     const validRooms = [...commonRooms];
+
+    // Helper function to add building-specific room formats
+    const addBuildingSpecificFormats = (roomId) => {
+      // For JMSB building
+      if (buildingId === "MB" && /^\d+\.\d+$/.test(roomId)) {
+        const floorNum = roomId.split(".")[0];
+        const roomNum = roomId.split(".")[1];
+        validRooms.push(`MB-${roomId}`);
+        validRooms.push(`MB-${floorNum}-${roomNum}`);
+      }
+
+      // For buildings with simple room numbers
+      if (/^\d+$/.test(roomId)) {
+        // Add building-prefixed versions
+        if (buildingId === "VE") validRooms.push(`VE-${roomId}`);
+        if (buildingId === "VL") validRooms.push(`VL-${roomId}`);
+        if (buildingId === "EV") validRooms.push(`EV-${roomId}`);
+        if (buildingId === "H") validRooms.push(`H-${roomId}`);
+      }
+
+      // For Hall Building with H-prefix
+      if (buildingId === "H" && /^H\d+$/.test(roomId)) {
+        const roomNum = roomId.replace(/^H/, "");
+        validRooms.push(`H-${roomNum}`);
+      }
+    };
+
     Object.values(building.floors).forEach((floor) => {
       if (floor?.rooms) {
-        // Add all room IDs from this floor
+        // Process each room on this floor
         Object.keys(floor.rooms).forEach((roomId) => {
           validRooms.push(roomId);
-
-          // For JMSB building, also add MB-prefixed versions to accommodate user input
-          if (buildingId === "MB") {
-            // For room IDs like 1.293, also add MB-1.293 and MB-1-293
-            if (/^\d+\.\d+$/.test(roomId)) {
-              const floorNum = roomId.split(".")[0];
-              const roomNum = roomId.split(".")[1];
-              validRooms.push(`MB-${roomId}`);
-              validRooms.push(`MB-${floorNum}-${roomNum}`);
-            }
-          }
-
-          // For Vanier Extension building
-          if (buildingId === "VE") {
-            // Add formats like VE-191
-            if (/^\d+$/.test(roomId)) {
-              validRooms.push(`VE-${roomId}`);
-            }
-          }
-
-          // For Vanier Library building
-          if (buildingId === "VL") {
-            // Add formats like VL-101
-            if (/^\d+$/.test(roomId)) {
-              validRooms.push(`VL-${roomId}`);
-            }
-          }
-
-          // For EV Building
-          if (buildingId === "EV") {
-            // Add formats like EV-200
-            if (/^\d+$/.test(roomId)) {
-              validRooms.push(`EV-${roomId}`);
-            }
-          }
-
-          // For Hall Building, add H-prefixed versions
-          if (buildingId === "H") {
-            // Add formats like H-801
-            if (/^\d+$/.test(roomId)) {
-              validRooms.push(`H-${roomId}`);
-            }
-            // Add formats for H801
-            if (/^H\d+$/.test(roomId)) {
-              const roomNum = roomId.replace(/^H/, "");
-              validRooms.push(`H-${roomNum}`);
-            }
-          }
+          addBuildingSpecificFormats(roomId);
         });
       }
     });

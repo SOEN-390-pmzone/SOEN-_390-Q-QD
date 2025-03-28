@@ -7,6 +7,20 @@ import { Alert } from "react-native";
 import ShuttleSchedule from "./ShuttleSchedule";
 import { navigationItems } from "../constants/configuration/navigationItems";
 
+const MenuItem = ({ item }) => (
+  <TouchableOpacity onPress={item.action} testID={item.testID}>
+    <Text style={styles.menuItem}>{item.label}</Text>
+  </TouchableOpacity>
+);
+
+MenuItem.propTypes = {
+  item: PropTypes.shape({
+    action: PropTypes.func.isRequired,
+    testID: PropTypes.string,
+    label: PropTypes.string.isRequired,
+  }).isRequired,
+};
+
 function NavBar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScheduleVisible, setIsScheduleVisible] = useState(false);
@@ -56,20 +70,6 @@ function NavBar() {
     inputRange: [0, 1],
     outputRange: [-270, 0],
   });
-
-  const MenuItem = ({ item }) => (
-    <TouchableOpacity onPress={item.action} testID={item.testID}>
-      <Text style={styles.menuItem}>{item.label}</Text>
-    </TouchableOpacity>
-  );
-
-  MenuItem.propTypes = {
-    item: PropTypes.shape({
-      action: PropTypes.func.isRequired,
-      testID: PropTypes.string,
-      label: PropTypes.string.isRequired,
-    }).isRequired,
-  };
 
   return (
     <View style={styles.navbar}>

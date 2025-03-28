@@ -318,26 +318,30 @@ class NavigationStrategyService {
     }
 
     // For MB-1-293 format
-    const mbMatch = roomId.match(/^MB-(\d+)-\d+$/i);
+    const mbRegex = /^MB-(\d+)-\d+$/i;
+    const mbMatch = mbRegex.exec(roomId);
     if (mbMatch && mbMatch[1]) {
       return mbMatch[1];
     }
 
     // For MB-1.293 format
-    const mbDotMatch = roomId.match(/^MB-(\d+)\.\d+$/i);
+    const mbDotRegex = /^MB-(\d+)\.\d+$/i;
+    const mbDotMatch = mbDotRegex.exec(roomId);
     if (mbDotMatch && mbDotMatch[1]) {
       return mbDotMatch[1];
     }
 
     // For classroom IDs like "H-920" (9th floor) or "H920"
     // Anchored pattern with reasonable limits
-    const match = roomId.match(/^[A-Za-z]{1,3}-?(\d)(\d{1,3})$/i);
-    if (match && match[1]) {
+    const generalRegex = /^[A-Za-z]{1,3}-?(\d)(\d{1,3})$/i;
+    const match = generalRegex.exec(roomId);
+    if (match?.[1]) {
       return match[1];
     }
 
     // Alternative format like "920" or "9thFloor"
-    const directMatch = roomId.match(/^(\d)\d*$/);
+    const directRegex = /^(\d)\d*$/;
+    const directMatch = directRegex.exec(roomId);
     if (directMatch) {
       return directMatch[1];
     }

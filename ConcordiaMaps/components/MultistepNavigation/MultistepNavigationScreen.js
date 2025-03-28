@@ -27,8 +27,9 @@ import {
 import Header from "../Header";
 import NavBar from "../NavBar";
 import Footer from "../Footer";
-import FloorRegistry from "../../services/BuildingDataService";
-import { CONCORDIA_BUILDINGS } from "../../services/BuildingDataService";
+import FloorRegistry, {
+  CONCORDIA_BUILDINGS,
+} from "../../services/BuildingDataService";
 import { getStepColor } from "../../services/NavigationStylesService";
 
 const MultistepNavigationScreen = () => {
@@ -1258,7 +1259,7 @@ const MultistepNavigationScreen = () => {
                     {navigationSteps.length > 0 ? (
                       navigationSteps.map((step, index) => (
                         <View
-                          key={index}
+                          key={`step-${step.type}-${step.text}-${index}`}
                           style={[
                             styles.navigationStepItem,
                             { paddingVertical: 6, paddingHorizontal: 8 },
@@ -1559,7 +1560,7 @@ const MultistepNavigationScreen = () => {
                             formattedRoom = `MB-${text}`;
                           }
                           // Try matching format like 1-293
-                          else if ((match = /^\d+-\d+$/.exec(text))) {
+                          else if (/^\d+-\d+$/.test(text)) {
                             formattedRoom = `MB-${text}`;
                           }
                           // If doesn't start with MB-, add the prefix
@@ -1584,7 +1585,7 @@ const MultistepNavigationScreen = () => {
 
                           if (specialRooms.includes(text.toLowerCase())) {
                             formattedRoom = text.toLowerCase();
-                          } else if (text.match(/^\d+$/)) {
+                          } else if (/^\d+$/.exec(text)) {
                             // Just a number like "101" - prefix with building code
                             formattedRoom = `${originBuilding.id}-${text}`;
                           } else if (

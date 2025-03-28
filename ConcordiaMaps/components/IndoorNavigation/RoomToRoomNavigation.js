@@ -74,105 +74,123 @@ const RoomToRoomNavigation = () => {
   // Available buildings
   const buildings = FloorRegistry.getBuildings();
 
-  // Initialize from route params on component mount
-  useEffect(() => {
-    if (buildingId) {
-      console.log(
-        `Initializing with building ID: ${buildingId}, buildingType: ${route.params.buildingType}`,
-      );
+  const determineBuildingTypeHelper = (buildingId, paramsType) => {
+    const determinedType =
+      paramsType || findBuildingTypeFromId(buildingId, FloorRegistry);
+    console.log(`Using building type ${determinedType} for ID ${buildingId}`);
+    return determinedType;
+  };
 
-      // Use the passed buildingType from params if available, otherwise determine it
-      const determinedBuildingType =
-        route.params.buildingType ||
-        findBuildingTypeFromId(buildingId, FloorRegistry);
+  // Find floor for a room if not explicitly provided
+  const findFloorForRoomHelper = (buildingType, room, explicitFloor) => {
+    if (explicitFloor) return explicitFloor;
 
-      if (determinedBuildingType) {
-        console.log(
-          `Using building type ${determinedBuildingType} for ID ${buildingId}`,
-        );
-        setBuildingType(determinedBuildingType);
-        setSelectedBuilding(buildingId);
+    if (room) {
+      const floor = findFloorForRoom(buildingType, room, FloorRegistry);
+      console.log(`Determined floor: ${floor} for room ${room}`);
+      return floor;
+    }
 
-        // Determine floors if rooms are provided
-        let foundStartFloor = startFloorParam;
-        let foundEndFloor = endFloorParam;
+    return null;
+  };
 
-        // If no start floor provided but have start room, find the floor
-        if (!foundStartFloor && startRoom) {
-          foundStartFloor = findFloorForRoom(
-            determinedBuildingType,
-            startRoom,
-            FloorRegistry,
-          );
-          console.log(
-            `Determined start floor: ${foundStartFloor} for room ${startRoom}`,
-          );
-        }
+  // Load rooms for a floor
+  const loadRoomsForFloor = (buildingType, floor) => {
+    if (!floor) return {};
+    return FloorRegistry.getRooms(buildingType, floor);
+  };
 
-        // If no end floor provided but have end room, find the floor
-        if (!foundEndFloor && endRoom) {
-          foundEndFloor = findFloorForRoom(
-            determinedBuildingType,
-            endRoom,
-            FloorRegistry,
-          );
-          console.log(
-            `Determined end floor: ${foundEndFloor} for room ${endRoom}`,
-          );
-        }
-
-        // Set floors and load rooms if floors were found
-        if (foundStartFloor) {
-          setStartFloor(foundStartFloor);
-          const startRooms = FloorRegistry.getRooms(
-            determinedBuildingType,
-            foundStartFloor,
-          );
-          setStartFloorRooms(startRooms);
-        }
-
-        if (foundEndFloor) {
-          setEndFloor(foundEndFloor);
-          const endRooms = FloorRegistry.getRooms(
-            determinedBuildingType,
-            foundEndFloor,
-          );
-          setEndFloorRooms(endRooms);
-        }
-
-        // Set selected rooms if provided
-        if (startRoom) setSelectedStartRoom(startRoom);
-        if (endRoom) setSelectedEndRoom(endRoom);
-
-        // Determine which step to show based on what info we have
-        if (
-          skipSelection &&
-          startRoom &&
-          endRoom &&
-          foundStartFloor &&
-          foundEndFloor
-        ) {
-          setStep("navigation");
-        } else if (startRoom && endRoom) {
-          setStep("rooms");
-        } else if (foundStartFloor && foundEndFloor) {
-          setStep("floors");
-        } else {
-          setStep("building");
-        }
-
-        // Mark initialization as complete
-        setInitializationComplete(true);
-      } else {
-        console.error(
-          `Could not determine building type for ID: ${buildingId}`,
-        );
-        setInitializationComplete(true);
-      }
+  // Determine which step to show based on available information
+  const determineNavigationStep = (
+    skipSelection,
+    startRoom,
+    endRoom,
+    startFloor,
+    endFloor,
+  ) => {
+    if (skipSelection && startRoom && endRoom && startFloor && endFloor) {
+      return "navigation";
+    } else if (startRoom && endRoom) {
+      return "rooms";
+    } else if (startFloor && endFloor) {
+      return "floors";
     } else {
+      return "building";
+    }
+  };
+
+  // Replace the complex useEffect with a simplified version
+  useEffect(() => {
+    if (!buildingId) {
       console.log("No building ID provided, showing building selection");
       setInitializationComplete(true);
+      return;
     }
+
+    console.log(
+      `Initializing with building ID: ${buildingId}, buildingType: ${route.params.buildingType}`,
+    );
+
+    // Step 1: Determine building type
+    const determinedBuildingType = determineBuildingTypeHelper(
+      buildingId,
+      route.params.buildingType,
+    );
+
+    if (!determinedBuildingType) {
+      console.error(`Could not determine building type for ID: ${buildingId}`);
+      setInitializationComplete(true);
+      return;
+    }
+
+    // Step 2: Set building information
+    setBuildingType(determinedBuildingType);
+    setSelectedBuilding(buildingId);
+
+    // Step 3: Determine floors
+    const foundStartFloor = findFloorForRoomHelper(
+      determinedBuildingType,
+      startRoom,
+      startFloorParam,
+    );
+    const foundEndFloor = findFloorForRoomHelper(
+      determinedBuildingType,
+      endRoom,
+      endFloorParam,
+    );
+
+    // Step 4: Set floors and load rooms
+    if (foundStartFloor) {
+      setStartFloor(foundStartFloor);
+      setStartFloorRooms(
+        loadRoomsForFloor(determinedBuildingType, foundStartFloor),
+      );
+    }
+
+    if (foundEndFloor) {
+      setEndFloor(foundEndFloor);
+      setEndFloorRooms(
+        loadRoomsForFloor(determinedBuildingType, foundEndFloor),
+      );
+    }
+
+    // Step 5: Set selected rooms if provided
+    if (startRoom) setSelectedStartRoom(startRoom);
+    if (endRoom) setSelectedEndRoom(endRoom);
+
+    // Step 6: Determine which navigation step to show
+    setStep(
+      determineNavigationStep(
+        skipSelection,
+        startRoom,
+        endRoom,
+        foundStartFloor,
+        foundEndFloor,
+      ),
+    );
+
+    // Step 7: Mark initialization as complete
+    setInitializationComplete(true);
   }, []);
 
   // Handle building selection
