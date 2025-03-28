@@ -8,7 +8,7 @@ import { LocationContext } from "../contexts/LocationContext";
 import Footer from "../components/Footer";
 import styles from "../styles";
 const customMarkerImage = require("../assets/PinLogo.png");
-import { Building } from "../components/MapMarkers";
+import { Building } from "../constants/Building";
 import { ModalContext } from "../App";
 import BuildingColoring from "../components/buildingColoring";
 import Legend from "../components/Legend";
@@ -21,7 +21,7 @@ import {
 } from "../components/AsyncPersistence";
 import convertToCoordinates from "../components/convertToCoordinates";
 import PropTypes from "prop-types";
-import findBuilding from "../components/userInPolygon";
+import {findBuilding, getData} from "../components/userInPolygon";
 
 function HomeScreen({ asyncKey = "Campus" }) {
   const loyolaPostalCode = process.env.EXPO_PUBLIC_LOYOLA_POSTAL_CODE;
@@ -40,7 +40,7 @@ function HomeScreen({ asyncKey = "Campus" }) {
   const toggleModalTime = "10000";
   useEffect(() => {
     const fetchLastCampus = async () => {
-      console.log(findBuilding());
+      
       const campus = await getFromAsyncStorage(asyncKey, sgwPostalCode);
       setPostalCode(campus);
       const coords = await convertToCoordinates(campus);
@@ -93,6 +93,7 @@ function HomeScreen({ asyncKey = "Campus" }) {
     }
   }, [coordinates]);
 
+  
   const handleChangeCampuses = () => {
     setPostalCode((prevPostalCode) =>
       prevPostalCode === sgwPostalCode ? loyolaPostalCode : sgwPostalCode,

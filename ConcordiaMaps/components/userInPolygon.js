@@ -1,7 +1,7 @@
-import React from "react";
 import pointInPolygon from "point-in-polygon";
 import { coloringData } from "../data/coloringData"; // Import your polygon data
-import { View, Text } from "react-native";
+import { Building } from "../data/markersData";
+import { ModalContext } from "../App";
 
 const findBuilding = () => {
   const { latitude, longitude } = {
@@ -21,4 +21,33 @@ const findBuilding = () => {
   return "Not inside any building"; // Return a default message if the user is not inside any building
 };
 
-export default findBuilding;
+const getData = (name) => {
+    // Find the matching building in Building.js
+    const matchingBuilding = Building.find(
+        (building) => building.name === name
+    );
+
+    // If a match is found, add the coordinate data
+    if (matchingBuilding) {
+        return {
+            buildingName: matchingBuilding.name,
+            buildingCoordinates: matchingBuilding.coordinate, // Add coordinates
+        };
+    }
+
+    // If no match is found, return the original entry
+    return {
+        buildingName: "Unknown",
+        buildingCoordinates: null,
+      };
+};
+const handleDirectionGeneration = () => {
+    const locationDueContext = {longitude,latitude} = useContext(ModalContext);
+    const result = findBuilding(locationDueContext)
+    if (result === "Not inside any building"){
+        
+    }
+    console.log(getData());
+  }
+
+export { findBuilding, getData };
