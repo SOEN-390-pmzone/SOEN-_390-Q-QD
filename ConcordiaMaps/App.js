@@ -8,7 +8,7 @@ import PopupModal from "./components/PopupModal";
 import styles from "./styles";
 import GetDirections from "./components/OutdoorNavigation/GetDirections";
 
-//? SCREENS 
+//? SCREENS
 import IndoorNavigation from "./components/IndoorNavigation/IndoorNavigation";
 import FloorSelector from "./components/IndoorNavigation/FloorSelector";
 import BuildingSelector from "./components/IndoorNavigation/BuildingSelector";
@@ -38,7 +38,8 @@ PopupModalWrapper.propTypes = {
   isVisible: PropTypes.bool.isRequired,
   data: PropTypes.object.isRequired,
   onClose: PropTypes.func.isRequired,
-};export default function App() {
+};
+export default function App() {
   const [isModalVisible, setModalVisible] = useState(false);
   const [modalData, setModalData] = useState({
     name: "",

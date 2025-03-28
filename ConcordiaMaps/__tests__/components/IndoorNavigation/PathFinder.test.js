@@ -1,4 +1,9 @@
-import { findShortestPath } from "../../../components/IndoorNavigation/PathFinder";
+import {
+  findShortestPath,
+  initializeGraphData,
+  findMinDistanceNode,
+} from "../../../components/IndoorNavigation/PathFinder";
+
 import { graph } from "../../../constants/coordinates/h8";
 
 describe("PathFinder", () => {
@@ -116,5 +121,70 @@ describe("Additional Tests", () => {
 
     const path = findShortestPath(graph, "start", "end");
     expect(path).toEqual(["start", "A", "D", "end"]);
+  });
+  test("initializeGraphData correctly initializes data structures", () => {
+    const graph = {
+      A: { B: 1, C: 2 },
+      B: { A: 1, C: 3 },
+      C: { A: 2, B: 3 },
+    };
+
+    const start = "A";
+    const { distances, previous, nodes } = initializeGraphData(graph, start);
+
+    // Test distances initialization
+    expect(distances).toEqual({
+      A: 0,
+      B: Infinity,
+      C: Infinity,
+    });
+
+    // Test previous initialization
+    expect(previous).toEqual({
+      A: null,
+      B: null,
+      C: null,
+    });
+
+    // Test nodes Set initialization
+    expect(nodes.size).toBe(3);
+    expect(nodes.has("A")).toBe(true);
+    expect(nodes.has("B")).toBe(true);
+    expect(nodes.has("C")).toBe(true);
+  });
+
+  test("findMinDistanceNode finds node with minimum distance", () => {
+    const nodes = new Set(["A", "B", "C"]);
+    const distances = {
+      A: 5,
+      B: 2,
+      C: 8,
+    };
+
+    const minNode = findMinDistanceNode(nodes, distances);
+    expect(minNode).toBe("B");
+  });
+
+  test("findMinDistanceNode with equal distances returns first occurrence", () => {
+    const nodes = new Set(["A", "B", "C"]);
+    const distances = {
+      A: 2,
+      B: 2,
+      C: 2,
+    };
+
+    const minNode = findMinDistanceNode(nodes, distances);
+    expect(minNode).toBe("A");
+  });
+
+  test("findMinDistanceNode with empty nodes returns null", () => {
+    const nodes = new Set();
+    const distances = {
+      A: 1,
+      B: 2,
+    };
+
+    const minNode = findMinDistanceNode(nodes, distances);
+    expect(minNode).toBe(null);
   });
 });

@@ -76,7 +76,10 @@ jest.mock("../../components/OutdoorNavigation/FloatingSearchBar", () => {
 
 jest.mock("../../components/Header", () => "Header");
 jest.mock("../../components/NavBar", () => "NavBar");
-jest.mock("../../components/OutdoorNavigation/DirectionsBox", () => "DirectionsBox");
+jest.mock(
+  "../../components/OutdoorNavigation/DirectionsBox",
+  () => "DirectionsBox",
+);
 
 const mockGetCurrentPositionAsync = jest.fn().mockResolvedValue({
   coords: {
