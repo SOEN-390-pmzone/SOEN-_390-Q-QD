@@ -21,6 +21,7 @@ import {
 import convertToCoordinates from "../components/convertToCoordinates";
 import PropTypes from "prop-types";
 import PopupOPI from "../components/PopupOPI"; // Import the new popup component
+import NextEventModal from "../components/NextEventModal"; // Import the NextEventModal component
 import { PointsOfInterest } from "../constants/OutdoorPtsOfDirections"; // Import the new Points of Interest data
 
 // Marker image assets for Restaurant and Cafe
@@ -41,6 +42,10 @@ function HomeScreen({ asyncKey = "Campus" }) {
   const borderColor = "#912338";
   const mapRef = useRef(null);
   const TOGGLE_MODAL_TIMEOUT = 10000;
+
+
+  const [eventModalVisible, setEventModalVisible] = useState(false);
+
 
   // State for OPI (Points of Interest) popup
   const [opiPopupVisible, setOpiPopupVisible] = useState(false);
@@ -256,6 +261,19 @@ function HomeScreen({ asyncKey = "Campus" }) {
       )}
       {error ? <Text>Error: {error}</Text> : null}
       <Footer />
+
+      <TouchableOpacity
+        style={styles.buttonNext}
+        onPress={() => setEventModalVisible(true)}
+      >
+        <Text style={styles.buttonNextText}>Next Event</Text>
+      </TouchableOpacity>
+
+      {/* Next Event Modal */}
+      <NextEventModal
+        isVisible={eventModalVisible}
+        onClose={() => setEventModalVisible(false)}
+      />
 
       {/* OPI Popup */}
       <PopupOPI
