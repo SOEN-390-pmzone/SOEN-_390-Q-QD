@@ -11,6 +11,7 @@ import {
   Platform,
   Modal,
 } from "react-native";
+import NavigationStep from "./NavigationStep";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import * as Location from "expo-location";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
@@ -19,7 +20,7 @@ import NavigationStrategyService from "../../services/NavigationStrategyService"
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { useGoogleMapDirections } from "../../hooks/useGoogleMapDirections";
 import styles from "../../styles/MultistepNavigation/MultistepNavigationStyles";
-import { generateFloorHtml } from "../../services/FloorPlanService";
+import MapGenerationService from "../../services/MapGenerationService";
 import {
   calculatePath,
   loadFloorPlans,
@@ -52,7 +53,6 @@ const MultistepNavigationScreen = () => {
 
   // Indoor navigation state
   const [indoorFloorPlans] = useState({});
-  const [indoorPaths] = useState({});
   const [showIndoorNavigation, setShowIndoorNavigation] = useState(false);
   const [indoorNavigationParams, setIndoorNavigationParams] = useState(null);
 
@@ -101,9 +101,6 @@ const MultistepNavigationScreen = () => {
   const [outdoorRoute, setOutdoorRoute] = useState([]);
   const [loadingDirections, setLoadingDirections] = useState(false);
   const [expandedMap, setExpandedMap] = useState(false);
-
-  // WebView ref
-  const mapWebViewRef = useRef(null);
 
   // Generate a new session token when component mounts
   useEffect(() => {
@@ -872,106 +869,6 @@ const MultistepNavigationScreen = () => {
     }
   };
 
-  // Generate Google Maps HTML for outdoor steps
-  const generateMapHtml = () => {
-    if (!outdoorRoute || outdoorRoute.length === 0) {
-      return `
-        <html>
-          <body style="margin:0;display:flex;justify-content:center;align-items:center;height:100vh;">
-            <div style="text-align:center;color:#666;">
-              <p>Loading map directions...</p>
-            </div>
-          </body>
-        </html>
-      `;
-    }
-
-    // Calculate center of the route
-    const center = outdoorRoute.reduce(
-      (acc, point) => {
-        acc.latitude += point.latitude / outdoorRoute.length;
-        acc.longitude += point.longitude / outdoorRoute.length;
-        return acc;
-      },
-      { latitude: 0, longitude: 0 },
-    );
-
-    // Convert route to Google Maps format
-    const routePoints = outdoorRoute
-      .map((point) => `{lat: ${point.latitude}, lng: ${point.longitude}}`)
-      .join(", ");
-
-    return `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <style>
-            body, html, #map {
-              height: 100%;
-              margin: 0;
-              padding: 0;
-            }
-          </style>
-        </head>
-        <body>
-          <div id="map" style="width: 100%; height: 100%;"></div>
-          <script>
-            function initMap() {
-              const map = new google.maps.Map(document.getElementById("map"), {
-                zoom: 15,
-                center: {lat: ${center.latitude}, lng: ${center.longitude}},
-                zoomControl: true,
-                mapTypeControl: false,
-                streetViewControl: false
-              });
-              
-              const routeCoordinates = [${routePoints}];
-              
-              const routePath = new google.maps.Polyline({
-                path: routeCoordinates,
-                geodesic: true,
-                strokeColor: "#800000",
-                strokeOpacity: 1.0,
-                strokeWeight: 4
-              });
-              
-              routePath.setMap(map);
-              
-              // Add markers for start and end
-              const startMarker = new google.maps.Marker({
-                position: routeCoordinates[0],
-                map: map,
-                title: "Start"
-              });
-              
-              const endMarker = new google.maps.Marker({
-                position: routeCoordinates[routeCoordinates.length-1],
-                map: map,
-                title: "End"
-              });
-              
-              // Fit map to bounds of route
-              const bounds = new google.maps.LatLngBounds();
-              routeCoordinates.forEach(coord => bounds.extend(coord));
-              map.fitBounds(bounds);
-            }
-          </script>
-          <script src="https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&callback=initMap" async defer></script>
-        </body>
-      </html>
-    `;
-  };
-
-  // Parse HTML instructions from Google Directions API
-  const parseHtmlInstructions = (htmlString) => {
-    return htmlString
-      .replace(/<div[^>]*>/gi, " ")
-      .replace(/<\/div>/gi, "")
-      .replace(/<\/?b>/gi, "")
-      .replace(/<wbr[^>]*>/gi, "");
-  };
-
   // Render indoor navigation UI with floor plans and step-by-step directions
   const renderIndoorNavigation = () => {
     if (!indoorNavigationParams) return null;
@@ -1027,10 +924,9 @@ const MultistepNavigationScreen = () => {
                     {indoorFloorPlans?.start ? (
                       <WebView
                         source={{
-                          html: generateFloorHtml(
-                            indoorFloorPlans.start,
-                            indoorPaths?.start || [],
-                            {},
+                          html: MapGenerationService.generateMapHtml(
+                            outdoorRoute,
+                            GOOGLE_MAPS_API_KEY,
                           ),
                         }}
                         style={styles.floorPlanWebView}
@@ -1070,10 +966,9 @@ const MultistepNavigationScreen = () => {
                       >
                         <WebView
                           source={{
-                            html: generateFloorHtml(
-                              indoorFloorPlans.end,
-                              indoorPaths?.end || [],
-                              {},
+                            html: MapGenerationService.generateMapHtml(
+                              outdoorRoute,
+                              GOOGLE_MAPS_API_KEY,
                             ),
                           }}
                           style={styles.floorPlanWebView}
@@ -1179,72 +1074,6 @@ const MultistepNavigationScreen = () => {
           </View>
         </View>
       </Modal>
-    );
-  };
-
-  // Render indoor step UI with button to open RoomToRoomNavigation
-  const renderIndoorStep = () => {
-    const currentStep = navigationPlan.steps[currentStepIndex];
-    const buildingName = FloorRegistry.getReadableBuildingName(
-      currentStep.buildingId,
-    );
-
-    return (
-      <View style={styles.stepContentContainer}>
-        <View style={styles.stepProgressContainer}>
-          <View style={styles.buildingIndicator}>
-            <MaterialIcons name="business" size={24} color="#4CAF50" />
-            <Text style={styles.buildingName}>
-              {currentStep.startRoom === "entrance"
-                ? "Entrance"
-                : `Room ${currentStep.startRoom}`}
-            </Text>
-          </View>
-          <View style={styles.progressLine}>
-            <MaterialIcons name="meeting-room" size={20} color="#666" />
-          </View>
-          <View style={styles.buildingIndicator}>
-            <MaterialIcons name="business" size={24} color="#F44336" />
-            <Text style={styles.buildingName}>Room {currentStep.endRoom}</Text>
-          </View>
-        </View>
-
-        {/* Indoor navigation summary */}
-        <View style={styles.indoorInfoContainer}>
-          <Text style={styles.indoorInfoText}>
-            Navigate from{" "}
-            {currentStep.startRoom === "entrance"
-              ? "entrance"
-              : `room ${currentStep.startRoom}`}{" "}
-            to room {currentStep.endRoom} in {buildingName}
-          </Text>
-          <Text style={styles.indoorDetailsText}>
-            • Start Floor:{" "}
-            <Text testID="start-floor">{currentStep.startFloor}</Text>
-            {"\n"}• End Floor:{" "}
-            <Text testID="end-floor">{currentStep.endFloor}</Text>
-            {"\n"}• Building: {buildingName}
-          </Text>
-
-          <View
-            style={{ flexDirection: "row", justifyContent: "space-between" }}
-          >
-            <TouchableOpacity
-              style={[styles.indoorNavButton, { flex: 1, marginRight: 8 }]}
-              onPress={() => handleIndoorNavigation(currentStep)}
-            >
-              <Text style={styles.indoorNavButtonText}>Navigate</Text>
-              <MaterialIcons name="directions" size={20} color="#fff" />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {currentStep.started && (
-          <Text style={styles.navigationStartedText}>
-            Indoor navigation in progress. Return here when finished.
-          </Text>
-        )}
-      </View>
     );
   };
 
@@ -1714,104 +1543,6 @@ const MultistepNavigationScreen = () => {
     );
   };
 
-  // Render outdoor step UI with map and directions
-  const renderOutdoorStep = () => {
-    const currentStep = navigationPlan.steps[currentStepIndex];
-    const originBuildingName = currentStep.startAddress
-      ? currentStep.startAddress.split(",")[0]
-      : "origin";
-    const destBuildingName = currentStep.endAddress
-      ? currentStep.endAddress.split(",")[0]
-      : "destination";
-
-    return (
-      <View style={styles.stepContentContainer}>
-        {/* Step progress indicator */}
-        <View style={styles.stepProgressContainer}>
-          <View style={styles.buildingIndicator}>
-            <MaterialIcons name="business" size={24} color="#4CAF50" />
-            <Text style={styles.buildingName}>{originBuildingName}</Text>
-          </View>
-          <View style={styles.progressLine}>
-            <MaterialIcons name="directions-walk" size={20} color="#666" />
-          </View>
-          <View style={styles.buildingIndicator}>
-            <MaterialIcons name="business" size={24} color="#F44336" />
-            <Text style={styles.buildingName}>{destBuildingName}</Text>
-          </View>
-        </View>
-
-        {/* Map display */}
-        <View style={styles.mapContainer}>
-          <TouchableOpacity
-            style={styles.expandButton}
-            onPress={() => setExpandedMap(true)}
-          >
-            <Text style={styles.expandButtonText}>Expand Map</Text>
-          </TouchableOpacity>
-
-          <View style={styles.mapWrapper}>
-            <WebView
-              ref={mapWebViewRef}
-              originWhitelist={["*"]}
-              source={{ html: generateMapHtml() }}
-              style={styles.mapWebView}
-              scrollEnabled={false}
-              onError={(e) => console.error("WebView error:", e.nativeEvent)}
-              onMessage={(event) =>
-                console.log("WebView message:", event.nativeEvent.data)
-              }
-              onLoadEnd={() => console.log("Map WebView loaded")}
-            />
-          </View>
-        </View>
-
-        <View style={styles.directionsContainer}>
-          <Text style={styles.directionsTitle}>Directions</Text>
-
-          {loadingDirections ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="small" color="#912338" />
-              <Text style={styles.loadingText}>Getting directions...</Text>
-            </View>
-          ) : outdoorDirections.length > 0 ? (
-            <ScrollView style={styles.directionsList}>
-              {outdoorDirections.map((direction, index) => {
-                // Generate a unique key combining relevant data
-                const directionKey = `${direction.distance || ""}-${direction.formatted_text || direction.html_instructions}-${Array.from(
-                  new Uint8Array(4),
-                )
-                  .map((b) => b.toString(16))
-                  .join("")}`;
-
-                return (
-                  <View key={directionKey} style={styles.directionItem}>
-                    <Text style={styles.directionNumber}>{index + 1}</Text>
-                    <View style={styles.directionContent}>
-                      <Text style={styles.directionText}>
-                        {direction.formatted_text ||
-                          parseHtmlInstructions(direction.html_instructions)}
-                      </Text>
-                      {direction.distance && (
-                        <Text style={styles.distanceText}>
-                          {direction.distance}
-                        </Text>
-                      )}
-                    </View>
-                  </View>
-                );
-              })}
-            </ScrollView>
-          ) : (
-            <Text style={styles.noDirectionsText}>
-              Walk from {originBuildingName} to {destBuildingName}
-            </Text>
-          )}
-        </View>
-      </View>
-    );
-  };
-
   // Render active navigation steps UI
   const renderNavigationSteps = () => {
     if (!navigationPlan) return null;
@@ -1819,7 +1550,7 @@ const MultistepNavigationScreen = () => {
     const currentStep = navigationPlan.steps[currentStepIndex];
 
     return (
-      <View style={{ flex: 1, paddingBottom: 70 }}>
+      <View style={styles.stepCard}>
         {/* Back button at the top */}
         <TouchableOpacity
           testID="change-route-button"
@@ -1837,27 +1568,22 @@ const MultistepNavigationScreen = () => {
             setIndoorNavigationParams(null);
           }}
         >
-          <MaterialIcons name="edit" size={22} color="white" />
+          <MaterialIcons name="edit" />
           <Text style={styles.navigationButtonText}>Change Route</Text>
         </TouchableOpacity>
 
-        <View style={[styles.stepCard, { marginTop: 5 }]}>
-          <Text style={styles.stepTitle}>{currentStep.title}</Text>
-
-          {/* Display step details based on type */}
-          {currentStep.type === "outdoor" ? (
-            renderOutdoorStep()
-          ) : currentStep.type === "indoor" ? (
-            renderIndoorStep()
-          ) : (
-            <View style={styles.stepContentContainer}>
-              <Text style={styles.noDirectionsText}>
-                This step type ({currentStep.type}) is not supported in the
-                current navigation mode.
-              </Text>
-            </View>
+        <NavigationStep
+          step={currentStep}
+          onNavigate={handleIndoorNavigation}
+          outdoorDirections={outdoorDirections}
+          loadingDirections={loadingDirections}
+          mapHtml={MapGenerationService.generateMapHtml(
+            outdoorRoute,
+            GOOGLE_MAPS_API_KEY,
           )}
-        </View>
+          onExpandMap={() => setExpandedMap(true)}
+        />
+
         <View
           style={[
             styles.navigationButtonsContainer,
@@ -1873,19 +1599,19 @@ const MultistepNavigationScreen = () => {
               onPress={navigateToPreviousStep}
               disabled={currentStepIndex === 0}
             >
-              <MaterialIcons name="arrow-back" size={22} color="white" />
+              <MaterialIcons name="arrow-back" />
               <Text style={styles.navigationButtonText}>Previous</Text>
             </TouchableOpacity>
 
             <View style={styles.stepIndicator}>
-              <MaterialIcons name="directions-walk" size={14} color="#666666" />
+              <MaterialIcons name="directions-walk" />
               <Text style={styles.stepIndicatorText}>
                 Step {currentStepIndex + 1} of {navigationPlan.steps.length}
               </Text>
             </View>
 
             <TouchableOpacity
-              testID="next-button" // Add this line
+              testID="next-button"
               style={[
                 styles.navigationButton,
                 currentStepIndex >= navigationPlan.steps.length - 1 &&
@@ -1895,14 +1621,13 @@ const MultistepNavigationScreen = () => {
               disabled={currentStepIndex >= navigationPlan.steps.length - 1}
             >
               <Text style={styles.navigationButtonText}>Next</Text>
-              <MaterialIcons name="arrow-forward" size={22} color="white" />
+              <MaterialIcons name="arrow-forward" />
             </TouchableOpacity>
           </View>
         </View>
       </View>
     );
   };
-
   const shouldShowIndoorNavigation = () => {
     return showIndoorNavigation && indoorNavigationParams !== null;
   };
@@ -1925,7 +1650,12 @@ const MultistepNavigationScreen = () => {
           </View>
           <WebView
             originWhitelist={["*"]}
-            source={{ html: generateMapHtml() }}
+            source={{
+              html: MapGenerationService.generateMapHtml(
+                outdoorRoute,
+                GOOGLE_MAPS_API_KEY,
+              ),
+            }}
             style={styles.expandedWebView}
           />
         </View>

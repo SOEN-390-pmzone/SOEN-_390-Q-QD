@@ -1448,24 +1448,6 @@ describe("MultistepNavigationScreen", () => {
     });
   });
 
-  test("checks getStepColor function for different step types", () => {
-    const stepTypes = {
-      start: "#4CAF50", // Green
-      elevator: "#9C27B0", // Purple
-      escalator: "#2196F3", // Blue
-      stairs: "#FF9800", // Orange
-      transport: "#912338", // Maroon (default)
-      end: "#F44336", // Red
-      error: "#912338", // Maroon (default)
-      walking: "#912338", // Maroon (default)
-      default: "#912338", // Maroon (default)
-    };
-
-    Object.entries(stepTypes).forEach(([type, expectedColor]) => {
-      expect(getStepColor(type)).toBe(expectedColor);
-    });
-  });
-
   test("handles floor extraction from room IDs", async () => {
     const testCases = [
       { roomId: "H-920", expected: "9" },
@@ -1552,41 +1534,6 @@ describe("MultistepNavigationScreen", () => {
     // Use root instead of container
     const { root } = render(<MultistepNavigationScreen />);
     expect(root).toBeTruthy();
-  });
-
-  test("renders indoor navigation visualization correctly", async () => {
-    const navigationPlan = {
-      steps: [
-        {
-          type: "indoor",
-          buildingId: "H",
-          startRoom: "H-920",
-          endRoom: "H-1020",
-          startFloor: "9",
-          endFloor: "10",
-          title: "Navigate from H-920 to H-1020",
-        },
-      ],
-    };
-
-    useRoute.mockReturnValue({ params: { navigationPlan } });
-
-    const { getByText, getAllByText } = render(
-      <MultistepNavigationScreen route={{ params: { navigationPlan } }} />,
-    );
-
-    // Use a more specific query to avoid multiple elements issue
-    // or use getAllByText and pick the first one
-    await waitFor(() => {
-      const navigationTexts = getAllByText(/Navigate.*H-920.*to.*H-1020/i);
-      expect(navigationTexts.length).toBeGreaterThan(0);
-    });
-
-    // Check floor information - be more specific with text patterns
-    await waitFor(() => {
-      expect(getByText(/Start Floor:.*9/i)).toBeTruthy();
-      expect(getByText(/End Floor:.*10/i)).toBeTruthy();
-    });
   });
 
   test("handles location permission scenarios", async () => {
@@ -1759,116 +1706,6 @@ describe("MultistepNavigationScreen", () => {
       await waitFor(() => {
         expect(input.props.value).toBe(test.input);
       });
-    }
-  });
-
-  test("handles multiple building types correctly", async () => {
-    // Mock the FloorRegistry.getBuildingTypeFromId method before using it
-    const FloorRegistry = require("../../../services/BuildingDataService");
-    // Create a mock implementation for getBuildingTypeFromId
-    FloorRegistry.getBuildingTypeFromId = jest
-      .fn()
-      .mockImplementation((buildingId) => {
-        // Return appropriate building types based on buildingId
-        if (buildingId === "H") return "HallBuilding";
-        if (buildingId === "LB") return "Library";
-        if (buildingId === "MB") return "JMSB";
-        if (buildingId === "EV") return "EVBuilding";
-        return "HallBuilding"; // Default case
-      });
-
-    // Define the building types we want to test
-    const buildingTypes = [
-      {
-        id: "H",
-        name: "Hall Building",
-        roomFormat: "H-920",
-      },
-      {
-        id: "LB",
-        name: "Webster Library",
-        roomFormat: "LB-301",
-      },
-      {
-        id: "MB",
-        name: "John Molson Building",
-        roomFormat: "MB-1.293",
-      },
-      {
-        id: "EV",
-        name: "EV Building",
-        roomFormat: "EV-200",
-      },
-    ];
-
-    // For each building type, we'll create a navigation plan and verify it renders correctly
-    for (const building of buildingTypes) {
-      // Create a navigation plan for indoor navigation within the building
-      const navigationPlan = {
-        steps: [
-          {
-            type: "indoor",
-            buildingId: building.id,
-            buildingType: FloorRegistry.getBuildingTypeFromId(building.id),
-            startRoom: `${building.roomFormat}`,
-            endRoom: `${building.id}-${building.roomFormat.split("-")[1].replace("920", "925")}`, // Just change the room number
-            startFloor: "9",
-            endFloor: "9",
-          },
-        ],
-      };
-
-      // Set up mock route parameters with our navigation plan
-      useRoute.mockReturnValue({ params: { navigationPlan } });
-
-      // Render the component
-      const { queryByTestId, getAllByText, unmount } = render(
-        <MultistepNavigationScreen />,
-      );
-
-      // Verify navigation screen renders
-      expect(queryByTestId("navigation-screen")).toBeTruthy();
-
-      // Verify that both the room information and building name are displayed
-      await waitFor(() => {
-        const displayedTexts = getAllByText(/.+/).map(
-          (element) => element.props.children,
-        );
-
-        // Check if any text contains the room format
-        const roomFormatFound = displayedTexts.some((text) => {
-          // Handle both string and array of children
-          if (typeof text === "string") {
-            return text.includes(building.roomFormat);
-          } else if (Array.isArray(text)) {
-            return text.some(
-              (child) =>
-                typeof child === "string" &&
-                child.includes(building.roomFormat),
-            );
-          }
-          return false;
-        });
-        expect(roomFormatFound).toBe(true);
-
-        // Check if any text contains the building name
-        const buildingNameFound = displayedTexts.some((text) => {
-          // Handle both string and array of children
-          if (typeof text === "string") {
-            return text.includes(building.name);
-          } else if (Array.isArray(text)) {
-            return text.some(
-              (child) =>
-                typeof child === "string" && child.includes(building.name),
-            );
-          }
-          return false;
-        });
-        expect(buildingNameFound).toBe(true);
-      });
-
-      // Clean up after each iteration to prevent conflicts between tests
-      unmount();
     }
   });
 

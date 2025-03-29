@@ -1,108 +1,47 @@
-import { StyleSheet } from "react-native";
-import styles from "../../../styles/MultistepNavigation/NavigationStepStyles.js"; // Adjust the import path as needed
+import styles from "../../../styles/MultistepNavigation/NavigationStepStyles";
 
-describe("Styles", () => {
-  // Test container styles
-  describe("container", () => {
-    it("should have correct base container properties", () => {
-      expect(styles.container).toEqual({
-        padding: 15,
-        backgroundColor: "#f5f5f5",
-        borderRadius: 10,
-        marginVertical: 10,
-        borderWidth: 1,
-        borderColor: "#e0e0e0",
-        elevation: 1,
-      });
-    });
+describe("NavigationStepStyles", () => {
+  it("should export a StyleSheet object", () => {
+    expect(styles).toBeDefined();
+    expect(typeof styles).toBe("object");
   });
 
-  // Test active container styles
-  describe("activeContainer", () => {
-    it("should have Concordia maroon background and border", () => {
-      expect(styles.activeContainer).toEqual({
-        backgroundColor: "#912338",
-        borderColor: "#912338",
-      });
-    });
+  it("should have stepCard style with correct properties", () => {
+    expect(styles.stepCard).toBeDefined();
+    expect(styles.stepCard.backgroundColor).toBe("#ffffff");
+    expect(styles.stepCard.borderRadius).toBe(12);
+    expect(styles.stepCard.elevation).toBe(2);
   });
 
-  // Test completed container styles
-  describe("completedContainer", () => {
-    it("should have gray background and border", () => {
-      expect(styles.completedContainer).toEqual({
-        backgroundColor: "#e0e0e0",
-        borderColor: "#c0c0c0",
-      });
-    });
+  it("should have properly defined text styles", () => {
+    expect(styles.stepTitle.fontSize).toBe(16);
+    expect(styles.stepTitle.fontWeight).toBe("bold");
+    expect(styles.directionText.fontSize).toBe(15);
+    expect(styles.indoorNavButtonText.color).toBe("#fff");
   });
 
-  // Test typography styles
-  describe("typography", () => {
-    it("should have correct title style", () => {
-      expect(styles.title).toEqual({
-        fontSize: 18,
-        fontWeight: "bold",
-        marginBottom: 5,
-      });
-    });
-
-    it("should have correct description style", () => {
-      expect(styles.description).toEqual({
-        fontSize: 16,
-        lineHeight: 24,
-      });
-    });
-
-    it("should have white text for active state", () => {
-      expect(styles.activeText).toEqual({
-        color: "#fff",
-      });
-    });
+  it("should have consistent styling for containers", () => {
+    expect(styles.indoorInfoContainer.backgroundColor).toBe("#f0f0f0");
+    expect(styles.directionsContainer.backgroundColor).toBe("#ffffff");
+    expect(styles.stepProgressContainer.borderWidth).toBe(1);
   });
 
-  // Test image styles
-  describe("stepImage", () => {
-    it("should have full width, fixed height, and rounded corners", () => {
-      expect(styles.stepImage).toEqual({
-        width: "100%",
-        height: 150,
-        borderRadius: 12,
-      });
-    });
+  it("should use Concordia brand color for key UI elements", () => {
+    const concordiaRed = "#912338";
+    expect(styles.indoorNavButton.backgroundColor).toBe(concordiaRed);
+    expect(styles.directionNumber.backgroundColor).toBe(concordiaRed);
+    expect(styles.expandButtonText.color).toBe(concordiaRed);
   });
 
-  // Test indicator styles
-  describe("indicators", () => {
-    const commonIndicatorStyles = {
-      position: "absolute",
-      top: 10,
-      right: 10,
-      width: 12,
-      height: 12,
-      borderRadius: 6,
-    };
-
-    it("should have correct active indicator style", () => {
-      expect(styles.activeIndicator).toEqual({
-        ...commonIndicatorStyles,
-        backgroundColor: "#912338",
-      });
-    });
-
-    it("should have correct completed indicator style", () => {
-      expect(styles.completedIndicator).toEqual({
-        ...commonIndicatorStyles,
-        backgroundColor: "green",
-      });
-    });
+  it("should have responsive map styles", () => {
+    expect(styles.mapContainer.height).toBe(200);
+    expect(styles.mapWrapper.flex).toBe(1);
+    expect(styles.mapContainer.overflow).toBe("hidden");
   });
 
-  // Validate that styles are created using StyleSheet.create
-  it("should use StyleSheet.create", () => {
-    const styleKeys = Object.keys(styles);
-    styleKeys.forEach((key) => {
-      expect(StyleSheet.flatten(styles[key])).toBeDefined();
-    });
+  it("should have proper list styling for directions", () => {
+    expect(styles.directionsList.maxHeight).toBe(200);
+    expect(styles.directionItem.flexDirection).toBe("row");
+    expect(styles.directionItem.borderBottomWidth).toBe(1);
   });
 });
