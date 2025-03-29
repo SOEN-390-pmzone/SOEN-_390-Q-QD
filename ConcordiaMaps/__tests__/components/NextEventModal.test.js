@@ -319,4 +319,49 @@ describe("NextEventModal additional coverage", () => {
     });
     expect(queryByText("Room 101")).toBeNull();
   });
+
+  it("uses spread sort when toSorted is not available", async () => {
+    const originalToSorted = Array.prototype.toSorted;
+    Array.prototype.toSorted = undefined;
+
+    Calendar.requestCalendarPermissionsAsync.mockResolvedValue({
+      status: "granted",
+    });
+    Calendar.getCalendarsAsync.mockResolvedValue([{ id: "1" }]);
+
+    const now = new Date();
+    const eventLater = {
+      id: "1",
+      title: "SOEN 390",
+      startDate: new Date(now.getTime() + 7200000).toISOString(), // 2 hours later
+      endDate: new Date(now.getTime() + 9000000).toISOString(), // 2.5 hours later
+      location: "Room 101",
+    };
+    const eventEarlier = {
+      id: "2",
+      title: "SOEN 390",
+      startDate: new Date(now.getTime() + 3600000).toISOString(), // 1 hour later
+      endDate: new Date(now.getTime() + 5400000).toISOString(), // 1.5 hours later
+      location: "Room 101",
+    };
+
+    Calendar.getEventsAsync.mockResolvedValue([eventLater, eventEarlier]);
+
+    const { getByText } = render(
+      <NextEventModal isVisible={true} onClose={jest.fn()} />,
+    );
+
+    await waitFor(() => {
+      expect(getByText("SOEN 390")).toBeTruthy();
+    });
+
+    fireEvent.press(getByText("Get Directions"));
+    expect(mockNavigate).toHaveBeenCalledWith("GetDirections", {
+      origin: { latitude: 45.494971642137095, longitude: -73.57791280320929 },
+      destination: "Room 101",
+      disableLiveLocation: true,
+    });
+
+    Array.prototype.toSorted = originalToSorted;
+  });
 });

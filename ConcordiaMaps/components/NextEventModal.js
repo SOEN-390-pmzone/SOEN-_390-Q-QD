@@ -16,7 +16,7 @@ const NextEventModal = ({ isVisible, onClose }) => {
   const [nextEvent, setNextEvent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [timeRemaining, setTimeRemaining] = useState(0); // Store the remaining time in seconds
-  const navigation = useNavigation(); // Use navigation hook here
+  const navigation = useNavigation();
 
   useEffect(() => {
     if (isVisible) {
@@ -67,11 +67,15 @@ const NextEventModal = ({ isVisible, onClose }) => {
       const upcomingEvents = events.filter(
         (event) => new Date(event.startDate) > now,
       );
-      const sortedEvents = upcomingEvents.sort(
-        (a, b) => new Date(a.startDate) - new Date(b.startDate),
-      );
+      const sortedEvents = upcomingEvents.toSorted
+        ? upcomingEvents.toSorted(
+            (a, b) => new Date(a.startDate) - new Date(b.startDate),
+          )
+        : [...upcomingEvents].sort(
+            (a, b) => new Date(a.startDate) - new Date(b.startDate),
+          );
 
-      // Filter events to only include those with titles starting with SOEN, COMP, or ENGR can be added for other prefixes
+      // Filter events to only include those with titles starting with allowed prefixes.
       const allowedPrefixes = ["SOEN", "COMP", "ENGR"];
       const filteredEvents = sortedEvents.filter((event) => {
         const title = event.title || "";
@@ -124,68 +128,71 @@ const NextEventModal = ({ isVisible, onClose }) => {
     });
   };
 
+  const renderContent = () => {
+    if (loading) {
+      return <ActivityIndicator size="large" color="#912338" />;
+    }
+    if (nextEvent) {
+      return (
+        <>
+          <View style={styles.eventContainer}>
+            <View style={styles.timeCircle}>
+              <Text style={styles.timeText}>{formatTime(timeRemaining)}</Text>
+            </View>
+            <View style={styles.eventDetails}>
+              <Text style={styles.eventTitleNext}>{nextEvent.title}</Text>
+              <Text style={styles.eventInfoNext}>
+                {format(new Date(nextEvent.startDate), "hh:mm a")} -{" "}
+                {format(new Date(nextEvent.endDate), "hh:mm a")}
+              </Text>
+              {nextEvent.location && (
+                <Text style={[styles.eventInfoNext, { marginBottom: 5 }]}>
+                  {nextEvent.location}
+                </Text>
+              )}
+            </View>
+          </View>
+          <View
+            style={[
+              styles.toggleContainer,
+              {
+                flexDirection: "row",
+                justifyContent: "space-between",
+                marginTop: -1,
+              },
+            ]}
+          >
+            <TouchableOpacity
+              onPress={handleGetDirections}
+              style={[styles.closeButton, { marginRight: 10 }]}
+            >
+              <Text style={styles.closeButtonText}>Get Directions</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+              <Text style={styles.closeButtonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </>
+      );
+    }
+    return (
+      <View style={{ alignItems: "center", marginTop: 10 }}>
+        <Text style={{ fontSize: 16, marginBottom: 10 }}>
+          No upcoming events today.
+        </Text>
+        <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+          <Text style={styles.closeButtonText}>Close</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
   return (
     <Modal visible={isVisible} animationType="slide" transparent>
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
           <Text style={styles.modalTitle}>Next Class</Text>
-          {loading ? (
-            <ActivityIndicator size="large" color="#912338" />
-          ) : nextEvent ? (
-            <>
-              <View style={styles.eventContainer}>
-                <View style={styles.timeCircle}>
-                  <Text style={styles.timeText}>
-                    {formatTime(timeRemaining)}
-                  </Text>
-                </View>
-
-                <View style={styles.eventDetails}>
-                  <Text style={styles.eventTitleNext}>{nextEvent.title}</Text>
-                  <Text style={styles.eventInfoNext}>
-                    {format(new Date(nextEvent.startDate), "hh:mm a")} -{" "}
-                    {format(new Date(nextEvent.endDate), "hh:mm a")}
-                  </Text>
-                  {nextEvent.location && (
-                    <Text style={[styles.eventInfoNext, { marginBottom: 5 }]}>
-                      {nextEvent.location}
-                    </Text>
-                  )}
-                </View>
-              </View>
-
-              <View
-                style={[
-                  styles.toggleContainer,
-                  {
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    marginTop: -1,
-                  },
-                ]}
-              >
-                <TouchableOpacity
-                  onPress={handleGetDirections}
-                  style={[styles.closeButton, { marginRight: 10 }]}
-                >
-                  <Text style={styles.closeButtonText}>Get Directions</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-                  <Text style={styles.closeButtonText}>Close</Text>
-                </TouchableOpacity>
-              </View>
-            </>
-          ) : (
-            <View style={{ alignItems: "center", marginTop: 10 }}>
-              <Text style={{ fontSize: 16, marginBottom: 10 }}>
-                No upcoming events today.
-              </Text>
-              <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-                <Text style={styles.closeButtonText}>Close</Text>
-              </TouchableOpacity>
-            </View>
-          )}
+          {renderContent()}
         </View>
       </View>
     </Modal>
