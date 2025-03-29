@@ -169,7 +169,6 @@ describe("CalendarScreen", () => {
 
   // Test the Get Directions button
   it("clicks on the Get Directions button and closes the alert", async () => {
-    // Mock the alert function
     const originalAlert = global.alert;
     global.alert = jest.fn();
 
@@ -186,8 +185,69 @@ describe("CalendarScreen", () => {
 
       expect(global.alert).toHaveBeenCalledWith("Get directions to Room 101");
     } finally {
-      // Always restore the original alert function
       global.alert = originalAlert;
     }
+  });
+
+  it("toggles calendar selection correctly (remove then add)", async () => {
+    const { getByText, getByTestId } = render(
+      <NavigationContainer>
+        <CalendarScreen />
+      </NavigationContainer>,
+    );
+
+    await waitFor(() => getByTestId("selectCalendarButton"));
+
+    fireEvent.press(getByTestId("selectCalendarButton"));
+
+    await waitFor(() => getByText("Select Calendars"));
+
+    expect(getByText("Select your calendars (2)")).toBeTruthy();
+
+    fireEvent.press(getByText("Calendar 1"));
+
+    fireEvent.press(getByText("Done"));
+
+    await waitFor(() => {
+      expect(getByText("Select your calendars (1)")).toBeTruthy();
+    });
+
+    fireEvent.press(getByTestId("selectCalendarButton"));
+    await waitFor(() => getByText("Select Calendars"));
+
+    fireEvent.press(getByText("Calendar 1"));
+    fireEvent.press(getByText("Done"));
+
+    await waitFor(() => {
+      expect(getByText("Select your calendars (2)")).toBeTruthy();
+    });
+  });
+
+  it("alerts with fallback when event location is undefined", async () => {
+    const originalAlert = global.alert;
+    global.alert = jest.fn();
+
+    Calendar.getEventsAsync.mockResolvedValueOnce([
+      {
+        id: "test-event",
+        title: "Test Event",
+        startDate: new Date(),
+        endDate: new Date(new Date().getTime() + 3600000),
+      },
+    ]);
+
+    const { getByTestId, getByText } = render(
+      <NavigationContainer>
+        <CalendarScreen />
+      </NavigationContainer>,
+    );
+
+    await waitFor(() => getByText("Test Event"));
+
+    fireEvent.press(getByTestId("getClassDirectionsButton"));
+
+    expect(global.alert).toHaveBeenCalledWith("Get directions to ");
+
+    global.alert = originalAlert;
   });
 });

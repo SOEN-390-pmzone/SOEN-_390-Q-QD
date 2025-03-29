@@ -254,4 +254,69 @@ describe("NextEventModal additional coverage", () => {
     });
     consoleErrorSpy.mockRestore();
   });
+
+  it("calls navigation.navigate with null destination when event has null location", async () => {
+    const onCloseMock = jest.fn();
+    Calendar.requestCalendarPermissionsAsync.mockResolvedValue({
+      status: "granted",
+    });
+    Calendar.getCalendarsAsync.mockResolvedValue([{ id: "1" }]);
+
+    const now = new Date();
+    const future = new Date(now.getTime() + 3600000);
+    const futureEnd = new Date(future.getTime() + 3600000);
+    Calendar.getEventsAsync.mockResolvedValue([
+      {
+        id: "1",
+        title: "COMP 248",
+        startDate: future.toISOString(),
+        endDate: futureEnd.toISOString(),
+        location: null,
+      },
+    ]);
+
+    const { getByText } = render(
+      <NextEventModal isVisible={true} onClose={onCloseMock} />,
+    );
+
+    await waitFor(() => {
+      expect(getByText("COMP 248")).toBeTruthy();
+    });
+
+    fireEvent.press(getByText("Get Directions"));
+    expect(onCloseMock).toHaveBeenCalled();
+    expect(mockNavigate).toHaveBeenCalledWith("GetDirections", {
+      origin: { latitude: 45.494971642137095, longitude: -73.57791280320929 },
+      destination: null,
+      disableLiveLocation: true,
+    });
+  });
+
+  it("filters out events missing title", async () => {
+    Calendar.requestCalendarPermissionsAsync.mockResolvedValue({
+      status: "granted",
+    });
+    Calendar.getCalendarsAsync.mockResolvedValue([{ id: "1" }]);
+
+    const now = new Date();
+    const future = new Date(now.getTime() + 3600000);
+    const futureEnd = new Date(future.getTime() + 3600000);
+    Calendar.getEventsAsync.mockResolvedValue([
+      {
+        id: "1",
+        startDate: future.toISOString(),
+        endDate: futureEnd.toISOString(),
+        location: "Room 101",
+      },
+    ]);
+
+    const { getByText, queryByText } = render(
+      <NextEventModal isVisible={true} onClose={jest.fn()} />,
+    );
+
+    await waitFor(() => {
+      expect(getByText("No upcoming events today.")).toBeTruthy();
+    });
+    expect(queryByText("Room 101")).toBeNull();
+  });
 });
