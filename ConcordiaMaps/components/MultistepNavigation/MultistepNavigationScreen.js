@@ -33,8 +33,12 @@ import FloorRegistry, {
 import { getStepColor } from "../../services/NavigationStylesService";
 
 const MultistepNavigationScreen = () => {
-  const { generateRandomToken, fetchOutdoorDirections } =
-    useGoogleMapDirections();
+  const {
+    generateRandomToken,
+    fetchOutdoorDirections,
+    searchPlaces,
+    fetchPlaceDetails,
+  } = useGoogleMapDirections();
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -188,24 +192,19 @@ const MultistepNavigationScreen = () => {
     setLoadingOrigin(true);
 
     try {
-      let locationParam = "";
-      if (userLocation?.latitude && userLocation?.longitude) {
-        locationParam = `&location=${userLocation.latitude},${userLocation.longitude}&radius=5000`;
-      } else {
-        console.warn(
-          "User location not available. Searching without location bias.",
-        );
-      }
-
-      // Use the session token to prevent caching of search results
-      const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_MAPS_API_KEY}&components=country:ca${locationParam}&sessiontoken=${sessionTokenRef.current}`,
+      const { predictions, error } = await searchPlaces(
+        text,
+        userLocation,
+        sessionTokenRef.current,
       );
 
-      const { predictions } = await response.json();
-      setOriginPredictions(predictions || []);
+      if (error) {
+        throw error;
+      }
+
+      setOriginPredictions(predictions);
     } catch (error) {
-      console.error(error);
+      console.error("Error searching origin places:", error);
     } finally {
       setLoadingOrigin(false);
     }
@@ -224,22 +223,17 @@ const MultistepNavigationScreen = () => {
     setLoadingDestination(true);
 
     try {
-      let locationParam = "";
-      if (userLocation?.latitude && userLocation?.longitude) {
-        locationParam = `&location=${userLocation.latitude},${userLocation.longitude}&radius=5000`;
-      } else {
-        console.warn(
-          "User location not available. Searching without location bias.",
-        );
-      }
-
-      // Use the session token to prevent caching of search results
-      const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_MAPS_API_KEY}&components=country:ca${locationParam}&sessiontoken=${sessionTokenRef.current}`,
+      const { predictions, error } = await searchPlaces(
+        text,
+        userLocation,
+        sessionTokenRef.current,
       );
 
-      const { predictions } = await response.json();
-      setDestinationPredictions(predictions || []);
+      if (error) {
+        throw error;
+      }
+
+      setDestinationPredictions(predictions);
     } catch (error) {
       console.error("Error fetching destination predictions:", error);
     } finally {
@@ -250,24 +244,23 @@ const MultistepNavigationScreen = () => {
   // Handle place selection from autocomplete
   const handleOriginSelection = async (placeId, description) => {
     try {
-      const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry,formatted_address&key=${GOOGLE_MAPS_API_KEY}&sessiontoken=${sessionTokenRef.current}`,
+      const placeDetails = await fetchPlaceDetails(
+        placeId,
+        sessionTokenRef.current,
       );
-      const { result } = await response.json();
-      if (result?.geometry?.location) {
-        setOrigin(description);
-        setOriginDetails({
-          latitude: result.geometry.location.lat,
-          longitude: result.geometry.location.lng,
-          formatted_address: result.formatted_address,
-        });
-        setOriginSearchQuery("");
-        setOriginPredictions([]);
 
-        // Generate a new session token
-        const newToken = await generateRandomToken();
-        sessionTokenRef.current = newToken;
-      }
+      setOrigin(description);
+      setOriginDetails({
+        latitude: placeDetails.latitude,
+        longitude: placeDetails.longitude,
+        formatted_address: placeDetails.formatted_address,
+      });
+      setOriginSearchQuery("");
+      setOriginPredictions([]);
+
+      // Generate a new session token
+      const newToken = await generateRandomToken();
+      sessionTokenRef.current = newToken;
     } catch (error) {
       console.error("Error fetching place details:", error);
     }
@@ -276,23 +269,21 @@ const MultistepNavigationScreen = () => {
   // Handle destination selection from autocomplete
   const handleDestinationSelection = async (placeId, description) => {
     try {
-      const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry,formatted_address&key=${GOOGLE_MAPS_API_KEY}&sessiontoken=${sessionTokenRef.current}`,
+      const placeDetails = await fetchPlaceDetails(
+        placeId,
+        sessionTokenRef.current,
       );
-      const { result } = await response.json();
 
-      if (result?.geometry?.location) {
-        setDestination(description);
-        setDestinationDetails({
-          latitude: result.geometry.location.lat,
-          longitude: result.geometry.location.lng,
-          formatted_address: result.formatted_address,
-        });
-        setDestinationSearchQuery("");
-        setDestinationPredictions([]);
+      setDestination(description);
+      setDestinationDetails({
+        latitude: placeDetails.latitude,
+        longitude: placeDetails.longitude,
+        formatted_address: placeDetails.formatted_address,
+      });
+      setDestinationSearchQuery("");
+      setDestinationPredictions([]);
 
-        // Don't generate a new session token yet - we'll do that when navigation starts
-      }
+      // Don't generate a new session token yet - we'll do that when navigation starts
     } catch (error) {
       console.error("Error fetching destination place details:", error);
     }

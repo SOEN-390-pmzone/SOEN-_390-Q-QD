@@ -298,12 +298,60 @@ export const useGoogleMapDirections = () => {
     }
   };
 
+  const searchPlaces = async (text, userLocation, sessionToken) => {
+    if (text.length < 3) {
+      return { predictions: [] };
+    }
+
+    try {
+      let locationParam = "";
+      if (userLocation?.latitude && userLocation?.longitude) {
+        locationParam = `&location=${userLocation.latitude},${userLocation.longitude}&radius=5000`;
+      } else {
+        console.warn(
+          "User location not available. Searching without location bias.",
+        );
+      }
+
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_MAPS_API_KEY}&components=country:ca${locationParam}&sessiontoken=${sessionToken}`,
+      );
+
+      const data = await response.json();
+      return { predictions: data.predictions || [] };
+    } catch (error) {
+      console.error("Error searching places:", error);
+      return { predictions: [], error };
+    }
+  };
+
+  const fetchPlaceDetails = async (placeId, sessionToken) => {
+    try {
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry,formatted_address&key=${GOOGLE_MAPS_API_KEY}&sessiontoken=${sessionToken}`,
+      );
+      const data = await response.json();
+
+      if (
+        !data.result ||
+        !data.result.geometry ||
+        !data.result.geometry.location
+      ) {
+        throw new Error("Invalid place details response");
+      }
+
+      return {
+        latitude: data.result.geometry.location.lat,
+        longitude: data.result.geometry.location.lng,
+        formatted_address: data.result.formatted_address || null,
+      };
+    } catch (error) {
+      console.error("Error fetching place details:", error);
+      throw error;
+    }
+  };
+
   return {
-    // State
-
-    // Setters
-
-    // Methods
     geocodeAddress,
     getStepsInHTML,
     getDirections,
@@ -311,5 +359,7 @@ export const useGoogleMapDirections = () => {
     generateRandomToken,
     fetchOutdoorDirections,
     parseHtmlInstructions,
+    searchPlaces,
+    fetchPlaceDetails,
   };
 };
