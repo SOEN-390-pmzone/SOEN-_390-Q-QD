@@ -11,6 +11,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
+    flexGrow: 1,
   },
   stepTitle: {
     fontSize: 16,
@@ -20,7 +21,6 @@ const styles = StyleSheet.create({
   },
   stepContentContainer: {
     marginTop: 8,
-    height: "100%",
   },
   stepProgressContainer: {
     flexDirection: "row",
@@ -134,6 +134,7 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 1,
     marginTop: 12,
+    marginBottom: 12,
   },
   directionsTitle: {
     fontSize: 16,
@@ -191,6 +192,72 @@ const styles = StyleSheet.create({
     marginTop: 10,
     color: "#666666",
     fontSize: 14,
+  },
+
+  // Navigation controls styles
+  navigationButtonsContainer: {
+    width: "100%",
+    borderTopWidth: 1,
+    borderTopColor: "#e0e0e0",
+    paddingVertical: 12,
+    marginTop: 10,
+    backgroundColor: "#ffffff",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    zIndex: 1,
+    alignContent: "center",
+    bottom: -120,
+  },
+  navigationControls: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    width: "100%",
+  },
+  navigationButton: {
+    backgroundColor: "#912338",
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    minWidth: 110,
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  navigationButtonDisabled: {
+    backgroundColor: "#cccccc",
+    opacity: 0.7,
+    shadowOpacity: 0,
+    elevation: 0,
+  },
+  navigationButtonText: {
+    color: "#ffffff",
+    fontWeight: "600",
+    fontSize: 15,
+    marginHorizontal: 5,
+  },
+  stepIndicator: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 10,
+  },
+  stepIndicatorText: {
+    color: "#666666",
+    fontSize: 14,
+    marginLeft: 5,
+  },
+  navigationStepsContainer: {
+    flex: 1,
+    maxHeight: 600,
+    display: "flex",
+    flexDirection: "column",
   },
 });
 

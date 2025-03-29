@@ -153,7 +153,11 @@ const NavigationStep = ({
               <Text style={styles.loadingText}>Getting directions...</Text>
             </View>
           ) : outdoorDirections.length > 0 ? (
-            <ScrollView style={styles.directionsList}>
+            <ScrollView
+              style={styles.directionsList}
+              showsVerticalScrollIndicator={true}
+              nestedScrollEnabled={true}
+            >
               {outdoorDirections.map((direction, index) => {
                 // Generate a unique key combining relevant data
                 const directionKey = `${direction.distance || ""}-${
@@ -217,4 +221,113 @@ NavigationStep.propTypes = {
   onExpandMap: PropTypes.func,
 };
 
+/**
+ * Navigation Steps Container component that manages the entire navigation steps interface
+ */
+const NavigationStepsContainer = ({
+  navigationPlan,
+  currentStepIndex,
+  handleIndoorNavigation,
+  outdoorDirections,
+  loadingDirections,
+  mapHtml,
+  onExpandMap,
+  onChangeRoute,
+  onNext,
+  onPrevious,
+}) => {
+  if (!navigationPlan) return null;
+
+  const currentStep = navigationPlan.steps[currentStepIndex];
+
+  return (
+    <View style={styles.navigationStepsContainer}>
+      {/* Back button at the top */}
+      <TouchableOpacity
+        testID="change-route-button"
+        style={[
+          styles.navigationButton,
+          { backgroundColor: "#007bff", padding: 10, marginBottom: 10 },
+        ]}
+        onPress={onChangeRoute}
+      >
+        <MaterialIcons name="edit" size={18} color="#fff" />
+        <Text style={styles.navigationButtonText}>Change Route</Text>
+      </TouchableOpacity>
+
+      {/* Wrap the main content in a ScrollView */}
+      <View style={{ flex: 1 }} contentContainerStyle={{ flexGrow: 1 }}>
+        <NavigationStep
+          step={currentStep}
+          onNavigate={handleIndoorNavigation}
+          outdoorDirections={outdoorDirections}
+          loadingDirections={loadingDirections}
+          mapHtml={mapHtml}
+          onExpandMap={onExpandMap}
+        />
+      </View>
+
+      {/* Navigation controls fixed at bottom */}
+      <View style={styles.navigationButtonsContainer}>
+        <View style={styles.navigationControls}>
+          <TouchableOpacity
+            style={[
+              styles.navigationButton,
+              currentStepIndex === 0 && styles.navigationButtonDisabled,
+            ]}
+            onPress={onPrevious}
+            disabled={currentStepIndex === 0}
+          >
+            <MaterialIcons name="arrow-back" size={20} color="#fff" />
+            <Text style={[styles.navigationButtonText, { marginLeft: 5 }]}>
+              Previous
+            </Text>
+          </TouchableOpacity>
+
+          <View style={styles.stepIndicator}>
+            <MaterialIcons name="directions-walk" size={20} color="#666" />
+            <Text style={styles.stepIndicatorText}>
+              Step {currentStepIndex + 1} of {navigationPlan.steps.length}
+            </Text>
+          </View>
+
+          <TouchableOpacity
+            testID="next-button"
+            style={[
+              styles.navigationButton,
+              currentStepIndex >= navigationPlan.steps.length - 1 &&
+                styles.navigationButtonDisabled,
+            ]}
+            onPress={onNext}
+            disabled={currentStepIndex >= navigationPlan.steps.length - 1}
+          >
+            <Text style={[styles.navigationButtonText, { marginRight: 5 }]}>
+              Next
+            </Text>
+            <MaterialIcons name="arrow-forward" size={20} color="#fff" />
+          </TouchableOpacity>
+        </View>
+      </View>
+    </View>
+  );
+};
+
+NavigationStepsContainer.propTypes = {
+  navigationPlan: PropTypes.shape({
+    steps: PropTypes.array.isRequired,
+    currentStep: PropTypes.number,
+    title: PropTypes.string,
+  }),
+  currentStepIndex: PropTypes.number.isRequired,
+  handleIndoorNavigation: PropTypes.func.isRequired,
+  outdoorDirections: PropTypes.array,
+  loadingDirections: PropTypes.bool,
+  mapHtml: PropTypes.string,
+  onExpandMap: PropTypes.func.isRequired,
+  onChangeRoute: PropTypes.func.isRequired,
+  onNext: PropTypes.func.isRequired,
+  onPrevious: PropTypes.func.isRequired,
+};
+
+export { NavigationStepsContainer };
 export default NavigationStep;
