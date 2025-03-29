@@ -340,9 +340,20 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     marginBottom: 5,
   },
+  eventTitleNext: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#912338",
+    marginBottom: 5,
+  },
   eventInfo: {
     fontSize: 14,
     color: "#F5F5F5",
+    marginBottom: 5,
+  },
+  eventInfoNext: {
+    fontSize: 14,
+    color: "#912338",
     marginBottom: 5,
   },
   classDirectionsButtonText: {
@@ -356,6 +367,64 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     maxWidth: 160,
     alignItems: "center",
+  },
+  buttonNext: {
+    bottom: 650,
+    left: "75%",
+    transform: [{ translateX: -80 }],
+    backgroundColor: "#912338",
+    borderRadius: 20,
+    paddingHorizontal: 30,
+    paddingVertical: 10,
+    maxWidth: 160,
+    alignItems: "center",
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+  },
+  buttonNextText: {
+    color: "white",
+    fontWeight: "bold",
+  },
+  toggleContainer: {
+    flexDirection: "row",
+    marginVertical: 10,
+  },
+  closeButton: {
+    marginTop: 15,
+    backgroundColor: "#912338",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+  },
+  closeButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  eventContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  timeCircle: {
+    width: 60, // Circle size
+    height: 60,
+    borderRadius: 30, // Makes it a perfect circle
+    backgroundColor: "#912338", // Adjust color to match your theme
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 10, // Space between circle and event details
+  },
+  timeText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#FFF",
+  },
+  eventDetails: {
+    flex: 1, // Allow details to take the remaining space
   },
 });
 
