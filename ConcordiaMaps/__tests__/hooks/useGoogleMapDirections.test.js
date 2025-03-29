@@ -475,4 +475,199 @@ describe("useGoogleMapDirections", () => {
       );
     });
   });
+  // Additional tests for fetchOutdoorDirections to improve branch coverage
+
+  describe("fetchOutdoorDirections - additional coverage tests", () => {
+    let hook;
+    const mockBuildingRegistry = {
+      findBuilding: jest.fn(),
+      getCoordinatesForBuilding: jest.fn(),
+    };
+
+    beforeEach(() => {
+      hook = useGoogleMapDirections();
+      jest.clearAllMocks();
+      mockBuildingRegistry.findBuilding.mockReset();
+      mockBuildingRegistry.getCoordinatesForBuilding.mockReset();
+    });
+
+    it("should handle when both geocoding and building registry fail for startPoint", async () => {
+      // Setup step with invalid startPoint
+      const step = {
+        type: "outdoor",
+        startPoint: "InvalidBuilding",
+        endPoint: { latitude: 45.497, longitude: -73.578 },
+      };
+
+      // Mock geocodeAddress to fail
+      jest
+        .spyOn(hook, "geocodeAddress")
+        .mockRejectedValue(new Error("Geocoding failed"));
+
+      // Mock building registry to not find the building
+      mockBuildingRegistry.findBuilding.mockReturnValue(null);
+
+      const result = await hook.fetchOutdoorDirections(step, {
+        buildingRegistry: mockBuildingRegistry,
+      });
+
+      // Should use fallback directions
+      expect(result).toHaveProperty("directions");
+      expect(result.directions[0].distance).toBe("Unknown distance");
+      expect(mockBuildingRegistry.findBuilding).toHaveBeenCalledWith(
+        step.startPoint,
+      );
+    });
+
+    it("should handle when both geocoding and building registry fail for endPoint", async () => {
+      // Setup step with valid start but invalid end
+      const step = {
+        type: "outdoor",
+        startPoint: { latitude: 45.495, longitude: -73.576 },
+        endPoint: "InvalidBuilding",
+      };
+
+      // Mock geocodeAddress to fail for endPoint
+      jest
+        .spyOn(hook, "geocodeAddress")
+        .mockRejectedValue(new Error("Geocoding failed"));
+
+      // Mock building registry to not find the building
+      mockBuildingRegistry.findBuilding.mockReturnValue(null);
+
+      const result = await hook.fetchOutdoorDirections(step, {
+        buildingRegistry: mockBuildingRegistry,
+      });
+
+      // Should use fallback directions
+      expect(result).toHaveProperty("directions");
+      expect(result.directions[0].distance).toBe("Unknown distance");
+      expect(mockBuildingRegistry.findBuilding).toHaveBeenCalledWith(
+        step.endPoint,
+      );
+    });
+
+    it("should properly handle a destination text with 'Destination' keyword", async () => {
+      const step = {
+        type: "outdoor",
+        startPoint: { latitude: 45.495, longitude: -73.576 },
+        endPoint: { latitude: 45.497, longitude: -73.578 },
+        endAddress: "Webster Library, Concordia University",
+      };
+
+      // Mock getStepsInHTML to include "Destination" in text
+      jest.spyOn(hook, "getStepsInHTML").mockResolvedValue([
+        {
+          html_instructions: "Destination will be on your right",
+          distance: "10 m",
+        },
+      ]);
+
+      jest.spyOn(hook, "getPolyline").mockResolvedValue([]);
+
+      const result = await hook.fetchOutdoorDirections(step);
+
+      // Verify the destination text was properly formatted with the building name
+      expect(result.directions[0].formatted_text).toBe(
+        "Walk from starting location to Webster Library, Concordia University",
+      );
+    });
+
+    it("should format endPoint as destination when endAddress is not available", async () => {
+      const step = {
+        type: "outdoor",
+        startPoint: { latitude: 45.495, longitude: -73.576 },
+        endPoint: "LB",
+      };
+
+      // Mock geocodeAddress for endPoint
+      jest.spyOn(hook, "geocodeAddress").mockResolvedValue({
+        latitude: 45.497,
+        longitude: -73.578,
+      });
+
+      // Mock getStepsInHTML to include "Destination" in text
+      jest
+        .spyOn(hook, "getStepsInHTML")
+        .mockResolvedValue([
+          { html_instructions: "Destination is on your left", distance: "5 m" },
+        ]);
+
+      jest.spyOn(hook, "getPolyline").mockResolvedValue([]);
+
+      const result = await hook.fetchOutdoorDirections(step);
+
+      // Should use the endPoint value in the destination text
+      expect(result.directions[0].formatted_text).toBe(
+        "Walk from starting location to destination building",
+      );
+    });
+
+    it("should properly format directions when no html_instructions contain 'Destination'", async () => {
+      const step = {
+        type: "outdoor",
+        startPoint: { latitude: 45.495, longitude: -73.576 },
+        endPoint: { latitude: 45.497, longitude: -73.578 },
+        startAddress: "Hall Building",
+        endAddress: "Webster Library",
+      };
+
+      // Mock getStepsInHTML without "Destination" keyword
+      const mockDirections = [
+        {
+          html_instructions: "Head <b>north</b> on Mackay St",
+          distance: "80 m",
+        },
+        {
+          html_instructions: "Turn <b>right</b> onto De Maisonneuve Blvd",
+          distance: "120 m",
+        },
+      ];
+
+      jest.spyOn(hook, "getStepsInHTML").mockResolvedValue(mockDirections);
+      jest.spyOn(hook, "getPolyline").mockResolvedValue([]);
+
+      const result = await hook.fetchOutdoorDirections(step);
+
+      expect(result.directions.length).toBe(1);
+
+      // Check the content of the directions
+      expect(result.directions[0].formatted_text).toBe(
+        "Walk from Hall Building to Webster Library",
+      );
+    });
+
+    it("should handle getDirections error and provide fallback", async () => {
+      const step = {
+        type: "outdoor",
+        startPoint: { latitude: 45.495, longitude: -73.576 },
+        endPoint: { latitude: 45.497, longitude: -73.578 },
+      };
+
+      // Mock getStepsInHTML to throw an error
+      jest
+        .spyOn(hook, "getDirections")
+        .mockRejectedValue(new Error("Invalid API key"));
+      jest
+        .spyOn(hook, "getStepsInHTML")
+        .mockRejectedValue(new Error("Error getting steps"));
+      jest.spyOn(hook, "getPolyline").mockResolvedValue([]); // This still works
+
+      const consoleErrorSpy = jest
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
+
+      const result = await hook.fetchOutdoorDirections(step);
+
+      // Should provide fallback directions
+      expect(result).toHaveProperty("directions");
+      expect(result.directions[0].html_instructions).toContain("Walk from");
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        "Error fetching outdoor directions:",
+        expect.any(Error),
+      );
+
+      consoleErrorSpy.mockRestore();
+    });
+  });
 });
