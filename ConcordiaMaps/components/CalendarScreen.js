@@ -165,11 +165,9 @@ const CalendarScreen = () => {
             renderItem={({ item }) => (
               <View style={styles.eventCard}>
                 <Text style={styles.eventTitle}>{item.title}</Text>
-                {item.location && (
-                  <Text style={styles.eventInfo}>
-                    {item.location ?? "No additionnal information"}
-                  </Text>
-                )}
+                <Text style={styles.eventInfo}>
+                  {item.location ?? "No additionnal information"}
+                </Text>
                 <Text style={styles.eventInfo}>
                   {format(new Date(item.startDate), "hh:mm a")} -{" "}
                   {format(new Date(item.endDate), "hh:mm a")}
