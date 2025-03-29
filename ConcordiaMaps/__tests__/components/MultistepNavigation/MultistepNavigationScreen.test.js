@@ -14,6 +14,33 @@ import MultistepNavigationScreen from "../../../components/MultistepNavigation/M
 import { getStepColor } from "../../../services/NavigationStylesService";
 import PropTypes from "prop-types";
 
+jest.mock("../../../components/OutdoorNavigation/ExpandedMapModal", () => {
+  // Import React and Text component properly
+  const mockReact = require("react");
+  const mockText = require("react-native").Text;
+
+  return {
+    __esModule: true,
+    default: (props) => {
+      if (!props.visible) return null;
+
+      // Use createElement instead of JSX
+      return mockReact.createElement(
+        mockReact.Fragment,
+        null,
+        mockReact.createElement(mockText, null, "Map Directions"),
+        mockReact.createElement(
+          mockText,
+          {
+            onPress: props.onClose, // Pass the onClose handler to make close button work
+          },
+          "×",
+        ),
+      );
+    },
+  };
+});
+
 jest.mock("../../../components/IndoorNavigation/RoomToRoomNavigation", () => {
   const MockRoomToRoomNavigation = () => null;
   MockRoomToRoomNavigation.loadFloorPlans = jest.fn().mockResolvedValue(true);

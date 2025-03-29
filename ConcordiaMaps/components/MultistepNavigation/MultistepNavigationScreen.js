@@ -12,14 +12,15 @@ import {
   Modal,
 } from "react-native";
 import NavigationStep from "./NavigationStep";
+import ExpandedMapModal from "../OutdoorNavigation/ExpandedMapModal";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import * as Location from "expo-location";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
-import { WebView } from "react-native-webview";
 import NavigationStrategyService from "../../services/NavigationStrategyService";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { useGoogleMapDirections } from "../../hooks/useGoogleMapDirections";
 import styles from "../../styles/MultistepNavigation/MultistepNavigationStyles";
+import { WebView } from "react-native-webview";
 import MapGenerationService from "../../services/MapGenerationService";
 import {
   calculatePath,
@@ -1632,44 +1633,19 @@ const MultistepNavigationScreen = () => {
     return showIndoorNavigation && indoorNavigationParams !== null;
   };
 
-  // Render expanded map modal
-  const renderExpandedMap = () => {
-    if (!expandedMap) return null;
-
-    return (
-      <View style={styles.expandedModalOverlay}>
-        <View style={styles.expandedModalContent}>
-          <View style={styles.expandedHeader}>
-            <Text style={styles.expandedTitle}>Map Directions</Text>
-            <TouchableOpacity
-              style={styles.closeExpandedButton}
-              onPress={() => setExpandedMap(false)}
-            >
-              <Text style={styles.closeExpandedText}>×</Text>
-            </TouchableOpacity>
-          </View>
-          <WebView
-            originWhitelist={["*"]}
-            source={{
-              html: MapGenerationService.generateMapHtml(
-                outdoorRoute,
-                GOOGLE_MAPS_API_KEY,
-              ),
-            }}
-            style={styles.expandedWebView}
-          />
-        </View>
-      </View>
-    );
-  };
-
   return (
     <SafeAreaView style={styles.safeAreaContainer} testID="navigation-screen">
       <Header />
       <NavBar />
       <View style={styles.navigationContainer}>
         {navigationPlan ? renderNavigationSteps() : renderNavigationForm()}
-        {expandedMap && renderExpandedMap()}
+        <ExpandedMapModal
+          visible={expandedMap}
+          onClose={() => setExpandedMap(false)}
+          route={outdoorRoute}
+          apiKey={GOOGLE_MAPS_API_KEY}
+          styles={styles}
+        />
         {shouldShowIndoorNavigation() && renderIndoorNavigation()}
       </View>
       <Footer />
