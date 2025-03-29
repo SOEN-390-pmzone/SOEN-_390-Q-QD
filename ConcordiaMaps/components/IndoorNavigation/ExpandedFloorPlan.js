@@ -19,22 +19,39 @@ const ExpandedFloorPlanModal = ({
       animationType="fade"
       onRequestClose={onClose}
     >
-      <View style={customStyles.expandedModalOverlay || styles.expandedModalOverlay}>
-        <View style={customStyles.expandedModalContent || styles.expandedModalContent}>
+      <View
+        style={customStyles.expandedModalOverlay || styles.expandedModalOverlay}
+      >
+        <View
+          style={
+            customStyles.expandedModalContent || styles.expandedModalContent
+          }
+        >
           <View style={customStyles.expandedHeader || styles.expandedHeader}>
             <Text style={customStyles.expandedTitle || styles.expandedTitle}>
               Floor {floorNumber}
             </Text>
             <TouchableOpacity
-              style={customStyles.closeExpandedButton || styles.closeExpandedButton}
+              style={
+                customStyles.closeExpandedButton || styles.closeExpandedButton
+              }
               onPress={onClose}
             >
-              <Text style={customStyles.closeExpandedText || styles.closeExpandedText}>
+              <Text
+                style={
+                  customStyles.closeExpandedText || styles.closeExpandedText
+                }
+              >
                 ×
               </Text>
             </TouchableOpacity>
           </View>
-          <View style={customStyles.expandedWebViewContainer || styles.expandedWebViewContainer}>
+          <View
+            style={
+              customStyles.expandedWebViewContainer ||
+              styles.expandedWebViewContainer
+            }
+          >
             <WebView
               source={{ html: htmlContent }}
               style={customStyles.expandedWebView || styles.expandedWebView}
