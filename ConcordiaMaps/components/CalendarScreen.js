@@ -165,9 +165,9 @@ const CalendarScreen = () => {
             renderItem={({ item }) => (
               <View style={styles.eventCard}>
                 <Text style={styles.eventTitle}>{item.title}</Text>
-                {item.notes && (
+                {item.location && (
                   <Text style={styles.eventInfo}>
-                    {item.notes ?? "No additionnal information"}
+                    {item.location ?? "No additionnal information"}
                   </Text>
                 )}
                 <Text style={styles.eventInfo}>
@@ -179,7 +179,7 @@ const CalendarScreen = () => {
                   testID="getClassDirectionsButton"
                   style={styles.classDirectionsButton}
                   onPress={() =>
-                    alert("Get directions to " + (item.notes ?? ""))
+                    alert("Get directions to " + (item.location ?? ""))
                   }
                 >
                   <Text style={styles.classDirectionsButtonText}>

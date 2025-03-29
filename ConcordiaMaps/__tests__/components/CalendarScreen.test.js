@@ -20,7 +20,7 @@ jest.mock("expo-calendar", () => ({
       title: "Event 1",
       startDate: new Date(),
       endDate: new Date(),
-      notes: "Room 101",
+      location: "Room 101",
     },
   ]),
   EntityTypes: {

@@ -11,7 +11,6 @@ import { format } from "date-fns";
 import styles from "../styles";
 import PropTypes from "prop-types";
 import { useNavigation } from "@react-navigation/native";
-import * as Location from "expo-location";
 
 const NextEventModal = ({ isVisible, onClose }) => {
   const [nextEvent, setNextEvent] = useState(null);
@@ -72,7 +71,14 @@ const NextEventModal = ({ isVisible, onClose }) => {
         (a, b) => new Date(a.startDate) - new Date(b.startDate),
       );
 
-      setNextEvent(sortedEvents.length > 0 ? sortedEvents[0] : null);
+      // Filter events to only include those with titles starting with SOEN, COMP, or ENGR can be added for other prefixes
+      const allowedPrefixes = ["SOEN", "COMP", "ENGR"];
+      const filteredEvents = sortedEvents.filter((event) => {
+        const title = event.title || "";
+        return allowedPrefixes.some((prefix) => title.startsWith(prefix));
+      });
+
+      setNextEvent(filteredEvents.length > 0 ? filteredEvents[0] : null);
     } catch (error) {
       console.error("Error fetching next event:", error);
     }
@@ -98,21 +104,11 @@ const NextEventModal = ({ isVisible, onClose }) => {
   };
 
   const handleGetDirections = async () => {
-    let userCurrentLocation;
-    try {
-      // Attempt to get the dynamic current position
-      const locationResponse = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.High,
-      });
-      userCurrentLocation = {
-        latitude: locationResponse.coords.latitude,
-        longitude: locationResponse.coords.longitude,
-      };
-    } catch (error) {
-      console.error("Error getting current location:", error);
-      // Fallback: if current location is not available, use default value
-      userCurrentLocation = "H3G 1M8";
-    }
+    // Set the default origin coordinates
+    const defaultOrigin = {
+      latitude: 45.494971642137095,
+      longitude: -73.57791280320929,
+    };
 
     // For the destination, use the event's location if available; otherwise, use null
     const destination = nextEvent ? nextEvent.location : null;
@@ -122,8 +118,9 @@ const NextEventModal = ({ isVisible, onClose }) => {
 
     // Navigate to the GetDirections screen with the origin and destination
     navigation.navigate("GetDirections", {
-      origin: userCurrentLocation,
+      origin: defaultOrigin,
       destination,
+      disableLiveLocation: true,
     });
   };
 

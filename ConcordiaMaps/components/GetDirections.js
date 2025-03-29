@@ -44,7 +44,6 @@ const RoutePolyline = memo(({ route }) => {
   if (route.length === 0) return null;
   return <Polyline coordinates={route} strokeWidth={10} strokeColor="blue" />;
 });
-
 RoutePolyline.displayName = "RoutePolyline";
 RoutePolyline.propTypes = {
   route: PropTypes.arrayOf(
@@ -63,7 +62,6 @@ const LocationMarkers = memo(({ origin, destination }) => {
     </>
   );
 });
-
 LocationMarkers.displayName = "LocationMarkers";
 LocationMarkers.propTypes = {
   origin: PropTypes.shape({
@@ -92,12 +90,23 @@ const GetDirections = () => {
   const [originText, setOriginText] = useState("");
   const [destinationText, setDestinationText] = useState("");
 
-  // Extract any passed parameters from the navigation route
+  // Extract any passed parameters from the navigation route.
+  // disableLiveLocation will be true when we want to lock the origin to the default.
   const routeNav = useRoute();
-  const { origin: passedOrigin, destination: passedDestination } =
-    routeNav.params || {};
+  const {
+    origin: passedOrigin,
+    destination: passedDestination,
+    disableLiveLocation,
+  } = routeNav.params || {};
 
-  // If there is no passed origin and we're using the current location, set it from context
+  // If disableLiveLocation is true, disable live tracking.
+  useEffect(() => {
+    if (disableLiveLocation) {
+      setUseCurrentLocation(false);
+    }
+  }, [disableLiveLocation]);
+
+  // If there is no passed origin and we're using the current location, set it from context.
   useEffect(() => {
     if (location && useCurrentLocation && !passedOrigin) {
       setOrigin({
@@ -108,7 +117,7 @@ const GetDirections = () => {
     }
   }, [location, useCurrentLocation, passedOrigin]);
 
-  // Handle passed origin and destination parameters
+  // Handle passed origin and destination parameters.
   useEffect(() => {
     if (passedOrigin) {
       setOrigin(passedOrigin);
@@ -121,7 +130,7 @@ const GetDirections = () => {
           `${passedDestination.latitude}, ${passedDestination.longitude}`,
         );
       } else if (typeof passedDestination === "string") {
-        // If destination is an address string, geocode it
+        // If destination is an address string, geocode it.
         const fetchCoordinates = async () => {
           const coords = await geocodeAddress(passedDestination);
           if (coords) {
@@ -190,14 +199,14 @@ const GetDirections = () => {
     setIsDirectionsBoxCollapsed(true);
   };
 
-  // Real-time location tracking during navigation
+  // Real-time location tracking during navigation.
+  // This effect will not update the origin if useCurrentLocation is false or if a passed origin exists.
   useEffect(() => {
     let intervalId;
 
     const updateLocation = async () => {
       try {
-        if (!useCurrentLocation) return;
-
+        if (!useCurrentLocation || passedOrigin) return; // Do not update if live tracking is disabled.
         const newLocation = await Location.getCurrentPositionAsync({
           accuracy: Location.Accuracy.High,
         });
@@ -218,7 +227,6 @@ const GetDirections = () => {
               getStepsInHTML(newOrigin, destination, mode),
               getPolyline(newOrigin, destination, mode),
             ]);
-
             setDirections(updatedDirections);
             setRoute(updatedPolyline);
             console.log("Route and directions updated with new location");
@@ -247,6 +255,7 @@ const GetDirections = () => {
     origin,
     useCurrentLocation,
     mode,
+    passedOrigin,
   ]);
 
   return (
