@@ -43,9 +43,7 @@ function HomeScreen({ asyncKey = "Campus" }) {
   const mapRef = useRef(null);
   const TOGGLE_MODAL_TIMEOUT = 10000;
 
-
   const [eventModalVisible, setEventModalVisible] = useState(false);
-
 
   // State for OPI (Points of Interest) popup
   const [opiPopupVisible, setOpiPopupVisible] = useState(false);
@@ -266,7 +264,7 @@ function HomeScreen({ asyncKey = "Campus" }) {
         style={styles.buttonNext}
         onPress={() => setEventModalVisible(true)}
       >
-        <Text style={styles.buttonNextText}>Next Event</Text>
+        <Text style={styles.buttonNextText}>Next Class</Text>
       </TouchableOpacity>
 
       {/* Next Event Modal */}

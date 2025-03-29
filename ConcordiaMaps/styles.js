@@ -369,7 +369,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   buttonNext: {
-    bottom: 535, 
+    bottom: 650, 
     left: "75%",
     transform: [{ translateX: -80 }], 
     backgroundColor: "#912338",

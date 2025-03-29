@@ -1,14 +1,23 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, Modal, TouchableOpacity, ActivityIndicator } from "react-native";
+import {
+  View,
+  Text,
+  Modal,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
 import * as Calendar from "expo-calendar";
 import { format } from "date-fns";
 import styles from "../styles";
 import PropTypes from "prop-types";
+import { useNavigation } from "@react-navigation/native";
+import * as Location from "expo-location";
 
 const NextEventModal = ({ isVisible, onClose }) => {
   const [nextEvent, setNextEvent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [timeRemaining, setTimeRemaining] = useState(0); // Store the remaining time in seconds
+  const navigation = useNavigation(); // Use navigation hook here
 
   useEffect(() => {
     if (isVisible) {
@@ -20,13 +29,11 @@ const NextEventModal = ({ isVisible, onClose }) => {
     let intervalId;
 
     if (nextEvent && timeRemaining > 0) {
-      // Set interval to update the time remaining every second
       intervalId = setInterval(() => {
-        setTimeRemaining((prevTime) => prevTime - 1); // Decrease time by 1 second
+        setTimeRemaining((prevTime) => prevTime - 1);
       }, 1000);
     }
 
-    // Clear the interval once the event starts or the modal is closed
     return () => clearInterval(intervalId);
   }, [nextEvent, timeRemaining]);
 
@@ -39,29 +46,32 @@ const NextEventModal = ({ isVisible, onClose }) => {
         setLoading(false);
         return;
       }
-  
-      const calendars = await Calendar.getCalendarsAsync(Calendar.EntityTypes.EVENT);
+
+      const calendars = await Calendar.getCalendarsAsync(
+        Calendar.EntityTypes.EVENT,
+      );
       if (calendars.length === 0) {
         setLoading(false);
         return;
       }
-  
+
       const now = new Date();
       const endOfDay = new Date();
       endOfDay.setHours(23, 59, 59, 999);
-  
+
       const events = await Calendar.getEventsAsync(
         calendars.map((cal) => cal.id),
         now,
-        endOfDay
+        endOfDay,
       );
-  
-      // Filter out events that have already started
-      const upcomingEvents = events.filter(event => new Date(event.startDate) > now);
-  
-      // Sort remaining events by start time
-      const sortedEvents = upcomingEvents.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
-  
+
+      const upcomingEvents = events.filter(
+        (event) => new Date(event.startDate) > now,
+      );
+      const sortedEvents = upcomingEvents.sort(
+        (a, b) => new Date(a.startDate) - new Date(b.startDate),
+      );
+
       setNextEvent(sortedEvents.length > 0 ? sortedEvents[0] : null);
     } catch (error) {
       console.error("Error fetching next event:", error);
@@ -69,12 +79,14 @@ const NextEventModal = ({ isVisible, onClose }) => {
     setLoading(false);
   };
 
-  // Calculate the remaining time in seconds
   useEffect(() => {
     if (nextEvent) {
       const eventStartTime = new Date(nextEvent.startDate).getTime();
       const currentTime = Date.now();
-      const remainingTime = Math.max(Math.floor((eventStartTime - currentTime) / 1000), 0);
+      const remainingTime = Math.max(
+        Math.floor((eventStartTime - currentTime) / 1000),
+        0,
+      );
       setTimeRemaining(remainingTime);
     }
   }, [nextEvent]);
@@ -85,56 +97,97 @@ const NextEventModal = ({ isVisible, onClose }) => {
     return `${String(minutes).padStart(2, "0")}:${String(remainingSeconds).padStart(2, "0")}`;
   };
 
+  const handleGetDirections = async () => {
+    let userCurrentLocation;
+    try {
+      // Attempt to get the dynamic current position
+      const locationResponse = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.High,
+      });
+      userCurrentLocation = {
+        latitude: locationResponse.coords.latitude,
+        longitude: locationResponse.coords.longitude,
+      };
+    } catch (error) {
+      console.error("Error getting current location:", error);
+      // Fallback: if current location is not available, use default value
+      userCurrentLocation = "H3G 1M8";
+    }
+
+    // For the destination, use the event's location if available; otherwise, use null
+    const destination = nextEvent ? nextEvent.location : null;
+
+    // Close the modal before navigating
+    onClose();
+
+    // Navigate to the GetDirections screen with the origin and destination
+    navigation.navigate("GetDirections", {
+      origin: userCurrentLocation,
+      destination,
+    });
+  };
+
   return (
     <Modal visible={isVisible} animationType="slide" transparent>
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>Next Event</Text>
+          <Text style={styles.modalTitle}>Next Class</Text>
           {loading ? (
             <ActivityIndicator size="large" color="#912338" />
           ) : nextEvent ? (
             <>
               <View style={styles.eventContainer}>
-                {/* Circular Timer Display */}
                 <View style={styles.timeCircle}>
                   <Text style={styles.timeText}>
-                    {formatTime(timeRemaining)} {/* Display dynamic time */}
+                    {formatTime(timeRemaining)}
                   </Text>
                 </View>
 
-                {/* Event Details */}
                 <View style={styles.eventDetails}>
                   <Text style={styles.eventTitleNext}>{nextEvent.title}</Text>
                   <Text style={styles.eventInfoNext}>
-                    {format(new Date(nextEvent.startDate), "hh:mm a")} - {format(new Date(nextEvent.endDate), "hh:mm a")}
+                    {format(new Date(nextEvent.startDate), "hh:mm a")} -{" "}
+                    {format(new Date(nextEvent.endDate), "hh:mm a")}
                   </Text>
-                  {nextEvent.notes && (
+                  {nextEvent.location && (
                     <Text style={[styles.eventInfoNext, { marginBottom: 5 }]}>
-                      Location: {nextEvent.notes}
+                      {nextEvent.location}
                     </Text>
                   )}
                 </View>
               </View>
 
-              {/* Buttons */}
-              <View style={[styles.toggleContainer, { flexDirection: "row", justifyContent: "space-between", marginTop: -1 }]}>
+              <View
+                style={[
+                  styles.toggleContainer,
+                  {
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    marginTop: -1,
+                  },
+                ]}
+              >
                 <TouchableOpacity
-                  onPress={onClose}
+                  onPress={handleGetDirections}
                   style={[styles.closeButton, { marginRight: 10 }]}
                 >
                   <Text style={styles.closeButtonText}>Get Directions</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity
-                  onPress={onClose}
-                  style={styles.closeButton}
-                >
+                <TouchableOpacity onPress={onClose} style={styles.closeButton}>
                   <Text style={styles.closeButtonText}>Close</Text>
                 </TouchableOpacity>
               </View>
             </>
           ) : (
-            <Text style={{ fontSize: 16, marginTop: 10 }}>No upcoming events today.</Text>
+            <View style={{ alignItems: "center", marginTop: 10 }}>
+              <Text style={{ fontSize: 16, marginBottom: 10 }}>
+                No upcoming events today.
+              </Text>
+              <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+                <Text style={styles.closeButtonText}>Close</Text>
+              </TouchableOpacity>
+            </View>
           )}
         </View>
       </View>
