@@ -19,15 +19,14 @@ jest.mock("expo-location", () => ({
   }),
 }));
 
-jest.mock('@react-navigation/native', () => {
-  const actualNav = jest.requireActual('@react-navigation/native');
+jest.mock("@react-navigation/native", () => {
+  const actualNav = jest.requireActual("@react-navigation/native");
   return {
     ...actualNav,
     useRoute: () => ({ params: {} }),
     useNavigation: () => ({ navigate: jest.fn() }),
   };
 });
-
 
 // Mock useGoogleMapDirections hook
 jest.mock("../../hooks/useGoogleMapDirections");

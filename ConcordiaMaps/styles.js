@@ -351,7 +351,7 @@ const styles = StyleSheet.create({
     color: "#F5F5F5",
     marginBottom: 5,
   },
-  eventInfoNext:{
+  eventInfoNext: {
     fontSize: 14,
     color: "#912338",
     marginBottom: 5,
@@ -369,9 +369,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   buttonNext: {
-    bottom: 650, 
+    bottom: 650,
     left: "75%",
-    transform: [{ translateX: -80 }], 
+    transform: [{ translateX: -80 }],
     backgroundColor: "#912338",
     borderRadius: 20,
     paddingHorizontal: 30,
@@ -426,7 +426,6 @@ const styles = StyleSheet.create({
   eventDetails: {
     flex: 1, // Allow details to take the remaining space
   },
-  
 });
 
-export default styles; 
+export default styles;
