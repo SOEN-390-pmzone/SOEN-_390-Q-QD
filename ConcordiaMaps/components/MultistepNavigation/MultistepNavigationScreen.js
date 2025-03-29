@@ -33,7 +33,7 @@ import FloorRegistry, {
 import { getStepColor } from "../../services/NavigationStylesService";
 
 const MultistepNavigationScreen = () => {
-  const { geocodeAddress, getStepsInHTML, getPolyline, generateRandomToken } =
+  const { generateRandomToken, fetchOutdoorDirections } =
     useGoogleMapDirections();
   const navigation = useNavigation();
 
@@ -128,167 +128,28 @@ const MultistepNavigationScreen = () => {
 
       // If we have an outdoor step as the first step, fetch directions immediately
       if (route.params.navigationPlan.steps[0].type === "outdoor") {
-        fetchOutdoorDirections(route.params.navigationPlan.steps[0]);
+        handleFetchOutdoorDirections(route.params.navigationPlan.steps[0]);
       }
     }
   }, [route.params]);
 
-  const fetchOutdoorDirections = async (step) => {
+  const handleFetchOutdoorDirections = async (step) => {
     if (step.type !== "outdoor") return;
 
     setLoadingDirections(true);
 
     try {
-      // IMPROVED: Use geocodeAddress method from hook to handle address-to-coordinates conversion
-      let originCoords;
-      let destinationCoords;
+      const options = {
+        originDetails,
+        buildingRegistry: FloorRegistry,
+      };
 
-      // Handle origin coordinates
-      if (step.startPoint && typeof step.startPoint === "string") {
-        try {
-          // Use the hook's geocodeAddress function for cleaner code
-          originCoords = await geocodeAddress(step.startPoint);
-          console.log("Using geocoded startPoint:", originCoords);
-        } catch (geocodeError) {
-          console.error("Error geocoding startPoint:", geocodeError);
-        }
-      } else if (step.startPoint?.latitude && step.startPoint?.longitude) {
-        originCoords = step.startPoint;
-        console.log("Using startPoint coordinates:", originCoords);
-      } else if (originDetails) {
-        originCoords = {
-          latitude: originDetails.latitude,
-          longitude: originDetails.longitude,
-        };
-        console.log("Using originDetails:", originCoords);
-      }
+      const result = await fetchOutdoorDirections(step, options);
 
-      // If we still don't have origin coordinates, try looking up building coordinates
-      if (
-        !originCoords &&
-        step.startPoint &&
-        typeof step.startPoint === "string"
-      ) {
-        const startBuilding = CONCORDIA_BUILDINGS.find(
-          (b) =>
-            b.id.toUpperCase() === step.startPoint.toUpperCase() ||
-            step.startPoint.toUpperCase().includes(b.id.toUpperCase()) ||
-            b.name.toUpperCase().includes(step.startPoint.toUpperCase()) ||
-            step.startPoint.toUpperCase().includes(b.name.toUpperCase()),
-        );
-
-        if (startBuilding) {
-          // Use the direct building coordinates getter from FloorRegistry
-          originCoords = FloorRegistry.getCoordinatesForBuilding(
-            startBuilding.id,
-          );
-          console.log(
-            `Using coordinates for ${startBuilding.id}:`,
-            originCoords,
-          );
-        }
-      }
-
-      // Handle destination coordinates with similar pattern
-      if (step.endPoint) {
-        if (typeof step.endPoint === "string") {
-          // Try to geocode the address directly using the hook
-          try {
-            destinationCoords = await geocodeAddress(step.endPoint);
-            console.log("Using geocoded endPoint:", destinationCoords);
-          } catch (geocodeError) {
-            console.error("Error geocoding endPoint:", geocodeError);
-
-            // Fallback to checking if it's a building
-            const destinationBuilding = CONCORDIA_BUILDINGS.find(
-              (b) => b.id === step.endPoint || b.name.includes(step.endPoint),
-            );
-
-            if (destinationBuilding) {
-              destinationCoords = FloorRegistry.getCoordinatesForBuilding(
-                destinationBuilding.id,
-              );
-              console.log(
-                `Using coordinates for ${destinationBuilding.id}:`,
-                destinationCoords,
-              );
-            }
-          }
-        } else if (step.endPoint.latitude && step.endPoint.longitude) {
-          destinationCoords = step.endPoint;
-        }
-      }
-
-      if (!originCoords || !destinationCoords) {
-        console.error("Could not determine origin or destination coordinates");
-        setLoadingDirections(false);
-        return;
-      }
-
-      console.log(
-        "Fetching directions from",
-        originCoords,
-        "to",
-        destinationCoords,
-      );
-
-      // Get directions using the hook methods
-      const directions = await getStepsInHTML(
-        originCoords,
-        destinationCoords,
-        "walking",
-      );
-
-      const route = await getPolyline(
-        originCoords,
-        destinationCoords,
-        "walking",
-      );
-
-      if (directions && directions.length > 0) {
-        // Format directions with better text
-        const formattedDirections = directions.map((direction) => {
-          let text = parseHtmlInstructions(direction.html_instructions);
-
-          // Improve clarity for building navigation context
-          if (text.includes("Destination")) {
-            const destBuildingName =
-              step.endAddress && typeof step.endAddress === "string"
-                ? step.endAddress.split(",")[0]
-                : step.endPoint;
-            text = `You've arrived at ${destBuildingName}.`;
-          }
-
-          return {
-            ...direction,
-            formatted_text: text,
-          };
-        });
-
-        setOutdoorDirections(formattedDirections);
-      } else {
-        // Provide fallback if no directions returned
-        setOutdoorDirections([
-          {
-            distance: "approx. 250m",
-            html_instructions: `Walk from ${step.startAddress || "starting location"} to ${step.endAddress || "destination building"}`,
-            formatted_text: `Walk from ${step.startAddress || "starting location"} to ${step.endAddress || "destination building"}`,
-          },
-        ]);
-      }
-
-      setOutdoorRoute(route || []);
+      setOutdoorDirections(result.directions);
+      setOutdoorRoute(result.route);
     } catch (error) {
-      console.error("Error fetching outdoor directions:", error);
-
-      // Provide fallback directions even if there's an error
-      setOutdoorDirections([
-        {
-          distance: "Unknown distance",
-          html_instructions: `Walk from ${step.startAddress || "starting location"} to ${step.endAddress || "destination building"}`,
-          formatted_text: `Walk from ${step.startAddress || "starting location"} to ${step.endAddress || "destination building"}`,
-        },
-      ]);
+      console.error("Error handling outdoor directions:", error);
     } finally {
       setLoadingDirections(false);
     }
@@ -991,7 +852,7 @@ const MultistepNavigationScreen = () => {
     // If next step is outdoor, fetch directions
     const nextStep = updatedPlan.steps[currentStepIndex + 1];
     if (nextStep && nextStep.type === "outdoor") {
-      fetchOutdoorDirections(nextStep);
+      handleFetchOutdoorDirections(nextStep);
     } else if (nextStep && nextStep.type === "indoor") {
       setLoadingDirections(false);
     }
@@ -1014,7 +875,7 @@ const MultistepNavigationScreen = () => {
     // If previous step is outdoor, fetch directions
     const prevStep = updatedPlan.steps[currentStepIndex - 1];
     if (prevStep && prevStep.type === "outdoor") {
-      fetchOutdoorDirections(prevStep);
+      handleFetchOutdoorDirections(prevStep);
     } else if (prevStep && prevStep.type === "indoor") {
       // Show indoor navigation modal
     }

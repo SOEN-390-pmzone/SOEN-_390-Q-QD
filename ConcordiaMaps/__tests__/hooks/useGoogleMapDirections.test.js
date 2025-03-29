@@ -1,13 +1,20 @@
 import { useGoogleMapDirections } from "../../hooks/useGoogleMapDirections";
 import polyline from "@mapbox/polyline";
+import * as Crypto from "expo-crypto";
 
 // Mock the polyline.decode function
 jest.mock("@mapbox/polyline", () => ({
   decode: jest.fn(),
 }));
 
+// Mock crypto for token generation tests
+jest.mock("expo-crypto", () => ({
+  getRandomBytesAsync: jest.fn(),
+}));
+
 // Mock fetch globally
 global.fetch = jest.fn();
+global.btoa = jest.fn().mockReturnValue("base64encodedstring");
 
 describe("useGoogleMapDirections", () => {
   let hook;
@@ -17,6 +24,16 @@ describe("useGoogleMapDirections", () => {
     // Clear all mocks before each test
     jest.clearAllMocks();
     fetch.mockClear();
+
+    // Set up API key for tests
+    process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY = "test_api_key";
+
+    // Default mock for Crypto
+    jest
+      .spyOn(Crypto, "getRandomBytesAsync")
+      .mockResolvedValue(
+        new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]),
+      );
   });
 
   describe("geocodeAddress", () => {
@@ -63,6 +80,26 @@ describe("useGoogleMapDirections", () => {
         "Geocoding failed: ZERO_RESULTS",
       );
     });
+
+    it("should handle geocode API failure with empty results", async () => {
+      global.fetch.mockImplementationOnce(() =>
+        Promise.resolve({
+          json: () => Promise.resolve({ results: [] }),
+        }),
+      );
+
+      await expect(hook.geocodeAddress("Unknown location")).rejects.toThrow(
+        "Geocoding failed",
+      );
+    });
+
+    it("should handle network errors during geocoding", async () => {
+      fetch.mockImplementationOnce(() =>
+        Promise.reject(new Error("Network error")),
+      );
+
+      await expect(hook.geocodeAddress("Some Address")).rejects.toThrow();
+    });
   });
 
   describe("getStepsInHTML", () => {
@@ -103,6 +140,32 @@ describe("useGoogleMapDirections", () => {
           distance: "100 m",
         },
       ]);
+    });
+
+    it("should handle null response from API", async () => {
+      fetch.mockImplementationOnce(() =>
+        Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(null),
+        }),
+      );
+
+      await expect(
+        hook.getStepsInHTML(mockOrigin, mockDestination),
+      ).rejects.toThrow("Direction API error: Unknown error");
+    });
+
+    it("should handle invalid API response structure", async () => {
+      fetch.mockImplementationOnce(() =>
+        Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ status: "OK", routes: [] }),
+        }),
+      );
+
+      await expect(
+        hook.getStepsInHTML(mockOrigin, mockDestination),
+      ).rejects.toThrow("No routes available");
     });
   });
 
@@ -191,6 +254,225 @@ describe("useGoogleMapDirections", () => {
       const result = await hook.getPolyline(mockOrigin, mockDestination);
 
       expect(result).toEqual([]);
+    });
+  });
+
+  describe("generateRandomToken", () => {
+    it("should generate a valid token from random bytes", async () => {
+      // Mock the Crypto module
+      const mockRandomBytes = new Uint8Array([
+        65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80,
+      ]);
+      Crypto.getRandomBytesAsync.mockResolvedValue(mockRandomBytes);
+
+      // Mock btoa to return a predictable value
+      global.btoa = jest.fn().mockReturnValue("QUJDREVGRw==");
+
+      const token = await hook.generateRandomToken();
+
+      // Verify token formatting - should remove +/= characters
+      expect(token).toBeDefined();
+      expect(token).not.toContain("+");
+      expect(token).not.toContain("/");
+      expect(token).not.toContain("=");
+
+      // Verify btoa was called
+      expect(global.btoa).toHaveBeenCalled();
+    });
+
+    it("should handle errors in crypto module", async () => {
+      // Mock Crypto to throw error
+      Crypto.getRandomBytesAsync.mockRejectedValue(new Error("Crypto failed"));
+
+      // Mock console.error to inspect what's logged
+      const mockConsoleError = jest
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
+
+      const token = await hook.generateRandomToken();
+
+      // Should log error and return undefined
+      expect(mockConsoleError).toHaveBeenCalledWith(
+        "Error generating random token:",
+        expect.any(Error),
+      );
+      expect(token).toBeUndefined();
+
+      mockConsoleError.mockRestore();
+    });
+  });
+
+  describe("parseHtmlInstructions", () => {
+    it("should correctly remove all HTML tags", () => {
+      // Test with various HTML formats to cover all branches
+      expect(hook.parseHtmlInstructions("<div>Test</div>")).toBe(" Test");
+      expect(
+        hook.parseHtmlInstructions("<div class='direction'>Test</div>"),
+      ).toBe(" Test");
+      expect(hook.parseHtmlInstructions("Walk <b>north</b>")).toBe(
+        "Walk north",
+      );
+      expect(hook.parseHtmlInstructions("100<wbr/>m")).toBe("100m");
+      expect(
+        hook.parseHtmlInstructions("<div><b>Complex</b> example</div>"),
+      ).toBe(" Complex example");
+      expect(hook.parseHtmlInstructions("Plain text")).toBe("Plain text");
+    });
+  });
+
+  describe("fetchOutdoorDirections", () => {
+    // Mock BuildingRegistry for use in tests
+    const mockBuildingRegistry = {
+      findBuilding: jest.fn(),
+      getCoordinatesForBuilding: jest.fn(),
+    };
+
+    beforeEach(() => {
+      mockBuildingRegistry.findBuilding.mockReset();
+      mockBuildingRegistry.getCoordinatesForBuilding.mockReset();
+    });
+
+    it("should fetch outdoor directions successfully", async () => {
+      // Setup step with coordinates
+      const step = {
+        type: "outdoor",
+        startPoint: { latitude: 45.496, longitude: -73.577 },
+        endPoint: { latitude: 45.497, longitude: -73.578 },
+      };
+
+      // Mock geocodeAddress to return coordinates
+      jest.spyOn(hook, "geocodeAddress").mockResolvedValue({
+        latitude: 45.497,
+        longitude: -73.578,
+      });
+
+      // Mock getStepsInHTML and getPolyline
+      jest.spyOn(hook, "getStepsInHTML").mockResolvedValue([]);
+      jest.spyOn(hook, "getPolyline").mockResolvedValue([]);
+
+      const result = await hook.fetchOutdoorDirections(step, {
+        buildingRegistry: mockBuildingRegistry,
+      });
+
+      expect(result).toHaveProperty("directions");
+    });
+
+    it("should handle geocoding failure by using building registry", async () => {
+      // Setup step with building ID
+      const step = {
+        type: "outdoor",
+        startPoint: "H",
+        endPoint: { latitude: 45.497, longitude: -73.578 },
+      };
+
+      // Mock geocodeAddress to fail
+      jest
+        .spyOn(hook, "geocodeAddress")
+        .mockRejectedValue(new Error("Geocoding failed"));
+
+      // Mock building registry to return coordinates
+      mockBuildingRegistry.findBuilding.mockReturnValue({ id: "H" });
+      mockBuildingRegistry.getCoordinatesForBuilding.mockReturnValue({
+        latitude: 45.496,
+        longitude: -73.577,
+      });
+
+      // Mock getStepsInHTML and getPolyline
+      jest.spyOn(hook, "getStepsInHTML").mockResolvedValue([]);
+      jest.spyOn(hook, "getPolyline").mockResolvedValue([]);
+
+      const result = await hook.fetchOutdoorDirections(step, {
+        buildingRegistry: mockBuildingRegistry,
+      });
+
+      // Verify building registry was used as fallback
+      expect(mockBuildingRegistry.findBuilding).toHaveBeenCalledWith(
+        step.startPoint,
+      );
+      expect(
+        mockBuildingRegistry.getCoordinatesForBuilding,
+      ).toHaveBeenCalledWith("H");
+      expect(result).toHaveProperty("directions");
+    });
+
+    it("should handle directions API failure with fallback directions", async () => {
+      // Setup step
+      const step = {
+        type: "outdoor",
+        startPoint: { latitude: 45.496, longitude: -73.577 },
+        endPoint: { latitude: 45.497, longitude: -73.578 },
+        startAddress: "Hall Building",
+        endAddress: "Library Building",
+      };
+
+      // Mock getStepsInHTML and getPolyline to fail
+      jest
+        .spyOn(hook, "getStepsInHTML")
+        .mockRejectedValue(new Error("API error"));
+      jest.spyOn(hook, "getPolyline").mockRejectedValue(new Error("API error"));
+
+      const result = await hook.fetchOutdoorDirections(step);
+
+      // Should return fallback directions
+      expect(result).toHaveProperty("directions");
+      expect(result.directions[0].formatted_text).toContain(
+        "Walk from Hall Building to Library Building",
+      );
+      expect(result.route).toEqual([]);
+    });
+
+    it("should handle missing origin or destination coordinates", async () => {
+      // Setup step with invalid start/end points
+      const step = {
+        type: "outdoor",
+        startPoint: null,
+        endPoint: null,
+      };
+
+      const result = await hook.fetchOutdoorDirections(step);
+
+      // Should return fallback directions
+      expect(result).toHaveProperty("directions");
+      expect(result.directions[0].distance).toBe("Unknown distance");
+      expect(result.route).toEqual([]);
+    });
+
+    it("should reject non-outdoor steps", async () => {
+      const step = {
+        type: "indoor",
+      };
+
+      await expect(hook.fetchOutdoorDirections(step)).rejects.toThrow(
+        "Cannot fetch outdoor directions for non-outdoor step",
+      );
+    });
+
+    it("should format destination text with building name when available", async () => {
+      // Setup step with proper addresses
+      const step = {
+        type: "outdoor",
+        startPoint: { latitude: 45.496, longitude: -73.577 },
+        endPoint: { latitude: 45.497, longitude: -73.578 },
+        startAddress: "Starting Point",
+        endAddress: "Hall Building",
+      };
+
+      // Mock getStepsInHTML to include "Destination" in text
+      jest.spyOn(hook, "getStepsInHTML").mockResolvedValue([
+        {
+          html_instructions: "Destination will be on the right",
+          distance: "50 m",
+        },
+      ]);
+
+      jest.spyOn(hook, "getPolyline").mockResolvedValue([]);
+
+      const result = await hook.fetchOutdoorDirections(step);
+
+      // Should format text with building name
+      expect(result.directions[0].formatted_text).toBe(
+        "Walk from Starting Point to Hall Building",
+      );
     });
   });
 });
