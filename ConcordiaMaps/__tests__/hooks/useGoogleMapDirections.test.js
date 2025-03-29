@@ -670,4 +670,115 @@ describe("useGoogleMapDirections", () => {
       consoleErrorSpy.mockRestore();
     });
   });
+  describe("fetchPlaceDetails", () => {
+    it("should successfully fetch place details", async () => {
+      // Mock successful API response
+      fetch.mockImplementationOnce(() =>
+        Promise.resolve({
+          json: () =>
+            Promise.resolve({
+              result: {
+                geometry: {
+                  location: {
+                    lat: 45.497,
+                    lng: -73.579,
+                  },
+                },
+                formatted_address:
+                  "1455 Boulevard de Maisonneuve O, Montréal, QC H3G 1M8, Canada",
+              },
+            }),
+        }),
+      );
+
+      const placeId = "ChIJDbdkHFoayUwR7-8fITgxTmU";
+      const sessionToken = "mockSessionToken123";
+      const result = await hook.fetchPlaceDetails(placeId, sessionToken);
+
+      // Verify API was called with correct parameters
+      expect(fetch).toHaveBeenCalledWith(
+        expect.stringContaining(`place_id=${placeId}`),
+      );
+      expect(fetch).toHaveBeenCalledWith(
+        expect.stringContaining(`sessiontoken=${sessionToken}`),
+      );
+
+      // Verify the returned structure
+      expect(result).toEqual({
+        latitude: 45.497,
+        longitude: -73.579,
+        formatted_address:
+          "1455 Boulevard de Maisonneuve O, Montréal, QC H3G 1M8, Canada",
+      });
+    });
+
+    it("should handle missing formatted_address", async () => {
+      // Mock API response with missing formatted_address
+      fetch.mockImplementationOnce(() =>
+        Promise.resolve({
+          json: () =>
+            Promise.resolve({
+              result: {
+                geometry: {
+                  location: {
+                    lat: 45.497,
+                    lng: -73.579,
+                  },
+                },
+                // formatted_address is missing
+              },
+            }),
+        }),
+      );
+
+      const result = await hook.fetchPlaceDetails("someId", "token123");
+
+      // Verify the function handles missing address field correctly
+      expect(result).toEqual({
+        latitude: 45.497,
+        longitude: -73.579,
+        formatted_address: null,
+      });
+    });
+
+    it("should throw error when place details are invalid", async () => {
+      // Mock API response with missing required fields
+      fetch.mockImplementationOnce(() =>
+        Promise.resolve({
+          json: () =>
+            Promise.resolve({
+              result: {}, // Missing geometry
+            }),
+        }),
+      );
+
+      await expect(
+        hook.fetchPlaceDetails("someId", "token123"),
+      ).rejects.toThrow("Invalid place details response");
+    });
+
+    it("should handle API errors", async () => {
+      // Mock API error
+      fetch.mockImplementationOnce(() =>
+        Promise.reject(new Error("Network error")),
+      );
+
+      // Mock console.error to avoid cluttering test output
+      const consoleErrorSpy = jest
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
+
+      await expect(
+        hook.fetchPlaceDetails("someId", "token123"),
+      ).rejects.toThrow("Network error");
+
+      // Verify error was logged
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        "Error fetching place details:",
+        expect.any(Error),
+      );
+
+      consoleErrorSpy.mockRestore();
+    });
+  });
 });
