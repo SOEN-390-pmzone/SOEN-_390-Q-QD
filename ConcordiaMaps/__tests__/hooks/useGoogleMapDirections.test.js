@@ -781,4 +781,140 @@ describe("useGoogleMapDirections", () => {
       consoleErrorSpy.mockRestore();
     });
   });
+  describe("searchPlaces", () => {
+    it("should return empty predictions when text is shorter than 3 characters", async () => {
+      const result = await hook.searchPlaces(
+        "ab",
+        { latitude: 45.497, longitude: -73.579 },
+        "testSessionToken",
+      );
+
+      expect(result).toEqual({ predictions: [] });
+      expect(fetch).not.toHaveBeenCalled();
+    });
+
+    it("should use location bias when user location is available", async () => {
+      // Mock successful API response
+      fetch.mockImplementationOnce(() =>
+        Promise.resolve({
+          json: () =>
+            Promise.resolve({
+              predictions: [
+                { description: "Concordia University", place_id: "place123" },
+                { description: "Loyola Campus", place_id: "place456" },
+              ],
+            }),
+        }),
+      );
+
+      const userLocation = { latitude: 45.497, longitude: -73.579 };
+      const sessionToken = "testSessionToken";
+
+      const result = await hook.searchPlaces(
+        "Concordia",
+        userLocation,
+        sessionToken,
+      );
+
+      // Verify API was called with location parameter
+      expect(fetch).toHaveBeenCalledWith(
+        expect.stringContaining(
+          `&location=${userLocation.latitude},${userLocation.longitude}&radius=5000`,
+        ),
+      );
+
+      // Verify results are returned correctly
+      expect(result).toEqual({
+        predictions: [
+          { description: "Concordia University", place_id: "place123" },
+          { description: "Loyola Campus", place_id: "place456" },
+        ],
+      });
+    });
+
+    it("should search without location bias when user location is not available", async () => {
+      // Mock API response
+      fetch.mockImplementationOnce(() =>
+        Promise.resolve({
+          json: () =>
+            Promise.resolve({
+              predictions: [
+                { description: "Concordia University", place_id: "place123" },
+              ],
+            }),
+        }),
+      );
+
+      // Mock console.warn to verify warning is logged
+      const consoleWarnSpy = jest
+        .spyOn(console, "warn")
+        .mockImplementation(() => {});
+
+      const result = await hook.searchPlaces(
+        "Concordia",
+        null,
+        "testSessionToken",
+      );
+
+      // Verify API was called without location parameter
+      expect(fetch).toHaveBeenCalledWith(
+        expect.not.stringContaining("&location="),
+      );
+
+      // Verify warning was logged
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        "User location not available. Searching without location bias.",
+      );
+
+      // Verify results
+      expect(result.predictions).toHaveLength(1);
+
+      consoleWarnSpy.mockRestore();
+    });
+
+    it("should handle API errors gracefully", async () => {
+      // Mock API error
+      fetch.mockImplementationOnce(() =>
+        Promise.reject(new Error("Network error")),
+      );
+
+      // Mock console.error to verify error is logged
+      const consoleErrorSpy = jest
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
+
+      const result = await hook.searchPlaces(
+        "Concordia",
+        null,
+        "testSessionToken",
+      );
+
+      // Verify error handling
+      expect(result).toEqual({ predictions: [], error: expect.any(Error) });
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        "Error searching places:",
+        expect.any(Error),
+      );
+
+      consoleErrorSpy.mockRestore();
+    });
+
+    it("should handle API response with no predictions", async () => {
+      // Mock API response with no predictions
+      fetch.mockImplementationOnce(() =>
+        Promise.resolve({
+          json: () => Promise.resolve({}),
+        }),
+      );
+
+      const result = await hook.searchPlaces(
+        "NonExistentPlace",
+        { latitude: 45.497, longitude: -73.579 },
+        "testSessionToken",
+      );
+
+      // Should return empty predictions array
+      expect(result).toEqual({ predictions: [] });
+    });
+  });
 });
