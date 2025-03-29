@@ -261,14 +261,15 @@ function HomeScreen({ asyncKey = "Campus" }) {
       <Footer />
 
       <TouchableOpacity
+        testID="next-class-button"
         style={styles.buttonNext}
         onPress={() => setEventModalVisible(true)}
       >
         <Text style={styles.buttonNextText}>Next Class</Text>
       </TouchableOpacity>
 
-      {/* Next Event Modal */}
       <NextEventModal
+        testID="next-event-modal"
         isVisible={eventModalVisible}
         onClose={() => setEventModalVisible(false)}
       />

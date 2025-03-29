@@ -352,3 +352,28 @@ describe("GetDirections - Transport Mode Tests", () => {
     });
   });
 });
+
+describe("FloatingSearchBar onPlaceSelect", () => {
+  const defaultLocation = { latitude: 45.4973, longitude: -73.5789 };
+  const renderWithContext = (component) =>
+    render(
+      <LocationContext.Provider value={defaultLocation}>
+        {component}
+      </LocationContext.Provider>,
+    );
+
+  it("updates origin when onPlaceSelect is called on the origin search bar", async () => {
+    const { getByTestId } = renderWithContext(<GetDirections />);
+    const originSearchBar = await waitFor(() =>
+      getByTestId("search-bar-Using Current Location"),
+    );
+
+    const newOrigin = { latitude: 50, longitude: 60 };
+    const newDisplayName = "50, 60";
+    act(() => {
+      fireEvent(originSearchBar, "onPlaceSelect", newOrigin, newDisplayName);
+    });
+
+    expect(originSearchBar.props.value).toBe(newDisplayName);
+  });
+});

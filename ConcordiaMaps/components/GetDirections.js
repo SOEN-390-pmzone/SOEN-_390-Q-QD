@@ -280,6 +280,7 @@ const GetDirections = () => {
               onFocus={() => {
                 setIsDirectionsBoxCollapsed(true);
               }}
+              testID="search-bar-Enter Origin"
             />
 
             <FloatingSearchBar
@@ -346,4 +347,5 @@ const GetDirections = () => {
   );
 };
 
+export { geocodeAddress };
 export default GetDirections;
