@@ -111,7 +111,7 @@ const NextEventModal = ({ isVisible, onClose }) => {
     };
 
     // For the destination, use the event's location if available; otherwise, use null
-    const destination = nextEvent ? nextEvent.location : null;
+    const destination = nextEvent.location;
 
     // Close the modal before navigating
     onClose();
