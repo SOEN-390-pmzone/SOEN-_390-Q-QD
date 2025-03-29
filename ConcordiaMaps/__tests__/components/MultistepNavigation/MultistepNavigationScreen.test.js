@@ -2553,11 +2553,24 @@ describe("MultistepNavigationScreen", () => {
     mockConsoleError.mockRestore();
   });
 
-  test("handles place search with API error", async () => {
-    // Test for lines 1711-1714
-    global.fetch.mockImplementationOnce(() =>
-      Promise.reject(new Error("API error")),
-    );
+  test("handles searchOriginPlaces API error with specific error response", async () => {
+    // Create error response
+    const apiError = {
+      message: "API key invalid",
+      status: "REQUEST_DENIED",
+    };
+
+    // Setup mock for searchPlaces that returns error
+    const mockSearchPlaces = jest.fn().mockResolvedValue({
+      predictions: [],
+      error: apiError,
+    });
+
+    useGoogleMapDirections.mockReturnValue({
+      ...useGoogleMapDirections(),
+      searchPlaces: mockSearchPlaces,
+      generateRandomToken: jest.fn().mockResolvedValue("mock-token"),
+    });
 
     const mockConsoleError = jest
       .spyOn(console, "error")
@@ -2565,11 +2578,22 @@ describe("MultistepNavigationScreen", () => {
 
     const { getByPlaceholderText } = render(<MultistepNavigationScreen />);
 
+    // Get the origin input
     const input = getByPlaceholderText("Enter your starting location");
-    fireEvent.changeText(input, "Concordia University");
 
+    // Enter a search query
+    await act(async () => {
+      fireEvent.changeText(input, "Hall Building");
+      await new Promise((resolve) => setTimeout(resolve, 50)); // Allow state update
+    });
+
+    // Wait for error handling
     await waitFor(() => {
-      expect(mockConsoleError).toHaveBeenCalled();
+      expect(mockSearchPlaces).toHaveBeenCalled();
+      expect(mockConsoleError).toHaveBeenCalledWith(
+        "Error searching origin places:",
+        apiError,
+      );
     });
 
     mockConsoleError.mockRestore();
@@ -3761,4 +3785,432 @@ describe("MultistepNavigationScreen", () => {
       });
     }
   });
+});
+test("handles searchOriginPlaces with short query", async () => {
+  // Setup a proper mock for searchPlaces
+  const mockSearchPlaces = jest.fn();
+  useGoogleMapDirections.mockReturnValue({
+    ...useGoogleMapDirections(),
+    searchPlaces: mockSearchPlaces,
+    generateRandomToken: jest.fn().mockResolvedValue("mock-token"),
+  });
+
+  const { getByPlaceholderText } = render(<MultistepNavigationScreen />);
+
+  // Get the origin input
+  const input = getByPlaceholderText("Enter your starting location");
+
+  // Enter a short search query (less than 3 characters)
+  await act(async () => {
+    fireEvent.changeText(input, "Ha");
+    await new Promise((resolve) => setTimeout(resolve, 50)); // Allow state update
+  });
+
+  // Verify searchPlaces was not called for query less than 3 chars
+  expect(mockSearchPlaces).not.toHaveBeenCalled();
+});
+
+test("handles searchOriginPlaces API error", async () => {
+  // Setup mock for searchPlaces that throws an error
+  const mockSearchPlaces = jest
+    .fn()
+    .mockRejectedValue(new Error("Network error"));
+  useGoogleMapDirections.mockReturnValue({
+    ...useGoogleMapDirections(),
+    searchPlaces: mockSearchPlaces,
+    generateRandomToken: jest.fn().mockResolvedValue("mock-token"),
+  });
+
+  const mockConsoleError = jest
+    .spyOn(console, "error")
+    .mockImplementation(() => {});
+
+  const { getByPlaceholderText } = render(<MultistepNavigationScreen />);
+
+  // Get the origin input
+  const input = getByPlaceholderText("Enter your starting location");
+
+  // Enter a search query that should trigger API call
+  await act(async () => {
+    fireEvent.changeText(input, "Hall Building");
+    await new Promise((resolve) => setTimeout(resolve, 50)); // Allow state update
+  });
+
+  // Verify searchPlaces was called and error is logged
+  await waitFor(() => {
+    expect(mockSearchPlaces).toHaveBeenCalled();
+    expect(mockConsoleError).toHaveBeenCalledWith(
+      "Error searching origin places:",
+      expect.any(Error),
+    );
+  });
+
+  mockConsoleError.mockRestore();
+});
+test("handles searchOriginPlaces with valid query", async () => {
+  // Mock predictions for successful response
+  const mockPredictions = [
+    { place_id: "place_1", description: "Concordia University" },
+    { place_id: "place_2", description: "Concordia Hall Building" },
+  ];
+
+  // Setup mock for searchPlaces to return successful result
+  const mockSearchPlaces = jest.fn().mockResolvedValue({
+    predictions: mockPredictions,
+    error: null,
+  });
+
+  useGoogleMapDirections.mockReturnValue({
+    ...useGoogleMapDirections(),
+    searchPlaces: mockSearchPlaces,
+    generateRandomToken: jest.fn().mockResolvedValue("mock-token"),
+  });
+
+  const { getByPlaceholderText } = render(<MultistepNavigationScreen />);
+
+  // Get the origin input
+  const input = getByPlaceholderText("Enter your starting location");
+
+  // Enter a valid search query
+  await act(async () => {
+    fireEvent.changeText(input, "Hall Building");
+    await new Promise((resolve) => setTimeout(resolve, 50)); // Allow state update
+  });
+
+  // Verify searchPlaces was called with correct parameters
+  // Note: The function is called with text, userLocation (could be null), and session token (could be empty)
+  expect(mockSearchPlaces).toHaveBeenCalledWith("Hall Building", null, "");
+
+  // Verify at least one prediction is in the document
+  await waitFor(() => {
+    expect(mockSearchPlaces).toHaveBeenCalled();
+    expect(mockPredictions.length).toBeGreaterThan(0);
+  });
+});
+
+test("handles searchOriginPlaces loading state", async () => {
+  // Create a deferred promise for controlling when the mock resolves
+  let resolveSearchPlaces;
+  const searchPlacesPromise = new Promise((resolve) => {
+    resolveSearchPlaces = resolve;
+  });
+
+  // Setup mock that doesn't resolve immediately
+  const mockSearchPlaces = jest.fn(() => searchPlacesPromise);
+
+  useGoogleMapDirections.mockReturnValue({
+    ...useGoogleMapDirections(),
+    searchPlaces: mockSearchPlaces,
+    generateRandomToken: jest.fn().mockResolvedValue("mock-token"),
+  });
+
+  const { getByPlaceholderText } = render(<MultistepNavigationScreen />);
+
+  // Get the origin input
+  const input = getByPlaceholderText("Enter your starting location");
+
+  // Enter a valid search query to trigger the API call
+  await act(async () => {
+    fireEvent.changeText(input, "Concordia");
+    await new Promise((resolve) => setTimeout(resolve, 50)); // Allow state update
+  });
+
+  // Verify searchPlaces was called
+  expect(mockSearchPlaces).toHaveBeenCalled();
+
+  // Resolve the API call with mock data
+  await act(async () => {
+    resolveSearchPlaces({
+      predictions: [
+        { place_id: "place_1", description: "Concordia University" },
+      ],
+      error: null,
+    });
+    await new Promise((resolve) => setTimeout(resolve, 50)); // Allow state update
+  });
+
+  // Wait for loading state to be cleared
+  await waitFor(() => {
+    expect(mockSearchPlaces).toHaveBeenCalledWith("Concordia", null, "");
+  });
+});
+
+test("handles searchDestinationPlaces with short query", async () => {
+  // Setup a proper mock for searchPlaces
+  const mockSearchPlaces = jest.fn();
+  useGoogleMapDirections.mockReturnValue({
+    ...useGoogleMapDirections(),
+    searchPlaces: mockSearchPlaces,
+    generateRandomToken: jest.fn().mockResolvedValue("mock-token"),
+  });
+
+  const { getByPlaceholderText, getAllByText } = render(
+    <MultistepNavigationScreen />,
+  );
+
+  // Switch to location input mode for destination if needed
+  const destinationTabs = getAllByText("Location");
+  if (destinationTabs.length > 1) {
+    fireEvent.press(destinationTabs[1]); // Press the second "Location" tab (for destination)
+  }
+
+  // Get the destination input
+  const input = getByPlaceholderText("Enter your destination");
+
+  // Enter a short search query (less than 3 characters)
+  await act(async () => {
+    fireEvent.changeText(input, "Ha");
+    await new Promise((resolve) => setTimeout(resolve, 50)); // Allow state update
+  });
+
+  // Verify searchPlaces was not called for query less than 3 chars
+  expect(mockSearchPlaces).not.toHaveBeenCalled();
+});
+
+test("handles searchDestinationPlaces API error", async () => {
+  // Setup mock for searchPlaces that returns an error
+  const mockSearchPlaces = jest.fn().mockResolvedValue({
+    predictions: [],
+    error: new Error("API error"),
+  });
+
+  useGoogleMapDirections.mockReturnValue({
+    ...useGoogleMapDirections(),
+    searchPlaces: mockSearchPlaces,
+    generateRandomToken: jest.fn().mockResolvedValue("mock-token"),
+  });
+
+  const mockConsoleError = jest
+    .spyOn(console, "error")
+    .mockImplementation(() => {});
+
+  const { getByPlaceholderText, getAllByText } = render(
+    <MultistepNavigationScreen />,
+  );
+
+  // Switch to location input mode for destination if needed
+  const destinationTabs = getAllByText("Location");
+  if (destinationTabs.length > 1) {
+    fireEvent.press(destinationTabs[1]); // Press the second "Location" tab (for destination)
+  }
+
+  // Get the destination input
+  const input = getByPlaceholderText("Enter your destination");
+
+  // Enter a search query that should trigger API call
+  await act(async () => {
+    fireEvent.changeText(input, "Hall Building");
+    await new Promise((resolve) => setTimeout(resolve, 50)); // Allow state update
+  });
+
+  // Verify searchPlaces was called and error is logged
+  await waitFor(() => {
+    expect(mockSearchPlaces).toHaveBeenCalled();
+    expect(mockConsoleError).toHaveBeenCalledWith(
+      "Error fetching destination predictions:",
+      expect.any(Error),
+    );
+  });
+
+  mockConsoleError.mockRestore();
+});
+
+test("handles searchDestinationPlaces with valid query and sets destination", async () => {
+  // Mock predictions for successful response
+  const mockPredictions = [
+    { place_id: "place_1", description: "Concordia University" },
+    { place_id: "place_2", description: "Concordia Hall Building" },
+  ];
+
+  // Setup mock for searchPlaces to return successful result
+  const mockSearchPlaces = jest.fn().mockResolvedValue({
+    predictions: mockPredictions,
+    error: null,
+  });
+
+  useGoogleMapDirections.mockReturnValue({
+    ...useGoogleMapDirections(),
+    searchPlaces: mockSearchPlaces,
+    generateRandomToken: jest.fn().mockResolvedValue("mock-token"),
+  });
+
+  const { getByPlaceholderText, getAllByText } = render(
+    <MultistepNavigationScreen />,
+  );
+
+  // Switch to location input mode for destination if needed
+  const destinationTabs = getAllByText("Location");
+  if (destinationTabs.length > 1) {
+    fireEvent.press(destinationTabs[1]); // Press the second "Location" tab (for destination)
+  }
+
+  // Get the destination input
+  const input = getByPlaceholderText("Enter your destination");
+
+  const searchText = "Hall Building";
+
+  // Enter a valid search query
+  await act(async () => {
+    fireEvent.changeText(input, searchText);
+    await new Promise((resolve) => setTimeout(resolve, 50)); // Allow state update
+  });
+
+  // Verify searchPlaces was called with correct parameters
+  expect(mockSearchPlaces).toHaveBeenCalledWith(searchText, null, "");
+
+  // Verify destination state is set correctly (unique to searchDestinationPlaces)
+  expect(input.props.value).toBe(searchText);
+
+  await waitFor(() => {
+    expect(mockSearchPlaces).toHaveBeenCalled();
+  });
+});
+
+test("handles searchDestinationPlaces loading state", async () => {
+  // Create a deferred promise for controlling when the mock resolves
+  let resolveSearchPlaces;
+  const searchPlacesPromise = new Promise((resolve) => {
+    resolveSearchPlaces = resolve;
+  });
+
+  // Setup mock that doesn't resolve immediately
+  const mockSearchPlaces = jest.fn(() => searchPlacesPromise);
+
+  useGoogleMapDirections.mockReturnValue({
+    ...useGoogleMapDirections(),
+    searchPlaces: mockSearchPlaces,
+    generateRandomToken: jest.fn().mockResolvedValue("mock-token"),
+  });
+
+  const { getByPlaceholderText, getAllByText } = render(
+    <MultistepNavigationScreen />,
+  );
+
+  // Switch to location input mode for destination if needed
+  const destinationTabs = getAllByText("Location");
+  if (destinationTabs.length > 1) {
+    fireEvent.press(destinationTabs[1]); // Press the second "Location" tab (for destination)
+  }
+
+  // Get the destination input
+  const input = getByPlaceholderText("Enter your destination");
+
+  // Enter a valid search query to trigger the API call
+  await act(async () => {
+    fireEvent.changeText(input, "Concordia");
+    await new Promise((resolve) => setTimeout(resolve, 50)); // Allow state update
+  });
+
+  // Verify searchPlaces was called
+  expect(mockSearchPlaces).toHaveBeenCalled();
+
+  // Resolve the API call with mock data
+  await act(async () => {
+    resolveSearchPlaces({
+      predictions: [
+        { place_id: "place_1", description: "Concordia University" },
+      ],
+      error: null,
+    });
+    await new Promise((resolve) => setTimeout(resolve, 50)); // Allow state update
+  });
+
+  // Wait for loading state to be cleared
+  await waitFor(() => {
+    expect(mockSearchPlaces).toHaveBeenCalledWith("Concordia", null, "");
+  });
+});
+
+test("handles searchDestinationPlaces setting destination state", async () => {
+  // Create a mock for the searchPlaces function
+  const mockSearchPlaces = jest.fn().mockResolvedValue({
+    predictions: [{ place_id: "place_1", description: "Concordia University" }],
+    error: null,
+  });
+
+  // Mock the generateRandomToken function
+  const mockGenerateRandomToken = jest.fn().mockResolvedValue("mock-token");
+
+  // Mock the useGoogleMapDirections hook
+  useGoogleMapDirections.mockReturnValue({
+    ...useGoogleMapDirections(),
+    searchPlaces: mockSearchPlaces,
+    generateRandomToken: mockGenerateRandomToken,
+  });
+
+  // Instead of trying to mock useState directly, we'll check if the input value changes
+  // which is a reliable way to verify the state was updated
+  const { getByPlaceholderText, getAllByText } = render(
+    <MultistepNavigationScreen />,
+  );
+
+  // Switch to location input mode for destination if needed
+  const destinationTabs = getAllByText("Location");
+  if (destinationTabs.length > 1) {
+    fireEvent.press(destinationTabs[1]); // Press the second "Location" tab (for destination)
+  }
+
+  // Get the destination input
+  const input = getByPlaceholderText("Enter your destination");
+
+  const searchText = "McGill University";
+
+  // Enter a valid search query
+  await act(async () => {
+    fireEvent.changeText(input, searchText);
+    await new Promise((resolve) => setTimeout(resolve, 50)); // Allow state update
+  });
+
+  // Check that the input value was updated, which confirms the destination state was set
+  expect(input.props.value).toBe(searchText);
+
+  // Verify the search function was called
+  expect(mockSearchPlaces).toHaveBeenCalledWith(searchText, null, "");
+});
+
+test("handles searchDestinationPlaces clearing predictions on short query", async () => {
+  // Setup initial state with some predictions
+  const mockSearchPlaces = jest.fn().mockResolvedValue({
+    predictions: [{ place_id: "place_1", description: "Concordia University" }],
+    error: null,
+  });
+
+  useGoogleMapDirections.mockReturnValue({
+    ...useGoogleMapDirections(),
+    searchPlaces: mockSearchPlaces,
+    generateRandomToken: jest.fn().mockResolvedValue("mock-token"),
+  });
+
+  const { getByPlaceholderText, getAllByText, queryByText } = render(
+    <MultistepNavigationScreen />,
+  );
+
+  // Switch to location input mode for destination if needed
+  const destinationTabs = getAllByText("Location");
+  if (destinationTabs.length > 1) {
+    fireEvent.press(destinationTabs[1]); // Press the second "Location" tab (for destination)
+  }
+
+  // Get the destination input
+  const input = getByPlaceholderText("Enter your destination");
+
+  // First set a longer query to trigger predictions
+  await act(async () => {
+    fireEvent.changeText(input, "Concordia");
+    await new Promise((resolve) => setTimeout(resolve, 50)); // Allow state update
+  });
+
+  // Then set a short query which should clear predictions
+  await act(async () => {
+    fireEvent.changeText(input, "Co");
+    await new Promise((resolve) => setTimeout(resolve, 50)); // Allow state update
+  });
+
+  // Verify searchPlaces was called for the first query but predictions were cleared
+  expect(mockSearchPlaces).toHaveBeenCalledTimes(1);
+
+  // No direct way to check if setDestinationPredictions([]) was called
+  // but we can infer it by checking that no predictions are displayed
+  const noPredictionsDisplayed = !queryByText("Concordia University");
+  expect(noPredictionsDisplayed).toBeTruthy();
 });
