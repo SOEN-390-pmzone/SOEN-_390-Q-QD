@@ -165,3 +165,93 @@ describe("NextEventModal", () => {
     });
   });
 });
+
+describe("NextEventModal additional coverage", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("decrements timer countdown", async () => {
+    jest.useFakeTimers();
+    Calendar.requestCalendarPermissionsAsync.mockResolvedValue({
+      status: "granted",
+    });
+    Calendar.getCalendarsAsync.mockResolvedValue([{ id: "1" }]);
+
+    // Create an event starting 5 seconds from now
+    const now = new Date();
+    const future = new Date(now.getTime() + 5000);
+    const futureEnd = new Date(future.getTime() + 3600000);
+    Calendar.getEventsAsync.mockResolvedValue([
+      {
+        id: "1",
+        title: "SOEN 390",
+        startDate: future.toISOString(),
+        endDate: futureEnd.toISOString(),
+        location: "Room 101",
+      },
+    ]);
+
+    const { getByText } = render(
+      <NextEventModal isVisible={true} onClose={jest.fn()} />,
+    );
+
+    // Wait for the event to render and timer to be set
+    await waitFor(() => {
+      expect(getByText("SOEN 390")).toBeTruthy();
+    });
+
+    // Get the initial timer text (format MM:SS)
+    const timerTextElement = getByText(/^\d\d:\d\d$/);
+    const initialTimeText = timerTextElement.props.children;
+
+    // Advance timers by 2000ms (2 seconds)
+    act(() => {
+      jest.advanceTimersByTime(2000);
+    });
+
+    await waitFor(() => {
+      const updatedTimeText = getByText(/^\d\d:\d\d$/).props.children;
+      expect(updatedTimeText).not.toEqual(initialTimeText);
+    });
+    jest.useRealTimers();
+  });
+
+  it("alerts when calendar permission is not granted", async () => {
+    global.alert = jest.fn();
+    Calendar.requestCalendarPermissionsAsync.mockResolvedValue({
+      status: "denied",
+    });
+    Calendar.getCalendarsAsync.mockResolvedValue([]);
+    Calendar.getEventsAsync.mockResolvedValue([]);
+
+    render(<NextEventModal isVisible={true} onClose={jest.fn()} />);
+    await waitFor(() => {
+      expect(global.alert).toHaveBeenCalledWith(
+        "Permission to access calendar denied.",
+      );
+    });
+  });
+
+  it("logs error when fetching event fails", async () => {
+    const errorMessage = new Error("Calendar error");
+    Calendar.requestCalendarPermissionsAsync.mockResolvedValue({
+      status: "granted",
+    });
+    // Force an error by rejecting the calendars call.
+    Calendar.getCalendarsAsync.mockRejectedValue(errorMessage);
+
+    const consoleErrorSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+
+    render(<NextEventModal isVisible={true} onClose={jest.fn()} />);
+    await waitFor(() => {
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        "Error fetching next event:",
+        errorMessage,
+      );
+    });
+    consoleErrorSpy.mockRestore();
+  });
+});
