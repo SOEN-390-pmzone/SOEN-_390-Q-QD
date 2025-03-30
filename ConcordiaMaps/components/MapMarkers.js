@@ -87,4 +87,3 @@ MapMarkers.propTypes = {
 };
 
 export default MapMarkers;
-

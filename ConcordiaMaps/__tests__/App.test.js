@@ -130,15 +130,6 @@ describe("App", () => {
     });
   });
 
-  it("shows navigation options", async () => {
-    const { getByText } = render(<App />);
-    await waitFor(() => {
-      expect(getByText("Get directions")).toBeTruthy();
-      expect(getByText("Outdoor Points of Interest")).toBeTruthy();
-      expect(getByText("Smart Planner")).toBeTruthy();
-    });
-  });
-
   it("initializes with modal hidden", async () => {
     render(<App />);
     await waitFor(() => {

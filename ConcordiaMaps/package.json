@@ -12,7 +12,8 @@
     "prettier:fix": "npx prettier \"*/*.{js,jsx,ts,tsx,json,css,scss,md}\" --write --ignore-path .gitignore",
     "lint:fix": "eslint . --fix --ignore-pattern node_modules/ --ignore-pattern .expo/",
     "format": "npm run lint:fix & npm run prettier:fix",
-    "test": "jest"
+    "test": "jest",
+    "pre-commit": "node scripts/pre-commit.js"
   },
   "jest": {
     "preset": "jest-expo",
@@ -37,10 +38,12 @@
     "axios": "^1.7.9",
     "ci": "^2.3.0",
     "concordiamaps": "file:",
+    "date-fns": "^4.1.0",
     "denodeify": "^1.2.1",
     "dotenv": "^16.4.7",
     "expo": "~52.0.27",
     "expo-auth-session": "~6.0.3",
+    "expo-calendar": "~14.0.6",
     "expo-crypto": "^14.0.2",
     "expo-location": "^18.0.5",
     "expo-status-bar": "~2.0.1",

@@ -7,7 +7,6 @@ import TemporaryModal from "../components/temporaryModal";
 import { LocationContext } from "../contexts/LocationContext";
 import Footer from "../components/Footer";
 import styles from "../styles";
-const customMarkerImage = require("../assets/PinLogo.png");
 import { Building } from "../constants/Building";
 import { ModalContext } from "../App";
 import BuildingColoring from "../components/buildingColoring";
@@ -21,26 +20,34 @@ import {
 } from "../components/AsyncPersistence";
 import convertToCoordinates from "../components/convertToCoordinates";
 import PropTypes from "prop-types";
-import {findBuilding, getData} from "../components/userInPolygon";
+import PopupOPI from "../components/PopupOPI"; // Import the new popup component
+import { PointsOfInterest } from "../constants/OutdoorPtsOfDirections"; // Import the new Points of Interest data
+
+// Marker image assets for Restaurant and Cafe
+const customMarkerImage = require("../assets/PinLogo.png");
 
 function HomeScreen({ asyncKey = "Campus" }) {
   const loyolaPostalCode = process.env.EXPO_PUBLIC_LOYOLA_POSTAL_CODE;
   const sgwPostalCode = process.env.EXPO_PUBLIC_SGW_POSTAL_CODE;
 
   const location = useContext(LocationContext);
-  const { toggleModal, setModalData } = useContext(ModalContext); // Access setModalData
+  const { toggleModal, setModalData } = useContext(ModalContext);
 
   const [postalCode, setPostalCode] = useState(null);
   const [coordinates, setCoordinates] = useState(null);
   const [error, setError] = useState("");
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [, setMapRegion] = useState(null);
-  const borderColor = "#912338"; // Initial border color (red)
+  const borderColor = "#912338";
   const mapRef = useRef(null);
-  const toggleModalTime = "10000";
+  const TOGGLE_MODAL_TIMEOUT = 10000;
+
+  // State for OPI (Points of Interest) popup
+  const [opiPopupVisible, setOpiPopupVisible] = useState(false);
+  const [selectedOPI, setSelectedOPI] = useState(null);
+
   useEffect(() => {
     const fetchLastCampus = async () => {
-      
       const campus = await getFromAsyncStorage(asyncKey, sgwPostalCode);
       setPostalCode(campus);
       const coords = await convertToCoordinates(campus);
@@ -89,11 +96,10 @@ function HomeScreen({ asyncKey = "Campus" }) {
           longitudeDelta: 0.01,
         },
         2500,
-      ); // Duration of the animation in milliseconds
+      );
     }
   }, [coordinates]);
 
-  
   const handleChangeCampuses = () => {
     setPostalCode((prevPostalCode) =>
       prevPostalCode === sgwPostalCode ? loyolaPostalCode : sgwPostalCode,
@@ -115,15 +121,19 @@ function HomeScreen({ asyncKey = "Campus" }) {
     }, 100);
   };
 
-  // Function to handle marker press and pass data to the modal
   const handleMarkerPress = (building) => {
     setModalData({
       name: building.name,
-      coordinate: building.coordinat,
+      coordinate: building.coordinate,
       address: building.address,
       fullBuildingName: building.fullBuildingName,
-    }); // Update modalData
-    toggleModal(); // Show modal
+    });
+    toggleModal();
+  };
+
+  const handleOPIMarkerPress = (poi) => {
+    setSelectedOPI(poi);
+    setOpiPopupVisible(true);
   };
 
   const [modalState, setModalState] = useState(true);
@@ -131,11 +141,12 @@ function HomeScreen({ asyncKey = "Campus" }) {
     if (modalState) {
       const timer = setTimeout(() => {
         setModalState(false);
-      }, toggleModalTime); // Modal will disappear after 3 seconds
+      }, TOGGLE_MODAL_TIMEOUT);
 
-      return () => clearTimeout(timer); // Cleanup the timer if the component unmounts
+      return () => clearTimeout(timer);
     }
   }, [modalState]);
+
   return (
     <View style={styles.container} testID="home-screen">
       <Header />
@@ -147,7 +158,7 @@ function HomeScreen({ asyncKey = "Campus" }) {
         <>
           <TemporaryModal
             text="Press the button to switch campuses"
-            time={toggleModalTime}
+            time={TOGGLE_MODAL_TIMEOUT}
             modalState={modalState}
             onRequestClose={() => setModalState(false)}
             TestID="toggleModal"
@@ -166,7 +177,7 @@ function HomeScreen({ asyncKey = "Campus" }) {
                     longitudeDelta: 0.005,
                   }
                 : {
-                    latitude: coordinates.latitude, // Default center (SGW campus)
+                    latitude: coordinates.latitude,
                     longitude: coordinates.longitude,
                     latitudeDelta: 0.01,
                     longitudeDelta: 0.01,
@@ -189,6 +200,20 @@ function HomeScreen({ asyncKey = "Campus" }) {
               >
                 <Image
                   source={customMarkerImage}
+                  style={styles.customMarkerImage}
+                />
+              </Marker>
+            ))}
+            {PointsOfInterest.map((poi) => (
+              <Marker
+                key={poi.name}
+                coordinate={poi.coordinate}
+                title={poi.name}
+                description={poi.address}
+                onPress={() => handleOPIMarkerPress(poi)}
+              >
+                <Image
+                  source={poi.markerImage}
                   style={styles.customMarkerImage}
                 />
               </Marker>
@@ -220,7 +245,7 @@ function HomeScreen({ asyncKey = "Campus" }) {
               <Image
                 style={styles.buttonImage}
                 source={require("../assets/ToggleButton.png")}
-                resizeMode={"cover"} // cover or contain its up to you view look
+                resizeMode={"cover"}
               />
             </TouchableOpacity>
           </View>
@@ -231,10 +256,19 @@ function HomeScreen({ asyncKey = "Campus" }) {
       )}
       {error ? <Text>Error: {error}</Text> : null}
       <Footer />
+
+      {/* OPI Popup */}
+      <PopupOPI
+        isVisible={opiPopupVisible}
+        data={selectedOPI || { name: "", address: "" }}
+        onClose={() => setOpiPopupVisible(false)}
+      />
     </View>
   );
 }
+
 HomeScreen.propTypes = {
   asyncKey: PropTypes.string,
 };
+
 export default HomeScreen;

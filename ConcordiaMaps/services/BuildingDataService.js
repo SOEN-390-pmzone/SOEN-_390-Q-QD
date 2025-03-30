@@ -21,6 +21,11 @@ import {
   rooms as JMSB2Rooms,
   graph as JMSB2Graph,
 } from "../constants/coordinates/msb2";
+//CC
+import {
+  rooms as CC1Rooms,
+  graph as CC1Graph,
+} from "../constants/coordinates/cc1";
 
 //Loyola
 import {
@@ -136,6 +141,24 @@ class FloorRegistry {
           rooms: VE2Rooms,
           graph: VE2graph,
           getSVG: () => SVGs.VEfloor2SVG,
+        },
+      },
+    },
+    // Add CC Building
+    CCBuilding: {
+      id: "cc",
+      name: "CC Building",
+      code: "CC",
+      description: "Communication Studies and Journalism Building",
+      address: "7141 Sherbrooke St W",
+      floors: {
+        1: {
+          id: "1",
+          name: "CC 1",
+          description: "First floor of CC Building",
+          rooms: CC1Rooms,
+          graph: CC1Graph,
+          getSVG: () => SVGs.CCfloor1SVG,
         },
       },
     },

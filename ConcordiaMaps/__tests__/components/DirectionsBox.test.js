@@ -1,6 +1,34 @@
-import React from "react";
+import React, { useState } from "react";
 import { render, fireEvent, waitFor, act } from "@testing-library/react-native";
-import DirectionsBox from "../../components/OutdoorNavigation/DirectionsBox";
+import DirectionsBox from "../../components/DirectionsBox";
+import PropTypes from "prop-types";
+
+// Wrapper component to manage state for testing
+const DirectionsBoxWrapper = ({ directions }) => {
+  const [isCollapsed, setIsCollapsed] = useState(true);
+  return (
+    <DirectionsBox
+      directions={directions}
+      isCollapsed={isCollapsed}
+      setIsCollapsed={setIsCollapsed}
+    />
+  );
+};
+
+// Add PropTypes for the wrapper component
+DirectionsBoxWrapper.propTypes = {
+  directions: PropTypes.arrayOf(
+    PropTypes.shape({
+      html_instructions: PropTypes.string.isRequired,
+      distance: PropTypes.string.isRequired,
+    }),
+  ),
+};
+
+// Add default props
+DirectionsBoxWrapper.defaultProps = {
+  directions: [],
+};
 
 describe("DirectionsBox", () => {
   const directions = [
@@ -15,7 +43,9 @@ describe("DirectionsBox", () => {
   ];
 
   it("toggles collapse state on handle press", async () => {
-    const { getByTestId } = render(<DirectionsBox directions={directions} />);
+    const { getByTestId } = render(
+      <DirectionsBoxWrapper directions={directions} />,
+    );
     const handle = getByTestId("handle");
 
     // Open the directions box
@@ -42,7 +72,9 @@ describe("DirectionsBox", () => {
   });
 
   it("opens the directions box when the handle is pressed", async () => {
-    const { getByTestId } = render(<DirectionsBox directions={directions} />);
+    const { getByTestId } = render(
+      <DirectionsBoxWrapper directions={directions} />,
+    );
     const handle = getByTestId("handle");
 
     await act(async () => {
@@ -53,7 +85,9 @@ describe("DirectionsBox", () => {
   });
 
   it("closes the directions box when the handle is pressed twice", async () => {
-    const { getByTestId } = render(<DirectionsBox directions={directions} />);
+    const { getByTestId } = render(
+      <DirectionsBoxWrapper directions={directions} />,
+    );
     const handle = getByTestId("handle");
 
     await act(async () => {
