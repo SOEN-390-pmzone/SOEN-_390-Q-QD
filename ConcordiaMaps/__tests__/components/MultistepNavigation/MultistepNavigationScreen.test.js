@@ -4076,3 +4076,68 @@ test("handles searchDestinationPlaces clearing predictions on short query", asyn
   const noPredictionsDisplayed = !queryByText("Concordia University");
   expect(noPredictionsDisplayed).toBeTruthy();
 });
+test("handles route change by resetting all navigation state", async () => {
+  // Setup navigation plan with data that should be reset
+  const navigationPlan = {
+    title: "Test Navigation",
+    currentStep: 1,
+    steps: [
+      {
+        type: "outdoor",
+        title: "Walk to Hall Building",
+        startPoint: { latitude: 45.496, longitude: -73.577 },
+        endPoint: { latitude: 45.497, longitude: -73.578 },
+        startAddress: "Start location",
+        endAddress: "Hall Building",
+        isComplete: false,
+      },
+      {
+        type: "indoor",
+        title: "Navigate to room",
+        buildingId: "H",
+        buildingType: "HallBuilding",
+        startRoom: "entrance",
+        endRoom: "H-920",
+        startFloor: "1",
+        endFloor: "9",
+        isComplete: false,
+      },
+    ],
+  };
+
+  useRoute.mockReturnValue({
+    params: { navigationPlan },
+  });
+
+  // Render component with navigation plan
+  const { getByText, queryByText, getByTestId } = render(
+    <MultistepNavigationScreen />,
+  );
+
+  // Verify navigation plan is active (showing step 2)
+  await waitFor(() => {
+    expect(getByText("Navigate to room")).toBeTruthy();
+    expect(getByText("Step 2 of 2")).toBeTruthy();
+  });
+
+  // Find the change route button (assuming it has text "Change Route")
+  const changeRouteButton = getByText("Change Route");
+  fireEvent.press(changeRouteButton);
+
+  // Verify navigation plan was reset and form is shown
+  await waitFor(() => {
+    // Navigation steps should no longer be displayed
+    expect(queryByText("Navigate to room")).toBeNull();
+    expect(queryByText("Step 2 of 2")).toBeNull();
+
+    // Form elements should be visible
+    expect(getByText("Plan Your Route")).toBeTruthy();
+    expect(getByText("Starting Point")).toBeTruthy();
+    expect(getByText("Destination")).toBeTruthy();
+    expect(getByText("Start Navigation")).toBeTruthy();
+  });
+
+  // Verify navigation screen is in its initial state
+  const navigationScreen = getByTestId("navigation-screen");
+  expect(navigationScreen).toBeTruthy();
+});
