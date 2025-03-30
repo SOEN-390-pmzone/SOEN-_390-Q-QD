@@ -24,10 +24,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "permissions": [
-        "READ_CALENDAR",
-        "WRITE_CALENDAR"
-      ],
+      "permissions": ["READ_CALENDAR", "WRITE_CALENDAR"],
       "package": "com.anonymous.ConcordiaMaps"
     },
     "web": {
