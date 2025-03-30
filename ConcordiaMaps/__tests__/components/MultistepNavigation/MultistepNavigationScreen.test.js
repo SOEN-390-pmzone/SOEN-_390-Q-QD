@@ -34,8 +34,8 @@ jest.mock("../../../components/OutdoorNavigation/ExpandedMapModal", () => {
           {
             onPress: props.onClose, // Pass the onClose handler to make close button work
           },
-          "×",
-        ),
+          "×"
+        )
       );
     },
   };
@@ -151,7 +151,7 @@ describe("MultistepNavigationScreen", () => {
       .mockResolvedValue(
         new Uint8Array([
           65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80,
-        ]),
+        ])
       );
   });
 
@@ -179,7 +179,7 @@ describe("MultistepNavigationScreen", () => {
 
     // Setup crypto mock
     Crypto.getRandomBytesAsync.mockResolvedValue(
-      new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]),
+      new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16])
     );
 
     const mockFetchOutdoorDirections = jest.fn().mockResolvedValue({
@@ -296,7 +296,7 @@ describe("MultistepNavigationScreen", () => {
 
   test("handles building selection for origin", async () => {
     const { getAllByText, getByPlaceholderText } = render(
-      <MultistepNavigationScreen />,
+      <MultistepNavigationScreen />
     );
 
     // Use getAllByText and select first "Building" tab
@@ -386,7 +386,7 @@ describe("MultistepNavigationScreen", () => {
     });
 
     const { getByTestId, getByText, findByText } = render(
-      <MultistepNavigationScreen />,
+      <MultistepNavigationScreen />
     );
 
     // Should display the first step
@@ -412,7 +412,7 @@ describe("MultistepNavigationScreen", () => {
 
   test("handles parsing classroom inputs", async () => {
     const { getAllByText, getByPlaceholderText } = render(
-      <MultistepNavigationScreen />,
+      <MultistepNavigationScreen />
     );
 
     // Use getAllByText and select first "Building" tab
@@ -511,7 +511,7 @@ describe("MultistepNavigationScreen", () => {
     await waitFor(() => {
       expect(mockNavigation.addListener).toHaveBeenCalledWith(
         "focus",
-        expect.any(Function),
+        expect.any(Function)
       );
     });
   });
@@ -555,7 +555,7 @@ describe("MultistepNavigationScreen", () => {
 
     // Render a new component instance
     const { getByText: getTextFresh, queryByText: queryTextFresh } = render(
-      <MultistepNavigationScreen />,
+      <MultistepNavigationScreen />
     );
 
     // Verify that we see the form elements
@@ -567,7 +567,7 @@ describe("MultistepNavigationScreen", () => {
 
   test("handles building suggestion selection", async () => {
     const { getAllByText, getByPlaceholderText } = render(
-      <MultistepNavigationScreen />,
+      <MultistepNavigationScreen />
     );
 
     // Use getAllByText and select first "Building" tab
@@ -644,7 +644,7 @@ describe("MultistepNavigationScreen", () => {
     await waitFor(() => {
       expect(mockConsoleError).toHaveBeenCalledWith(
         expect.stringContaining("WebView error"),
-        expect.any(Object),
+        expect.any(Object)
       );
     });
 
@@ -737,7 +737,7 @@ describe("MultistepNavigationScreen", () => {
           startFloor: "1",
           endFloor: "9",
           skipSelection: true,
-        }),
+        })
       );
     });
   });
@@ -745,7 +745,7 @@ describe("MultistepNavigationScreen", () => {
   test("handles parseOriginClassroom with Hall Building full name", async () => {
     // Testing parseOriginClassroom with full building name (lines ~1300-1320)
     const { getAllByText, getByPlaceholderText } = render(
-      <MultistepNavigationScreen />,
+      <MultistepNavigationScreen />
     );
 
     // Switch to Building input type
@@ -854,13 +854,13 @@ describe("MultistepNavigationScreen", () => {
       expect.objectContaining({
         startRoom: "H920",
         endRoom: "H925",
-      }),
+      })
     );
   });
 
   test("handles room number input correctly", async () => {
     const { getAllByText, getByPlaceholderText, findByText } = render(
-      <MultistepNavigationScreen />,
+      <MultistepNavigationScreen />
     );
 
     // Switch to classroom input type
@@ -928,7 +928,7 @@ describe("MultistepNavigationScreen", () => {
       expect.objectContaining({
         startFloor: "9",
         endFloor: "10",
-      }),
+      })
     );
   });
 
@@ -964,7 +964,7 @@ describe("MultistepNavigationScreen", () => {
     await waitFor(() => {
       expect(mockConsoleError).toHaveBeenCalledWith(
         expect.stringContaining("WebView error"),
-        expect.any(Object),
+        expect.any(Object)
       );
     });
 
@@ -1014,7 +1014,7 @@ describe("MultistepNavigationScreen", () => {
 
   test("handles building selection and address display", () => {
     const { getAllByText, getByText, getByPlaceholderText } = render(
-      <MultistepNavigationScreen />,
+      <MultistepNavigationScreen />
     );
 
     // Switch to building input
@@ -1112,13 +1112,13 @@ describe("MultistepNavigationScreen", () => {
           startFloor: "9",
           endFloor: "10",
           skipSelection: true,
-        }),
+        })
       );
     });
 
     // Verify the navigation info is displayed
     expect(
-      getByText(/Navigate from.*room H-920.*to room.*H-1025/),
+      getByText(/Navigate from.*room H-920.*to room.*H-1025/)
     ).toBeTruthy();
     expect(getByText(/Start Floor:.*9/)).toBeTruthy();
     expect(getByText(/End Floor:.*10/)).toBeTruthy();
@@ -1150,7 +1150,7 @@ describe("MultistepNavigationScreen", () => {
     // Wait for fetchOutdoorDirections from the hook to be called
     await waitFor(() => {
       expect(
-        useGoogleMapDirections().fetchOutdoorDirections,
+        useGoogleMapDirections().fetchOutdoorDirections
       ).toHaveBeenCalled();
     });
   });
@@ -1364,7 +1364,7 @@ describe("MultistepNavigationScreen", () => {
     await waitFor(() => {
       expect(mockConsoleError).toHaveBeenCalledWith(
         "WebView error:",
-        expect.any(Object),
+        expect.any(Object)
       );
     });
 
@@ -1506,7 +1506,7 @@ describe("MultistepNavigationScreen", () => {
 
       // First verify the navigation info is displayed
       expect(
-        getByText(new RegExp(`Navigate.*${roomId}.*to.*${roomId}`)),
+        getByText(new RegExp(`Navigate.*${roomId}.*to.*${roomId}`))
       ).toBeTruthy();
 
       // Then check the floor number
@@ -1566,10 +1566,10 @@ describe("MultistepNavigationScreen", () => {
   test("handles location permission scenarios", async () => {
     // Test for lines 1545-1548
     Location.requestForegroundPermissionsAsync.mockRejectedValueOnce(
-      new Error("Permission error"),
+      new Error("Permission error")
     );
     Location.getCurrentPositionAsync.mockRejectedValueOnce(
-      new Error("Location error"),
+      new Error("Location error")
     );
 
     const mockConsoleError = jest
@@ -1581,7 +1581,7 @@ describe("MultistepNavigationScreen", () => {
     await waitFor(() => {
       expect(mockConsoleError).toHaveBeenCalledWith(
         "Error getting location:",
-        expect.any(Error),
+        expect.any(Error)
       );
     });
 
@@ -1620,11 +1620,11 @@ describe("MultistepNavigationScreen", () => {
 
     // Directly call the warning logic
     console.warn(
-      "User location not available. Searching without location bias.",
+      "User location not available. Searching without location bias."
     );
 
     expect(mockConsoleWarn).toHaveBeenCalledWith(
-      "User location not available. Searching without location bias.",
+      "User location not available. Searching without location bias."
     );
 
     mockConsoleWarn.mockRestore();
@@ -1655,7 +1655,7 @@ describe("MultistepNavigationScreen", () => {
     await waitFor(() => {
       expect(mockNavigation.navigate).toHaveBeenCalledWith(
         "RoomToRoomNavigation",
-        expect.any(Object),
+        expect.any(Object)
       );
     });
   });
@@ -1704,7 +1704,7 @@ describe("MultistepNavigationScreen", () => {
 
     // This should test the case where generateMapHtml works with empty path
     expect(mockConsoleWarn).not.toHaveBeenCalledWith(
-      expect.stringContaining("Error generating map HTML"),
+      expect.stringContaining("Error generating map HTML")
     );
 
     mockConsoleWarn.mockRestore();
@@ -1712,7 +1712,7 @@ describe("MultistepNavigationScreen", () => {
 
   test("handles origin building name parsing and selection", async () => {
     const { getAllByText, getByPlaceholderText } = render(
-      <MultistepNavigationScreen />,
+      <MultistepNavigationScreen />
     );
 
     // Switch to building input type
@@ -1785,7 +1785,7 @@ describe("MultistepNavigationScreen", () => {
     await waitFor(() => {
       expect(mockConsoleError).toHaveBeenCalledWith(
         "WebView error:",
-        expect.any(Object),
+        expect.any(Object)
       );
     });
 
@@ -1802,7 +1802,7 @@ describe("MultistepNavigationScreen", () => {
   test("handles place search without location bias", async () => {
     // Mock location services to be unavailable
     Location.requestForegroundPermissionsAsync.mockRejectedValueOnce(
-      new Error("Permission denied"),
+      new Error("Permission denied")
     );
 
     const mockConsoleWarn = jest
@@ -1811,11 +1811,11 @@ describe("MultistepNavigationScreen", () => {
 
     // Directly test the warning by calling it
     console.warn(
-      "User location not available. Searching without location bias.",
+      "User location not available. Searching without location bias."
     );
 
     expect(mockConsoleWarn).toHaveBeenCalledWith(
-      "User location not available. Searching without location bias.",
+      "User location not available. Searching without location bias."
     );
 
     mockConsoleWarn.mockRestore();
@@ -1828,7 +1828,7 @@ describe("MultistepNavigationScreen", () => {
 
     // Mock loadFloorPlans to fail - remove unused original reference
     mockLoadFloorPlans.mockImplementation(() =>
-      Promise.reject(new Error("Floor plan loading failed")),
+      Promise.reject(new Error("Floor plan loading failed"))
     );
 
     const navigationPlan = {
@@ -1862,7 +1862,7 @@ describe("MultistepNavigationScreen", () => {
           buildingId: "H",
           startRoom: expect.any(String),
           endRoom: expect.any(String),
-        }),
+        })
       );
     });
 
@@ -2144,7 +2144,7 @@ describe("MultistepNavigationScreen", () => {
     await waitFor(() => {
       expect(mockConsoleError).toHaveBeenCalledWith(
         "WebView error:",
-        expect.any(Object),
+        expect.any(Object)
       );
     });
 
@@ -2174,7 +2174,7 @@ describe("MultistepNavigationScreen", () => {
 
     // Render the component with navigation plan
     const { getByText, queryByText, getAllByText } = render(
-      <MultistepNavigationScreen />,
+      <MultistepNavigationScreen />
     );
 
     // Test expand map button
@@ -2227,7 +2227,7 @@ describe("MultistepNavigationScreen", () => {
     NavigationStrategyService.navigateToStep = jest.fn();
 
     const { getAllByText, getByPlaceholderText, getByText } = render(
-      <MultistepNavigationScreen />,
+      <MultistepNavigationScreen />
     );
 
     // Switch to building input type for both origin and destination
@@ -2259,7 +2259,7 @@ describe("MultistepNavigationScreen", () => {
 
     // Simulate selecting MB Building
     const mbSuggestion = await waitFor(() =>
-      getByText("John Molson Building (MB)"),
+      getByText("John Molson Building (MB)")
     );
     fireEvent.press(mbSuggestion);
 
@@ -2271,7 +2271,7 @@ describe("MultistepNavigationScreen", () => {
     // we should expect an alert to be shown for missing room numbers
     await waitFor(() => {
       expect(global.alert).toHaveBeenCalledWith(
-        expect.stringContaining("Please enter a room"),
+        expect.stringContaining("Please enter a room")
       );
     });
 
@@ -2325,7 +2325,7 @@ describe("MultistepNavigationScreen", () => {
     await waitFor(() => {
       expect(mockConsoleError).toHaveBeenCalledWith(
         "Error in handleIndoorNavigation:",
-        expect.any(Error),
+        expect.any(Error)
       );
     });
 
@@ -2375,7 +2375,7 @@ describe("MultistepNavigationScreen", () => {
     await waitFor(() => {
       expect(mockNavigation.addListener).toHaveBeenCalledWith(
         "focus",
-        expect.any(Function),
+        expect.any(Function)
       );
     });
 
@@ -2391,14 +2391,14 @@ describe("MultistepNavigationScreen", () => {
     // Verify the component handles return from indoor navigation
     expect(mockNavigation.addListener).toHaveBeenCalledWith(
       "focus",
-      expect.any(Function),
+      expect.any(Function)
     );
   });
 
   test("handles location permissions denied with an error", async () => {
     // Test for line 1546-1549
     Location.requestForegroundPermissionsAsync.mockRejectedValueOnce(
-      new Error("Permission denied"),
+      new Error("Permission denied")
     );
 
     const mockConsoleError = jest
@@ -2410,7 +2410,7 @@ describe("MultistepNavigationScreen", () => {
     await waitFor(() => {
       expect(mockConsoleError).toHaveBeenCalledWith(
         "Error getting location:",
-        expect.any(Error),
+        expect.any(Error)
       );
     });
 
@@ -2456,7 +2456,7 @@ describe("MultistepNavigationScreen", () => {
       expect(mockSearchPlaces).toHaveBeenCalled();
       expect(mockConsoleError).toHaveBeenCalledWith(
         "Error searching origin places:",
-        apiError,
+        apiError
       );
     });
 
@@ -2549,7 +2549,7 @@ describe("MultistepNavigationScreen", () => {
 
   test("handles special MB building room formats", async () => {
     const { getAllByText, getByPlaceholderText, findByText } = render(
-      <MultistepNavigationScreen />,
+      <MultistepNavigationScreen />
     );
 
     // Switch to building input for destination
@@ -2664,7 +2664,7 @@ describe("MultistepNavigationScreen", () => {
 
   test("validates room inputs for various building types", async () => {
     const { getAllByText, getByPlaceholderText, findByText } = render(
-      <MultistepNavigationScreen />,
+      <MultistepNavigationScreen />
     );
 
     // Switch to building input for destination
@@ -2738,7 +2738,7 @@ describe("MultistepNavigationScreen", () => {
     // Verify addListener was called with 'focus' event
     expect(mockNavigation.addListener).toHaveBeenCalledWith(
       "focus",
-      expect.any(Function),
+      expect.any(Function)
     );
 
     // Manually trigger the focus callback to simulate returning to screen
@@ -2819,7 +2819,7 @@ describe("MultistepNavigationScreen", () => {
 
     // Setup for classroom to outdoor location navigation
     const { getAllByText, getByPlaceholderText, findByText } = render(
-      <MultistepNavigationScreen />,
+      <MultistepNavigationScreen />
     );
 
     // Switch origin to building input type
@@ -2950,16 +2950,16 @@ describe("MultistepNavigationScreen", () => {
 
   // Create all navigation scenario tests
   createNavigationScenarioTest(
-    "handles cases where both origin and destination are in same building",
+    "handles cases where both origin and destination are in same building"
   );
   createNavigationScenarioTest(
-    "handles case where origin is classroom and destination is outdoor location",
+    "handles case where origin is classroom and destination is outdoor location"
   );
   createNavigationScenarioTest(
-    "handles case where origin is outdoor location and destination is classroom",
+    "handles case where origin is outdoor location and destination is classroom"
   );
   createNavigationScenarioTest(
-    "handles case where origin and destination are different buildings",
+    "handles case where origin and destination are different buildings"
   );
 
   test("getStepColor returns correct colors for all step types", () => {
@@ -3076,7 +3076,7 @@ describe("MultistepNavigationScreen", () => {
               p &&
               p.nearestPoint &&
               typeof p.nearestPoint.x === "number" &&
-              typeof p.nearestPoint.y === "number",
+              typeof p.nearestPoint.y === "number"
           )
         : [];
 
@@ -3085,7 +3085,7 @@ describe("MultistepNavigationScreen", () => {
         validPoints.map((p) => ({
           x: p.nearestPoint.x,
           y: p.nearestPoint.y,
-        })),
+        }))
       );
 
       // Return HTML with SVG and path data
@@ -3109,7 +3109,7 @@ describe("MultistepNavigationScreen", () => {
     const validResult = generateFloorHtml("<svg></svg>", validPoints);
     expect(validResult).toContain("<svg>");
     expect(validResult).toContain(
-      'const points = [{"x":10,"y":20},{"x":30,"y":40}];',
+      'const points = [{"x":10,"y":20},{"x":30,"y":40}];'
     );
 
     // Test with floor plan and some invalid path points
@@ -3131,7 +3131,7 @@ describe("MultistepNavigationScreen", () => {
 
   test("parseDestination correctly identifies building and room", async () => {
     const { getAllByText, getByPlaceholderText } = render(
-      <MultistepNavigationScreen />,
+      <MultistepNavigationScreen />
     );
 
     // Switch to building input for destination
@@ -3226,7 +3226,7 @@ describe("MultistepNavigationScreen", () => {
       // Special case for non-numeric room identifiers
       if (
         /^(entrance|lobby|main lobby|main entrance|elevator|stairs|escalator|toilet)$/i.test(
-          roomId,
+          roomId
         )
       ) {
         return "1"; // Default these to first floor
@@ -3399,7 +3399,7 @@ describe("MultistepNavigationScreen", () => {
     const validateOriginInput = (
       originBuilding,
       originRoom,
-      originInputType = "classroom",
+      originInputType = "classroom"
     ) => {
       if (originInputType === "classroom") {
         // Origin is a classroom
@@ -3430,7 +3430,7 @@ describe("MultistepNavigationScreen", () => {
     // Test case 1: Missing building
     validateOriginInput(null, null);
     expect(global.alert).toHaveBeenCalledWith(
-      "Please enter a valid origin building",
+      "Please enter a valid origin building"
     );
     global.alert.mockClear();
 
@@ -3443,13 +3443,13 @@ describe("MultistepNavigationScreen", () => {
     // Test case 3: Invalid room
     validateOriginInput(hallBuilding, "H-999");
     expect(global.alert).toHaveBeenCalledWith(
-      "Room H-999 doesn't exist in Hall Building",
+      "Room H-999 doesn't exist in Hall Building"
     );
   });
 
   test("handles special room formatting for VE, VL and EV buildings", async () => {
     const { getAllByText, getByPlaceholderText, findByText } = render(
-      <MultistepNavigationScreen />,
+      <MultistepNavigationScreen />
     );
 
     // Switch to building input for origin
@@ -3499,7 +3499,7 @@ describe("MultistepNavigationScreen", () => {
 
       // Find and select building suggestion
       const suggestion = await findByText(
-        `${building.buildingName} (${building.buildingId})`,
+        `${building.buildingName} (${building.buildingId})`
       );
       fireEvent.press(suggestion);
 
@@ -3524,7 +3524,7 @@ describe("MultistepNavigationScreen", () => {
 
   test("handles special room recognition for different building types", async () => {
     const { getAllByText, getByPlaceholderText, findByText } = render(
-      <MultistepNavigationScreen />,
+      <MultistepNavigationScreen />
     );
 
     // Switch to building input
@@ -3545,7 +3545,7 @@ describe("MultistepNavigationScreen", () => {
     fireEvent.changeText(buildingInput, "EV");
 
     const suggestion = await findByText(
-      "Engineering & Visual Arts Complex (EV)",
+      "Engineering & Visual Arts Complex (EV)"
     );
     fireEvent.press(suggestion);
 
@@ -3570,7 +3570,7 @@ describe("MultistepNavigationScreen", () => {
 
   test("handles case-insensitivity for special rooms in VE/VL/EV buildings", async () => {
     const { getAllByText, getByPlaceholderText, findByText } = render(
-      <MultistepNavigationScreen />,
+      <MultistepNavigationScreen />
     );
 
     // Switch to building input
@@ -3606,7 +3606,7 @@ describe("MultistepNavigationScreen", () => {
 
   test("handles inclusion check logic for special rooms array", async () => {
     const { getAllByText, getByPlaceholderText, findByText } = render(
-      <MultistepNavigationScreen />,
+      <MultistepNavigationScreen />
     );
 
     // Switch to building input
@@ -3618,7 +3618,7 @@ describe("MultistepNavigationScreen", () => {
     fireEvent.changeText(buildingInput, "EV");
 
     const suggestion = await findByText(
-      "Engineering & Visual Arts Complex (EV)",
+      "Engineering & Visual Arts Complex (EV)"
     );
     fireEvent.press(suggestion);
 
@@ -3705,7 +3705,7 @@ test("handles searchOriginPlaces API error", async () => {
     expect(mockSearchPlaces).toHaveBeenCalled();
     expect(mockConsoleError).toHaveBeenCalledWith(
       "Error searching origin places:",
-      expect.any(Error),
+      expect.any(Error)
     );
   });
 
@@ -3809,7 +3809,7 @@ test("handles searchDestinationPlaces with short query", async () => {
   });
 
   const { getByPlaceholderText, getAllByText } = render(
-    <MultistepNavigationScreen />,
+    <MultistepNavigationScreen />
   );
 
   // Switch to location input mode for destination if needed
@@ -3849,7 +3849,7 @@ test("handles searchDestinationPlaces API error", async () => {
     .mockImplementation(() => {});
 
   const { getByPlaceholderText, getAllByText } = render(
-    <MultistepNavigationScreen />,
+    <MultistepNavigationScreen />
   );
 
   // Switch to location input mode for destination if needed
@@ -3872,7 +3872,7 @@ test("handles searchDestinationPlaces API error", async () => {
     expect(mockSearchPlaces).toHaveBeenCalled();
     expect(mockConsoleError).toHaveBeenCalledWith(
       "Error fetching destination predictions:",
-      expect.any(Error),
+      expect.any(Error)
     );
   });
 
@@ -3899,7 +3899,7 @@ test("handles searchDestinationPlaces with valid query and sets destination", as
   });
 
   const { getByPlaceholderText, getAllByText } = render(
-    <MultistepNavigationScreen />,
+    <MultistepNavigationScreen />
   );
 
   // Switch to location input mode for destination if needed
@@ -3947,7 +3947,7 @@ test("handles searchDestinationPlaces loading state", async () => {
   });
 
   const { getByPlaceholderText, getAllByText } = render(
-    <MultistepNavigationScreen />,
+    <MultistepNavigationScreen />
   );
 
   // Switch to location input mode for destination if needed
@@ -4005,7 +4005,7 @@ test("handles searchDestinationPlaces setting destination state", async () => {
   // Instead of trying to mock useState directly, we'll check if the input value changes
   // which is a reliable way to verify the state was updated
   const { getByPlaceholderText, getAllByText } = render(
-    <MultistepNavigationScreen />,
+    <MultistepNavigationScreen />
   );
 
   // Switch to location input mode for destination if needed
@@ -4046,7 +4046,7 @@ test("handles searchDestinationPlaces clearing predictions on short query", asyn
   });
 
   const { getByPlaceholderText, getAllByText, queryByText } = render(
-    <MultistepNavigationScreen />,
+    <MultistepNavigationScreen />
   );
 
   // Switch to location input mode for destination if needed
@@ -4077,4 +4077,23 @@ test("handles searchDestinationPlaces clearing predictions on short query", asyn
   // but we can infer it by checking that no predictions are displayed
   const noPredictionsDisplayed = !queryByText("Concordia University");
   expect(noPredictionsDisplayed).toBeTruthy();
+});
+
+test("creates and cleans up a session token", async () => {
+  const mockGenerateRandomToken = jest.fn().mockResolvedValue("mock-token");
+  useGoogleMapDirections.mockReturnValue({
+    ...useGoogleMapDirections(),
+    generateRandomToken: mockGenerateRandomToken,
+  });
+
+  const { unmount } = render(<MultistepNavigationScreen />);
+
+  // Verify that the token was generated
+  expect(mockGenerateRandomToken).toHaveBeenCalled();
+
+  // Unmount the component to trigger cleanup
+  unmount();
+
+  // Verify that the token was cleaned up
+  expect(mockGenerateRandomToken).toHaveBeenCalledTimes(1);
 });
