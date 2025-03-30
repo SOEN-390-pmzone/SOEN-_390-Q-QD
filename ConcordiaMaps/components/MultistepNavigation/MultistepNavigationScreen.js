@@ -34,7 +34,12 @@ import Footer from "../Footer";
 import FloorRegistry from "../../services/BuildingDataService";
 import { getStepColor } from "../../services/NavigationStylesService";
 
-const MultistepNavigationScreen = () => {
+const MultistepNavigationScreen = (
+  indoors,
+  sourceCoordinates, 
+  sourceBuildingName,
+  destinationCoordinates,
+  destinationBuildingName) => {
   const {
     generateRandomToken,
     fetchOutdoorDirections,
@@ -77,13 +82,13 @@ const MultistepNavigationScreen = () => {
   const [invalidDestinationRoom, setInvalidDestinationRoom] = useState(false);
 
   // Origin search state
-  const [origin, setOrigin] = useState("");
+  const [origin, setOrigin] = useState(sourceBuildingName);
   const [originSearchQuery, setOriginSearchQuery] = useState("");
   const [originPredictions, setOriginPredictions] = useState([]);
   const [loadingOrigin, setLoadingOrigin] = useState(false);
   const [userLocation, setUserLocation] = useState(null);
   const sessionTokenRef = useRef("");
-  const [originDetails, setOriginDetails] = useState(null);
+  const [originDetails, setOriginDetails] = useState(sourceCoordinates);
   const [originInputType, setOriginInputType] = useState("location"); // "location" or "classroom"
   const [destinationInputType, setDestinationInputType] = useState("classroom"); // "location" or "classroom"
   const [originBuilding, setOriginBuilding] = useState(null);
@@ -95,7 +100,7 @@ const MultistepNavigationScreen = () => {
     useState(false);
 
   // Destination state
-  const [destination, setDestination] = useState("");
+  const [destination, setDestination] = useState(destinationBuildingName);
   const [building, setBuilding] = useState(null);
   const [room, setRoom] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -106,7 +111,7 @@ const MultistepNavigationScreen = () => {
   const [destinationSearchQuery, setDestinationSearchQuery] = useState("");
   const [destinationPredictions, setDestinationPredictions] = useState([]);
   const [loadingDestination, setLoadingDestination] = useState(false);
-  const [destinationDetails, setDestinationDetails] = useState(null);
+  const [destinationDetails, setDestinationDetails] = useState(destinationCoordinates);
 
   // Direction display state
   const [outdoorDirections, setOutdoorDirections] = useState([]);

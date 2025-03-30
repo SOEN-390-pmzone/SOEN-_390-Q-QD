@@ -23,8 +23,7 @@ const CalendarScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
 
   const [destinationLocation, setDestinationLocation] = useState(null);
-  const [endBuildingName, setEndBuildingName] = useState('');
-  const { location, isIndoors, startBuildingName } = useDataFlow();
+  const { location, isIndoors, buildingName } = useDataFlow();
 
   useEffect(() => {
     requestCalendarPermission();
@@ -93,7 +92,11 @@ const CalendarScreen = () => {
   };
   const getDestination = (loc) => {
     setDestinationLocation(loc);
-    convertToCoordinates(loc).then((coordinates) => {});
+    convertToCoordinates(loc).then((coordinates) => {
+      console.log(coordinates)
+
+      
+    });
   };
   return (
     <View style={[styles.container, { backgroundColor: "white" }]}>
