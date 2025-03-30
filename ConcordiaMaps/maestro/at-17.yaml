@@ -9,31 +9,28 @@ appId: com.anonymous.ConcordiaMaps
     label: 'Tap on "Indoor Navigation"'
 - tapOn: "John Molson Building"
 - tapOn: "Floor 1"
+- tapOn:
+    text: "1.294"
+    index: 1
+    label: "Tap on room 1.294"
 - swipe:
-    start: "26%,69%"
-    end: "27%,59%"
-    label: "Scroll through the Start rooms"
+    start: "73%,70%"
+    end: "73%,58%"
+    label: "Scroll through the End rooms"
 - tapOn:
-    text: "1.345"
+    text: "1.340"
     index: 1
-    label: "Tap on room 1.345"
-- tapOn:
-    text: "1.293"
-    index: 1
-    label: "Tap on room 1.293"
+    label: "Tap on room 1.340"
 - tapOn: "Find Path"
 - tapOn:
     text: "+"
     repeat: 4
     label: "Zoom in on the map"
 - swipe:
-    start: "57%,24%"
-    end: "49%,46%"
+    start: "62%,23%"
+    end: "44%,49%"
     label: "Swipe map to show highlighted rooms"
-- tapOn:
-    text: "-"
-    repeat: 2
-    label: "Zoom out on the map"
-- tapOn:
-    text: "R"
-    label: "Reset the map position"
+- swipe:
+    start: "50%,94%"
+    end: "50%,83%"
+    label: "Scroll through the Navigation Path description"
