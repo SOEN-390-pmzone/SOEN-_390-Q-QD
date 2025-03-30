@@ -74,6 +74,33 @@ export const CONCORDIA_BUILDINGS = [
 ];
 
 class FloorRegistry {
+  static parseRoomFormat(text) {
+    // Common formats: "H-920", "H 920", "Hall Building 920"
+    const buildingMatch = text.match(/^([A-Za-z]+)-?(\d+)$/);
+    if (buildingMatch) {
+      const [, buildingCode, roomNumber] = buildingMatch;
+      return {
+        buildingCode,
+        roomNumber,
+        formatted: `${buildingCode}-${roomNumber}`,
+      };
+    }
+    return null;
+  }
+
+  static findBuildingByCode(buildingCode) {
+    return CONCORDIA_BUILDINGS.find(
+      (b) => b.id.toLowerCase() === buildingCode.toLowerCase(),
+    );
+  }
+
+  static filterBuildingSuggestions(text) {
+    return CONCORDIA_BUILDINGS.filter(
+      (building) =>
+        building.name.toLowerCase().includes(text.toLowerCase()) ||
+        building.id.toLowerCase().includes(text.toLowerCase()),
+    );
+  }
   // Get building type from building ID
   static getBuildingTypeFromId(buildingId) {
     if (!buildingId) return "HallBuilding"; // Default

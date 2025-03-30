@@ -8,6 +8,11 @@ import {
   SafeAreaView,
   Modal,
 } from "react-native";
+import {
+  parseOriginClassroom,
+  parseDestination,
+  handleBuildingSelect,
+} from "../../services/NavigationFormService";
 import NavigationForm from "./NavigationForm";
 import { NavigationStepsContainer } from "./NavigationStep";
 import ExpandedMapModal from "../OutdoorNavigation/ExpandedMapModal";
@@ -26,9 +31,7 @@ import {
 import Header from "../Header";
 import NavBar from "../NavBar";
 import Footer from "../Footer";
-import FloorRegistry, {
-  CONCORDIA_BUILDINGS,
-} from "../../services/BuildingDataService";
+import FloorRegistry from "../../services/BuildingDataService";
 import { getStepColor } from "../../services/NavigationStylesService";
 
 const MultistepNavigationScreen = () => {
@@ -68,8 +71,8 @@ const MultistepNavigationScreen = () => {
   const [navigationSteps] = useState([]);
 
   // State to track available rooms for building/validation
-  const [availableOriginRooms, setAvailableOriginRooms] = useState([]);
-  const [availableDestRooms, setAvailableDestRooms] = useState([]);
+  const [setAvailableOriginRooms] = useState([]);
+  const [setAvailableDestRooms] = useState([]);
   const [invalidOriginRoom, setInvalidOriginRoom] = useState(false);
   const [invalidDestinationRoom, setInvalidDestinationRoom] = useState(false);
 
@@ -297,61 +300,39 @@ const MultistepNavigationScreen = () => {
 
   // Filter building suggestions based on text input
   const filterBuildingSuggestions = (text) => {
-    const filtered = CONCORDIA_BUILDINGS.filter(
-      (building) =>
-        building.name.toLowerCase().includes(text.toLowerCase()) ||
-        building.id.toLowerCase().includes(text.toLowerCase()),
-    );
+    const filtered = FloorRegistry.filterBuildingSuggestions(text);
     setBuildingSuggestions(filtered);
     setShowBuildingSuggestions(filtered.length > 0);
   };
 
   // Handle building suggestion filtering
   const filterOriginBuildingSuggestions = (text) => {
-    const filtered = CONCORDIA_BUILDINGS.filter(
-      (building) =>
-        building.name.toLowerCase().includes(text.toLowerCase()) ||
-        building.id.toLowerCase().includes(text.toLowerCase()),
-    );
+    const filtered = FloorRegistry.filterBuildingSuggestions(text);
     setOriginBuildingSuggestions(filtered);
     setShowOriginBuildingSuggestions(filtered.length > 0);
   };
 
   // Handle origin building selection from suggestions
-  const handleOriginBuildingSelect = (building) => {
-    setOriginBuilding(building);
-    setOrigin(building.name);
-    setShowOriginBuildingSuggestions(false);
-
-    // Load available rooms for this building
-    const validRooms = FloorRegistry.getValidRoomsForBuilding(building.id);
-    console.log(`Available origin rooms: ${availableOriginRooms.length}`);
-    setAvailableOriginRooms(validRooms);
-    setInvalidOriginRoom(false);
+  const handleOriginBuildingSelectHandler = (building) => {
+    handleBuildingSelect(
+      building,
+      setOriginBuilding,
+      setOrigin,
+      setShowOriginBuildingSuggestions,
+      setAvailableOriginRooms,
+      setInvalidOriginRoom,
+    );
   };
 
   // Parse origin into building and room
-  const parseOriginClassroom = (text) => {
-    setOrigin(text);
-
-    // Common formats: "H-920", "H 920", "Hall Building 920"
-    const buildingMatch = text.match(/^([A-Za-z]+)-?(\d+)$/);
-    if (buildingMatch) {
-      const [, buildingCode, roomNumber] = buildingMatch;
-
-      // Find building details
-      const foundBuilding = CONCORDIA_BUILDINGS.find(
-        (b) => b.id === buildingCode,
-      );
-
-      if (foundBuilding) {
-        setOriginBuilding(foundBuilding);
-        setOriginRoom(`${buildingCode}-${roomNumber}`);
-      }
-    } else {
-      // If not in standard format, try to match building name
-      filterOriginBuildingSuggestions(text);
-    }
+  const parseOriginClassroomHandler = (text) => {
+    parseOriginClassroom(
+      text,
+      setOrigin,
+      setOriginBuilding,
+      setOriginRoom,
+      filterOriginBuildingSuggestions,
+    );
   };
 
   // Get coordinates for a classroom
@@ -361,42 +342,26 @@ const MultistepNavigationScreen = () => {
   };
 
   // Parse destination into building and room
-  const parseDestination = (text) => {
-    setDestination(text);
-
-    // Common formats: "H-920", "H 920", "Hall Building 920"
-    const buildingMatch = text.match(/^([A-Za-z]+)[-\s]?(\d+)/);
-
-    if (buildingMatch) {
-      const buildingCode = buildingMatch[1].toUpperCase();
-      const roomNumber = buildingMatch[2];
-
-      // Find building details
-      const foundBuilding = CONCORDIA_BUILDINGS.find(
-        (b) => b.id === buildingCode,
-      );
-
-      if (foundBuilding) {
-        setBuilding(foundBuilding);
-        setRoom(`${buildingCode}-${roomNumber}`);
-      }
-    } else {
-      // If not in standard format, try to match building name
-      filterBuildingSuggestions(text);
-    }
+  const parseDestinationHandler = (text) => {
+    parseDestination(
+      text,
+      setDestination,
+      setBuilding,
+      setRoom,
+      filterBuildingSuggestions,
+    );
   };
 
   // Handle building selection from suggestions
-  const handleBuildingSelect = (building) => {
-    setBuilding(building);
-    setDestination(building.name);
-    setShowBuildingSuggestions(false);
-
-    // Load available rooms for this building
-    const validRooms = FloorRegistry.getValidRoomsForBuilding(building.id);
-    console.log(`Available destination rooms: ${availableDestRooms.length}`);
-    setAvailableDestRooms(validRooms);
-    setInvalidDestinationRoom(false);
+  const handleBuildingSelectHandler = (building) => {
+    handleBuildingSelect(
+      building,
+      setBuilding,
+      setDestination,
+      setShowBuildingSuggestions,
+      setAvailableDestRooms,
+      setInvalidDestinationRoom,
+    );
   };
 
   // Create navigation plan from inputs
@@ -1149,10 +1114,10 @@ const MultistepNavigationScreen = () => {
             searchOriginPlaces={searchOriginPlaces}
             searchDestinationPlaces={searchDestinationPlaces}
             handleOriginSelection={handleOriginSelection}
-            handleOriginBuildingSelect={handleOriginBuildingSelect}
-            parseOriginClassroom={parseOriginClassroom}
-            parseDestination={parseDestination}
-            handleBuildingSelect={handleBuildingSelect}
+            handleOriginBuildingSelect={handleOriginBuildingSelectHandler}
+            parseOriginClassroom={parseOriginClassroomHandler}
+            parseDestination={parseDestinationHandler}
+            handleBuildingSelect={handleBuildingSelectHandler}
             handleDestinationSelection={handleDestinationSelection}
             handleStartNavigation={handleStartNavigation}
           />
