@@ -15,6 +15,12 @@ import RoomToRoomNavigation from "./components/IndoorNavigation/RoomToRoomNaviga
 import TunnelNavigation from "./components/IndoorNavigation/TunnelNavigation";
 import PropTypes from "prop-types";
 import CalendarScreen from "./components/CalendarScreen";
+import useClarity from "./MicrosoftClarity";
+// initialize("qw6bw3yak6");
+// import * as Clarity from '@microsoft/react-native-clarity';
+
+
+
 
 // Create Context for modal data and visibility
 export const ModalContext = createContext();
@@ -39,6 +45,7 @@ PopupModalWrapper.propTypes = {
   onClose: PropTypes.func.isRequired,
 };
 export default function App() {
+  useClarity();  
   const [isModalVisible, setModalVisible] = useState(false);
   const [modalData, setModalData] = useState({
     name: "",
