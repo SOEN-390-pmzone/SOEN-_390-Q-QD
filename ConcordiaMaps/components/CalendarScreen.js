@@ -1,5 +1,4 @@
-import Header from "./Header";
-import NavBar from "./NavBar";
+import Header from "../components/Header";
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -13,7 +12,6 @@ import * as Calendar from "expo-calendar";
 import { format, addDays, subDays } from "date-fns";
 import styles from "../styles";
 import { Ionicons } from "@expo/vector-icons";
-import Footer from "./Footer";
 
 const CalendarScreen = () => {
   const [events, setEvents] = useState([]);
@@ -84,7 +82,6 @@ const CalendarScreen = () => {
   return (
     <View style={[styles.container, { backgroundColor: "white" }]}>
       <Header />
-      <NavBar />
 
       <View style={{ padding: 20 }}>
         <Text style={styles.dateText}>
@@ -192,8 +189,6 @@ const CalendarScreen = () => {
           />
         )}
       </View>
-
-      <Footer />
     </View>
   );
 };
