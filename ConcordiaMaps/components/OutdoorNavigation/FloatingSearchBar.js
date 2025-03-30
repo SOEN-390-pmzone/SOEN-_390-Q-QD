@@ -36,8 +36,8 @@ const FloatingSearchBar = ({
 
       // Convert to base64 string
       let base64 = "";
-      for (let i = 0; i < randomBytes.length; i++) {
-        base64 += String.fromCharCode(randomBytes[i]);
+      for (const byte of randomBytes) {
+        base64 += String.fromCharCode(byte);
       }
       base64 = btoa(base64);
 

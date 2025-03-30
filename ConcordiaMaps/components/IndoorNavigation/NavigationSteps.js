@@ -26,7 +26,7 @@ const NavigationSteps = ({ steps, customStyles = {} }) => {
       <ScrollView style={[styles.stepsList, customStyles.stepsList]}>
         {steps.map((step, index) => (
           <View
-            key={index}
+            key={`step-${step.type}-${index}`}
             style={[styles.stepItem, customStyles.stepItem]}
             accessible={true}
             accessibilityLabel={step.text}

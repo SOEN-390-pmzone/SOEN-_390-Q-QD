@@ -23,6 +23,12 @@ import {
   // findTransportMethod
 } from "../../services/PathCalculationService";
 
+import {
+  validateNodeExists,
+  resolveEntranceNode,
+  NODE_TYPES,
+} from "../../services/NavigationUtilsService";
+
 const RoomToRoomNavigation = () => {
   const route = useRoute();
   const navigation = useNavigation(); // Moved hook to top level of component
@@ -68,95 +74,123 @@ const RoomToRoomNavigation = () => {
   // Available buildings
   const buildings = FloorRegistry.getBuildings();
 
-  // Initialize from route params on component mount
-  useEffect(() => {
-    if (buildingId) {
-      const determinedBuildingType = findBuildingTypeFromId(
-        buildingId,
-        FloorRegistry,
-      );
+  const determineBuildingTypeHelper = (buildingId, paramsType) => {
+    const determinedType =
+      paramsType || findBuildingTypeFromId(buildingId, FloorRegistry);
+    console.log(`Using building type ${determinedType} for ID ${buildingId}`);
+    return determinedType;
+  };
 
-      if (determinedBuildingType) {
-        console.log(
-          `Found building type ${determinedBuildingType} for ID ${buildingId}`,
-        );
-        setBuildingType(determinedBuildingType);
-        setSelectedBuilding(buildingId);
+  // Find floor for a room if not explicitly provided
+  const findFloorForRoomHelper = (buildingType, room, explicitFloor) => {
+    if (explicitFloor) return explicitFloor;
 
-        // Determine floors if rooms are provided
-        let foundStartFloor = startFloorParam;
-        let foundEndFloor = endFloorParam;
-
-        // If no start floor provided but have start room, find the floor
-        if (!foundStartFloor && startRoom) {
-          foundStartFloor = findFloorForRoom(
-            determinedBuildingType,
-            startRoom,
-            FloorRegistry,
-          );
-          console.log(
-            `Determined start floor: ${foundStartFloor} for room ${startRoom}`,
-          );
-        }
-
-        // If no end floor provided but have end room, find the floor
-        if (!foundEndFloor && endRoom) {
-          foundEndFloor = findFloorForRoom(
-            determinedBuildingType,
-            endRoom,
-            FloorRegistry,
-          );
-          console.log(
-            `Determined end floor: ${foundEndFloor} for room ${endRoom}`,
-          );
-        }
-
-        // Set floors and load rooms if floors were found
-        if (foundStartFloor) {
-          setStartFloor(foundStartFloor);
-          const startRooms = FloorRegistry.getRooms(
-            determinedBuildingType,
-            foundStartFloor,
-          );
-          setStartFloorRooms(startRooms);
-        }
-
-        if (foundEndFloor) {
-          setEndFloor(foundEndFloor);
-          const endRooms = FloorRegistry.getRooms(
-            determinedBuildingType,
-            foundEndFloor,
-          );
-          setEndFloorRooms(endRooms);
-        }
-
-        // Set selected rooms if provided
-        if (startRoom) setSelectedStartRoom(startRoom);
-        if (endRoom) setSelectedEndRoom(endRoom);
-
-        // Determine which step to show based on what info we have
-        if (
-          skipSelection &&
-          startRoom &&
-          endRoom &&
-          foundStartFloor &&
-          foundEndFloor
-        ) {
-          setStep("navigation");
-        } else if (startRoom && endRoom) {
-          setStep("rooms");
-        } else if (foundStartFloor && foundEndFloor) {
-          setStep("floors");
-        } else {
-          setStep("building");
-        }
-
-        // Mark initialization as complete
-        setInitializationComplete(true);
-      }
-    } else {
-      setInitializationComplete(true);
+    if (room) {
+      const floor = findFloorForRoom(buildingType, room, FloorRegistry);
+      console.log(`Determined floor: ${floor} for room ${room}`);
+      return floor;
     }
+
+    return null;
+  };
+
+  // Load rooms for a floor
+  const loadRoomsForFloor = (buildingType, floor) => {
+    if (!floor) return {};
+    return FloorRegistry.getRooms(buildingType, floor);
+  };
+
+  // Determine which step to show based on available information
+  const determineNavigationStep = (
+    skipSelection,
+    startRoom,
+    endRoom,
+    startFloor,
+    endFloor,
+  ) => {
+    if (skipSelection && startRoom && endRoom && startFloor && endFloor) {
+      return "navigation";
+    } else if (startRoom && endRoom) {
+      return "rooms";
+    } else if (startFloor && endFloor) {
+      return "floors";
+    } else {
+      return "building";
+    }
+  };
+
+  // Replace the complex useEffect with a simplified version
+  useEffect(() => {
+    if (!buildingId) {
+      console.log("No building ID provided, showing building selection");
+      setInitializationComplete(true);
+      return;
+    }
+
+    console.log(
+      `Initializing with building ID: ${buildingId}, buildingType: ${route.params.buildingType}`,
+    );
+
+    // Step 1: Determine building type
+    const determinedBuildingType = determineBuildingTypeHelper(
+      buildingId,
+      route.params.buildingType,
+    );
+
+    if (!determinedBuildingType) {
+      console.error(`Could not determine building type for ID: ${buildingId}`);
+      setInitializationComplete(true);
+      return;
+    }
+
+    // Step 2: Set building information
+    setBuildingType(determinedBuildingType);
+    setSelectedBuilding(buildingId);
+
+    // Step 3: Determine floors
+    const foundStartFloor = findFloorForRoomHelper(
+      determinedBuildingType,
+      startRoom,
+      startFloorParam,
+    );
+    const foundEndFloor = findFloorForRoomHelper(
+      determinedBuildingType,
+      endRoom,
+      endFloorParam,
+    );
+
+    // Step 4: Set floors and load rooms
+    if (foundStartFloor) {
+      setStartFloor(foundStartFloor);
+      setStartFloorRooms(
+        loadRoomsForFloor(determinedBuildingType, foundStartFloor),
+      );
+    }
+
+    if (foundEndFloor) {
+      setEndFloor(foundEndFloor);
+      setEndFloorRooms(
+        loadRoomsForFloor(determinedBuildingType, foundEndFloor),
+      );
+    }
+
+    // Step 5: Set selected rooms if provided
+    if (startRoom) setSelectedStartRoom(startRoom);
+    if (endRoom) setSelectedEndRoom(endRoom);
+
+    // Step 6: Determine which navigation step to show
+    setStep(
+      determineNavigationStep(
+        skipSelection,
+        startRoom,
+        endRoom,
+        foundStartFloor,
+        foundEndFloor,
+      ),
+    );
+
+    // Step 7: Mark initialization as complete
+    setInitializationComplete(true);
   }, []);
 
   // Handle building selection
@@ -373,16 +407,80 @@ const RoomToRoomNavigation = () => {
         Object.keys(startFloorGraph).length,
         "nodes",
       );
+
+      // Log all available nodes in start floor
+      const availableNodes = Object.keys(startFloorGraph);
+      console.log("Available nodes on start floor:", availableNodes);
+
       console.log(
         "End floor graph loaded:",
         Object.keys(endFloorGraph).length,
         "nodes",
       );
+      // Map 'entrance' to an actual node in the graph if needed
+      let resolvedStartRoom = selectedStartRoom;
+
+      // Find a suitable entrance node based on the building type and available nodes
+      if (selectedStartRoom === NODE_TYPES.ENTRANCE) {
+        // Use the extracted function to resolve the entrance node
+        const entranceNode = resolveEntranceNode(
+          buildingType,
+          startFloor,
+          availableNodes,
+        );
+
+        if (entranceNode) {
+          resolvedStartRoom = entranceNode;
+          console.log("Mapped 'entrance' to node:", resolvedStartRoom);
+        } else {
+          alert(`No navigation nodes available on floor ${startFloor}`);
+          return;
+        }
+      }
+
+      // Also check if the end room exists
+      if (!validateNodeExists(endFloorGraph, selectedEndRoom)) {
+        console.error(
+          "End room not found in navigation graph:",
+          selectedEndRoom,
+        );
+        console.log("Available end floor nodes:", Object.keys(endFloorGraph));
+
+        // Try to find a similar room name
+        const similarRooms = Object.keys(endFloorGraph).filter(
+          (room) =>
+            room.includes(selectedEndRoom) || selectedEndRoom.includes(room),
+        );
+
+        if (similarRooms.length > 0) {
+          const mappedEndRoom = similarRooms[0];
+          console.log(
+            `End room ${selectedEndRoom} not found, using similar room: ${mappedEndRoom}`,
+          );
+          setSelectedEndRoom(mappedEndRoom); // Use the state setter instead of direct assignment
+        } else {
+          alert(`Room ${selectedEndRoom} not found on floor ${endFloor}`);
+          return;
+        }
+      }
+
+      console.log("Using start room:", resolvedStartRoom);
+      console.log("Using end room:", selectedEndRoom);
+
+      // Make sure the mapped nodes actually exist in the graph
+      if (!validateNodeExists(startFloorGraph, resolvedStartRoom)) {
+        console.error(
+          "Mapped start room not found in graph:",
+          resolvedStartRoom,
+        );
+        alert(`Unable to find a valid starting point on floor ${startFloor}`);
+        return;
+      }
 
       const validationError = validateRoomSelection(
         startFloorGraph,
         endFloorGraph,
-        selectedStartRoom,
+        resolvedStartRoom,
         selectedEndRoom,
       );
 
@@ -397,26 +495,18 @@ const RoomToRoomNavigation = () => {
       if (startFloor === endFloor) {
         result = handleSameFloorNavigation(
           startFloorGraph,
-          selectedStartRoom,
+          resolvedStartRoom,
           selectedEndRoom,
           startFloor,
           building.name,
         );
       } else {
         console.log("Finding transport method between floors");
-        console.log(
-          "Start floor nodes:",
-          JSON.stringify(Object.keys(startFloorGraph)),
-        );
-        console.log(
-          "End floor nodes:",
-          JSON.stringify(Object.keys(endFloorGraph)),
-        );
 
         result = handleInterFloorNavigation(
           startFloorGraph,
           endFloorGraph,
-          selectedStartRoom,
+          resolvedStartRoom,
           selectedEndRoom,
           startFloor,
           endFloor,
@@ -674,7 +764,6 @@ const RoomToRoomNavigation = () => {
                   domStorageEnabled={true}
                   cacheEnabled={false}
                   incognito={true}
-                  key={`start-${startFloor}-${startFloorPath.length}`} // Add a key to control remounting
                 />
               </View>
             </View>
@@ -768,7 +857,6 @@ const RoomToRoomNavigation = () => {
           onLoadEnd: () => console.log("Modal WebView loaded"),
           cacheEnabled: false,
           incognito: true,
-          key: `expanded-${expandedFloor}-${pathNodes.length}`,
         }}
       />
     );

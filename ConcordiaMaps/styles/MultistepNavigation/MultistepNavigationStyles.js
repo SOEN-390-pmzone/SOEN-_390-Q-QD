@@ -66,6 +66,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#e0e0e0",
     maxHeight: 200,
+    paddingBottom: 5,
     shadowColor: "#000000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
@@ -94,12 +95,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     fontSize: 16,
     color: "#333333",
-
     shadowColor: "#000000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 3,
     elevation: 2,
+  },
+  invalidInput: {
+    borderColor: "#f44336",
+    borderWidth: 2,
+  },
+  errorText: {
+    color: "#f44336",
+    fontSize: 14,
+    marginTop: 4,
   },
   suggestionsContainer: {
     backgroundColor: "#ffffff",
@@ -123,7 +132,6 @@ const styles = StyleSheet.create({
   suggestionText: {
     fontSize: 16,
     color: "#333333",
-
     marginBottom: 4,
   },
   suggestionAddress: {
@@ -267,7 +275,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
-    elevation: 5,
   },
   navigationButtonText: {
     color: "#ffffff",
@@ -275,7 +282,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginHorizontal: 8,
   },
-
   navigationButtonsContainer: {
     width: "100%",
     paddingVertical: 16,
@@ -284,16 +290,14 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: "#e0e0e0",
     position: "absolute",
-    bottom: -10,
+    bottom: -40,
     left: 0,
     right: 0,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.1,
     shadowRadius: 3,
-    elevation: 4,
   },
-
   navigationButtonDisabled: {
     backgroundColor: "#cccccc",
     shadowOpacity: 0,
@@ -303,12 +307,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
     borderRadius: 12,
     padding: 16,
-    marginBottom: 12,
+    marginBottom: 80,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 3,
   },
   indoorNavButton: {
     backgroundColor: "#912338",
@@ -342,7 +345,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 3,
   },
   indoorNavigationHeader: {
     flexDirection: "row",
@@ -357,6 +359,12 @@ const styles = StyleSheet.create({
   },
   closeIndoorButton: {
     padding: 5,
+  },
+  navigationStartedText: {
+    marginTop: 10,
+    fontStyle: "italic",
+    color: "#666",
+    textAlign: "center",
   },
   floorPlansContainer: {
     flexDirection: "column",
@@ -389,7 +397,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   stepsList: {
-    flex: 1,
+    flex: 2,
     maxHeight: 400,
   },
   navigationStepItem: {
@@ -461,7 +469,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: "100%",
   },
-
   // Map styles
   mapContainer: {
     height: 200,
@@ -493,7 +500,6 @@ const styles = StyleSheet.create({
     color: "#912338",
     fontWeight: "600",
   },
-
   // Floor plan styles
   floorPlanContainer: {
     height: 200,
@@ -566,7 +572,6 @@ const styles = StyleSheet.create({
   floorButtonTextActive: {
     color: "#ffffff",
   },
-
   // Direction list styles
   directionsContainer: {
     backgroundColor: "#ffffff",
@@ -576,7 +581,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 3,
-    elevation: 2,
   },
   directionsTitle: {
     fontSize: 16,
@@ -586,6 +590,7 @@ const styles = StyleSheet.create({
   },
   directionsList: {
     maxHeight: 200,
+    paddingBottom: 10,
   },
   directionItem: {
     flexDirection: "row",
@@ -631,7 +636,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     padding: 16,
   },
-
   // Expanded view styles
   expandedModalOverlay: {
     position: "absolute",
@@ -693,7 +697,6 @@ const styles = StyleSheet.create({
     borderLeftWidth: 4,
     borderLeftColor: "#912338",
   },
-
   roomInfoText: {
     fontSize: 14,
     fontWeight: "600",
@@ -706,7 +709,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingVertical: 20,
   },
-
   loadingText: {
     marginTop: 10,
     color: "#666666",
@@ -794,6 +796,9 @@ const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 30,
   },
+  modalScrollView: {
+    maxHeight: height * 0.6,
+  },
   indoorStepsPreview: {
     marginVertical: 10,
     padding: 10,
@@ -848,6 +853,20 @@ const styles = StyleSheet.create({
     fontStyle: "italic",
     textAlign: "center",
     padding: 10,
+  },
+  centeredContent: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  activityIndicatorContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    flex: 1,
+  },
+  safeAreaContainer: {
+    flex: 1,
+    backgroundColor: "#f5f5f5",
   },
 });
 

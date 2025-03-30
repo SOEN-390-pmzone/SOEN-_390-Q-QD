@@ -23,7 +23,8 @@ const CalendarScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
 
   const [destinationLocation, setDestinationLocation] = useState(null);
-  const { location, isIndoors, buildingName } = useDataFlow();
+  const [endBuildingName, setEndBuildingName] = useState('');
+  const { location, isIndoors, startBuildingName } = useDataFlow();
 
   useEffect(() => {
     requestCalendarPermission();

@@ -130,7 +130,7 @@ function useDataFlow() {
   return {
     location: startLocation,
     isIndoors: indoors,
-    buildingName: name
+    buildingName: name,
     // You might also want to add other useful data or methods here
   };
 }
