@@ -21,10 +21,9 @@ const CalendarScreen = () => {
   const [selectedCalendarIds, setSelectedCalendarIds] = useState([]);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [modalVisible, setModalVisible] = useState(false);
+
   const [destinationLocation, setDestinationLocation] = useState(null);
-  const [currentLocation, setCurrentLocation] = useState(null);
-  const [inOrOut, setInOrOut] = useState("");
-  const { location, isIndoors } = useDataFlow();
+  const { location, isIndoors, buildingName } = useDataFlow();
 
   useEffect(() => {
     requestCalendarPermission();
@@ -35,9 +34,7 @@ const CalendarScreen = () => {
     //   setInOrOut("outdoors");
   }, []);
 
-  useEffect(() => {
-    
-  }, []);
+  useEffect(() => {}, []);
 
   useEffect(() => {
     fetchCalendarEvents();
@@ -95,9 +92,7 @@ const CalendarScreen = () => {
   };
   const getDestination = (loc) => {
     setDestinationLocation(loc);
-    convertToCoordinates(loc).then((coordinates) => {
-      
-    });
+    convertToCoordinates(loc).then((coordinates) => {});
   };
   return (
     <View style={[styles.container, { backgroundColor: "white" }]}>

@@ -43,7 +43,6 @@ const findBuilding = (dataSet, location) => {
   return { status: false };
 };
 
-
 const getData = (building) => {
   const isIndoors = building.status;
 
@@ -103,6 +102,7 @@ function useDataFlow() {
     latitude: locationData?.latitude || null,
     longitude: locationData?.longitude || null,
   };
+  const [name, setName] = useState("");
   const [indoors, setIndoors] = useState(false);
   const [startLocation, setStartLocation] = useState(
     location || {
@@ -116,7 +116,6 @@ function useDataFlow() {
     let buildingData = findBuilding(coloringData, startLocation);
     //console.log(startLocation)
     if (buildingData.status) {
-      console.log("Relloh")
       setIndoors(true);
       //const buildingType = buildingData.type;
       if (!buildingData.differentiator) {
@@ -131,6 +130,7 @@ function useDataFlow() {
   return {
     location: startLocation,
     isIndoors: indoors,
+    buildingName: name
     // You might also want to add other useful data or methods here
   };
 }
