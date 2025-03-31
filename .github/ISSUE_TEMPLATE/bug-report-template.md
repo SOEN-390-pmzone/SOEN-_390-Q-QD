@@ -1,24 +1,23 @@
 ---
-name: Usual Bug report template
-about: Create a report to help us improve
-title: "[BUG]"
-labels: bug, help wanted
-assignees: shanvinluo
+name: Bug Report Template
+about: Report a bug
+title: "[BUG] "
+labels: bug
+assignees: ''
+
 ---
 
-**Description**
+### Description
 A clear and concise description of what the bug is.
 
-**To Reproduce**
-Steps to reproduce the behavior:
+### Reproducing the behavior
+1. Lorem ipsum.
+2. Lorem ipsum.
+3. ...
 
-1.
-2.
-3.
+### Platforms
+- lorem ipsum
+- lorem ipsum
+- ...
 
-**How was this tested?**
-
-- [ ] manual tests
-
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
+*If possible, add a recording or screenshots that show the faulty behavior.*
