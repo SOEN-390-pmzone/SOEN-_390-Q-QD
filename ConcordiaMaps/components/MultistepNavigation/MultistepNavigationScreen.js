@@ -15,10 +15,10 @@ import {
 } from "../../services/NavigationFormService";
 import NavigationForm from "./NavigationForm";
 import { NavigationStepsContainer } from "./NavigationStep";
+import NavigationPlanService from "../../services/NavigationPlanService";
 import ExpandedMapModal from "../OutdoorNavigation/ExpandedMapModal";
 import * as Location from "expo-location";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
-import NavigationStrategyService from "../../services/NavigationStrategyService";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { useGoogleMapDirections } from "../../hooks/useGoogleMapDirections";
 import styles from "../../styles/MultistepNavigation/MultistepNavigationStyles";
@@ -89,7 +89,7 @@ const MultistepNavigationScreen = () => {
   const [originBuilding, setOriginBuilding] = useState(null);
   const [originRoom, setOriginRoom] = useState("");
   const [originBuildingSuggestions, setOriginBuildingSuggestions] = useState(
-    [],
+    []
   );
   const [showOriginBuildingSuggestions, setShowOriginBuildingSuggestions] =
     useState(false);
@@ -204,7 +204,7 @@ const MultistepNavigationScreen = () => {
       const { predictions, error } = await searchPlaces(
         text,
         userLocation,
-        sessionTokenRef.current,
+        sessionTokenRef.current
       );
 
       if (error) {
@@ -235,7 +235,7 @@ const MultistepNavigationScreen = () => {
       const { predictions, error } = await searchPlaces(
         text,
         userLocation,
-        sessionTokenRef.current,
+        sessionTokenRef.current
       );
 
       if (error) {
@@ -255,7 +255,7 @@ const MultistepNavigationScreen = () => {
     try {
       const placeDetails = await fetchPlaceDetails(
         placeId,
-        sessionTokenRef.current,
+        sessionTokenRef.current
       );
 
       setOrigin(description);
@@ -280,7 +280,7 @@ const MultistepNavigationScreen = () => {
     try {
       const placeDetails = await fetchPlaceDetails(
         placeId,
-        sessionTokenRef.current,
+        sessionTokenRef.current
       );
 
       setDestination(description);
@@ -320,7 +320,7 @@ const MultistepNavigationScreen = () => {
       setOrigin,
       setShowOriginBuildingSuggestions,
       setAvailableOriginRooms,
-      setInvalidOriginRoom,
+      setInvalidOriginRoom
     );
   };
 
@@ -331,14 +331,8 @@ const MultistepNavigationScreen = () => {
       setOrigin,
       setOriginBuilding,
       setOriginRoom,
-      filterOriginBuildingSuggestions,
+      filterOriginBuildingSuggestions
     );
-  };
-
-  // Get coordinates for a classroom
-  const getCoordinatesForClassroom = (building) => {
-    if (!building) return null;
-    return FloorRegistry.getCoordinatesForBuilding(building.id);
   };
 
   // Parse destination into building and room
@@ -348,7 +342,7 @@ const MultistepNavigationScreen = () => {
       setDestination,
       setBuilding,
       setRoom,
-      filterBuildingSuggestions,
+      filterBuildingSuggestions
     );
   };
 
@@ -360,243 +354,27 @@ const MultistepNavigationScreen = () => {
       setDestination,
       setShowBuildingSuggestions,
       setAvailableDestRooms,
-      setInvalidDestinationRoom,
+      setInvalidDestinationRoom
     );
   };
 
-  // Create navigation plan from inputs
   const handleStartNavigation = () => {
-    // Get origin coordinates and details
-    let originCoords = null;
-    let originAddress = null;
-    let originBuildingId = null;
-    let originRoomId = null;
-
-    if (originInputType === "location") {
-      if (!originDetails) {
-        alert("Please enter a valid origin address");
-        return;
-      }
-      originCoords = {
-        latitude: originDetails.latitude,
-        longitude: originDetails.longitude,
-      };
-      originAddress = originDetails.formatted_address || origin;
-    } else {
-      // Origin is a classroom
-      if (!originBuilding) {
-        alert("Please enter a valid origin building");
-        return;
-      }
-
-      // If a room is specified, validate it
-      if (originRoom) {
-        if (!FloorRegistry.isValidRoom(originBuilding.id, originRoom)) {
-          setInvalidOriginRoom(true);
-          alert(`Room ${originRoom} doesn't exist in ${originBuilding.name}`);
-          return;
-        }
-      } else {
-        alert("Please enter a room number");
-        return;
-      }
-
-      originCoords = getCoordinatesForClassroom(originBuilding);
-      originBuildingId = originBuilding.id;
-      originRoomId = originRoom || "entrance"; // Default to entrance if no room
-      originAddress = originRoom
-        ? `${originRoom}, ${originBuilding.name}`
-        : `${originBuilding.name} entrance`;
-    }
-
-    // Get destination details
-    let destinationCoords = null;
-    let destinationAddress = null;
-    let destinationBuildingId = null;
-    let destinationRoomId = null;
-
-    if (destinationInputType === "location") {
-      if (!destinationDetails) {
-        alert("Please enter a valid destination address");
-        return;
-      }
-      destinationCoords = {
-        latitude: destinationDetails.latitude,
-        longitude: destinationDetails.longitude,
-      };
-      destinationAddress = destinationDetails.formatted_address || destination;
-    } else {
-      // Destination is a classroom
-      if (!building) {
-        alert("Please enter a valid destination building");
-        return;
-      }
-
-      // If a room is specified, validate it
-      if (room) {
-        if (!FloorRegistry.isValidRoom(building.id, room)) {
-          setInvalidDestinationRoom(true);
-          alert(`Room ${room} doesn't exist in ${building.name}`);
-          return;
-        }
-      } else {
-        alert("Please enter a room number");
-        return;
-      }
-
-      destinationCoords = getCoordinatesForClassroom(building);
-      destinationBuildingId = building.id;
-      destinationRoomId = room;
-      destinationAddress = `${room}, ${building.name}`;
-    }
-
-    setIsLoading(true);
-
-    // Create navigation steps
-    const steps = [];
-
-    // Case 1: Both origin and destination are in the same building
-    if (
-      originBuildingId &&
-      destinationBuildingId &&
-      originBuildingId === destinationBuildingId
-    ) {
-      // Create indoor step
-      steps.push({
-        type: "indoor",
-        title: `Navigate inside ${originBuilding.name}`,
-        buildingId: originBuildingId,
-        buildingType: FloorRegistry.getBuildingTypeFromId(originBuildingId),
-        startRoom: originRoomId,
-        endRoom: destinationRoomId,
-        startFloor: FloorRegistry.extractFloorFromRoom(originRoomId),
-        endFloor: FloorRegistry.extractFloorFromRoom(destinationRoomId),
-        isComplete: false,
-      });
-    }
-    // Case 2: Origin is a classroom, but destination is an outdoor location
-    else if (originBuildingId && !destinationBuildingId) {
-      // Add step to navigate from room to building entrance first
-      steps.push({
-        type: "indoor",
-        title: `Exit ${originBuilding.name}`,
-        buildingId: originBuildingId,
-        buildingType: FloorRegistry.getBuildingTypeFromId(originBuildingId),
-        startRoom: originRoomId,
-        // Use "Main lobby" instead of "entrance" as it's more likely to be in the navigation graph
-        endRoom: "Main lobby",
-        startFloor: FloorRegistry.extractFloorFromRoom(originRoomId),
-        endFloor: "1", // Assume entrance is on first floor
-        isComplete: false,
-      });
-
-      // Then add outdoor step to navigate to destination
-      steps.push({
-        type: "outdoor",
-        title: `Travel to ${destinationAddress}`,
-        startPoint: originCoords,
-        endPoint: destinationCoords,
-        startAddress: originAddress,
-        endAddress: destinationAddress,
-        isComplete: false,
-      });
-    }
-    // Case 3: Origin is an outdoor location, and destination is a classroom
-    else if (!originBuildingId && destinationBuildingId) {
-      // Add outdoor step
-      steps.push({
-        type: "outdoor",
-        title: `Travel to ${building.name}`,
-        startPoint: originCoords,
-        endPoint: destinationCoords,
-        startAddress: originAddress,
-        endAddress: destinationAddress,
-        isComplete: false,
-      });
-
-      // Add indoor step to navigate inside destination building
-      steps.push({
-        type: "indoor",
-        title: `Navigate to room ${destinationRoomId} in ${building.name}`,
-        buildingId: destinationBuildingId,
-        buildingType: FloorRegistry.getBuildingTypeFromId(
-          destinationBuildingId,
-        ),
-        startRoom: "entrance", // Default entry point
-        endRoom: destinationRoomId,
-        startFloor: "1", // Assume entrance is on first floor
-        endFloor: FloorRegistry.extractFloorFromRoom(destinationRoomId),
-        isComplete: false,
-      });
-    }
-    // Case 4: Both origin and destination are different buildings
-    else if (
-      originBuildingId &&
-      destinationBuildingId &&
-      originBuildingId !== destinationBuildingId
-    ) {
-      // Add step to navigate from room to building entrance first
-      steps.push({
-        type: "indoor",
-        title: `Exit ${originBuilding.name}`,
-        buildingId: originBuildingId,
-        buildingType: FloorRegistry.getBuildingTypeFromId(originBuildingId),
-        startRoom: originRoomId,
-        endRoom: "entrance",
-        startFloor: FloorRegistry.extractFloorFromRoom(originRoomId),
-        endFloor: "1", // Assume entrance is on first floor
-        isComplete: false,
-      });
-
-      // Add outdoor step between buildings
-      steps.push({
-        type: "outdoor",
-        title: `Travel to ${building.name}`,
-        startPoint: originCoords,
-        endPoint: destinationCoords,
-        startAddress: originAddress,
-        endAddress: `${building.name} entrance`,
-        isComplete: false,
-      });
-
-      // Add indoor step to navigate inside destination building
-      steps.push({
-        type: "indoor",
-        title: `Navigate to room ${destinationRoomId} in ${building.name}`,
-        buildingId: destinationBuildingId,
-        buildingType: FloorRegistry.getBuildingTypeFromId(
-          destinationBuildingId,
-        ),
-        startRoom: "entrance", // Default entry point
-        endRoom: destinationRoomId,
-        startFloor: "1", // Assume entrance is on first floor
-        endFloor: FloorRegistry.extractFloorFromRoom(destinationRoomId),
-        isComplete: false,
-      });
-    }
-    // Case 5: Pure outdoor navigation (both are external locations)
-    else {
-      // Add outdoor step
-      steps.push({
-        type: "outdoor",
-        title: `Travel to ${destinationAddress}`,
-        startPoint: originCoords,
-        endPoint: destinationCoords,
-        startAddress: originAddress,
-        endAddress: destinationAddress,
-        isComplete: false,
-      });
-    }
-
-    const route = {
-      title: `Navigate to ${destinationRoomId || destinationAddress}`,
-      currentStep: 0,
-      steps: steps,
-    };
-
-    // Use the service to navigate with the created route
-    NavigationStrategyService.navigateToStep(navigation, route);
-    setIsLoading(false);
+    NavigationPlanService.createNavigationPlan({
+      originInputType,
+      originDetails,
+      origin,
+      originBuilding,
+      originRoom,
+      destinationInputType,
+      destinationDetails,
+      destination,
+      building,
+      room,
+      setInvalidOriginRoom,
+      setInvalidDestinationRoom,
+      setIsLoading,
+      navigation,
+    });
   };
 
   // Handle indoor navigation steps
@@ -621,7 +399,7 @@ const MultistepNavigationScreen = () => {
         // For JMSB building
         if (
           ["entrance", "main lobby", "main entrance", "lobby"].includes(
-            step.startRoom.toLowerCase(),
+            step.startRoom.toLowerCase()
           )
         ) {
           normalizedStartRoom = "main hall"; // JMSB uses "main hall" based on the available nodes
@@ -631,7 +409,7 @@ const MultistepNavigationScreen = () => {
 
         if (
           ["entrance", "main lobby", "main entrance", "lobby"].includes(
-            step.endRoom.toLowerCase(),
+            step.endRoom.toLowerCase()
           )
         ) {
           normalizedEndRoom = "main hall"; // JMSB uses "main hall" based on the available nodes
@@ -642,7 +420,7 @@ const MultistepNavigationScreen = () => {
         // For other buildings (Hall, etc.)
         if (
           ["entrance", "main entrance", "lobby"].includes(
-            step.startRoom.toLowerCase(),
+            step.startRoom.toLowerCase()
           )
         ) {
           normalizedStartRoom = "Main lobby"; // Hall building uses "Main lobby"
@@ -652,7 +430,7 @@ const MultistepNavigationScreen = () => {
 
         if (
           ["entrance", "main entrance", "lobby"].includes(
-            step.endRoom.toLowerCase(),
+            step.endRoom.toLowerCase()
           )
         ) {
           normalizedEndRoom = "Main lobby"; // Hall building uses "Main lobby"
@@ -727,7 +505,7 @@ const MultistepNavigationScreen = () => {
       ) {
         // Don't automatically show the modal on return - let user click button again if needed
         console.log(
-          "Returned to MultistepNavigation with indoor navigation data",
+          "Returned to MultistepNavigation with indoor navigation data"
         );
       }
     });
@@ -900,7 +678,7 @@ const MultistepNavigationScreen = () => {
                         source={{
                           html: MapGenerationService.generateMapHtml(
                             outdoorRoute,
-                            GOOGLE_MAPS_API_KEY,
+                            GOOGLE_MAPS_API_KEY
                           ),
                         }}
                         style={styles.floorPlanWebView}
@@ -942,7 +720,7 @@ const MultistepNavigationScreen = () => {
                           source={{
                             html: MapGenerationService.generateMapHtml(
                               outdoorRoute,
-                              GOOGLE_MAPS_API_KEY,
+                              GOOGLE_MAPS_API_KEY
                             ),
                           }}
                           style={styles.floorPlanWebView}
@@ -1069,7 +847,7 @@ const MultistepNavigationScreen = () => {
             loadingDirections={loadingDirections}
             mapHtml={MapGenerationService.generateMapHtml(
               outdoorRoute,
-              GOOGLE_MAPS_API_KEY,
+              GOOGLE_MAPS_API_KEY
             )}
             onExpandMap={() => setExpandedMap(true)}
             onChangeRoute={handleChangeRoute}
