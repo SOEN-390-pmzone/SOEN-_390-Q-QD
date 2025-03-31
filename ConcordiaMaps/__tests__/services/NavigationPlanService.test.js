@@ -27,7 +27,7 @@ describe("NavigationPlanService", () => {
   // Reset mocks before each test
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
     // Default implementation for mocked functions
     FloorRegistry.isValidRoom.mockReturnValue(true);
     FloorRegistry.getBuildingTypeFromId.mockReturnValue("HallBuilding");
@@ -50,14 +50,14 @@ describe("NavigationPlanService", () => {
     test("should return coordinates for valid building", () => {
       const building = { id: "H", name: "Hall Building" };
       const result = NavigationPlanService.getCoordinatesForClassroom(building);
-      
+
       expect(FloorRegistry.getCoordinatesForBuilding).toHaveBeenCalledWith("H");
       expect(result).toEqual({ latitude: 45.497, longitude: -73.578 });
     });
 
     test("should return null for null building", () => {
       const result = NavigationPlanService.getCoordinatesForClassroom(null);
-      
+
       expect(FloorRegistry.getCoordinatesForBuilding).not.toHaveBeenCalled();
       expect(result).toBeNull();
     });
@@ -109,7 +109,7 @@ describe("NavigationPlanService", () => {
                 endFloor: "10",
               }),
             ],
-          })
+          }),
         );
       });
     });
@@ -164,7 +164,7 @@ describe("NavigationPlanService", () => {
                 endAddress: "Some Destination Address",
               }),
             ],
-          })
+          }),
         );
       });
     });
@@ -219,7 +219,7 @@ describe("NavigationPlanService", () => {
                 endFloor: "9",
               }),
             ],
-          })
+          }),
         );
       });
     });
@@ -279,7 +279,7 @@ describe("NavigationPlanService", () => {
                 endFloor: "3",
               }),
             ],
-          })
+          }),
         );
       });
     });
@@ -329,7 +329,7 @@ describe("NavigationPlanService", () => {
                 endAddress: "Destination Address",
               }),
             ],
-          })
+          }),
         );
       });
     });
@@ -354,8 +354,10 @@ describe("NavigationPlanService", () => {
         };
 
         NavigationPlanService.createNavigationPlan(params);
-        
-        expect(global.alert).toHaveBeenCalledWith("Please enter a valid origin building");
+
+        expect(global.alert).toHaveBeenCalledWith(
+          "Please enter a valid origin building",
+        );
         expect(NavigationStrategyService.navigateToStep).not.toHaveBeenCalled();
       });
 
@@ -378,7 +380,7 @@ describe("NavigationPlanService", () => {
         };
 
         NavigationPlanService.createNavigationPlan(params);
-        
+
         expect(global.alert).toHaveBeenCalledWith("Please enter a room number");
         expect(NavigationStrategyService.navigateToStep).not.toHaveBeenCalled();
       });
@@ -404,9 +406,11 @@ describe("NavigationPlanService", () => {
         };
 
         NavigationPlanService.createNavigationPlan(params);
-        
+
         expect(mockSetInvalidOriginRoom).toHaveBeenCalledWith(true);
-        expect(global.alert).toHaveBeenCalledWith("Room H-9999 doesn't exist in Hall Building");
+        expect(global.alert).toHaveBeenCalledWith(
+          "Room H-9999 doesn't exist in Hall Building",
+        );
         expect(NavigationStrategyService.navigateToStep).not.toHaveBeenCalled();
       });
 
@@ -433,8 +437,10 @@ describe("NavigationPlanService", () => {
         };
 
         NavigationPlanService.createNavigationPlan(params);
-        
-        expect(global.alert).toHaveBeenCalledWith("Please enter a valid destination building");
+
+        expect(global.alert).toHaveBeenCalledWith(
+          "Please enter a valid destination building",
+        );
         expect(NavigationStrategyService.navigateToStep).not.toHaveBeenCalled();
       });
 
@@ -461,7 +467,7 @@ describe("NavigationPlanService", () => {
         };
 
         NavigationPlanService.createNavigationPlan(params);
-        
+
         expect(global.alert).toHaveBeenCalledWith("Please enter a room number");
         expect(NavigationStrategyService.navigateToStep).not.toHaveBeenCalled();
       });
@@ -492,9 +498,11 @@ describe("NavigationPlanService", () => {
         };
 
         NavigationPlanService.createNavigationPlan(params);
-        
+
         expect(mockSetInvalidDestinationRoom).toHaveBeenCalledWith(true);
-        expect(global.alert).toHaveBeenCalledWith("Room H-9999 doesn't exist in Hall Building");
+        expect(global.alert).toHaveBeenCalledWith(
+          "Room H-9999 doesn't exist in Hall Building",
+        );
         expect(NavigationStrategyService.navigateToStep).not.toHaveBeenCalled();
       });
     });
