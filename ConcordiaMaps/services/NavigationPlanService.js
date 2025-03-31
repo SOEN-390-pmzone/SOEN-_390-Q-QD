@@ -81,47 +81,19 @@ const createNavigationPlan = ({
   let originRoomId = null; // Room identifier within the building
 
   // PROCESS ORIGIN INFORMATION
-  // Handle outdoor location as origin
-  if (originInputType === "location") {
-    // Validate that required details are provided
-    if (!originDetails) {
-      alert("Please enter a valid origin address");
-      return;
-    }
-    // Extract coordinates and address
-    originCoords = {
-      latitude: originDetails.latitude,
-      longitude: originDetails.longitude,
-    };
-    originAddress = originDetails.formatted_address || origin;
-  } else {
-    // Handle building/room as origin
-    // Validate that a building was selected
-    if (!originBuilding) {
-      alert("Please enter a valid origin building");
-      return;
-    }
+  const originProcessResult = processOriginInformation({
+    originInputType,
+    originDetails,
+    origin,
+    originBuilding,
+    originRoom,
+    setInvalidOriginRoom,
+  });
 
-    // If a room is specified, validate it exists in the building
-    if (originRoom) {
-      if (!FloorRegistry.isValidRoom(originBuilding.id, originRoom)) {
-        setInvalidOriginRoom(true);
-        alert(`Room ${originRoom} doesn't exist in ${originBuilding.name}`);
-        return;
-      }
-    } else {
-      alert("Please enter a room number");
-      return;
-    }
+  if (!originProcessResult) return;
 
-    // Get building coordinates and store identifier information
-    originCoords = getCoordinatesForClassroom(originBuilding);
-    originBuildingId = originBuilding.id;
-    originRoomId = originRoom || "entrance"; // Default to entrance if no room
-    originAddress = originRoom
-      ? `${originRoom}, ${originBuilding.name}`
-      : `${originBuilding.name} entrance`;
-  }
+  ({ originCoords, originAddress, originBuildingId, originRoomId } =
+    originProcessResult);
 
   // PROCESS DESTINATION INFORMATION
   // Initialize variables for destination details
@@ -130,42 +102,23 @@ const createNavigationPlan = ({
   let destinationBuildingId = null;
   let destinationRoomId = null;
 
-  // Handle outdoor location as destination
-  if (destinationInputType === "location") {
-    if (!destinationDetails) {
-      alert("Please enter a valid destination address");
-      return;
-    }
-    destinationCoords = {
-      latitude: destinationDetails.latitude,
-      longitude: destinationDetails.longitude,
-    };
-    destinationAddress = destinationDetails.formatted_address || destination;
-  } else {
-    // Handle building/room as destination
-    if (!building) {
-      alert("Please enter a valid destination building");
-      return;
-    }
+  const destinationProcessResult = processDestinationInformation({
+    destinationInputType,
+    destinationDetails,
+    destination,
+    building,
+    room,
+    setInvalidDestinationRoom,
+  });
 
-    // If a room is specified, validate it exists in the building
-    if (room) {
-      if (!FloorRegistry.isValidRoom(building.id, room)) {
-        setInvalidDestinationRoom(true);
-        alert(`Room ${room} doesn't exist in ${building.name}`);
-        return;
-      }
-    } else {
-      alert("Please enter a room number");
-      return;
-    }
+  if (!destinationProcessResult) return;
 
-    // Get building coordinates and store identifier information
-    destinationCoords = getCoordinatesForClassroom(building);
-    destinationBuildingId = building.id;
-    destinationRoomId = room;
-    destinationAddress = `${room}, ${building.name}`;
-  }
+  ({
+    destinationCoords,
+    destinationAddress,
+    destinationBuildingId,
+    destinationRoomId,
+  } = destinationProcessResult);
 
   // Start the loading indicator for navigation plan creation
   setIsLoading(true);
@@ -174,137 +127,70 @@ const createNavigationPlan = ({
   // Initialize array to hold navigation steps
   const steps = [];
 
-  // SCENARIO 1: SAME BUILDING NAVIGATION
-  // If both origin and destination are in the same building, create a single indoor navigation step
+  // Determine which navigation scenario to use
   if (
     originBuildingId &&
     destinationBuildingId &&
     originBuildingId === destinationBuildingId
   ) {
-    // Create indoor step for room-to-room navigation
-    steps.push({
-      type: "indoor",
-      title: `Navigate inside ${originBuilding.name}`,
-      buildingId: originBuildingId,
-      buildingType: FloorRegistry.getBuildingTypeFromId(originBuildingId),
-      startRoom: originRoomId,
-      endRoom: destinationRoomId,
-      startFloor: FloorRegistry.extractFloorFromRoom(originRoomId),
-      endFloor: FloorRegistry.extractFloorFromRoom(destinationRoomId),
-      isComplete: false,
+    // SCENARIO 1: SAME BUILDING NAVIGATION
+    createSameBuildingNavigation({
+      steps,
+      originBuildingId,
+      originRoomId,
+      destinationRoomId,
+      originBuilding,
     });
-  }
-  // SCENARIO 2: ROOM TO OUTDOOR LOCATION
-  // If origin is inside a building but destination is outside
-  else if (originBuildingId && !destinationBuildingId) {
-    // Step 1: Navigate from room to building entrance
-    steps.push({
-      type: "indoor",
-      title: `Exit ${originBuilding.name}`,
-      buildingId: originBuildingId,
-      buildingType: FloorRegistry.getBuildingTypeFromId(originBuildingId),
-      startRoom: originRoomId,
-      // Use "Main lobby" instead of "entrance" as it's more likely to be in the navigation graph
-      endRoom: "Main lobby",
-      startFloor: FloorRegistry.extractFloorFromRoom(originRoomId),
-      endFloor: "1", // Assume entrance is on first floor
-      isComplete: false,
+  } else if (originBuildingId && !destinationBuildingId) {
+    // SCENARIO 2: ROOM TO OUTDOOR LOCATION
+    createRoomToOutdoorNavigation({
+      steps,
+      originBuildingId,
+      originRoomId,
+      originBuilding,
+      originCoords,
+      destinationCoords,
+      originAddress,
+      destinationAddress,
     });
-
-    // Step 2: Navigate from building entrance to outdoor destination
-    steps.push({
-      type: "outdoor",
-      title: `Travel to ${destinationAddress}`,
-      startPoint: originCoords,
-      endPoint: destinationCoords,
-      startAddress: originAddress,
-      endAddress: destinationAddress,
-      isComplete: false,
+  } else if (!originBuildingId && destinationBuildingId) {
+    // SCENARIO 3: OUTDOOR LOCATION TO ROOM
+    createOutdoorToRoomNavigation({
+      steps,
+      destinationBuildingId,
+      destinationRoomId,
+      originCoords,
+      destinationCoords,
+      originAddress,
+      destinationAddress,
+      building,
     });
-  }
-  // SCENARIO 3: OUTDOOR LOCATION TO ROOM
-  // If origin is outside but destination is inside a building
-  else if (!originBuildingId && destinationBuildingId) {
-    // Step 1: Navigate from origin to building entrance
-    steps.push({
-      type: "outdoor",
-      title: `Travel to ${building.name}`,
-      startPoint: originCoords,
-      endPoint: destinationCoords,
-      startAddress: originAddress,
-      endAddress: destinationAddress,
-      isComplete: false,
-    });
-
-    // Step 2: Navigate from building entrance to destination room
-    steps.push({
-      type: "indoor",
-      title: `Navigate to room ${destinationRoomId} in ${building.name}`,
-      buildingId: destinationBuildingId,
-      buildingType: FloorRegistry.getBuildingTypeFromId(destinationBuildingId),
-      startRoom: "entrance", // Default entry point
-      endRoom: destinationRoomId,
-      startFloor: "1", // Assume entrance is on first floor
-      endFloor: FloorRegistry.extractFloorFromRoom(destinationRoomId),
-      isComplete: false,
-    });
-  }
-  // SCENARIO 4: BUILDING TO BUILDING NAVIGATION
-  // If origin and destination are in different buildings
-  else if (
+  } else if (
     originBuildingId &&
     destinationBuildingId &&
     originBuildingId !== destinationBuildingId
   ) {
-    // Step 1: Navigate from origin room to building entrance
-    steps.push({
-      type: "indoor",
-      title: `Exit ${originBuilding.name}`,
-      buildingId: originBuildingId,
-      buildingType: FloorRegistry.getBuildingTypeFromId(originBuildingId),
-      startRoom: originRoomId,
-      endRoom: "entrance",
-      startFloor: FloorRegistry.extractFloorFromRoom(originRoomId),
-      endFloor: "1", // Assume entrance is on first floor
-      isComplete: false,
+    // SCENARIO 4: BUILDING TO BUILDING NAVIGATION
+    createBuildingToBuildingNavigation({
+      steps,
+      originBuildingId,
+      originRoomId,
+      destinationBuildingId,
+      destinationRoomId,
+      originBuilding,
+      building,
+      originCoords,
+      destinationCoords,
+      originAddress,
     });
-
-    // Step 2: Navigate between buildings (outdoor)
-    steps.push({
-      type: "outdoor",
-      title: `Travel to ${building.name}`,
-      startPoint: originCoords,
-      endPoint: destinationCoords,
-      startAddress: originAddress,
-      endAddress: `${building.name} entrance`,
-      isComplete: false,
-    });
-
-    // Step 3: Navigate from destination building entrance to room
-    steps.push({
-      type: "indoor",
-      title: `Navigate to room ${destinationRoomId} in ${building.name}`,
-      buildingId: destinationBuildingId,
-      buildingType: FloorRegistry.getBuildingTypeFromId(destinationBuildingId),
-      startRoom: "entrance", // Default entry point
-      endRoom: destinationRoomId,
-      startFloor: "1", // Assume entrance is on first floor
-      endFloor: FloorRegistry.extractFloorFromRoom(destinationRoomId),
-      isComplete: false,
-    });
-  }
-  // SCENARIO 5: OUTDOOR TO OUTDOOR NAVIGATION
-  // If both origin and destination are outdoor locations
-  else {
-    // Create a single outdoor navigation step
-    steps.push({
-      type: "outdoor",
-      title: `Travel to ${destinationAddress}`,
-      startPoint: originCoords,
-      endPoint: destinationCoords,
-      startAddress: originAddress,
-      endAddress: destinationAddress,
-      isComplete: false,
+  } else {
+    // SCENARIO 5: OUTDOOR TO OUTDOOR NAVIGATION
+    createOutdoorToOutdoorNavigation({
+      steps,
+      originCoords,
+      destinationCoords,
+      originAddress,
+      destinationAddress,
     });
   }
 
@@ -320,6 +206,313 @@ const createNavigationPlan = ({
 
   // End loading state
   setIsLoading(false);
+};
+
+/**
+ * Process origin information and validate inputs
+ * @param {Object} params - Parameters for origin processing
+ * @returns {Object|null} - Process result or null if validation fails
+ */
+const processOriginInformation = ({
+  originInputType,
+  originDetails,
+  origin,
+  originBuilding,
+  originRoom,
+  setInvalidOriginRoom,
+}) => {
+  let originCoords = null;
+  let originAddress = null;
+  let originBuildingId = null;
+  let originRoomId = null;
+
+  // Handle outdoor location as origin
+  if (originInputType === "location") {
+    // Validate that required details are provided
+    if (!originDetails) {
+      alert("Please enter a valid origin address");
+      return null;
+    }
+    // Extract coordinates and address
+    originCoords = {
+      latitude: originDetails.latitude,
+      longitude: originDetails.longitude,
+    };
+    originAddress = originDetails.formatted_address || origin;
+  } else {
+    // Handle building/room as origin
+    // Validate that a building was selected
+    if (!originBuilding) {
+      alert("Please enter a valid origin building");
+      return null;
+    }
+
+    // If a room is specified, validate it exists in the building
+    if (originRoom) {
+      if (!FloorRegistry.isValidRoom(originBuilding.id, originRoom)) {
+        setInvalidOriginRoom(true);
+        alert(`Room ${originRoom} doesn't exist in ${originBuilding.name}`);
+        return null;
+      }
+    } else {
+      alert("Please enter a room number");
+      return null;
+    }
+
+    // Get building coordinates and store identifier information
+    originCoords = getCoordinatesForClassroom(originBuilding);
+    originBuildingId = originBuilding.id;
+    originRoomId = originRoom || "entrance"; // Default to entrance if no room
+    originAddress = originRoom
+      ? `${originRoom}, ${originBuilding.name}`
+      : `${originBuilding.name} entrance`;
+  }
+
+  return { originCoords, originAddress, originBuildingId, originRoomId };
+};
+
+/**
+ * Process destination information and validate inputs
+ * @param {Object} params - Parameters for destination processing
+ * @returns {Object|null} - Process result or null if validation fails
+ */
+const processDestinationInformation = ({
+  destinationInputType,
+  destinationDetails,
+  destination,
+  building,
+  room,
+  setInvalidDestinationRoom,
+}) => {
+  let destinationCoords = null;
+  let destinationAddress = null;
+  let destinationBuildingId = null;
+  let destinationRoomId = null;
+
+  // Handle outdoor location as destination
+  if (destinationInputType === "location") {
+    if (!destinationDetails) {
+      alert("Please enter a valid destination address");
+      return null;
+    }
+    destinationCoords = {
+      latitude: destinationDetails.latitude,
+      longitude: destinationDetails.longitude,
+    };
+    destinationAddress = destinationDetails.formatted_address || destination;
+  } else {
+    // Handle building/room as destination
+    if (!building) {
+      alert("Please enter a valid destination building");
+      return null;
+    }
+
+    // If a room is specified, validate it exists in the building
+    if (room) {
+      if (!FloorRegistry.isValidRoom(building.id, room)) {
+        setInvalidDestinationRoom(true);
+        alert(`Room ${room} doesn't exist in ${building.name}`);
+        return null;
+      }
+    } else {
+      alert("Please enter a room number");
+      return null;
+    }
+
+    // Get building coordinates and store identifier information
+    destinationCoords = getCoordinatesForClassroom(building);
+    destinationBuildingId = building.id;
+    destinationRoomId = room;
+    destinationAddress = `${room}, ${building.name}`;
+  }
+
+  return {
+    destinationCoords,
+    destinationAddress,
+    destinationBuildingId,
+    destinationRoomId,
+  };
+};
+
+/**
+ * SCENARIO 1: Create same building navigation steps
+ * If both origin and destination are in the same building, create a single indoor navigation step
+ */
+const createSameBuildingNavigation = ({
+  steps,
+  originBuildingId,
+  originRoomId,
+  destinationRoomId,
+  originBuilding,
+}) => {
+  // Create indoor step for room-to-room navigation
+  steps.push({
+    type: "indoor",
+    title: `Navigate inside ${originBuilding.name}`,
+    buildingId: originBuildingId,
+    buildingType: FloorRegistry.getBuildingTypeFromId(originBuildingId),
+    startRoom: originRoomId,
+    endRoom: destinationRoomId,
+    startFloor: FloorRegistry.extractFloorFromRoom(originRoomId),
+    endFloor: FloorRegistry.extractFloorFromRoom(destinationRoomId),
+    isComplete: false,
+  });
+};
+
+/**
+ * SCENARIO 2: Create room to outdoor location navigation steps
+ * If origin is inside a building but destination is outside
+ */
+const createRoomToOutdoorNavigation = ({
+  steps,
+  originBuildingId,
+  originRoomId,
+  originBuilding,
+  originCoords,
+  destinationCoords,
+  originAddress,
+  destinationAddress,
+}) => {
+  // Step 1: Navigate from room to building entrance
+  steps.push({
+    type: "indoor",
+    title: `Exit ${originBuilding.name}`,
+    buildingId: originBuildingId,
+    buildingType: FloorRegistry.getBuildingTypeFromId(originBuildingId),
+    startRoom: originRoomId,
+    // Use "Main lobby" instead of "entrance" as it's more likely to be in the navigation graph
+    endRoom: "Main lobby",
+    startFloor: FloorRegistry.extractFloorFromRoom(originRoomId),
+    endFloor: "1", // Assume entrance is on first floor
+    isComplete: false,
+  });
+
+  // Step 2: Navigate from building entrance to outdoor destination
+  steps.push({
+    type: "outdoor",
+    title: `Travel to ${destinationAddress}`,
+    startPoint: originCoords,
+    endPoint: destinationCoords,
+    startAddress: originAddress,
+    endAddress: destinationAddress,
+    isComplete: false,
+  });
+};
+
+/**
+ * SCENARIO 3: Create outdoor location to room navigation steps
+ * If origin is outside but destination is inside a building
+ */
+const createOutdoorToRoomNavigation = ({
+  steps,
+  destinationBuildingId,
+  destinationRoomId,
+  originCoords,
+  destinationCoords,
+  originAddress,
+  destinationAddress,
+  building,
+}) => {
+  // Step 1: Navigate from origin to building entrance
+  steps.push({
+    type: "outdoor",
+    title: `Travel to ${building.name}`,
+    startPoint: originCoords,
+    endPoint: destinationCoords,
+    startAddress: originAddress,
+    endAddress: destinationAddress,
+    isComplete: false,
+  });
+
+  // Step 2: Navigate from building entrance to destination room
+  steps.push({
+    type: "indoor",
+    title: `Navigate to room ${destinationRoomId} in ${building.name}`,
+    buildingId: destinationBuildingId,
+    buildingType: FloorRegistry.getBuildingTypeFromId(destinationBuildingId),
+    startRoom: "entrance", // Default entry point
+    endRoom: destinationRoomId,
+    startFloor: "1", // Assume entrance is on first floor
+    endFloor: FloorRegistry.extractFloorFromRoom(destinationRoomId),
+    isComplete: false,
+  });
+};
+
+/**
+ * SCENARIO 4: Create building to building navigation steps
+ * If origin and destination are in different buildings
+ */
+const createBuildingToBuildingNavigation = ({
+  steps,
+  originBuildingId,
+  originRoomId,
+  destinationBuildingId,
+  destinationRoomId,
+  originBuilding,
+  building,
+  originCoords,
+  destinationCoords,
+  originAddress,
+}) => {
+  // Step 1: Navigate from origin room to building entrance
+  steps.push({
+    type: "indoor",
+    title: `Exit ${originBuilding.name}`,
+    buildingId: originBuildingId,
+    buildingType: FloorRegistry.getBuildingTypeFromId(originBuildingId),
+    startRoom: originRoomId,
+    endRoom: "entrance",
+    startFloor: FloorRegistry.extractFloorFromRoom(originRoomId),
+    endFloor: "1", // Assume entrance is on first floor
+    isComplete: false,
+  });
+
+  // Step 2: Navigate between buildings (outdoor)
+  steps.push({
+    type: "outdoor",
+    title: `Travel to ${building.name}`,
+    startPoint: originCoords,
+    endPoint: destinationCoords,
+    startAddress: originAddress,
+    endAddress: `${building.name} entrance`,
+    isComplete: false,
+  });
+
+  // Step 3: Navigate from destination building entrance to room
+  steps.push({
+    type: "indoor",
+    title: `Navigate to room ${destinationRoomId} in ${building.name}`,
+    buildingId: destinationBuildingId,
+    buildingType: FloorRegistry.getBuildingTypeFromId(destinationBuildingId),
+    startRoom: "entrance", // Default entry point
+    endRoom: destinationRoomId,
+    startFloor: "1", // Assume entrance is on first floor
+    endFloor: FloorRegistry.extractFloorFromRoom(destinationRoomId),
+    isComplete: false,
+  });
+};
+
+/**
+ * SCENARIO 5: Create outdoor to outdoor navigation steps
+ * If both origin and destination are outdoor locations
+ */
+const createOutdoorToOutdoorNavigation = ({
+  steps,
+  originCoords,
+  destinationCoords,
+  originAddress,
+  destinationAddress,
+}) => {
+  // Create a single outdoor navigation step
+  steps.push({
+    type: "outdoor",
+    title: `Travel to ${destinationAddress}`,
+    startPoint: originCoords,
+    endPoint: destinationCoords,
+    startAddress: originAddress,
+    endAddress: destinationAddress,
+    isComplete: false,
+  });
 };
 
 /**
