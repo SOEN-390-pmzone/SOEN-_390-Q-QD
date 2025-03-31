@@ -37,8 +37,6 @@ describe("NextEventModal", () => {
     );
 
     expect(UNSAFE_getByType(ActivityIndicator)).toBeTruthy();
-
-    await act(async () => {});
   });
 
   it("renders event details when an allowed upcoming event exists", async () => {
