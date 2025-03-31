@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, Modal } from "react-native";
-import * as Calendar from "expo-calendar";
 import styles from "../styles";
 import PropTypes from "prop-types";
 import { useNavigation } from "@react-navigation/native";
-import { EventLoading, EventDetails, NoEvents } from "./EventComponents"; // Adjust path as needed
+import { EventLoading, EventDetails, NoEvents } from "./EventComponents";
+import { getNextEvent } from "./CalendarService";
 
 const NextEventModal = ({ isVisible, onClose }) => {
   const [nextEvent, setNextEvent] = useState(null);
@@ -31,52 +31,14 @@ const NextEventModal = ({ isVisible, onClose }) => {
   const fetchNextEvent = async () => {
     setLoading(true);
     try {
-      const { status } = await Calendar.requestCalendarPermissionsAsync();
-      if (status !== "granted") {
-        alert("Permission to access calendar denied.");
-        setLoading(false);
-        return;
-      }
-
-      const calendars = await Calendar.getCalendarsAsync(
-        Calendar.EntityTypes.EVENT,
-      );
-      if (calendars.length === 0) {
-        setLoading(false);
-        return;
-      }
-
-      const now = new Date();
-      const endOfDay = new Date();
-      endOfDay.setHours(23, 59, 59, 999);
-
-      const events = await Calendar.getEventsAsync(
-        calendars.map((cal) => cal.id),
-        now,
-        endOfDay,
-      );
-
-      const upcomingEvents = events.filter(
-        (event) => new Date(event.startDate) > now,
-      );
-      const sortedEvents = upcomingEvents.toSorted
-        ? upcomingEvents.toSorted(
-            (a, b) => new Date(a.startDate) - new Date(b.startDate),
-          )
-        : [...upcomingEvents].sort(
-            (a, b) => new Date(a.startDate) - new Date(b.startDate),
-          );
-
-      // Filter events to only include those with titles starting with allowed prefixes.
-      const allowedPrefixes = ["SOEN", "COMP", "ENGR"];
-      const filteredEvents = sortedEvents.filter((event) => {
-        const title = event.title || "";
-        return allowedPrefixes.some((prefix) => title.startsWith(prefix));
-      });
-
-      setNextEvent(filteredEvents.length > 0 ? filteredEvents[0] : null);
+      const event = await getNextEvent();
+      setNextEvent(event);
     } catch (error) {
-      console.error("Error fetching next event:", error);
+      if (error.message === "Permission to access calendar denied.") {
+        alert("Permission to access calendar denied.");
+      } else {
+        console.error("Error fetching next event:", error);
+      }
     }
     setLoading(false);
   };
