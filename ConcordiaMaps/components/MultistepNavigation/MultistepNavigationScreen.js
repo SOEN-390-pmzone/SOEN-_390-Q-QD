@@ -89,7 +89,7 @@ const MultistepNavigationScreen = () => {
   const [originBuilding, setOriginBuilding] = useState(null);
   const [originRoom, setOriginRoom] = useState("");
   const [originBuildingSuggestions, setOriginBuildingSuggestions] = useState(
-    []
+    [],
   );
   const [showOriginBuildingSuggestions, setShowOriginBuildingSuggestions] =
     useState(false);
@@ -204,7 +204,7 @@ const MultistepNavigationScreen = () => {
       const { predictions, error } = await searchPlaces(
         text,
         userLocation,
-        sessionTokenRef.current
+        sessionTokenRef.current,
       );
 
       if (error) {
@@ -235,7 +235,7 @@ const MultistepNavigationScreen = () => {
       const { predictions, error } = await searchPlaces(
         text,
         userLocation,
-        sessionTokenRef.current
+        sessionTokenRef.current,
       );
 
       if (error) {
@@ -255,7 +255,7 @@ const MultistepNavigationScreen = () => {
     try {
       const placeDetails = await fetchPlaceDetails(
         placeId,
-        sessionTokenRef.current
+        sessionTokenRef.current,
       );
 
       setOrigin(description);
@@ -280,7 +280,7 @@ const MultistepNavigationScreen = () => {
     try {
       const placeDetails = await fetchPlaceDetails(
         placeId,
-        sessionTokenRef.current
+        sessionTokenRef.current,
       );
 
       setDestination(description);
@@ -320,7 +320,7 @@ const MultistepNavigationScreen = () => {
       setOrigin,
       setShowOriginBuildingSuggestions,
       setAvailableOriginRooms,
-      setInvalidOriginRoom
+      setInvalidOriginRoom,
     );
   };
 
@@ -331,7 +331,7 @@ const MultistepNavigationScreen = () => {
       setOrigin,
       setOriginBuilding,
       setOriginRoom,
-      filterOriginBuildingSuggestions
+      filterOriginBuildingSuggestions,
     );
   };
 
@@ -342,7 +342,7 @@ const MultistepNavigationScreen = () => {
       setDestination,
       setBuilding,
       setRoom,
-      filterBuildingSuggestions
+      filterBuildingSuggestions,
     );
   };
 
@@ -354,7 +354,7 @@ const MultistepNavigationScreen = () => {
       setDestination,
       setShowBuildingSuggestions,
       setAvailableDestRooms,
-      setInvalidDestinationRoom
+      setInvalidDestinationRoom,
     );
   };
 
@@ -399,7 +399,7 @@ const MultistepNavigationScreen = () => {
         // For JMSB building
         if (
           ["entrance", "main lobby", "main entrance", "lobby"].includes(
-            step.startRoom.toLowerCase()
+            step.startRoom.toLowerCase(),
           )
         ) {
           normalizedStartRoom = "main hall"; // JMSB uses "main hall" based on the available nodes
@@ -409,7 +409,7 @@ const MultistepNavigationScreen = () => {
 
         if (
           ["entrance", "main lobby", "main entrance", "lobby"].includes(
-            step.endRoom.toLowerCase()
+            step.endRoom.toLowerCase(),
           )
         ) {
           normalizedEndRoom = "main hall"; // JMSB uses "main hall" based on the available nodes
@@ -420,7 +420,7 @@ const MultistepNavigationScreen = () => {
         // For other buildings (Hall, etc.)
         if (
           ["entrance", "main entrance", "lobby"].includes(
-            step.startRoom.toLowerCase()
+            step.startRoom.toLowerCase(),
           )
         ) {
           normalizedStartRoom = "Main lobby"; // Hall building uses "Main lobby"
@@ -430,7 +430,7 @@ const MultistepNavigationScreen = () => {
 
         if (
           ["entrance", "main entrance", "lobby"].includes(
-            step.endRoom.toLowerCase()
+            step.endRoom.toLowerCase(),
           )
         ) {
           normalizedEndRoom = "Main lobby"; // Hall building uses "Main lobby"
@@ -505,7 +505,7 @@ const MultistepNavigationScreen = () => {
       ) {
         // Don't automatically show the modal on return - let user click button again if needed
         console.log(
-          "Returned to MultistepNavigation with indoor navigation data"
+          "Returned to MultistepNavigation with indoor navigation data",
         );
       }
     });
@@ -678,7 +678,7 @@ const MultistepNavigationScreen = () => {
                         source={{
                           html: MapGenerationService.generateMapHtml(
                             outdoorRoute,
-                            GOOGLE_MAPS_API_KEY
+                            GOOGLE_MAPS_API_KEY,
                           ),
                         }}
                         style={styles.floorPlanWebView}
@@ -720,7 +720,7 @@ const MultistepNavigationScreen = () => {
                           source={{
                             html: MapGenerationService.generateMapHtml(
                               outdoorRoute,
-                              GOOGLE_MAPS_API_KEY
+                              GOOGLE_MAPS_API_KEY,
                             ),
                           }}
                           style={styles.floorPlanWebView}
@@ -847,7 +847,7 @@ const MultistepNavigationScreen = () => {
             loadingDirections={loadingDirections}
             mapHtml={MapGenerationService.generateMapHtml(
               outdoorRoute,
-              GOOGLE_MAPS_API_KEY
+              GOOGLE_MAPS_API_KEY,
             )}
             onExpandMap={() => setExpandedMap(true)}
             onChangeRoute={handleChangeRoute}
