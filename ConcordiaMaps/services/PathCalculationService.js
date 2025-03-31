@@ -2,6 +2,12 @@
  * Service for calculating navigation paths between rooms
  */
 import { findShortestPath } from "../components/IndoorNavigation/PathFinder";
+import { adjustGraphForAccessibility } from "../services/AccessibilityGraphUtils";
+
+// temporary: accesibility preferences (update later with option to toggle it)
+const userAccessibilityPreferences = {
+  avoidStairs: true,
+};
 
 /**
  * Find available transportation method between floors
@@ -13,10 +19,14 @@ export const findTransportMethod = (startFloorGraph, endFloorGraph) => {
   const startNodes = new Set(Object.keys(startFloorGraph));
   const endNodes = new Set(Object.keys(endFloorGraph));
 
-  const transportMethods = ["escalator", "elevator", "stairs"];
+  const transportMethods = ["elevator", "escalator", "stairs"]; // Prefer elevators first
 
   for (const method of transportMethods) {
-    if (startNodes.has(method) && endNodes.has(method)) {
+    if (
+      startNodes.has(method) &&
+      endNodes.has(method) &&
+      (!userAccessibilityPreferences.avoidStairs || method !== "stairs")
+    ) {
       return method;
     }
   }
@@ -38,12 +48,17 @@ export const handleSameFloorNavigation = (
   selectedStartRoom,
   selectedEndRoom,
   startFloor,
-  buildingName,
+  buildingName
 ) => {
-  const directPath = findShortestPath(
+  const adjustedGraph = adjustGraphForAccessibility(
     startFloorGraph,
+    userAccessibilityPreferences
+  );
+
+  const directPath = findShortestPath(
+    adjustedGraph,
     selectedStartRoom,
-    selectedEndRoom,
+    selectedEndRoom
   );
 
   if (directPath.length < 2) {
@@ -88,25 +103,37 @@ export const handleInterFloorNavigation = (
   selectedEndRoom,
   startFloor,
   endFloor,
-  buildingName,
+  buildingName
 ) => {
-  const transportMethod = findTransportMethod(startFloorGraph, endFloorGraph);
+  const adjustedStartGraph = adjustGraphForAccessibility(
+    startFloorGraph,
+    userAccessibilityPreferences
+  );
+  const adjustedEndGraph = adjustGraphForAccessibility(
+    endFloorGraph,
+    userAccessibilityPreferences
+  );
+
+  const transportMethod = findTransportMethod(
+    adjustedStartGraph,
+    adjustedEndGraph
+  );
 
   if (!transportMethod) {
     throw new Error(
-      `Cannot navigate between floors ${startFloor} and ${endFloor}`,
+      `No accessible transport method (e.g., elevator) found between floors ${startFloor} and ${endFloor}. Try enabling stairs.`
     );
   }
 
   const startFloorTransportPath = findShortestPath(
-    startFloorGraph,
+    adjustedStartGraph,
     selectedStartRoom,
-    transportMethod,
+    transportMethod
   );
   const endFloorTransportPath = findShortestPath(
-    endFloorGraph,
+    adjustedEndGraph,
     transportMethod,
-    selectedEndRoom,
+    selectedEndRoom
   );
 
   if (startFloorTransportPath.length < 2 || endFloorTransportPath.length < 2) {
@@ -169,7 +196,7 @@ export const calculateNavigationPath = ({
     !selectedEndRoom
   ) {
     throw new Error(
-      "Missing navigation data. Please select building, floors, and rooms.",
+      "Missing navigation data. Please select building, floors, and rooms."
     );
   }
 
@@ -177,7 +204,7 @@ export const calculateNavigationPath = ({
     "Calculating path from",
     selectedStartRoom,
     "to",
-    selectedEndRoom,
+    selectedEndRoom
   );
   console.log(
     "Building type:",
@@ -185,7 +212,7 @@ export const calculateNavigationPath = ({
     "Start floor:",
     startFloor,
     "End floor:",
-    endFloor,
+    endFloor
   );
 
   const startFloorGraph = FloorRegistry.getGraph(buildingType, startFloor);
@@ -199,13 +226,13 @@ export const calculateNavigationPath = ({
 
   if (!startFloorGraph[selectedStartRoom]) {
     throw new Error(
-      `Start room ${selectedStartRoom} not found in navigation graph`,
+      `Start room ${selectedStartRoom} not found in navigation graph`
     );
   }
 
   if (!endFloorGraph[selectedEndRoom]) {
     throw new Error(
-      `End room ${selectedEndRoom} not found in navigation graph`,
+      `End room ${selectedEndRoom} not found in navigation graph`
     );
   }
 
@@ -216,7 +243,7 @@ export const calculateNavigationPath = ({
       selectedStartRoom,
       selectedEndRoom,
       startFloor,
-      building.name,
+      building.name
     );
   } else {
     return handleInterFloorNavigation(
@@ -226,7 +253,7 @@ export const calculateNavigationPath = ({
       selectedEndRoom,
       startFloor,
       endFloor,
-      building.name,
+      building.name
     );
   }
 };
