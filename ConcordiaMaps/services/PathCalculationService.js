@@ -6,7 +6,7 @@ import { adjustGraphForAccessibility } from "../services/AccessibilityGraphUtils
 
 // temporary: accesibility preferences (update later with option to toggle it)
 const userAccessibilityPreferences = {
-  avoidStairs: true,
+  avoidStairs: false,
 };
 
 /**
@@ -19,7 +19,7 @@ export const findTransportMethod = (startFloorGraph, endFloorGraph) => {
   const startNodes = new Set(Object.keys(startFloorGraph));
   const endNodes = new Set(Object.keys(endFloorGraph));
 
-  const transportMethods = ["elevator", "escalator", "stairs"]; // Prefer elevators first
+  const transportMethods = ["escalator", "elevator", "stairs"];
 
   for (const method of transportMethods) {
     if (
@@ -48,17 +48,17 @@ export const handleSameFloorNavigation = (
   selectedStartRoom,
   selectedEndRoom,
   startFloor,
-  buildingName
+  buildingName,
 ) => {
   const adjustedGraph = adjustGraphForAccessibility(
     startFloorGraph,
-    userAccessibilityPreferences
+    userAccessibilityPreferences,
   );
 
   const directPath = findShortestPath(
     adjustedGraph,
     selectedStartRoom,
-    selectedEndRoom
+    selectedEndRoom,
   );
 
   if (directPath.length < 2) {
@@ -103,37 +103,37 @@ export const handleInterFloorNavigation = (
   selectedEndRoom,
   startFloor,
   endFloor,
-  buildingName
+  buildingName,
 ) => {
   const adjustedStartGraph = adjustGraphForAccessibility(
     startFloorGraph,
-    userAccessibilityPreferences
+    userAccessibilityPreferences,
   );
   const adjustedEndGraph = adjustGraphForAccessibility(
     endFloorGraph,
-    userAccessibilityPreferences
+    userAccessibilityPreferences,
   );
 
   const transportMethod = findTransportMethod(
     adjustedStartGraph,
-    adjustedEndGraph
+    adjustedEndGraph,
   );
 
   if (!transportMethod) {
     throw new Error(
-      `No accessible transport method (e.g., elevator) found between floors ${startFloor} and ${endFloor}. Try enabling stairs.`
+      `No accessible transport method (e.g., elevator) found between floors ${startFloor} and ${endFloor}. Try enabling stairs.`,
     );
   }
 
   const startFloorTransportPath = findShortestPath(
     adjustedStartGraph,
     selectedStartRoom,
-    transportMethod
+    transportMethod,
   );
   const endFloorTransportPath = findShortestPath(
     adjustedEndGraph,
     transportMethod,
-    selectedEndRoom
+    selectedEndRoom,
   );
 
   if (startFloorTransportPath.length < 2 || endFloorTransportPath.length < 2) {
@@ -196,7 +196,7 @@ export const calculateNavigationPath = ({
     !selectedEndRoom
   ) {
     throw new Error(
-      "Missing navigation data. Please select building, floors, and rooms."
+      "Missing navigation data. Please select building, floors, and rooms.",
     );
   }
 
@@ -204,7 +204,7 @@ export const calculateNavigationPath = ({
     "Calculating path from",
     selectedStartRoom,
     "to",
-    selectedEndRoom
+    selectedEndRoom,
   );
   console.log(
     "Building type:",
@@ -212,7 +212,7 @@ export const calculateNavigationPath = ({
     "Start floor:",
     startFloor,
     "End floor:",
-    endFloor
+    endFloor,
   );
 
   const startFloorGraph = FloorRegistry.getGraph(buildingType, startFloor);
@@ -226,13 +226,13 @@ export const calculateNavigationPath = ({
 
   if (!startFloorGraph[selectedStartRoom]) {
     throw new Error(
-      `Start room ${selectedStartRoom} not found in navigation graph`
+      `Start room ${selectedStartRoom} not found in navigation graph`,
     );
   }
 
   if (!endFloorGraph[selectedEndRoom]) {
     throw new Error(
-      `End room ${selectedEndRoom} not found in navigation graph`
+      `End room ${selectedEndRoom} not found in navigation graph`,
     );
   }
 
@@ -243,7 +243,7 @@ export const calculateNavigationPath = ({
       selectedStartRoom,
       selectedEndRoom,
       startFloor,
-      building.name
+      building.name,
     );
   } else {
     return handleInterFloorNavigation(
@@ -253,7 +253,7 @@ export const calculateNavigationPath = ({
       selectedEndRoom,
       startFloor,
       endFloor,
-      building.name
+      building.name,
     );
   }
 };
