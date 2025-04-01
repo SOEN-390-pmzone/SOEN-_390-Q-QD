@@ -20,7 +20,12 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.anonymous.ConcordiaMaps"
+      "package": "com.anonymous.ConcordiaMaps",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyAW8gOP1PJiZp1br3kOPSlRYdPlDoGkkR4"
+        }
+      }
     },
     "web": {
       "favicon": "./assets/favicon.png"

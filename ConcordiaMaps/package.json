@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "npx expo start --clear --tunnel",
+    "start": "expo start --dev-client",
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
@@ -54,7 +54,7 @@
     "prop-types": "^15.8.1",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "react-native": "^0.76.7",
+    "react-native": "0.76.7",
     "react-native-config": "^1.5.5",
     "react-native-fs": "^2.20.0",
     "react-native-gesture-handler": "~2.20.2",
@@ -67,7 +67,8 @@
     "react-native-vector-icons": "^10.2.0",
     "react-native-web": "~0.19.13",
     "react-native-webview": "^13.13.2",
-    "react-test-renderer": "18.3.1"
+    "react-test-renderer": "18.3.1",
+    "expo-dev-client": "~5.0.15"
   },
   "devDependencies": {
     "@babel/core": "^7.26.7",

@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import Constants from 'expo-constants';
 
-
 /**
  * Hook to gather usability testing on the app.
  * This hook initializes MS Clarity only when running on native code. To avoid
