@@ -38,4 +38,5 @@ yarn-error.*
 # android folder
 android/
 
+# test coverage
 coverage/

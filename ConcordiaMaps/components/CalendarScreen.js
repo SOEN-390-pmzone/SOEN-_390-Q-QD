@@ -1,4 +1,5 @@
-import Header from "../components/Header";
+import Header from "./Header";
+import NavBar from "./NavBar";
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -101,6 +102,7 @@ const CalendarScreen = () => {
   return (
     <View style={[styles.container, { backgroundColor: "white" }]}>
       <Header />
+      <NavBar />
 
       <View style={{ padding: 20 }}>
         <Text style={styles.dateText}>
@@ -175,43 +177,39 @@ const CalendarScreen = () => {
             No events for today.
           </Text>
         ) : (
-          <>
-            <FlatList
-              data={events}
-              keyExtractor={(item) => item.id}
-              renderItem={({ item }) => (
-                <View style={styles.eventCard}>
-                  <Text style={styles.eventTitle}>{item.title}</Text>
-                  {item.notes && (
-                    <Text style={styles.eventInfo}>
-                      {item.notes ?? "No additionnal information"}
-                    </Text>
-                  )}
-                  {<Text>{item.coordinates}</Text>}
-                  {item.location && (
-                    <Text style={styles.eventInfo}>{item.location}</Text>
-                  )}
-                  <Text style={styles.eventInfo}>
-                    {format(new Date(item.startDate), "hh:mm a")} -{" "}
-                    {format(new Date(item.endDate), "hh:mm a")}
-                  </Text>
+          <FlatList
+            data={events}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <View style={styles.eventCard}>
+                <Text style={styles.eventTitle}>{item.title}</Text>
+                <Text style={styles.eventInfo}>
+                  {item.location ?? "No additionnal information"}
+                </Text>
+                <Text style={styles.eventInfo}>
+                  {format(new Date(item.startDate), "hh:mm a")} -{" "}
+                  {format(new Date(item.endDate), "hh:mm a")}
+                </Text>
 
-                  <TouchableOpacity
-                    testID="getClassDirectionsButton"
-                    style={styles.classDirectionsButton}
-                    onPress={() => getDestination(item.location)}
-                  >
-                    <Text style={styles.classDirectionsButtonText}>
-                      {" "}
-                      Get Directions{" "}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              )}
-            />
-          </>
+                <TouchableOpacity
+                  testID="getClassDirectionsButton"
+                  style={styles.classDirectionsButton}
+                  onPress={() =>
+                    alert("Get directions to " + (item.location ?? ""))
+                  }
+                >
+                  <Text style={styles.classDirectionsButtonText}>
+                    {" "}
+                    Get Directions{" "}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          />
         )}
       </View>
+
+      <Footer />
     </View>
   );
 };
