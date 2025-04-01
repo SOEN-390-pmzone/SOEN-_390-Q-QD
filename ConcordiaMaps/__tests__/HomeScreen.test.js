@@ -25,6 +25,11 @@ jest.mock("expo-font", () => ({
 
 jest.mock("axios");
 
+jest.mock("../components/LiveBusTracker", () => ({
+  __esModule: true,
+  default: () => null,
+}));
+
 describe("HomeScreen", () => {
   const mockLocation = { latitude: 45.4973, longitude: -73.5789 };
   const mockToggleModal = jest.fn();

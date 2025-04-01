@@ -1,10 +1,25 @@
 import React, { useState } from "react";
 import { View, TouchableOpacity, Text, Animated } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import PropTypes from "prop-types"; // Add this import
 import styles from "../styles";
 import { Alert } from "react-native";
 import ShuttleSchedule from "./ShuttleSchedule";
 import { navigationItems } from "../constants/configuration/navigationItems";
+
+const MenuItem = ({ item }) => (
+  <TouchableOpacity onPress={item.action} testID={item.testID}>
+    <Text style={styles.menuItem}>{item.label}</Text>
+  </TouchableOpacity>
+);
+
+MenuItem.propTypes = {
+  item: PropTypes.shape({
+    action: PropTypes.func.isRequired,
+    testID: PropTypes.string,
+    label: PropTypes.string.isRequired,
+  }).isRequired,
+};
 
 function NavBar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -22,20 +37,20 @@ function NavBar() {
   };
 
   // Process the menu items and attach the concrete implementations
-  const menuItems = navigationItems.map(item => {
+  const menuItems = navigationItems.map((item) => {
     let action;
-    
+
     // Determine action based on actionType
     switch (item.actionType) {
-      case 'navigate':
+      case "navigate":
         action = () => navigation.navigate(item.screen);
         break;
-      case 'alert':
+      case "alert":
         action = () => Alert.alert(`You clicked: ${item.label}`);
         break;
-      case 'custom':
+      case "custom":
         // Special case for shuttle schedule
-        if (item.id === 'shuttle') {
+        if (item.id === "shuttle") {
           action = () => setIsScheduleVisible(true);
         } else {
           action = () => Alert.alert(`Custom action for: ${item.label}`);
@@ -44,10 +59,10 @@ function NavBar() {
       default:
         action = () => Alert.alert(`No action defined for: ${item.label}`);
     }
-    
+
     return {
       ...item,
-      action
+      action,
     };
   });
 
@@ -55,12 +70,6 @@ function NavBar() {
     inputRange: [0, 1],
     outputRange: [-270, 0],
   });
-
-  const MenuItem = ({ item }) => (
-    <TouchableOpacity onPress={item.action} testID={item.testID}>
-      <Text style={styles.menuItem}>{item.label}</Text>
-    </TouchableOpacity>
-  );
 
   return (
     <View style={styles.navbar}>
