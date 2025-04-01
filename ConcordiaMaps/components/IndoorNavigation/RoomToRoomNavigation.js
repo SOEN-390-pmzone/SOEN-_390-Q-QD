@@ -8,6 +8,7 @@ import NavBar from "../NavBar";
 import styles from "../../styles/IndoorNavigation/RoomtoRoomNavigationStyles";
 import ExpandedFloorPlanModal from "./ExpandedFloorPlan";
 import NavigationSteps from "./NavigationSteps";
+import { measureWebViewPerformance } from "../../utils/PerformanceMonitoring";
 
 // Import extracted services
 import { generateFloorHtml } from "../../services/FloorPlanService";
@@ -17,10 +18,8 @@ import {
   validateRoomSelection,
 } from "../../services/NavigationValidationService";
 import {
-  // calculateNavigationPath,
   handleSameFloorNavigation,
   handleInterFloorNavigation,
-  // findTransportMethod
 } from "../../services/PathCalculationService";
 
 const RoomToRoomNavigation = () => {
@@ -663,7 +662,9 @@ const RoomToRoomNavigation = () => {
                   onError={(e) =>
                     console.error("WebView error:", e.nativeEvent)
                   }
-                  onLoadEnd={() => console.log("WebView loaded")}
+                  onLoadEnd={(e) =>
+                    measureWebViewPerformance(e, `Start Floor ${startFloor}`)
+                  }
                   renderLoading={() => (
                     <View style={styles.webViewLoader}>
                       <Text>Loading...</Text>
@@ -704,7 +705,9 @@ const RoomToRoomNavigation = () => {
                     onError={(e) =>
                       console.error("WebView error:", e.nativeEvent)
                     }
-                    onLoadEnd={() => console.log("WebView loaded")}
+                    onLoadEnd={(e) =>
+                      measureWebViewPerformance(e, `End Floor ${endFloor}`)
+                    }
                     renderLoading={() => (
                       <View style={styles.webViewLoader}>
                         <Text>Loading...</Text>

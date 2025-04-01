@@ -20,10 +20,30 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.anonymous.ConcordiaMaps"
+      "package": "com.anonymous.ConcordiaMaps",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyAW8gOP1PJiZp1br3kOPSlRYdPlDoGkkR4"
+        }
+      }
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "@sentry/react-native/expo",
+        {
+          "url": "https://sentry.io/",
+          "project": "concordiamaps",
+          "organization": "mannrp"
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "bc687347-4420-4121-ae87-4bfd54ff7086"
+      }
     }
   }
 }

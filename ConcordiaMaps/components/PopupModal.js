@@ -2,6 +2,7 @@ import React from "react";
 import { Modal, View, Text, TouchableOpacity, Alert } from "react-native";
 import PropTypes from "prop-types";
 import styles from "../styles/DirectionBox.style";
+import { useNavigation } from '@react-navigation/native'; // Add this import
 
 // Building to floor selector mapping
 const INDOOR_NAVIGATION_BUILDINGS = {
@@ -9,7 +10,9 @@ const INDOOR_NAVIGATION_BUILDINGS = {
   "John Molson School Of Business": "JMSB",
 };
 
-const PopupModal = ({ isVisible, data, onClose, navigation }) => {
+const PopupModal = ({ isVisible, data, onClose }) => {
+  const navigation = useNavigation(); // Get navigation via hook
+  
   const handleFloorSelector = () => {
     onClose(); // Close the modal first
     const buildingType = INDOOR_NAVIGATION_BUILDINGS[data.name];
@@ -93,7 +96,6 @@ PopupModal.propTypes = {
     address: PropTypes.string,
   }).isRequired,
   onClose: PropTypes.func.isRequired,
-  navigation: PropTypes.object.isRequired,
 };
 
 export default PopupModal;
