@@ -3,12 +3,13 @@ export function adjustGraphForAccessibility(graph, preferences) {
 
   if (preferences.avoidStairs) {
     for (const node in updatedGraph) {
+      // Remove any node whose name includes "stairs"
       if (node.toLowerCase().includes("stairs")) {
         delete updatedGraph[node];
         continue;
       }
 
-      for (const neighbor in Object.keys(updatedGraph[node])) {
+      for (const neighbor in updatedGraph[node]) {
         if (neighbor.toLowerCase().includes("stairs")) {
           delete updatedGraph[node][neighbor];
         }

@@ -171,6 +171,7 @@ describe("NextEventModal additional coverage", () => {
 
   it("decrements timer countdown", async () => {
     jest.useFakeTimers();
+
     Calendar.requestCalendarPermissionsAsync.mockResolvedValue({
       status: "granted",
     });
@@ -178,8 +179,9 @@ describe("NextEventModal additional coverage", () => {
 
     // Create an event starting 5 seconds from now
     const now = new Date();
-    const future = new Date(now.getTime() + 5000);
+    const future = new Date(now.getTime() + 10000);
     const futureEnd = new Date(future.getTime() + 3600000);
+
     Calendar.getEventsAsync.mockResolvedValue([
       {
         id: "1",
@@ -190,28 +192,25 @@ describe("NextEventModal additional coverage", () => {
       },
     ]);
 
-    const { getByText } = render(
+    const { getByTestId } = render(
       <NextEventModal isVisible={true} onClose={jest.fn()} />,
     );
 
-    // Wait for the event to render and timer to be set
     await waitFor(() => {
-      expect(getByText("SOEN 390")).toBeTruthy();
+      expect(getByTestId("timer-text")).toBeTruthy();
     });
 
-    // Get the initial timer text (format MM:SS)
-    const timerTextElement = getByText(/^\d\d:\d\d$/);
-    const initialTimeText = timerTextElement.props.children;
+    const initialTime = getByTestId("timer-text").props.children;
 
-    // Advance timers by 2000ms (2 seconds)
-    act(() => {
-      jest.advanceTimersByTime(2000);
+    await act(async () => {
+      jest.advanceTimersByTime(3000);
     });
 
     await waitFor(() => {
-      const updatedTimeText = getByText(/^\d\d:\d\d$/).props.children;
-      expect(updatedTimeText).not.toEqual(initialTimeText);
+      const updatedTime = getByTestId("timer-text").props.children;
+      expect(updatedTime).not.toEqual(initialTime);
     });
+
     jest.useRealTimers();
   });
 
