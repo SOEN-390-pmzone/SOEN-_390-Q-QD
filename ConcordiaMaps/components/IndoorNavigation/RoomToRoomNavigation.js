@@ -8,6 +8,7 @@ import NavBar from "../NavBar";
 import styles from "../../styles/IndoorNavigation/RoomtoRoomNavigationStyles";
 import ExpandedFloorPlanModal from "./ExpandedFloorPlan";
 import NavigationSteps from "./NavigationSteps";
+import { adjustGraphForAccessibility } from "../../services/AccessibilityGraphUtils";
 
 // Import extracted services
 import { generateFloorHtml } from "../../services/FloorPlanService";
@@ -26,7 +27,6 @@ import {
 const RoomToRoomNavigation = () => {
   const route = useRoute();
   const navigation = useNavigation(); // Moved hook to top level of component
-
   // Extract route parameters
   const {
     buildingId = null, // Building ID (e.g., "hall", "jmsb")
@@ -56,6 +56,8 @@ const RoomToRoomNavigation = () => {
   const [endFloorPath, setEndFloorPath] = useState([]);
   const [navigationSteps, setNavigationSteps] = useState([]);
 
+  const [avoidStairs, setAvoidStairs] = useState(false);
+
   // State for UI management
   const [expandedFloor, setExpandedFloor] = useState(null);
   const [step, setStep] = useState("building"); // Possible values: 'building', 'floors', 'rooms', 'navigation'
@@ -67,6 +69,10 @@ const RoomToRoomNavigation = () => {
 
   // Available buildings
   const buildings = FloorRegistry.getBuildings();
+
+  const handleToggleAccessibility = () => {
+    setAvoidStairs((prev) => !prev);
+  };
 
   // Initialize from route params on component mount
   useEffect(() => {
@@ -364,10 +370,16 @@ const RoomToRoomNavigation = () => {
         endFloor,
       );
 
-      const startFloorGraph = FloorRegistry.getGraph(buildingType, startFloor);
-      const endFloorGraph = FloorRegistry.getGraph(buildingType, endFloor);
+      const sFloorGraph = FloorRegistry.getGraph(buildingType, startFloor);
+      const eFloorGraph = FloorRegistry.getGraph(buildingType, endFloor);
       const building = FloorRegistry.getBuilding(buildingType);
 
+      const startFloorGraph = adjustGraphForAccessibility(sFloorGraph, {
+        avoidStairs,
+      });
+      const endFloorGraph = adjustGraphForAccessibility(eFloorGraph, {
+        avoidStairs,
+      });
       console.log(
         "Start floor graph loaded:",
         Object.keys(startFloorGraph).length,
@@ -552,7 +564,25 @@ const RoomToRoomNavigation = () => {
   const renderRoomSelection = () => (
     <View style={styles.sectionContainer}>
       <Text style={styles.sectionTitle}>Select Rooms</Text>
-
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          marginVertical: 10,
+        }}
+      >
+        <Text style={{ fontSize: 16, marginRight: 10 }}>Avoid Stairs:</Text>
+        <TouchableOpacity
+          onPress={handleToggleAccessibility}
+          style={{
+            padding: 10,
+            backgroundColor: avoidStairs ? "green" : "gray",
+            borderRadius: 5,
+          }}
+        >
+          <Text style={{ color: "white" }}>{avoidStairs ? "ON" : "OFF"}</Text>
+        </TouchableOpacity>
+      </View>
       <View style={styles.floorsContainer}>
         <View style={styles.floorColumn}>
           <Text style={styles.floorColumnTitle}>
