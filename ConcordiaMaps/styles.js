@@ -1,4 +1,4 @@
-import { StyleSheet } from "react-native";
+import { Platform, StyleSheet } from "react-native";
 
 const styles = StyleSheet.create({
   container: {
@@ -369,7 +369,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   buttonNext: {
-    bottom: 650,
+    bottom: Platform.OS === "ios" ? 525 : 650,
     left: "75%",
     transform: [{ translateX: -80 }],
     backgroundColor: "#912338",
