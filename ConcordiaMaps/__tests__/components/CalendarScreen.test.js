@@ -58,10 +58,8 @@ describe("Header", () => {
 
   it("opens the CalendarScreen when clicking on the calendar icon", () => {
     const { getByTestId } = render(<Header />);
-
     const calendarButton = getByTestId("calendarButton");
     fireEvent.press(calendarButton);
-
     expect(mockNavigate).toHaveBeenCalledWith("Calendar");
   });
 });
@@ -74,11 +72,10 @@ describe("CalendarScreen", () => {
 
   // Test the fetching of calendars
   it("shows alert when calendar permissions are denied", async () => {
-    // Mock the alert function
     const originalAlert = global.alert;
     global.alert = jest.fn();
 
-    // Directly modify the mock implementation for this test only
+    // Modify the mock for this test only
     Calendar.requestCalendarPermissionsAsync.mockImplementationOnce(() =>
       Promise.resolve({ status: "denied" }),
     );
@@ -90,7 +87,6 @@ describe("CalendarScreen", () => {
         </NavigationContainer>,
       );
 
-      // Wait for the alert to be called with a longer timeout
       await waitFor(
         () => {
           expect(global.alert).toHaveBeenCalledWith(
@@ -98,11 +94,9 @@ describe("CalendarScreen", () => {
           );
         },
         { timeout: 3000 },
-      ); // Increase timeout to give enough time
+      );
     } finally {
-      // Restore original alert
       global.alert = originalAlert;
-
       // Reset the mock to return granted for other tests
       Calendar.requestCalendarPermissionsAsync.mockImplementation(() =>
         Promise.resolve({ status: "granted" }),
@@ -110,7 +104,6 @@ describe("CalendarScreen", () => {
     }
   });
 
-  // Test the selecting multiple calendars functionality
   it("selects other calendars", async () => {
     const { getByText, getByTestId } = render(
       <NavigationContainer>
@@ -125,7 +118,6 @@ describe("CalendarScreen", () => {
     await waitFor(() => getByText("Select Calendars"));
 
     fireEvent.press(getByText("Calendar 1"));
-
     fireEvent.press(getByText("Done"));
 
     await waitFor(() => {
@@ -133,7 +125,6 @@ describe("CalendarScreen", () => {
     });
   });
 
-  // Test previous days view
   it("shows events from previous days", async () => {
     const { getByText } = render(
       <NavigationContainer>
@@ -150,7 +141,6 @@ describe("CalendarScreen", () => {
     });
   });
 
-  // Test upcoming days view
   it("shows events for upcoming days", async () => {
     const { getByText } = render(
       <NavigationContainer>
@@ -167,28 +157,6 @@ describe("CalendarScreen", () => {
     });
   });
 
-  // Test the Get Directions button
-  it("clicks on the Get Directions button and closes the alert", async () => {
-    const originalAlert = global.alert;
-    global.alert = jest.fn();
-
-    try {
-      const { getByText } = render(
-        <NavigationContainer>
-          <CalendarScreen />
-        </NavigationContainer>,
-      );
-
-      await waitFor(() => getByText("Event 1"));
-
-      fireEvent.press(getByText("Get Directions"));
-
-      expect(global.alert).toHaveBeenCalledWith("Get directions to Room 101");
-    } finally {
-      global.alert = originalAlert;
-    }
-  });
-
   it("toggles calendar selection correctly (remove then add)", async () => {
     const { getByText, getByTestId } = render(
       <NavigationContainer>
@@ -199,13 +167,11 @@ describe("CalendarScreen", () => {
     await waitFor(() => getByTestId("selectCalendarButton"));
 
     fireEvent.press(getByTestId("selectCalendarButton"));
-
     await waitFor(() => getByText("Select Calendars"));
 
     expect(getByText("Select your calendars (2)")).toBeTruthy();
 
     fireEvent.press(getByText("Calendar 1"));
-
     fireEvent.press(getByText("Done"));
 
     await waitFor(() => {
@@ -233,6 +199,7 @@ describe("CalendarScreen", () => {
         title: "Test Event",
         startDate: new Date(),
         endDate: new Date(new Date().getTime() + 3600000),
+        // location is undefined
       },
     ]);
 
@@ -246,8 +213,28 @@ describe("CalendarScreen", () => {
 
     fireEvent.press(getByTestId("getClassDirectionsButton"));
 
-    expect(global.alert).toHaveBeenCalledWith("Get directions to ");
+    expect(global.alert).toHaveBeenCalledWith(
+      "There is no location associated with this event.",
+    );
 
     global.alert = originalAlert;
+  });
+
+  it("clicks on the Get Directions button and navigates to GetDirections", async () => {
+    const { getByText } = render(
+      <NavigationContainer>
+        <CalendarScreen />
+      </NavigationContainer>,
+    );
+
+    await waitFor(() => getByText("Event 1"));
+
+    fireEvent.press(getByText("Get Directions"));
+
+    expect(mockNavigate).toHaveBeenCalledWith("GetDirections", {
+      origin: { latitude: 45.494971642137095, longitude: -73.57791280320929 },
+      destination: "Room 101",
+      disableLiveLocation: true,
+    });
   });
 });

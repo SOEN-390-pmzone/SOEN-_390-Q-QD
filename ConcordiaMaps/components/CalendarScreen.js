@@ -14,6 +14,7 @@ import { format, addDays, subDays } from "date-fns";
 import styles from "../styles";
 import { Ionicons } from "@expo/vector-icons";
 import Footer from "./Footer";
+import { useNavigation } from "@react-navigation/native";
 
 const CalendarScreen = () => {
   const [events, setEvents] = useState([]);
@@ -21,6 +22,7 @@ const CalendarScreen = () => {
   const [selectedCalendarIds, setSelectedCalendarIds] = useState([]);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [modalVisible, setModalVisible] = useState(false);
+  const navigation = useNavigation(); // Initialize navigation
 
   useEffect(() => {
     requestCalendarPermission();
@@ -79,6 +81,23 @@ const CalendarScreen = () => {
     setSelectedCalendarIds((prev) =>
       prev.includes(id) ? prev.filter((calId) => calId !== id) : [...prev, id],
     );
+  };
+
+  // Helper function to handle Get Directions button press
+  const handleGetDirections = (event) => {
+    if (event.location) {
+      const defaultOrigin = {
+        latitude: 45.494971642137095,
+        longitude: -73.57791280320929,
+      };
+      navigation.navigate("GetDirections", {
+        origin: defaultOrigin,
+        destination: event.location,
+        disableLiveLocation: true,
+      });
+    } else {
+      alert("There is no location associated with this event.");
+    }
   };
 
   return (
@@ -166,7 +185,7 @@ const CalendarScreen = () => {
               <View style={styles.eventCard}>
                 <Text style={styles.eventTitle}>{item.title}</Text>
                 <Text style={styles.eventInfo}>
-                  {item.location ?? "No additionnal information"}
+                  {item.location ?? "No additional information"}
                 </Text>
                 <Text style={styles.eventInfo}>
                   {format(new Date(item.startDate), "hh:mm a")} -{" "}
@@ -176,13 +195,10 @@ const CalendarScreen = () => {
                 <TouchableOpacity
                   testID="getClassDirectionsButton"
                   style={styles.classDirectionsButton}
-                  onPress={() =>
-                    alert("Get directions to " + (item.location ?? ""))
-                  }
+                  onPress={() => handleGetDirections(item)}
                 >
                   <Text style={styles.classDirectionsButtonText}>
-                    {" "}
-                    Get Directions{" "}
+                    Get Directions
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -197,5 +213,3 @@ const CalendarScreen = () => {
 };
 
 export default CalendarScreen;
-
-//ss
