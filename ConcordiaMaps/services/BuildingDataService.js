@@ -109,10 +109,10 @@ class FloorRegistry {
           graph: JMSB1Graph,
           getSVG: () => SVGs.MBfloor1SVG,
         },
-        2: {
-          id: "2",
-          name: "MSB 2",
-          description: "Second floor of JMSB",
+        S2: {
+          id: "S2",
+          name: "MSB S2",
+          description: "Second-lowest floor of JMSB",
           rooms: JMSB2Rooms,
           graph: JMSB2Graph,
           getSVG: () => SVGs.MBfloor2SVG,
