@@ -36,7 +36,8 @@ yarn-error.*
 *.tsbuildinfo
 
 #coverage
-coverage
+coverage/
+
 
 #maestro
 maestro
