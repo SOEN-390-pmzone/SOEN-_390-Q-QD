@@ -7,6 +7,7 @@
  */
 
 import DistanceCalculatorService from "./DistanceCalculatorService";
+import NavigationStepsService from "./NavigationStepsService";
 
 class JourneyOptimizer {
   /**
@@ -95,8 +96,8 @@ class JourneyOptimizer {
     // Find optimal path
     const optimizedLocations = this.findOptimalPath(locations);
 
-    // Generate steps
-    return generateNavigationSteps(optimizedLocations);
+    // Generate steps using the dedicated service
+    return NavigationStepsService.generateNavigationSteps(optimizedLocations);
   }
 }
 
