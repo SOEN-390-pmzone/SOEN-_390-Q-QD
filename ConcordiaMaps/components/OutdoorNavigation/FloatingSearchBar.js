@@ -13,7 +13,11 @@ import styles from "../../styles";
 import PropTypes from "prop-types";
 import * as Crypto from "expo-crypto";
 
-const FloatingSearchBar = ({ onPlaceSelect, placeholder, nestedScrollEnabled = true  }) => {
+const FloatingSearchBar = ({
+  onPlaceSelect,
+  placeholder,
+  nestedScrollEnabled = true,
+}) => {
   const GOOGLE_MAPS_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -130,7 +134,6 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder, nestedScrollEnabled = t
     }
   };
 
-
   return (
     <View style={{ width: "90%" }}>
       <View style={styles.searchBar}>
@@ -153,7 +156,7 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder, nestedScrollEnabled = t
           </TouchableOpacity>
         )}
       </View>
-      
+
       {/* Replace FlatList with direct mapping in a ScrollView */}
       {predictions.length > 0 && (
         <View style={[styles.list, { marginTop: 5 }]}>
@@ -183,6 +186,5 @@ FloatingSearchBar.propTypes = {
   placeholder: PropTypes.string,
   nestedScrollEnabled: PropTypes.bool,
 };
-
 
 export default FloatingSearchBar;
