@@ -11,29 +11,27 @@ export const useBuildingRoomSelection = () => {
   // Get rooms for the selected building
   const availableRooms = useMemo(() => {
     if (!selectedBuilding) return [];
-
+  
     const buildingType = Object.keys(FloorRegistry.getAllBuildings()).find(
       (key) => FloorRegistry.getBuilding(key).id === selectedBuilding,
     );
-
+  
     if (!buildingType) return [];
-
-    // Get all floors for this building
+  
     const building = FloorRegistry.getBuilding(buildingType);
     if (!building || !building.floors) return [];
-
-    // Collect rooms from all floors
-    let allRooms = [];
+  
+    const allRooms = new Set(); // Use a Set to ensure unique room IDs
     Object.values(building.floors).forEach((floor) => {
       const floorRooms = FloorRegistry.getRooms(buildingType, floor.id);
       if (floorRooms) {
-        allRooms = [...allRooms, ...Object.keys(floorRooms)];
+        Object.keys(floorRooms).forEach((room) => allRooms.add(room));
       }
     });
-
-    return allRooms;
+  
+    return Array.from(allRooms); // Convert Set back to an array
   }, [selectedBuilding]);
-
+  
   const handleBuildingChange = (value) => {
     setSelectedBuilding(value);
     setSelectedRoom("");
