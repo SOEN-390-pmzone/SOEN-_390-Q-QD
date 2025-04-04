@@ -1,97 +1,99 @@
-import {
-  calculateDistance,
-  getLocationCoordinates,
-  estimateIndoorDistance,
-  hasIndoorConnection,
-  estimateDistanceBetweenBuildings,
-} from "./NavigationHelperFunctions";
-
 /**
- * Route Strategies for JourneyOptimizer
- *
- * This file contains strategy implementations for different route optimization approaches.
- * Following the Strategy Pattern, each strategy implements the same interface but provides
- * different algorithms for calculating path distances and determining valid paths.
+ * Route strategies for different types of location pairs
  */
 
-// Strategy interface (abstract)
-export class RouteStrategy {
-  calculateDistance(locationA, locationB) {
-    /* abstract */
-  }
-  isPathAllowed(fromLocation, toLocation) {
-    /* abstract */
-  }
-}
+const RouteStrategies = {
+  /**
+   * Indoor strategy for paths between rooms in buildings
+   */
+  Indoor: {
+    calculateDistance(locationA, locationB) {
+      // If in same building, use direct indoor distance
+      if (locationA.buildingId === locationB.buildingId) {
+        return this._calculateSameBuildingDistance(locationA, locationB);
+      }
 
-// Strategy for users who want to minimize distance regardless of indoor/outdoor
-export class ShortestPathStrategy extends RouteStrategy {
-  calculateDistance(locationA, locationB) {
-    // If same building, use indoor distance
-    if (
-      locationA.buildingId &&
-      locationB.buildingId &&
-      locationA.buildingId === locationB.buildingId
-    ) {
-      return estimateIndoorDistance(locationA.room, locationB.room);
-    }
+      // Different buildings - use tunnel system or known indoor paths
+      return this._calculateCrossBuildingDistance(locationA, locationB);
+    },
 
-    // Otherwise, calculate direct geographic distance
-    const coordA = getLocationCoordinates(locationA);
-    const coordB = getLocationCoordinates(locationB);
-    return calculateDistance(coordA, coordB);
-  }
+    isPathAllowed(locationA, locationB, avoidOutdoor) {
+      // Different buildings - check if connected by tunnels/indoor paths
+      if (locationA.buildingId !== locationB.buildingId) {
+        // Check building connectivity through indoor paths
+        return this._buildingsHaveIndoorConnection(
+          locationA.buildingId,
+          locationB.buildingId,
+        );
+      }
+      return true; // Same building is always allowed
+    },
 
-  isPathAllowed() {
-    // All paths are allowed in shortest path strategy
-    return true;
-  }
-}
+    _calculateSameBuildingDistance(locationA, locationB) {
+      // Implement indoor distance logic (floor differences, etc.)
+      // ...
+      return 1; // Placeholder
+    },
 
-// Strategy for users who want to stay indoors
-export class IndoorOnlyStrategy extends RouteStrategy {
-  calculateDistance(locationA, locationB) {
-    // If same building, use indoor distance
-    if (
-      locationA.buildingId &&
-      locationB.buildingId &&
-      locationA.buildingId === locationB.buildingId
-    ) {
-      return estimateIndoorDistance(locationA.room, locationB.room);
-    }
+    _calculateCrossBuildingDistance(locationA, locationB) {
+      // Implement cross-building distance logic
+      // ...
+      return 10; // Placeholder
+    },
 
-    // If buildings have indoor connection, use that distance
-    if (
-      locationA.buildingId &&
-      locationB.buildingId &&
-      hasIndoorConnection(locationA.buildingId, locationB.buildingId)
-    ) {
-      return estimateDistanceBetweenBuildings(
-        locationA.buildingId,
-        locationB.buildingId,
+    _buildingsHaveIndoorConnection(buildingA, buildingB) {
+      // Check building connectivity (tunnels, bridges, etc.)
+      // This would use building data to determine connectivity
+      // ...
+      return true; // Placeholder
+    },
+  },
+
+  /**
+   * Outdoor strategy for paths between outdoor locations
+   */
+  Outdoor: {
+    calculateDistance(locationA, locationB) {
+      // Simple haversine formula or similar for direct outdoor distance
+      return Math.sqrt(
+        Math.pow(locationB.latitude - locationA.latitude, 2) +
+          Math.pow(locationB.longitude - locationA.longitude, 2),
       );
-    }
+    },
 
-    // No indoor connection possible
-    return Infinity; // Make this path impossible to select
-  }
+    isPathAllowed(locationA, locationB, avoidOutdoor) {
+      // If avoiding outdoor paths, this might return false
+      // But typically all outdoor paths are possible
+      return (
+        !avoidOutdoor || this._isShortDistanceOutdoors(locationA, locationB)
+      );
+    },
 
-  isPathAllowed(locationA, locationB) {
-    // Only allow paths that are within the same building or have tunnel/indoor connections
-    if (!locationA.buildingId || !locationB.buildingId) {
-      return false; // One of them is outdoor, not allowed
-    }
+    _isShortDistanceOutdoors(locationA, locationB) {
+      // Logic to determine if an outdoor path is short enough to be acceptable
+      // even when avoiding outdoor paths
+      // ...
+      return true; // Placeholder
+    },
+  },
 
-    return (
-      locationA.buildingId === locationB.buildingId ||
-      hasIndoorConnection(locationA.buildingId, locationB.buildingId)
-    );
-  }
-}
+  /**
+   * Mixed strategy for paths between indoor and outdoor locations
+   */
+  Mixed: {
+    calculateDistance(locationA, locationB) {
+      // Find nearest building entrance to the outdoor location
+      // Then calculate: indoor location -> building entrance + entrance -> outdoor location
+      // ...
+      return 5; // Placeholder
+    },
 
-// Factory for creating strategy based on user preference
-export class RouteStrategyFactory {
-  static getStrategy(avoidOutdoor) {
-    return avoidOutdoor ? new IndoorOnlyStrategy() : new ShortestPathStrategy();
-  }
-}
+    isPathAllowed(locationA, locationB, avoidOutdoor) {
+      // Mixed paths are always allowed, but might prefer certain entrances
+      // based on user preferences
+      return true;
+    },
+  },
+};
+
+export default RouteStrategies;

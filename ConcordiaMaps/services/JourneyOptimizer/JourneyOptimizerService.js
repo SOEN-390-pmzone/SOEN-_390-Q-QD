@@ -1,40 +1,23 @@
-import { RouteStrategyFactory } from "./RouteStrategies";
-import { generateNavigationSteps } from "./NavigationStepGenerator";
-
 /**
  * JourneyOptimizerService
  *
- * Implementation of the Strategy Pattern with a Toggle-Based Factory.
- * This solves the path variant of the Traveling Salesman Problem using the Nearest Neighbor algorithm.
- * We are trying to hit all locations whilst only deciding the start location.
- * Solution runs in O(n²) time. Not guaranteed to be optimal, but is at most log(n) times longer than the optimal path.
- *
- * Works based on user preference for indoor or outdoor paths. There is a route strategy for each option.
- *
- * ? Simple use case for a user who prefers indoors (e.g., when weather is bad)
- *  import JourneyOptimizerService from './JourneyOptimizerService';
- *  const indoorSteps = JourneyOptimizerService.generateOptimalJourney(tasks, true);
- *
- * ? Advanced use case with optimizer instance
- *  const optimizer = JourneyOptimizerService.createOptimizer(true);
- *    Morning tasks
- *  const steps = optimizer.generateOptimalJourney(morningTasks);
- *    Afternoon tasks
- *  const afternoonSteps = optimizer.generateOptimalJourney(afternoonTasks);
- *    ...
+ * Core service for finding optimal paths through a set of locations.
+ * Implements the Traveling Salesman Problem using the Nearest Neighbor algorithm.
+ * Agnostic to the specific distance calculation method.
  */
 
-// Main service that uses the strategies
+import DistanceCalculatorService from "./DistanceCalculatorService";
+
 class JourneyOptimizer {
   /**
-   * @param {Boolean} avoidOutdoor - True if user wants Indoor path that uses tunnels
+   * @param {Object} distanceCalculator - Service for calculating distances
    */
-  constructor(avoidOutdoor = false) {
-    this.strategy = RouteStrategyFactory.getStrategy(avoidOutdoor);
+  constructor(distanceCalculator) {
+    this.distanceCalculator = distanceCalculator;
   }
 
   /**
-   * Find the optimal path using Nearest Neighbor algorithm with the selected strategy
+   * Find the optimal path using Nearest Neighbor algorithm
    * @param {Array} locations - Array of locations to visit
    * @returns {Array} Ordered array of locations to visit
    */
@@ -59,9 +42,9 @@ class JourneyOptimizer {
 
       // Find nearest valid location
       remainingLocations.forEach((location, index) => {
-        // Check if this path is allowed by the strategy
-        if (this.strategy.isPathAllowed(currentLocation, location)) {
-          const distance = this.strategy.calculateDistance(
+        // Check if this path is allowed
+        if (this.distanceCalculator.isPathAllowed(currentLocation, location)) {
+          const distance = this.distanceCalculator.calculateDistance(
             currentLocation,
             location,
           );
@@ -92,7 +75,7 @@ class JourneyOptimizer {
   }
 
   /**
-   * Main method to generate an optimal journey
+   * Generate navigation steps from optimized locations
    * @param {Array} tasks - Tasks/locations to visit
    * @returns {Array} Navigation steps
    */
@@ -124,7 +107,8 @@ export default {
    * @param {boolean} avoidOutdoor - Whether to avoid outdoor paths
    * @returns {Object} Journey optimizer
    */
-  createOptimizer: (avoidOutdoor = false) => new JourneyOptimizer(avoidOutdoor),
+  createOptimizer: (avoidOutdoor = false) =>
+    new JourneyOptimizer(new DistanceCalculatorService(avoidOutdoor)),
 
   /**
    * Generate optimal journey with specified preference
@@ -133,7 +117,9 @@ export default {
    * @returns {Array} Navigation steps
    */
   generateOptimalJourney: (tasks, avoidOutdoor = false) => {
-    const optimizer = new JourneyOptimizer(avoidOutdoor);
+    const optimizer = new JourneyOptimizer(
+      new DistanceCalculatorService(avoidOutdoor),
+    );
     return optimizer.generateOptimalJourney(tasks);
   },
 };
