@@ -23,24 +23,25 @@ class JourneyOptimizer {
    * @returns {Array} Ordered array of locations to visit
    */
   findOptimalPath(locations) {
-    // Trivial case with 2 or less locations
+    // Trivial case with 2 or fewer locations
     if (!locations || locations.length <= 2) {
       return locations;
     }
-
+  
     // Always start with the first location
     const startLocation = locations[0];
-
+  
     // All other locations need to be visited
     let currentLocation = startLocation;
     let remainingLocations = [...locations.slice(1)];
     let orderedPath = [startLocation];
-
+    let unreachableLocations = []; // Track locations that cannot be reached
+  
     // Process locations until none remain or no valid paths exist
     while (remainingLocations.length > 0) {
       let nearestIndex = -1;
       let minDistance = Infinity;
-
+  
       // Find nearest valid location
       remainingLocations.forEach((location, index) => {
         // Check if this path is allowed
@@ -55,23 +56,34 @@ class JourneyOptimizer {
           }
         }
       });
-
-      // If no valid path was found, break the loop
+  
+      // If no valid path was found, mark remaining locations as unreachable
       if (nearestIndex === -1) {
         console.warn(
-          "No valid path found. Some locations are unreachable with current constraints.",
+          "No valid path found for some locations. These locations are unreachable:",
+          remainingLocations.map((loc) => loc.id),
         );
+        unreachableLocations = [...remainingLocations];
         break;
       }
-
+  
       // Add nearest location to path
       const nextLocation = remainingLocations[nearestIndex];
       orderedPath.push(nextLocation);
       currentLocation = nextLocation;
-
+  
+      // Remove the visited location from the remaining list
       remainingLocations.splice(nearestIndex, 1);
     }
-
+  
+    // Log unreachable locations if any
+    if (unreachableLocations.length > 0) {
+      console.warn(
+        "Unreachable locations:",
+        unreachableLocations.map((loc) => loc.id),
+      );
+    }
+  
     return orderedPath;
   }
 
