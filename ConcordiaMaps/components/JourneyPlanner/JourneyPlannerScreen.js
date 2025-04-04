@@ -76,7 +76,9 @@ const JourneyPlannerScreen = () => {
           />
 
           {inputMode === "address" ? (
-            <AddressSelector onAddressSelect={handleAddressSelect} />
+            <AddressSelector
+              onAddressSelect={handleAddressSelect}
+            />
           ) : (
             <BuildingRoomSelector
               buildings={buildings}
