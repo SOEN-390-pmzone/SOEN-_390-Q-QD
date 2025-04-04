@@ -49,10 +49,10 @@ export const navigationItems = [
     actionType: "alert",
   },
   {
-    id:'journey-planner',
-    label: 'Journey Planner',
-    actionType:'navigate',
-    screen:'JourneyPlannerScreen',
+    id: "journey-planner",
+    label: "Journey Planner",
+    actionType: "navigate",
+    screen: "JourneyPlannerScreen",
   },
   {
     id: "shuttle",
