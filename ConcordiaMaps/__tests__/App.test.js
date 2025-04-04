@@ -73,42 +73,7 @@ jest.mock("react-native-maps", () => {
 });
 
 // Mock the PopupModal component but capture its props
-let mockPopupModalProps = {};
-jest.mock("../components/PopupModal", () => {
-  const { View } = require("react-native");
-  const PropTypes = require("prop-types");
 
-  const PopupModal = (props) => {
-    mockPopupModalProps = props;
-    return <View testID="popup-modal" />;
-  };
-
-  PopupModal.propTypes = {
-    isVisible: PropTypes.bool,
-    data: PropTypes.shape({
-      name: PropTypes.string,
-      coordinate: PropTypes.shape({
-        latitude: PropTypes.number,
-        longitude: PropTypes.number,
-      }),
-    }),
-    onClose: PropTypes.func,
-  };
-
-  return PopupModal;
-});
-
-// Mock the navigation
-const mockNavigate = jest.fn();
-jest.mock("@react-navigation/native", () => {
-  const actualNav = jest.requireActual("@react-navigation/native");
-  return {
-    ...actualNav,
-    useNavigation: () => ({
-      navigate: mockNavigate,
-    }),
-  };
-});
 
 describe("App", () => {
   beforeEach(() => {

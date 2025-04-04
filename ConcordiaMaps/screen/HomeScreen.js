@@ -1,4 +1,11 @@
-import React, { useState, useEffect, useRef, useContext } from "react";
+import React, {
+  useState,
+  useEffect,
+  createContext,
+  useRef,
+  useContext,
+  useMemo,
+} from "react";
 import { View, Text, TouchableOpacity, Image } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import NavBar from "../components/NavBar";
@@ -7,7 +14,7 @@ import TemporaryModal from "../components/temporaryModal";
 import { LocationContext } from "../contexts/LocationContext";
 import Footer from "../components/Footer";
 import styles from "../styles";
-
+import { useNavigation } from "@react-navigation/native";
 import BuildingColoring from "../components/buildingColoring";
 import Legend from "../components/Legend";
 import ShuttleStop from "../components/ShuttleStop";
@@ -19,17 +26,56 @@ import {
 } from "../components/AsyncPersistence";
 import convertToCoordinates from "../components/convertToCoordinates";
 import PropTypes from "prop-types";
-
+import PopupModal from "../components/PopupModal";
 import MapMarkers from "../components/MapMarkers";
+import PopupOPI from "../components/PopupOPI";
 
-import PopupOPI from "../components/PopupOPI"; // Import the new popup component
-import { PointsOfInterest } from "../constants/OutdoorPtsOfDirections"; // Import the new Points of Interest data
+const ModalContext = createContext();
 
+// Correctly defined wrapper component with navigation prop
+const PopupModalWrapper = ({ isVisible, data, onClose, navigation }) => {
+  return (
+    <PopupModal
+      isVisible={isVisible}
+      data={data}
+      onClose={onClose}
+      navigation={navigation}
+    />
+  );
+};
+const OPIModalWrapper = ({
+  opiPopupVisible,
+  selectedOPI,
+  onClose,
+  navigation,
+}) => {
+  return (
+    <PopupOPI
+      isVisible={opiPopupVisible}
+      data={selectedOPI || { name: "", address: "" }}
+      onClose={onClose}
+      navigation={navigation}
+    />
+  );
+};
+PopupModalWrapper.propTypes = {
+  isVisible: PropTypes.bool.isRequired,
+  data: PropTypes.object.isRequired,
+  onClose: PropTypes.func.isRequired,
+  navigation: PropTypes.object.isRequired
+};
+OPIModalWrapper.propTypes = {
+  opiPopupVisible: PropTypes.bool.isRequired,
+  selectedOPI: PropTypes.object,  // Remove isRequired
+  onClose: PropTypes.func.isRequired,
+  navigation: PropTypes.object.isRequired
+};
 function HomeScreen({ asyncKey = "Campus" }) {
   const loyolaPostalCode = process.env.EXPO_PUBLIC_LOYOLA_POSTAL_CODE;
   const sgwPostalCode = process.env.EXPO_PUBLIC_SGW_POSTAL_CODE;
 
   const location = useContext(LocationContext);
+  const navigation = useNavigation();
 
   const [postalCode, setPostalCode] = useState(null);
   const [coordinates, setCoordinates] = useState(null);
@@ -40,9 +86,36 @@ function HomeScreen({ asyncKey = "Campus" }) {
   const mapRef = useRef(null);
   const TOGGLE_MODAL_TIMEOUT = 10000;
 
-  // State for OPI (Points of Interest) popup
+  // Modals for building pop ups
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [modalData, setModalData] = useState({
+    name: "",
+    coordinate: { latitude: 0, longitude: 0 },
+  });
   const [opiPopupVisible, setOpiPopupVisible] = useState(false);
   const [selectedOPI, setSelectedOPI] = useState(null);
+
+  const toggleModal = () => {
+    setModalVisible(!isModalVisible);
+  };
+  const opiToggleModal = () => {
+    setOpiPopupVisible((prev) => !prev);
+  };
+
+  // Memoize the context value
+  const modalContextValue = useMemo(
+    () => ({
+      isModalVisible,
+      modalData,
+      toggleModal,
+      setModalData,
+      opiToggleModal,
+      setSelectedOPI,
+      opiPopupVisible,
+      selectedOPI,
+    }),
+    [isModalVisible, modalData, selectedOPI, opiPopupVisible],
+  );
 
   useEffect(() => {
     const fetchLastCampus = async () => {
@@ -119,10 +192,6 @@ function HomeScreen({ asyncKey = "Campus" }) {
     }, 100);
   };
 
-  const handleOPIMarkerPress = (poi) => {
-    setSelectedOPI(poi);
-    setOpiPopupVisible(true);
-  };
   const [modalState, setModalState] = useState(true);
   useEffect(() => {
     if (modalState) {
@@ -136,106 +205,98 @@ function HomeScreen({ asyncKey = "Campus" }) {
 
   return (
     <View style={styles.container} testID="home-screen">
-      <Header />
-      <NavBar />
-      <FloatingSearchBar onPlaceSelect={handlePlaceSelect} />
-      {error ? <Text testID="error-message">{error}</Text> : null}
+      <ModalContext.Provider value={modalContextValue}>
+        <Header />
+        <NavBar />
+        <FloatingSearchBar onPlaceSelect={handlePlaceSelect} />
+        {error ? <Text testID="error-message">{error}</Text> : null}
 
-      {coordinates ? (
-        <>
-          <TemporaryModal
-            text="Press the button to switch campuses"
-            time={TOGGLE_MODAL_TIMEOUT}
-            modalState={modalState}
-            onRequestClose={() => setModalState(false)}
-            TestID="toggleModal"
-          />
+        {coordinates ? (
+          <>
+            <TemporaryModal
+              text="Press the button to switch campuses"
+              time={TOGGLE_MODAL_TIMEOUT}
+              modalState={modalState}
+              onRequestClose={() => setModalState(false)}
+              TestID="toggleModal"
+            />
 
-          <MapView
-            testID="map-view"
-            style={styles.map}
-            ref={mapRef}
-            initialRegion={
-              location
-                ? {
-                    latitude: location.latitude,
-                    longitude: location.longitude,
-                    latitudeDelta: 0.005,
-                    longitudeDelta: 0.005,
-                  }
-                : {
-                    latitude: coordinates.latitude,
-                    longitude: coordinates.longitude,
-                    latitudeDelta: 0.01,
-                    longitudeDelta: 0.01,
-                  }
-            }
-            showsUserLocation={true}
-            loadingEnabled={true}
-            watchUserLocation={true}
-            onRegionChangeComplete={(region) => setMapRegion(region)}
-          >
-            <MapMarkers />
-            {PointsOfInterest.map((poi) => (
-              <Marker
-                key={poi.name}
-                coordinate={poi.coordinate}
-                title={poi.name}
-                description={poi.address}
-                onPress={() => handleOPIMarkerPress(poi)}
+            <MapView
+              testID="map-view"
+              style={styles.map}
+              ref={mapRef}
+              initialRegion={
+                location
+                  ? {
+                      latitude: location.latitude,
+                      longitude: location.longitude,
+                      latitudeDelta: 0.005,
+                      longitudeDelta: 0.005,
+                    }
+                  : {
+                      latitude: coordinates.latitude,
+                      longitude: coordinates.longitude,
+                      latitudeDelta: 0.01,
+                      longitudeDelta: 0.01,
+                    }
+              }
+              showsUserLocation={true}
+              loadingEnabled={true}
+              watchUserLocation={true}
+              onRegionChangeComplete={(region) => setMapRegion(region)}
+            >
+              <MapMarkers />
+              <BuildingColoring />
+              {selectedLocation && (
+                <Marker
+                  coordinate={{
+                    latitude: selectedLocation.latitude,
+                    longitude: selectedLocation.longitude,
+                  }}
+                  title="Selected Location"
+                />
+              )}
+              <ShuttleStop />
+              <LiveBusTracker mapRef={mapRef} />
+            </MapView>
+            <View style={styles.toggleView}>
+              <TouchableOpacity
+                testID="change-campus-button"
+                onPress={handleChangeCampuses}
+                activeOpacity={0.7}
+                style={{
+                  borderColor: borderColor,
+                  borderWidth: 2,
+                  borderRadius: 10,
+                }}
               >
                 <Image
-                  source={poi.markerImage}
-                  style={styles.customMarkerImage}
+                  style={styles.buttonImage}
+                  source={require("../assets/ToggleButton.png")}
+                  resizeMode={"cover"}
                 />
-              </Marker>
-            ))}
-
-            <BuildingColoring />
-            {selectedLocation && (
-              <Marker
-                coordinate={{
-                  latitude: selectedLocation.latitude,
-                  longitude: selectedLocation.longitude,
-                }}
-                title="Selected Location"
-              />
-            )}
-            <ShuttleStop />
-            <LiveBusTracker mapRef={mapRef} />
-          </MapView>
-          <View style={styles.toggleView}>
-            <TouchableOpacity
-              testID="change-campus-button"
-              onPress={handleChangeCampuses}
-              activeOpacity={0.7}
-              style={{
-                borderColor: borderColor,
-                borderWidth: 2,
-                borderRadius: 10,
-              }}
-            >
-              <Image
-                style={styles.buttonImage}
-                source={require("../assets/ToggleButton.png")}
-                resizeMode={"cover"}
-              />
-            </TouchableOpacity>
-          </View>
-          <Legend />
-        </>
-      ) : (
-        <Text>Loading...</Text>
-      )}
-      {error ? <Text>Error: {error}</Text> : null}
-      <Footer />
-
-      {/* OPI Popup */}
-      <PopupOPI
-        isVisible={opiPopupVisible}
-        data={selectedOPI || { name: "", address: "" }}
-        onClose={() => setOpiPopupVisible(false)}
-      />
+              </TouchableOpacity>
+            </View>
+            <Legend />
+          </>
+        ) : (
+          <Text>Loading...</Text>
+        )}
+        {error ? <Text>Error: {error}</Text> : null}
+        <Footer />
+        <PopupModalWrapper
+          navigation={navigation}
+          isVisible={isModalVisible}
+          data={modalData}
+          onClose={toggleModal}
+        />
+        <OPIModalWrapper
+          navigation={navigation}
+          opiPopupVisible={opiPopupVisible}
+          selectedOPI={selectedOPI}
+          onClose={opiToggleModal}
+        />
+      </ModalContext.Provider>
     </View>
   );
 }
@@ -244,4 +305,5 @@ HomeScreen.propTypes = {
   asyncKey: PropTypes.string,
 };
 
+export { ModalContext };
 export default HomeScreen;

@@ -14,7 +14,23 @@ jest.mock("expo-location", () => ({
     granted: true,
   }),
 }));
+const mockModalContext = {
+  isModalVisible: false,
+  modalData: {},
+  toggleModal: jest.fn(),
+  setModalData: jest.fn(),
+  opiToggleModal: jest.fn(),
+  setSelectedOPI: jest.fn(),
+  opiPopupVisible: false,
+  selectedOPI: null
+};
 
+// Render test component with context
+render(
+  <ModalContext.Provider value={mockModalContext}>
+    <HomeScreen />
+  </ModalContext.Provider>
+);
 jest.mock("react-native-webview", () => ({
   WebView: () => null,
 }));
