@@ -9,6 +9,7 @@ import styles from "./styles";
 import GetDirections from "./components/OutdoorNavigation/GetDirections";
 
 //? SCREENS
+import JourneyPlannerScreen from "./components/JourneyPlanner/JourneyPlannerScreen"
 import IndoorNavigation from "./components/IndoorNavigation/IndoorNavigation";
 import FloorSelector from "./components/IndoorNavigation/FloorSelector";
 import BuildingSelector from "./components/IndoorNavigation/BuildingSelector";
@@ -88,6 +89,10 @@ export default function App() {
             <Stack.Screen
               name="MultistepNavigationScreen"
               component={MultistepNavigationScreen}
+            />
+                        <Stack.Screen
+              name="JourneyplannerScreen"
+              component={JourneyPlannerScreen}
             />
           </Stack.Navigator>
 
