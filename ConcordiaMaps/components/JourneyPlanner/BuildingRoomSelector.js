@@ -8,6 +8,9 @@ const BuildingRoomSelector = ({
   buildings,
   selectedBuilding,
   setSelectedBuilding,
+  selectedFloor,
+  setSelectedFloor,
+  availableFloors,
   selectedRoom,
   setSelectedRoom,
   availableRooms,
@@ -34,13 +37,29 @@ const BuildingRoomSelector = ({
         </Picker>
       </View>
 
+      <Text style={styles.inputLabel}>Select floor:</Text>
+      <View style={styles.pickerContainer}>
+        <Picker
+          selectedValue={selectedFloor}
+          onValueChange={setSelectedFloor}
+          style={styles.picker}
+          enabled={selectedBuilding !== ""}
+          testID="floor-picker"
+        >
+          <Picker.Item label="Select a floor" value="" />
+          {availableFloors.map((floor) => (
+            <Picker.Item key={floor} label={`Floor ${floor}`} value={floor} />
+          ))}
+        </Picker>
+      </View>
+
       <Text style={styles.inputLabel}>Select room:</Text>
       <View style={styles.pickerContainer}>
         <Picker
           selectedValue={selectedRoom}
           onValueChange={setSelectedRoom}
           style={styles.picker}
-          enabled={selectedBuilding !== ""}
+          enabled={selectedBuilding !== "" && selectedFloor !== ""}
           testID="room-picker"
         >
           <Picker.Item label="Select a room" value="" />
@@ -54,6 +73,7 @@ const BuildingRoomSelector = ({
         style={styles.addButton}
         onPress={onAddLocation}
         testID="add-building-location-button"
+        disabled={!selectedBuilding || !selectedFloor || !selectedRoom}
       >
         <Text style={styles.addButtonText}>Add Location</Text>
       </TouchableOpacity>
@@ -65,6 +85,9 @@ BuildingRoomSelector.propTypes = {
   buildings: PropTypes.array.isRequired,
   selectedBuilding: PropTypes.string.isRequired,
   setSelectedBuilding: PropTypes.func.isRequired,
+  selectedFloor: PropTypes.string.isRequired,
+  setSelectedFloor: PropTypes.func.isRequired,
+  availableFloors: PropTypes.array.isRequired,
   selectedRoom: PropTypes.string.isRequired,
   setSelectedRoom: PropTypes.func.isRequired,
   availableRooms: PropTypes.array.isRequired,

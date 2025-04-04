@@ -32,9 +32,12 @@ const JourneyPlannerScreen = () => {
   const {
     buildings,
     selectedBuilding,
+    selectedFloor,      
+    availableFloors,  
     selectedRoom,
     availableRooms,
     setSelectedBuilding,
+    setSelectedFloor,   
     setSelectedRoom,
     resetSelection,
   } = useBuildingRoomSelection();
@@ -46,7 +49,7 @@ const JourneyPlannerScreen = () => {
   };
 
   const handleBuildingRoomAdd = () => {
-    if (addBuildingRoomTask(taskTitle, selectedBuilding, selectedRoom)) {
+    if (addBuildingRoomTask(taskTitle, selectedBuilding, selectedRoom, selectedFloor)) {
       setTaskTitle("");
       resetSelection();
     }
@@ -81,14 +84,17 @@ const JourneyPlannerScreen = () => {
             />
           ) : (
             <BuildingRoomSelector
-              buildings={buildings}
-              selectedBuilding={selectedBuilding}
-              setSelectedBuilding={setSelectedBuilding}
-              selectedRoom={selectedRoom}
-              setSelectedRoom={setSelectedRoom}
-              availableRooms={availableRooms}
-              onAddLocation={handleBuildingRoomAdd}
-            />
+                buildings={buildings}
+                selectedBuilding={selectedBuilding}
+                setSelectedBuilding={setSelectedBuilding}
+                selectedFloor={selectedFloor}      
+                setSelectedFloor={setSelectedFloor} 
+                availableFloors={availableFloors}   
+                selectedRoom={selectedRoom}
+                setSelectedRoom={setSelectedRoom}
+                availableRooms={availableRooms}
+                onAddLocation={handleBuildingRoomAdd}
+              />
           )}
         </View>
 

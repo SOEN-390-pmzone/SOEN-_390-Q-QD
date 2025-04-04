@@ -101,22 +101,39 @@ class FloorRegistry {
         building.id.toLowerCase().includes(text.toLowerCase()),
     );
   }
-  // Get building type from building ID
   static getBuildingTypeFromId(buildingId) {
     if (!buildingId) return "HallBuilding"; // Default
-
+  
+    // Direct mappings for common building codes
+    const directMappings = {
+      "MB": "JMSB",
+      "JMSB": "JMSB",
+      "H": "HallBuilding",
+      "HALL": "HallBuilding",
+      "VE": "VanierExtension",
+      "VL": "VanierLibrary",
+      "EV": "EVBuilding",
+      "LB": "Library"
+    };
+  
+    // Check for direct mapping first
+    const upperBuildingId = buildingId.toUpperCase();
+    if (directMappings[upperBuildingId]) {
+      return directMappings[upperBuildingId];
+    }
+  
     try {
-      // Look through available buildings in registry
+      // Look through available buildings in registry as fallback
       const buildingTypes = Object.keys(this.#buildings);
       const foundType = buildingTypes.find(
-        (key) => this.#buildings[key]?.code === buildingId.toUpperCase(),
+        (key) => this.#buildings[key]?.code === upperBuildingId
       );
-
+  
       if (foundType) return foundType;
     } catch (error) {
       console.error("Error finding building type:", error);
     }
-
+    console.log("Couldnt find floor from FloorRegistry. defaulting to Hall Building")
     return "HallBuilding"; // Default to Hall Building if no match
   }
 

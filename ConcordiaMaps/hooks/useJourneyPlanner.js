@@ -5,11 +5,23 @@ import JourneyOptimizerService from "../services/JourneyOptimizer/JourneyOptimiz
 
 //The goal of the file is to decouple The task list management from the JourneyOptimizerScreen.
 // This file stores the information about which tasks have been selected and how to rearrange them.
+
+/**
+ * Custom hook for journey planning functionality
+ * Manages task list and provides methods for task manipulation
+ * @returns {Object} Journey planning methods and state
+ */
 export const useJourneyPlanner = () => {
   const navigation = useNavigation();
   const [tasks, setTasks] = useState([]);
   const [avoidOutdoor, setAvoidOutdoor] = useState(false);
 
+  /**
+   * Add an outdoor location task
+   * @param {string} title - Title for the location
+   * @param {Object} location - Location with latitude and longitude
+   * @returns {boolean} Success indicator
+   */
   const addAddressTask = (title, location) => {
     if (title.trim() === "") {
       Alert.alert("Error", "Please enter a title for this location");
@@ -18,6 +30,7 @@ export const useJourneyPlanner = () => {
 
     const newTask = {
       id: `task-${Date.now()}`,
+      type: "outdoor",
       title: title,
       latitude: location.latitude,
       longitude: location.longitude,
@@ -28,33 +41,43 @@ export const useJourneyPlanner = () => {
     return true;
   };
 
-  const addBuildingRoomTask = (title, buildingId, room) => {
-    if (title.trim() === "") {
-      Alert.alert("Error", "Please enter a title for this location");
-      return false;
-    }
+  /**
+ * Add an indoor location task with room and building
+ * @param {string} title - Title for the location
+ * @param {string} buildingId - Building identifier
+ * @param {string} room - Room identifier
+ * @param {string} selectedFloor - Floor identifier
+ * @returns {boolean} Success indicator
+ */
+const addBuildingRoomTask = (title, buildingId, room, selectedFloor) => {
+  if (title.trim() === "") {
+    Alert.alert("Error", "Please enter a title for this location");
+    return false;
+  }
 
-    if (!buildingId) {
-      Alert.alert("Error", "Please select a building");
-      return false;
-    }
+  if (!buildingId) {
+    Alert.alert("Error", "Please select a building");
+    return false;
+  }
 
-    if (!room) {
-      Alert.alert("Error", "Please select a room");
-      return false;
-    }
+  if (!room) {
+    Alert.alert("Error", "Please select a room");
+    return false;
+  }
 
-    const newTask = {
-      id: `task-${Date.now()}`,
-      title: title,
-      buildingId: buildingId,
-      room: room,
-      description: `Visit ${title} in ${buildingId}, room ${room}`,
-    };
-
-    setTasks([...tasks, newTask]);
-    return true;
+  const newTask = {
+    id: `task-${Date.now()}`,
+    type: "indoor",
+    title: title,
+    buildingId: buildingId,
+    room: room,
+    floor: floor,
+    description: `Visit ${title} in ${buildingId}, room ${room}`,
   };
+
+  setTasks([...tasks, newTask]);
+  return true;
+};
 
   const removeTask = (id) => {
     setTasks(tasks.filter((task) => task.id !== id));
@@ -83,7 +106,6 @@ export const useJourneyPlanner = () => {
       Alert.alert("Error", "Please add at least two locations for a journey");
       return false;
     }
-    // TODO : Implement this vvvvv
 
     // try {
     //   // Call the JourneyOptimizerService to get optimized navigation steps
@@ -93,7 +115,14 @@ export const useJourneyPlanner = () => {
     //   );
 
     //   // Navigate to the MultistepNavigationScreen with the generated steps
-    //   navigation.navigate('MultistepNavigationScreen', { steps });
+    //   navigation.navigate('MultistepNavigationScreen', { 
+    //     navigationPlan: {
+    //       steps: steps,
+    //       title: "Optimized Journey",
+    //       id: `journey-${Date.now()}`,
+    //       currentStep: 0
+    //     }
+    //   });
     //   return true;
     // } catch (error) {
     //   console.error('Error generating journey:', error);

@@ -93,17 +93,42 @@ class JourneyOptimizer {
    * @returns {Array} Navigation steps
    */
   generateOptimalJourney(tasks) {
-    // Convert tasks to location objects
-    const locations = tasks.map((task) => ({
-      id: task.id,
-      buildingId: task.buildingId,
-      room: task.room,
-      latitude: task.latitude,
-      longitude: task.longitude,
-      title: task.title,
-      description:
-        task.description || `Task at ${task.buildingId || "outdoor location"}`,
-    }));
+    // Convert tasks to location objects while preserving type-specific properties
+    const locations = tasks.map((task) => {
+      // Create base location object with common properties
+      const baseLocation = {
+        id: task.id,
+        title: task.title,
+        type: task.type || (task.buildingId ? "indoor" : "outdoor"),
+        description: task.description || 
+          (task.type === "indoor" ? 
+            `Visit ${task.title} in ${task.buildingId}, room ${task.room}` : 
+            `Visit ${task.title} at this location`)
+      };
+
+      // Add type-specific properties based on location type
+      if (task.type === "indoor" || task.buildingId) {
+        // Indoor location - include building, room, floor
+        return {
+          ...baseLocation,
+          buildingId: task.buildingId,
+          room: task.room,
+          floor: task.floor,
+          // Include coordinates if available
+          ...(task.latitude && task.longitude && {
+            latitude: task.latitude,
+            longitude: task.longitude
+          })
+        };
+      } else {
+        // Outdoor location - include coordinates
+        return {
+          ...baseLocation,
+          latitude: task.latitude,
+          longitude: task.longitude
+        };
+      }
+    });
 
     // Find optimal path
     const optimizedLocations = this.findOptimalPath(locations);

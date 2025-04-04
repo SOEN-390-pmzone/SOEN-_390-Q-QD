@@ -65,41 +65,42 @@ describe("JourneyPlannerScreen", () => {
   // We don't need to mock the hook's setInputMode anymore for these tests
   // as we'll be triggering the component's internal one.
 
-  beforeEach(() => {
-    // Reset mocks
-    jest.clearAllMocks();
-    mockAddAddressTask.mockReturnValue(true); // Default success
-    mockAddBuildingRoomTask.mockReturnValue(true); // Default success
+  // First, add selectedFloor to the useBuildingRoomSelection mock return value
+beforeEach(() => {
+  // Reset mocks
+  jest.clearAllMocks();
+  mockAddAddressTask.mockReturnValue(true); // Default success
+  mockAddBuildingRoomTask.mockReturnValue(true); // Default success
 
-
-    // Mock hook implementations - provide initial values
-    useJourneyPlanner.mockReturnValue({
-      tasks: [],
-      avoidOutdoor: false,
-      setAvoidOutdoor: mockSetAvoidOutdoor,
-      addAddressTask: mockAddAddressTask,
-      addBuildingRoomTask: mockAddBuildingRoomTask,
-      removeTask: mockRemoveTask,
-      moveTaskUp: mockMoveTaskUp,
-      moveTaskDown: mockMoveTaskDown,
-      generateJourney: mockGenerateJourney,
-      // The hook's inputMode/setInputMode are less relevant now for conditional rendering tests
-    });
-
-    useBuildingRoomSelection.mockReturnValue({
-      buildings: [
-        { id: "H", name: "Hall Building" },
-        { id: "MB", name: "JMSB Building" },
-      ],
-      selectedBuilding: { id: "H", name: "Hall Building" },
-      selectedRoom: "H-920",
-      availableRooms: ["H-920", "H-921", "H-922"],
-      setSelectedBuilding: jest.fn(),
-      setSelectedRoom: jest.fn(),
-      resetSelection: mockResetSelection,
-    });
+  // Mock hook implementations - provide initial values
+  useJourneyPlanner.mockReturnValue({
+    tasks: [],
+    avoidOutdoor: false,
+    setAvoidOutdoor: mockSetAvoidOutdoor,
+    addAddressTask: mockAddAddressTask,
+    addBuildingRoomTask: mockAddBuildingRoomTask,
+    removeTask: mockRemoveTask,
+    moveTaskUp: mockMoveTaskUp,
+    moveTaskDown: mockMoveTaskDown,
+    generateJourney: mockGenerateJourney,
   });
 
+  useBuildingRoomSelection.mockReturnValue({
+    buildings: [
+      { id: "H", name: "Hall Building" },
+      { id: "MB", name: "JMSB Building" },
+    ],
+    selectedBuilding: { id: "H", name: "Hall Building" },
+    selectedRoom: "H-920",
+    selectedFloor: "9", // Add this line
+    availableFloors: ["8", "9", "10"], // Add this line
+    availableRooms: ["H-920", "H-921", "H-922"],
+    setSelectedBuilding: jest.fn(),
+    setSelectedRoom: jest.fn(),
+    setSelectedFloor: jest.fn(), // Add this line
+    resetSelection: mockResetSelection,
+  });
+});
   it("renders correctly", () => {
     const { getByTestId } = render(<JourneyPlannerScreen />);
 
@@ -151,35 +152,34 @@ describe("JourneyPlannerScreen", () => {
     // or explicitly if we tracked setTaskTitle state.
   });
 
-  // --- FIXED TEST ---
-  it("handles building/room selection correctly", () => {
-    const { UNSAFE_root, getByTestId } = render(<JourneyPlannerScreen />);
+// Fix for "handles building/room selection correctly" test
+it("handles building/room selection correctly", () => {
+  const { UNSAFE_root, getByTestId } = render(<JourneyPlannerScreen />);
 
-    // --- Switch mode first ---
-    const inputSwitcher = UNSAFE_root.findByType("InputTypeSwitcher");
-    act(() => {
-      inputSwitcher.props.setInputMode("building");
-    });
-    // --- Mode switched ---
-
-    // Find BuildingRoomSelector mock component instance (now that it should be rendered)
-    const buildingSelector = getByTestId("building-room-selector"); // Use getByTestId as it should exist
-
-    // Simulate location addition by calling the prop
-    act(() => { // Wrap interaction in act
-        buildingSelector.props.onAddLocation();
-    });
-
-    // Check if addBuildingRoomTask was called
-    // Arguments are: taskTitle (""), selectedBuilding, selectedRoom from the hook mock
-    expect(mockAddBuildingRoomTask).toHaveBeenCalledWith(
-      "", // Initial taskTitle
-      { id: "H", name: "Hall Building" }, // selectedBuilding from mock
-      "H-920" // selectedRoom from mock
-    );
-    // Check that selection *was* reset because addBuildingRoomTask returned true
-    expect(mockResetSelection).toHaveBeenCalledTimes(1);
+  // --- Switch mode first ---
+  const inputSwitcher = UNSAFE_root.findByType("InputTypeSwitcher");
+  act(() => {
+    inputSwitcher.props.setInputMode("building");
   });
+  // --- Mode switched ---
+
+  // Find BuildingRoomSelector mock component instance (now that it should be rendered)
+  const buildingSelector = getByTestId("building-room-selector"); // Use getByTestId as it should exist
+
+  // Simulate location addition by calling the prop
+  act(() => { 
+    buildingSelector.props.onAddLocation();
+  });
+
+  // Check if addBuildingRoomTask was called with the correct parameters (including selectedFloor)
+  expect(mockAddBuildingRoomTask).toHaveBeenCalledWith(
+    "", // Initial taskTitle
+    { id: "H", name: "Hall Building" }, // selectedBuilding from mock
+    "H-920", // selectedRoom from mock
+    "9" // selectedFloor from mock - add this line
+  );
+  expect(mockResetSelection).toHaveBeenCalledTimes(1);
+});
 
   it("handles failed address task addition", () => {
     // Make addAddressTask return false specifically for this test
@@ -200,39 +200,39 @@ describe("JourneyPlannerScreen", () => {
     // The main check is that the function was called.
   });
 
-  // --- FIXED TEST ---
-  it("handles failed building/room task addition", () => {
-    // Make addBuildingRoomTask return false specifically for this test
-    mockAddBuildingRoomTask.mockReturnValueOnce(false);
+  // Fix for "handles failed building/room task addition" test
+it("handles failed building/room task addition", () => {
+  // Make addBuildingRoomTask return false specifically for this test
+  mockAddBuildingRoomTask.mockReturnValueOnce(false);
 
-    const { UNSAFE_root, getByTestId } = render(<JourneyPlannerScreen />);
+  const { UNSAFE_root, getByTestId } = render(<JourneyPlannerScreen />);
 
-    // --- Switch mode first ---
-    const inputSwitcher = UNSAFE_root.findByType("InputTypeSwitcher");
-    act(() => {
-      inputSwitcher.props.setInputMode("building");
-    });
-    // --- Mode switched ---
-
-    // Find BuildingRoomSelector mock component instance
-    const buildingSelector = getByTestId("building-room-selector");
-
-     // Simulate location addition by calling the prop
-    act(() => {
-        buildingSelector.props.onAddLocation();
-    });
-
-
-    // Check if addBuildingRoomTask was called
-    expect(mockAddBuildingRoomTask).toHaveBeenCalledWith(
-      "",
-      { id: "H", name: "Hall Building" },
-      "H-920"
-    );
-
-    // Check that selection was NOT reset since addition failed
-    expect(mockResetSelection).not.toHaveBeenCalled();
+  // --- Switch mode first ---
+  const inputSwitcher = UNSAFE_root.findByType("InputTypeSwitcher");
+  act(() => {
+    inputSwitcher.props.setInputMode("building");
   });
+  // --- Mode switched ---
+
+  // Find BuildingRoomSelector mock component instance
+  const buildingSelector = getByTestId("building-room-selector");
+
+  // Simulate location addition by calling the prop
+  act(() => {
+    buildingSelector.props.onAddLocation();
+  });
+
+  // Check if addBuildingRoomTask was called with the correct parameters
+  expect(mockAddBuildingRoomTask).toHaveBeenCalledWith(
+    "",
+    { id: "H", name: "Hall Building" },
+    "H-920",
+    "9" // Add the selectedFloor parameter
+  );
+
+  // Check that selection was NOT reset since addition failed
+  expect(mockResetSelection).not.toHaveBeenCalled();
+});
 
   it("disables Generate button when fewer than 2 tasks", () => {
     // Override hook return value for this test *before* render
