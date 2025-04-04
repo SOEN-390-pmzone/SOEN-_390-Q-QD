@@ -52,7 +52,7 @@ export const navigationItems = [
     id:'journey-planner',
     label: 'Journey Planner',
     actionType:'navigate',
-    screen:'JourneyPlanner',
+    screen:'JourneyPlannerScreen',
   },
   {
     id: "shuttle",

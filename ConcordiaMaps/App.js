@@ -91,7 +91,7 @@ export default function App() {
               component={MultistepNavigationScreen}
             />
                         <Stack.Screen
-              name="JourneyplannerScreen"
+              name="JourneyPlannerScreen"
               component={JourneyPlannerScreen}
             />
           </Stack.Navigator>
