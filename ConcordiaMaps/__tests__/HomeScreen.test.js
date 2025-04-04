@@ -41,6 +41,31 @@ jest.mock("expo-font", () => ({
 
 jest.mock("axios");
 
+// Mock NextEventModal so we can check its visibility and simulate closing it.
+jest.mock("../components/NextEventModal", () => {
+  const React = require("react");
+  const { TouchableOpacity, Text } = require("react-native");
+  const PropTypes = require("prop-types");
+
+  const MockNextEventModal = ({ isVisible, onClose, testID }) => {
+    return isVisible ? (
+      <TouchableOpacity testID={testID || "next-event-modal"} onPress={onClose}>
+        <Text>Next Event Modal</Text>
+      </TouchableOpacity>
+    ) : null;
+  };
+
+  MockNextEventModal.propTypes = {
+    isVisible: PropTypes.bool.isRequired,
+    onClose: PropTypes.func.isRequired,
+    testID: PropTypes.string,
+  };
+
+  MockNextEventModal.displayName = "MockNextEventModal";
+
+  return MockNextEventModal;
+});
+
 describe("HomeScreen", () => {
   const mockLocation = { latitude: 45.4973, longitude: -73.5789 };
   const mockToggleModal = jest.fn();
@@ -61,6 +86,29 @@ describe("HomeScreen", () => {
         </ModalContext.Provider>
       </NavigationContainer>,
     );
+
+  it("opens and closes NextEventModal when 'Next Class' button is pressed", async () => {
+    const { getByText, queryByTestId, getByTestId } = renderComponent();
+
+    // Initially, the modal should not be visible
+    expect(queryByTestId("next-event-modal")).toBeNull();
+
+    // Press the "Next Class" button
+    const nextClassButton = getByText("Next Class");
+    fireEvent.press(nextClassButton);
+
+    // Wait for the modal to appear
+    const modal = await waitFor(() => getByTestId("next-event-modal"));
+    expect(modal).toBeTruthy();
+
+    // Simulate closing the modal by pressing it
+    fireEvent.press(modal);
+
+    // Wait for the modal to be removed
+    await waitFor(() => {
+      expect(queryByTestId("next-event-modal")).toBeNull();
+    });
+  });
 
   it("renders the map correctly on successful API call", async () => {
     const mockResponse = {

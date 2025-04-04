@@ -26,6 +26,13 @@ import {
 } from "../components/AsyncPersistence";
 import convertToCoordinates from "../components/convertToCoordinates";
 import PropTypes from "prop-types";
+import PopupOPI from "../components/PopupOPI"; // Import the new popup component
+import NextEventModal from "../components/NextEventModal"; // Import the NextEventModal component
+import { PointsOfInterest } from "../constants/OutdoorPtsOfDirections"; // Import the new Points of Interest data
+
+// Marker image assets for Restaurant and Cafe
+const customMarkerImage = require("../assets/PinLogo.png");
+
 import PopupModal from "../components/PopupModal";
 import MapMarkers from "../components/MapMarkers";
 import PopupOPI from "../components/PopupOPI";
@@ -85,6 +92,8 @@ function HomeScreen({ asyncKey = "Campus" }) {
   const borderColor = "#912338";
   const mapRef = useRef(null);
   const TOGGLE_MODAL_TIMEOUT = 10000;
+
+  const [eventModalVisible, setEventModalVisible] = useState(false);
 
   // Modals for building pop ups
   const [isModalVisible, setModalVisible] = useState(false);

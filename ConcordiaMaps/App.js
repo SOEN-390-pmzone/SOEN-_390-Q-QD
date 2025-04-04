@@ -11,6 +11,11 @@ import IndoorNavigation from "./components/IndoorNavigation/IndoorNavigation";
 import FloorSelector from "./components/IndoorNavigation/FloorSelector";
 import BuildingSelector from "./components/IndoorNavigation/BuildingSelector";
 import TunnelNavigation from "./components/IndoorNavigation/TunnelNavigation";
+import PropTypes from "prop-types";
+import CalendarScreen from "./components/CalendarScreen";
+
+// Create Context for modal data and visibility
+export const ModalContext = createContext();
 
 const Stack = createNativeStackNavigator();
 
@@ -41,6 +46,8 @@ export default function App() {
               name="TunnelNavigation"
               component={TunnelNavigation}
             />
+
+            <Stack.Screen name="Calendar" component={CalendarScreen} />
           </Stack.Navigator>
         </NavigationContainer>
       </>

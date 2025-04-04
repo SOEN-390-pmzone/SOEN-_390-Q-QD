@@ -18,6 +18,26 @@ import { useGoogleMapDirections } from "../hooks/useGoogleMapDirections";
 import DirectionsBox from "./DirectionsBox";
 import PropTypes from "prop-types";
 import { LocationContext } from "../contexts/LocationContext";
+import { useRoute } from "@react-navigation/native";
+
+// Helper function to geocode an address string into coordinates
+const geocodeAddress = async (address) => {
+  try {
+    const geocodedLocations = await Location.geocodeAsync(address);
+    if (geocodedLocations.length > 0) {
+      return {
+        latitude: geocodedLocations[0].latitude,
+        longitude: geocodedLocations[0].longitude,
+      };
+    } else {
+      console.warn("No locations found for address:", address);
+      return null;
+    }
+  } catch (error) {
+    console.error("Error geocoding address:", error);
+    return null;
+  }
+};
 
 const MemoizedMapView = memo(MapView);
 
@@ -25,7 +45,6 @@ const RoutePolyline = memo(({ route }) => {
   if (route.length === 0) return null;
   return <Polyline coordinates={route} strokeWidth={10} strokeColor="blue" />;
 });
-
 RoutePolyline.displayName = "RoutePolyline";
 RoutePolyline.propTypes = {
   route: PropTypes.arrayOf(
@@ -44,7 +63,6 @@ const LocationMarkers = memo(({ origin, destination }) => {
     </>
   );
 });
-
 LocationMarkers.displayName = "LocationMarkers";
 LocationMarkers.propTypes = {
   origin: PropTypes.shape({
@@ -64,6 +82,7 @@ const GetDirections = () => {
   const fromPopup = routeParams.params?.fromPopup || null;
   const mapRef = useRef(null);
   const location = useContext(LocationContext);
+  const { getStepsInHTML, getPolyline } = useGoogleMapDirections();
   const [mode, setMode] = useState("walking");
   const [origin, setOrigin] = useState(null);
   const [destination, setDestination] = useState(null);
@@ -72,28 +91,60 @@ const GetDirections = () => {
   const [isInNavigationMode, setIsInNavigationMode] = useState(false);
   const [isDirectionsBoxCollapsed, setIsDirectionsBoxCollapsed] =
     useState(true);
-
-  const { getStepsInHTML, getPolyline } = useGoogleMapDirections();
   const [useCurrentLocation, setUseCurrentLocation] = useState(true);
 
-  // Set initial location from context
+  // Extract any passed parameters from the navigation route.
+  // disableLiveLocation will be true when we want to lock the origin to the default.
+  const routeNav = useRoute();
+  const {
+    origin: passedOrigin,
+    destination: passedDestination,
+    disableLiveLocation,
+  } = routeNav.params || {};
+
+  // If disableLiveLocation is true, disable live tracking.
   useEffect(() => {
-    if (fromPopup) {
-      console.log("zzz");
-      setDestination({
-        latitude: lat,
-        longitude: long,
-      });
-    } else setDestination(null);
-  }, []);
+    if (disableLiveLocation) {
+      setUseCurrentLocation(false);
+    }
+  }, [disableLiveLocation]);
+
+  // If there is no passed origin and we're using the current location, set it from context.
   useEffect(() => {
-    if (location && useCurrentLocation) {
+    if (location && useCurrentLocation && !passedOrigin) {
       setOrigin({
         latitude: location.latitude,
         longitude: location.longitude,
       });
+      setOriginText(`${location.latitude}, ${location.longitude}`);
     }
-  }, [location, useCurrentLocation]);
+  }, [location, useCurrentLocation, passedOrigin]);
+
+  // Handle passed origin and destination parameters.
+  useEffect(() => {
+    if (passedOrigin) {
+      setOrigin(passedOrigin);
+      setOriginText(`${passedOrigin.latitude}, ${passedOrigin.longitude}`);
+    }
+    if (passedDestination) {
+      if (typeof passedDestination === "object") {
+        setDestination(passedDestination);
+        setDestinationText(
+          `${passedDestination.latitude}, ${passedDestination.longitude}`,
+        );
+      } else if (typeof passedDestination === "string") {
+        // If destination is an address string, geocode it.
+        const fetchCoordinates = async () => {
+          const coords = await geocodeAddress(passedDestination);
+          if (coords) {
+            setDestination(coords);
+            setDestinationText(passedDestination);
+          }
+        };
+        fetchCoordinates();
+      }
+    }
+  }, [passedOrigin, passedDestination]);
 
   const fitMapToCoordinates = (coordinates, animated = true) => {
     if (mapRef.current && coordinates.length > 0) {
@@ -140,25 +191,25 @@ const GetDirections = () => {
       setRoute(polyline);
       setIsInNavigationMode(true);
       setIsDirectionsBoxCollapsed(false);
-      console.log("Success! drawing the line...");
+      console.log("Success! Drawing the route...");
     } catch (error) {
-      console.error("Geocode Error:", error);
+      console.error("Error getting directions:", error);
     }
   };
 
-  const onChangeDirections = async () => {
+  const onChangeDirections = () => {
     setIsInNavigationMode(false);
     setIsDirectionsBoxCollapsed(true);
   };
 
-  // Real-time location tracking during navigation
+  // Real-time location tracking during navigation.
+  // This effect will not update the origin if useCurrentLocation is false or if a passed origin exists.
   useEffect(() => {
     let intervalId;
 
     const updateLocation = async () => {
       try {
-        if (!useCurrentLocation) return;
-
+        if (!useCurrentLocation || passedOrigin) return; // Do not update if live tracking is disabled.
         const newLocation = await Location.getCurrentPositionAsync({
           accuracy: Location.Accuracy.High,
         });
@@ -179,19 +230,18 @@ const GetDirections = () => {
               getStepsInHTML(newOrigin, destination, mode),
               getPolyline(newOrigin, destination, mode),
             ]);
-
             setDirections(updatedDirections);
             setRoute(updatedPolyline);
             console.log("Route and directions updated with new location");
           }
         }
       } catch (error) {
-        console.error("Error updating location" + error);
+        console.error("Error updating location", error);
       }
     };
 
     if (isInNavigationMode && destination) {
-      updateLocation(); // Initial call to set the location immediately
+      updateLocation(); // Initial call
       intervalId = setInterval(updateLocation, 20000); // Every 20 seconds
     }
 
@@ -207,18 +257,10 @@ const GetDirections = () => {
     getStepsInHTML,
     origin,
     useCurrentLocation,
+    mode,
+    passedOrigin,
   ]);
 
-  useEffect(() => {
-    if (location && useCurrentLocation) {
-      setOrigin({
-        latitude: location.latitude,
-        longitude: location.longitude,
-      });
-    }
-  }, [location, useCurrentLocation]);
-
-  // Update the FloatingSearchBar for origin
   return (
     <View style={styles.container}>
       <Header />
@@ -235,11 +277,12 @@ const GetDirections = () => {
                 useCurrentLocation ? "Using Current Location" : "Enter Origin"
               }
               style={styles.searchBar}
-              initialValue={
-                useCurrentLocation && origin
-                  ? `Current Location (${origin.latitude.toFixed(4)}, ${origin.longitude.toFixed(4)})`
-                  : ""
-              }
+              value={originText}
+              onChangeText={setOriginText}
+              onFocus={() => {
+                setIsDirectionsBoxCollapsed(true);
+              }}
+              testID="search-bar-Enter Origin"
             />
             <FloatingSearchBar
               onPlaceSelect={(location) => {
@@ -247,6 +290,11 @@ const GetDirections = () => {
               }}
               placeholder="Enter Destination"
               style={[styles.searchBar, { marginTop: 10 }]}
+              value={destinationText}
+              onChangeText={setDestinationText}
+              onFocus={() => {
+                setIsDirectionsBoxCollapsed(true);
+              }}
             />
             <View style={styles.modes}>
               <Button
@@ -299,4 +347,5 @@ const GetDirections = () => {
   );
 };
 
+export { geocodeAddress };
 export default GetDirections;
