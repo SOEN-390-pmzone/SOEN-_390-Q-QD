@@ -3,7 +3,6 @@ import { coloringData } from "../data/coloringData"; // Import your polygon data
 import { Building } from "../data/markersData";
 import { useState, useContext, useEffect } from "react";
 import { LocationContext } from "../contexts/LocationContext";
-import FloorRegistry from "../services/BuildingDataService";
 /*
 this function determines whether the user is inside
 one of the known to use buildings: points of interests or Concordia buildings
@@ -58,7 +57,7 @@ const getData = (building) => {
         buildingName: buildingName,
         latitude: latitude,
         longitude: longitude,
-        differentiator:differentiator // Add coordinates
+        differentiator: differentiator, // Add coordinates
       };
     } else {
       const matchingBuilding = Building.find(
@@ -71,7 +70,7 @@ const getData = (building) => {
           buildingName: matchingBuilding.name,
           latitude: matchingBuilding.coordinate.latitude,
           longitude: matchingBuilding.coordinate.longitude,
-          differentiator: differentiator // Add coordinates,
+          differentiator: differentiator, // Add coordinates,
         };
       } else {
         console.error(
@@ -81,7 +80,7 @@ const getData = (building) => {
           buildingName: "Unknown",
           latitude: null,
           longitude: null,
-          differentiator: null
+          differentiator: null,
         };
       }
     }
@@ -107,32 +106,47 @@ function useDataFlow() {
   };
   const [name, setName] = useState("");
   const [indoors, setIndoors] = useState(false);
-  const [startLocation, setStartLocation] = useState(
-    {
-      latitude: location.latitude ?? 45.495304, // A latitude value within the polygon
-      longitude:location.longitude ??  -73.579044, // A longitude value within the polygon
-    }
-  );
-  let differentiator = null
-  //  null;
-  //Second cup : [-73.640921, 45.456134]
+  const [startLocation, setStartLocation] = useState({
+    latitude: location.latitude ?? 45.495304,
+    longitude: location.longitude ?? -73.579044,
+  });
+  const [differentiator, setDifferentiator] = useState(null);
+
   useEffect(() => {
-    let buildingData = findBuilding(coloringData, startLocation);
-    differentiator = buildingData.buildingDiffirentiator;
-    if (buildingData.status) {
-      setIndoors(true);
-      if (!differentiator) {
-        buildingData = getData(buildingData);
-        setStartLocation(buildingData);
+    // Only run if we have real location data
+    if (locationData?.latitude && locationData?.longitude) {
+      const currentLocation = {
+        latitude: locationData.latitude,
+        longitude: locationData.longitude,
+      };
+
+      // Update startLocation with real coordinates
+      setStartLocation(currentLocation);
+
+      let buildingData = findBuilding(coloringData, currentLocation);
+      if (buildingData.status) {
+        setIndoors(true);
+        setDifferentiator(buildingData.buildingDiffirentiator);
+
+        if (!buildingData.buildingDiffirentiator) {
+          buildingData = getData(buildingData);
+        }
+
+        setName(buildingData.buildingName);
+      } else {
+        // We're outdoors
+        setIndoors(false);
+        setName("");
+        setDifferentiator(null);
       }
-      setStartLocation(buildingData);
-      setName(buildingData.buildingName);
-    } 
-    
-  }, []);
-  
+    }
+  }, [locationData?.latitude, locationData?.longitude]);
+
   return {
-    location: startLocation,
+    location: {
+      latitude: locationData?.latitude || startLocation.latitude,
+      longitude: locationData?.longitude || startLocation.longitude,
+    },
     isIndoors: indoors,
     buildingName: name,
     differentiator: differentiator,
@@ -140,4 +154,4 @@ function useDataFlow() {
 }
 
 export default useDataFlow;
-export {findBuilding, getData};
+export { findBuilding, getData };

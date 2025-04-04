@@ -49,6 +49,7 @@ const KNOWN_BUILDINGS = {
   "Vanier Extension": "Vanier Extension",
   "Webster Library": "J.W. McConnell Building",
   "Vanier Library": "Vanier Library",
+  "EV Building": "Engineering & Visual Arts Complex",
 };
 
 export const CONCORDIA_BUILDINGS = [
@@ -98,12 +99,63 @@ export const CONCORDIA_BUILDINGS = [
 
 class FloorRegistry {
   static findBuildingByName(buildingName) {
-    
-    return CONCORDIA_BUILDINGS.find((building) => building.name === KNOWN_BUILDINGS[buildingName]).id;
-  
+    if (!buildingName) return null;
+
+    // First try using the KNOWN_BUILDINGS mapping
+    const mappedName = KNOWN_BUILDINGS[buildingName];
+    let building = null;
+
+    if (mappedName) {
+      building = CONCORDIA_BUILDINGS.find((b) => b.name === mappedName);
+      if (building) return building.id;
+    }
+
+    // If not found by mapped name, try direct match
+    building = CONCORDIA_BUILDINGS.find((b) => b.name === buildingName);
+    if (building) return building.id;
+
+    // Try matching by building ID (e.g., "EV" for EV Building)
+    if (buildingName.includes("EV")) {
+      return "EV";
+    } else if (buildingName.includes("Hall")) {
+      return "H";
+    } else if (
+      buildingName.includes("Molson") ||
+      buildingName.includes("JMSB")
+    ) {
+      return "MB";
+    } else if (
+      buildingName.includes("Webster") &&
+      buildingName.includes("Library")
+    ) {
+      return "LB";
+    } else if (
+      buildingName.includes("Vanier") &&
+      buildingName.includes("Extension")
+    ) {
+      return "VE";
+    } else if (
+      buildingName.includes("Vanier") &&
+      buildingName.includes("Library")
+    ) {
+      return "VL";
+    }
+
+    // Last resort: try to match any part of the name
+    for (const building of CONCORDIA_BUILDINGS) {
+      if (
+        buildingName.toLowerCase().includes(building.name.toLowerCase()) ||
+        building.name.toLowerCase().includes(buildingName.toLowerCase())
+      ) {
+        return building.id;
+      }
+    }
+
+    return null;
   }
   static getAddressByID(id) {
-    return CONCORDIA_BUILDINGS.find((building) => building.id === id).address;
+    const building = CONCORDIA_BUILDINGS.find((building) => building.id === id);
+    return building ? building.address : null;
   }
 
   static parseRoomFormat(text) {

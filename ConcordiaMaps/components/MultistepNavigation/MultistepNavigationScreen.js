@@ -133,8 +133,8 @@ const MultistepNavigationScreen = () => {
     };
   }, [generateRandomToken]);
 
-  // Handle existing navigation plan if passed as parameter
   useEffect(() => {
+    // Handle existing navigation plan if passed as parameter
     if (route.params?.navigationPlan) {
       setNavigationPlan(route.params.navigationPlan);
       setCurrentStepIndex(route.params.navigationPlan.currentStep || 0);
@@ -144,7 +144,95 @@ const MultistepNavigationScreen = () => {
         handleFetchOutdoorDirections(route.params.navigationPlan.steps[0]);
       }
     }
+
+    // Handle prefilled navigation data from CalendarScreen
+    if (route.params?.prefillNavigation) {
+      const { origin, destination } = route.params;
+
+      // Set origin details
+      if (origin) {
+        setOriginInputType(origin.originInputType || "location");
+        if (origin.originDetails) {
+          setOriginDetails(origin.originDetails);
+          setOrigin(origin.originDetails.formatted_address || "");
+        }
+        if (origin.originBuilding) {
+          setOriginBuilding(origin.originBuilding);
+        }
+        if (origin.originRoom) {
+          setOriginRoom(origin.originRoom);
+        }
+      }
+
+      // Set destination details
+      if (destination) {
+        setDestinationInputType(destination.destinationInputType || "location");
+        if (destination.destinationDetails) {
+          setDestinationDetails(destination.destinationDetails);
+          setDestination(
+            destination.destinationAddress ||
+              destination.destinationDetails.formatted_address ||
+              "",
+          );
+        }
+        if (destination.building) {
+          setBuilding(destination.building);
+        }
+        if (destination.room) {
+          setRoom(destination.room);
+        }
+      }
+    }
   }, [route.params]);
+
+  useEffect(() => {
+    // Only process parameters if there's no navigation plan (form view is active)
+    if (!navigationPlan && route.params) {
+      console.log("Initializing form with parameters:", route.params);
+
+      // Handle destination parameters
+      if (route.params.destination) {
+        setDestination(route.params.destination);
+      }
+
+      if (route.params.destinationInputType) {
+        setDestinationInputType(route.params.destinationInputType);
+      }
+
+      if (route.params.building) {
+        setBuilding(route.params.building);
+      }
+
+      if (route.params.room) {
+        setRoom(route.params.room);
+      }
+
+      if (route.params.destinationDetails) {
+        setDestinationDetails(route.params.destinationDetails);
+      }
+
+      // Handle origin parameters
+      if (route.params.origin) {
+        setOrigin(route.params.origin);
+      }
+
+      if (route.params.originInputType) {
+        setOriginInputType(route.params.originInputType);
+      }
+
+      if (route.params.originBuilding) {
+        setOriginBuilding(route.params.originBuilding);
+      }
+
+      if (route.params.originRoom) {
+        setOriginRoom(route.params.originRoom);
+      }
+
+      if (route.params.originDetails) {
+        setOriginDetails(route.params.originDetails);
+      }
+    }
+  }, [route.params, navigationPlan]);
 
   const handleFetchOutdoorDirections = async (step) => {
     if (step.type !== "outdoor") return;

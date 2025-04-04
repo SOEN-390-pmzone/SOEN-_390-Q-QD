@@ -203,15 +203,30 @@ describe("NextEventModal additional coverage", () => {
     const timerTextElement = getByText(/^\d\d:\d\d$/);
     const initialTimeText = timerTextElement.props.children;
 
+    // Run all pending timers (this will run the initial setup of intervals)
+    act(() => {
+      jest.runOnlyPendingTimers();
+    });
+
     // Advance timers by 2000ms (2 seconds)
     act(() => {
       jest.advanceTimersByTime(2000);
     });
 
-    await waitFor(() => {
-      const updatedTimeText = getByText(/^\d\d:\d\d$/).props.children;
-      expect(updatedTimeText).not.toEqual(initialTimeText);
+    // Run any pending timers that were created during the time advancement
+    act(() => {
+      jest.runOnlyPendingTimers();
     });
+
+    // Check that the timer text has changed
+    await waitFor(
+      () => {
+        const updatedTimeText = getByText(/^\d\d:\d\d$/).props.children;
+        expect(updatedTimeText).not.toEqual(initialTimeText);
+      },
+      { timeout: 1000 },
+    );
+
     jest.useRealTimers();
   });
 

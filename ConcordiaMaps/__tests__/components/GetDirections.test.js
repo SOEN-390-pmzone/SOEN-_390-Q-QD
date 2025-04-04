@@ -6,7 +6,7 @@ import {
   waitFor,
   cleanup,
 } from "@testing-library/react-native";
-import GetDirections from "../../components/GetDirections";
+import GetDirections from "../../components/OutdoorNavigation/GetDirections";
 import { useGoogleMapDirections } from "../../hooks/useGoogleMapDirections";
 import { LocationContext } from "../../contexts/LocationContext";
 
@@ -41,7 +41,7 @@ jest.mock("react-native-maps", () => {
   };
 });
 
-jest.mock("../../components/FloatingSearchBar", () => {
+jest.mock("../../Components/OutdoorNavigation/FloatingSearchBar", () => {
   const React = require("react");
   const PropTypes = require("prop-types");
   const MockFloatingSearchBar = ({ onPlaceSelect, placeholder, value }) => (
@@ -60,9 +60,12 @@ jest.mock("../../components/FloatingSearchBar", () => {
   return { __esModule: true, default: MockFloatingSearchBar };
 });
 
-jest.mock("../../components/Header", () => "Header");
-jest.mock("../../components/NavBar", () => "NavBar");
-jest.mock("../../components/DirectionsBox", () => "DirectionsBox");
+jest.mock("../../Components/Header", () => "Header");
+jest.mock("../../Components/NavBar", () => "NavBar");
+jest.mock(
+  "../../Components/OutdoorNavigation/DirectionsBox",
+  () => "DirectionsBox",
+);
 
 const mockGetCurrentPositionAsync = jest.fn().mockResolvedValue({
   coords: { latitude: 45.5017, longitude: -73.5673 },

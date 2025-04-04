@@ -37,6 +37,40 @@ jest.mock("@expo/vector-icons", () => ({
   Ionicons: "Ionicons",
 }));
 
+// Mock Alert
+jest.mock("react-native/Libraries/Alert/Alert", () => ({
+  alert: jest.fn(),
+}));
+
+// Mock userInPolygon hook
+jest.mock("../../components/userInPolygon", () => ({
+  __esModule: true,
+  default: () => ({
+    location: { latitude: 45.495, longitude: -73.578 },
+    isIndoors: false,
+    buildingName: null,
+  }),
+  findBuilding: jest.fn(),
+  getData: jest.fn(),
+}));
+
+// Mock convertToCoordinates
+jest.mock("../../components/convertToCoordinates", () =>
+  jest.fn().mockResolvedValue(null),
+);
+
+// Mock BuildingDataService
+jest.mock("../../services/BuildingDataService", () => ({
+  __esModule: true,
+  default: {
+    KNOWN_BUILDINGS: {},
+    findBuildingByName: jest.fn(),
+    getAddressByID: jest.fn(),
+    parseRoomFormat: jest.fn().mockReturnValue(null),
+  },
+  CONCORDIA_BUILDINGS: [],
+}));
+
 const mockNavigate = jest.fn();
 
 jest.mock("@react-navigation/native", () => {
@@ -74,40 +108,37 @@ describe("CalendarScreen", () => {
 
   // Test the fetching of calendars
   it("shows alert when calendar permissions are denied", async () => {
-    // Mock the alert function
-    const originalAlert = global.alert;
-    global.alert = jest.fn();
+    // Mock Alert.alert
+    const alertSpy = jest.spyOn(
+      require("react-native/Libraries/Alert/Alert"),
+      "alert",
+    );
 
     // Directly modify the mock implementation for this test only
     Calendar.requestCalendarPermissionsAsync.mockImplementationOnce(() =>
       Promise.resolve({ status: "denied" }),
     );
 
-    try {
-      render(
-        <NavigationContainer>
-          <CalendarScreen />
-        </NavigationContainer>,
-      );
+    render(
+      <NavigationContainer>
+        <CalendarScreen />
+      </NavigationContainer>,
+    );
 
-      // Wait for the alert to be called with a longer timeout
-      await waitFor(
-        () => {
-          expect(global.alert).toHaveBeenCalledWith(
-            "Permission to access the calendar was denied.",
-          );
-        },
-        { timeout: 3000 },
-      ); // Increase timeout to give enough time
-    } finally {
-      // Restore original alert
-      global.alert = originalAlert;
+    // Wait for the alert to be called
+    await waitFor(
+      () => {
+        expect(alertSpy).toHaveBeenCalledWith(
+          "Permission to access the calendar was denied.",
+        );
+      },
+      { timeout: 3000 },
+    );
 
-      // Reset the mock to return granted for other tests
-      Calendar.requestCalendarPermissionsAsync.mockImplementation(() =>
-        Promise.resolve({ status: "granted" }),
-      );
-    }
+    // Reset the mock to return granted for other tests
+    Calendar.requestCalendarPermissionsAsync.mockImplementation(() =>
+      Promise.resolve({ status: "granted" }),
+    );
   });
 
   // Test the selecting multiple calendars functionality
@@ -169,24 +200,22 @@ describe("CalendarScreen", () => {
 
   // Test the Get Directions button
   it("clicks on the Get Directions button and closes the alert", async () => {
-    const originalAlert = global.alert;
-    global.alert = jest.fn();
+    const alertSpy = jest.spyOn(
+      require("react-native/Libraries/Alert/Alert"),
+      "alert",
+    );
 
-    try {
-      const { getByText } = render(
-        <NavigationContainer>
-          <CalendarScreen />
-        </NavigationContainer>,
-      );
+    const { getByText } = render(
+      <NavigationContainer>
+        <CalendarScreen />
+      </NavigationContainer>,
+    );
 
-      await waitFor(() => getByText("Event 1"));
+    await waitFor(() => getByText("Event 1"));
 
-      fireEvent.press(getByText("Get Directions"));
+    fireEvent.press(getByText("Get Directions"));
 
-      expect(global.alert).toHaveBeenCalledWith("Get directions to Room 101");
-    } finally {
-      global.alert = originalAlert;
-    }
+    expect(alertSpy).toHaveBeenCalledWith("Get directions to Room 101");
   });
 
   it("toggles calendar selection correctly (remove then add)", async () => {
@@ -224,8 +253,10 @@ describe("CalendarScreen", () => {
   });
 
   it("alerts with fallback when event location is undefined", async () => {
-    const originalAlert = global.alert;
-    global.alert = jest.fn();
+    const alertSpy = jest.spyOn(
+      require("react-native/Libraries/Alert/Alert"),
+      "alert",
+    );
 
     Calendar.getEventsAsync.mockResolvedValueOnce([
       {
@@ -246,8 +277,6 @@ describe("CalendarScreen", () => {
 
     fireEvent.press(getByTestId("getClassDirectionsButton"));
 
-    expect(global.alert).toHaveBeenCalledWith("Get directions to ");
-
-    global.alert = originalAlert;
+    expect(alertSpy).toHaveBeenCalledWith("Get directions to ");
   });
 });
