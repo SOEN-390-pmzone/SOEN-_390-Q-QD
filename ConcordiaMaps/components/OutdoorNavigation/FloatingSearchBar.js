@@ -13,7 +13,7 @@ import styles from "../../styles";
 import PropTypes from "prop-types";
 import * as Crypto from "expo-crypto";
 
-const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
+const FloatingSearchBar = ({ onPlaceSelect, placeholder, nestedScrollEnabled = true  }) => {
   const GOOGLE_MAPS_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -130,6 +130,7 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
     }
   };
 
+
   return (
     <View style={{ width: "90%" }}>
       <View style={styles.searchBar}>
@@ -137,9 +138,7 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
         <TextInput
           value={searchQuery}
           onChangeText={searchPlaces}
-          placeholder={
-            selectedLocation || placeholder || "Search for a place..."
-          }
+          placeholder={selectedLocation || placeholder}
           style={styles.input}
         />
         {loading && <ActivityIndicator />}
@@ -154,14 +153,13 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
           </TouchableOpacity>
         )}
       </View>
+      
+      {/* Replace FlatList with direct mapping in a ScrollView */}
       {predictions.length > 0 && (
-        <FlatList
-          data={predictions}
-          keyExtractor={(item) => item.place_id}
-          keyboardShouldPersistTaps="handled"
-          style={[styles.list, { marginTop: 5 }]}
-          renderItem={({ item }) => (
+        <View style={[styles.list, { marginTop: 5 }]}>
+          {predictions.map((item) => (
             <TouchableOpacity
+              key={item.place_id}
               onPress={() => handleSelection(item.place_id)}
               style={styles.item}
             >
@@ -173,8 +171,8 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
               />
               <Text>{item.description}</Text>
             </TouchableOpacity>
-          )}
-        />
+          ))}
+        </View>
       )}
     </View>
   );
@@ -183,6 +181,8 @@ const FloatingSearchBar = ({ onPlaceSelect, placeholder }) => {
 FloatingSearchBar.propTypes = {
   onPlaceSelect: PropTypes.func.isRequired,
   placeholder: PropTypes.string,
+  nestedScrollEnabled: PropTypes.bool,
 };
+
 
 export default FloatingSearchBar;
