@@ -43,6 +43,14 @@ import {
 
 import SVGs from "../assets/svg/SVGtoString";
 
+const KNOWN_BUILDINGS = {
+  "John Molson School Of Business": "John Molson Building",
+  "Henry F. Hall": "Hall Building",
+  "Vanier Extension": "Vanier Extension",
+  "Webster Library": "J.W. McConnell Building",
+  "Vanier Library": "Vanier Library",
+};
+
 export const CONCORDIA_BUILDINGS = [
   {
     id: "H",
@@ -55,30 +63,49 @@ export const CONCORDIA_BUILDINGS = [
     id: "LB",
     name: "J.W. McConnell Building",
     address: "1400 De Maisonneuve Blvd. Ouest",
+    latitude: 45.4968158,
+    longitude: -73.5779337,
   },
   {
     id: "MB",
     name: "John Molson Building",
     address: "1450 Guy St.",
+    latitude: 45.495304,
+    longitude: -73.579044,
   },
   {
     id: "EV",
     name: "Engineering & Visual Arts Complex",
     address: "1515 St. Catherine St. Ouest",
+    latitude: 45.495376,
+    longitude: -73.577997,
   },
   {
     id: "VL",
     name: "Vanier Library",
     address: "7141 Sherbrooke St. W",
+    latitude: 45.459026,
+    longitude: -73.638606,
   },
   {
     id: "VE",
     name: "Vanier Extension",
     address: "7141 Sherbrooke St. W",
+    latitude: 45.459026,
+    longitude: -73.638606,
   },
 ];
 
 class FloorRegistry {
+  static findBuildingByName(buildingName) {
+    
+    return CONCORDIA_BUILDINGS.find((building) => building.name === KNOWN_BUILDINGS[buildingName]).id;
+  
+  }
+  static getAddressByID(id) {
+    return CONCORDIA_BUILDINGS.find((building) => building.id === id).address;
+  }
+
   static parseRoomFormat(text) {
     // Common formats: "H-920", "H 920", "Hall Building 920"
     const buildingMatch = text.match(/^([A-Za-z]+)-?(\d+)$/);

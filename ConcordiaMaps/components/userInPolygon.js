@@ -3,6 +3,7 @@ import { coloringData } from "../data/coloringData"; // Import your polygon data
 import { Building } from "../data/markersData";
 import { useState, useContext, useEffect } from "react";
 import { LocationContext } from "../contexts/LocationContext";
+import FloorRegistry from "../services/BuildingDataService";
 /*
 this function determines whether the user is inside
 one of the known to use buildings: points of interests or Concordia buildings
@@ -20,7 +21,7 @@ const findBuilding = (dataSet, location) => {
     if (isPointInPolygon) {
       if (buildingDiffirentiator) {
         return {
-          building_name: feature.properties.name,
+          buildingName: feature.properties.name,
           latitude: feature.properties.latitude,
           longitude: feature.properties.longitude,
           type: feature.properties?.type,
@@ -29,7 +30,7 @@ const findBuilding = (dataSet, location) => {
         };
       } else
         return {
-          building_name: feature.properties.name,
+          buildingName: feature.properties.name,
           latitude: null,
           longitude: null,
           status: true,
@@ -48,19 +49,20 @@ const getData = (building) => {
 
   // Find the matching building in Building.js
   if (isIndoors) {
-    const building_name = building.building_name;
+    const buildingName = building.buildingName;
     const latitude = building.latitude;
     const longitude = building.longitude;
     const differentiator = building.buildingDiffirentiator;
     if (differentiator) {
       return {
-        building_name: building_name,
+        buildingName: buildingName,
         latitude: latitude,
-        longitude: longitude, // Add coordinates
+        longitude: longitude,
+        differentiator:differentiator // Add coordinates
       };
     } else {
       const matchingBuilding = Building.find(
-        (building) => building.name === building_name,
+        (building) => building.name === buildingName,
       );
 
       // If a match is found, add the coordinate data
@@ -68,7 +70,8 @@ const getData = (building) => {
         return {
           buildingName: matchingBuilding.name,
           latitude: matchingBuilding.coordinate.latitude,
-          longitude: matchingBuilding.coordinate.longitude, // Add coordinates
+          longitude: matchingBuilding.coordinate.longitude,
+          differentiator: differentiator // Add coordinates,
         };
       } else {
         console.error(
@@ -78,6 +81,7 @@ const getData = (building) => {
           buildingName: "Unknown",
           latitude: null,
           longitude: null,
+          differentiator: null
         };
       }
     }
@@ -89,14 +93,13 @@ const getData = (building) => {
     longitude: null,
   };
 };
-
-function useDataFlow() {
-  /*
+/*
     a user can be in either of three "locations"
     1. concordia building
     2. a point of interest
     3. street (pretty much anywhere)
     */
+function useDataFlow() {
   const locationData = useContext(LocationContext);
   const location = {
     latitude: locationData?.latitude || null,
@@ -105,34 +108,36 @@ function useDataFlow() {
   const [name, setName] = useState("");
   const [indoors, setIndoors] = useState(false);
   const [startLocation, setStartLocation] = useState(
-    location || {
-      latitude: 45.456134, // A latitude value within the polygon
-      longitude: -73.640921, // A longitude value within the polygon
-    },
+    {
+      latitude: location.latitude ?? 45.495304, // A latitude value within the polygon
+      longitude:location.longitude ??  -73.579044, // A longitude value within the polygon
+    }
   );
+  let differentiator = null
   //  null;
   //Second cup : [-73.640921, 45.456134]
   useEffect(() => {
     let buildingData = findBuilding(coloringData, startLocation);
-    //console.log(startLocation)
+    differentiator = buildingData.buildingDiffirentiator;
     if (buildingData.status) {
       setIndoors(true);
-      //const buildingType = buildingData.type;
-      if (!buildingData.differentiator) {
+      if (!differentiator) {
         buildingData = getData(buildingData);
         setStartLocation(buildingData);
-      } else {
-        setStartLocation(buildingData);
       }
-    }
+      setStartLocation(buildingData);
+      setName(buildingData.buildingName);
+    } 
+    
   }, []);
-
+  
   return {
     location: startLocation,
     isIndoors: indoors,
     buildingName: name,
-    // You might also want to add other useful data or methods here
+    differentiator: differentiator,
   };
 }
 
 export default useDataFlow;
+export {findBuilding, getData};

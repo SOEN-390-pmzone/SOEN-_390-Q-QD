@@ -1,6 +1,8 @@
 import Header from "./Header";
 import NavBar from "./NavBar";
+import Footer from "./Footer";
 import React, { useEffect, useState } from "react";
+import { useNavigation } from "@react-navigation/native";
 import {
   View,
   Text,
@@ -15,7 +17,12 @@ import styles from "../styles";
 import { Ionicons } from "@expo/vector-icons";
 import convertToCoordinates from "./convertToCoordinates";
 import useDataFlow from "../components/userInPolygon";
-import MultistepNavigationScreen from "./MultistepNavigation/MultistepNavigationScreen";
+import FloorRegistry from "../services/BuildingDataService";
+import NavigationPlanService from "../services/NavigationPlanService";
+
+import { findBuilding, getData } from "../components/userInPolygon";
+import { coloringData } from "../data/coloringData";
+
 const CalendarScreen = () => {
   const [events, setEvents] = useState([]);
   const [calendars, setCalendars] = useState([]);
@@ -24,10 +31,11 @@ const CalendarScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
 
   const [destinationLocation, setDestinationLocation] = useState(null);
-  const { location, isIndoors, buildingName } = useDataFlow();
-
+  const { location, isIndoors, buildingName, differentiator } = useDataFlow();
+  const navigation = useNavigation();
   useEffect(() => {
     requestCalendarPermission();
+
     //setCurrentLocation(currentLocation);
     // if(indoors)
     //   setInOrOut("indoors");
@@ -92,12 +100,87 @@ const CalendarScreen = () => {
     );
   };
   const getDestination = (loc) => {
-    setDestinationLocation(loc);
-    convertToCoordinates(loc).then((coordinates) => {
-      console.log(coordinates)
-
+    
+    if (loc === null || loc === undefined) {
+      console.log("Make sure the address is included in the calendar event");
+    } else {
       
-    });
+      setDestinationLocation(loc);
+      convertToCoordinates(loc).then((coordinates) => {
+        
+        const startBuildingId = FloorRegistry.findBuildingByName(location.buildingName);
+        let targetBuilding = findBuilding(coloringData, coordinates);
+        targetBuilding = getData(targetBuilding) // fetches the information about the destination Concordia building
+        const endBuildingId = FloorRegistry.findBuildingByName(targetBuilding.buildingName);
+
+        const startAddress = FloorRegistry.getAddressByID(startBuildingId);
+        const endAddress = FloorRegistry.getAddressByID(endBuildingId);
+        
+        const endBuildingName = FloorRegistry.findBuildingByCode(endBuildingId);
+        console.log(isIndoors)
+        console.log( differentiator)
+        if (isIndoors) {
+          if (!differentiator) {
+            const originDetails = {
+              latitude: location.latitude,
+              longitude: location.longitude,
+              formatted_address: startAddress,
+            };
+
+            const originBuilding = {
+              id: startBuildingId,
+              name: buildingName,
+            };
+
+            const destinationDetails = {
+              latitude: coordinates.latitude,
+              longitude: location.longitude,
+              formatted_address: endAddress,
+            }; 
+            
+            const destinationBuilding = {
+              id: endBuildingId,
+              name: endBuildingName,
+            };
+            NavigationPlanService.createNavigationPlan({
+              originInputType: "location",
+              originDetails: originDetails,
+              origin: null,
+              originBuilding: originBuilding,
+              originRoom: null,
+              destinationInputType: "classroom",
+              destinationDetails: destinationDetails,
+              destination: null,
+              building: destinationBuilding,
+              room: null,
+              setInvalidOriginRoom: () => {},
+              setInvalidDestinationRoom: () => {},
+              setIsLoading: () => {},
+              navigation
+            });
+          }
+        }
+
+        // const createNavigationPlan = ({
+        //   originInputType,
+        //   originDetails,
+        //   origin,
+        //   originBuilding,
+        //   originRoom,
+        //   destinationInputType,
+        //   destinationDetails,
+        //   destination,
+        //   building,
+        //   room,
+        //   setInvalidOriginRoom,
+        //   setInvalidDestinationRoom,
+        //   setIsLoading,
+        //   navigation,
+        // })
+        // location location isIndoors buildingName
+        // loc destinationAddress, coordinates
+      });
+    }
   };
   return (
     <View style={[styles.container, { backgroundColor: "white" }]}>
@@ -194,9 +277,7 @@ const CalendarScreen = () => {
                 <TouchableOpacity
                   testID="getClassDirectionsButton"
                   style={styles.classDirectionsButton}
-                  onPress={() =>
-                    alert("Get directions to " + (item.location ?? ""))
-                  }
+                  onPress={() => getDestination(item.location)}
                 >
                   <Text style={styles.classDirectionsButtonText}>
                     {" "}

@@ -17,7 +17,6 @@ import { useGoogleMapDirections } from "../../hooks/useGoogleMapDirections";
 import DirectionsBox from "./DirectionsBox";
 import PropTypes from "prop-types";
 import { LocationContext } from "../../contexts/LocationContext";
-import { LocationContext } from "../contexts/LocationContext";
 import { useRoute } from "@react-navigation/native";
 
 // Helper function to geocode an address string into coordinates
