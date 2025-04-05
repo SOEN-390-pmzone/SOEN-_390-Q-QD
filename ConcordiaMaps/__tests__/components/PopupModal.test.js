@@ -75,6 +75,7 @@ describe("PopupModal Component", () => {
         data={mockData}
         onClose={mockOnClose}
         navigation={mockNavigation}
+        targetLocation={mockData.address}
       />,
     );
 
@@ -85,6 +86,7 @@ describe("PopupModal Component", () => {
       latitude: mockData.coordinate.latitude,
       longitude: mockData.coordinate.longitude,
       fromPopup: mockData.fromPopup,
+      targetLocation: mockData.address,
     });
 
     // Verify that onClose was called
@@ -99,6 +101,7 @@ describe("PopupModal Component", () => {
         data={mockData}
         onClose={mockOnClose}
         navigation={mockNavigation}
+        targetLocation={mockData.address}
       />,
     );
 

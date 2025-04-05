@@ -23,6 +23,7 @@ const PopupModal = ({ isVisible, data, onClose, navigation }) => {
       latitude: data.coordinate.latitude,
       longitude: data.coordinate.longitude,
       fromPopup: true,
+      targetLocation: data.address,
     });
   };
 

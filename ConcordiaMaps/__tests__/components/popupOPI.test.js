@@ -1,9 +1,12 @@
 import React from "react";
 import { render, fireEvent } from "@testing-library/react-native";
 import PopupOPI from "../../components/PopupOPI";
-import "@testing-library/jest-native/extend-expect";
-import { Alert } from "react-native";
 
+jest.mock("@react-navigation/native", () => {
+  return {
+    useNavigation: jest.fn(),
+  };
+});
 describe("<PopupOPI/>", () => {
   const mockOnClose = jest.fn();
   //Creating mock data
@@ -52,23 +55,24 @@ describe("<PopupOPI/>", () => {
     expect(queryByText("Test Cafe")).toBeNull();
     expect(queryByText("123 Test St.")).toBeNull();
   });
-  it("Get Directions alert appears when Get Directions is pressed", () => {
-    const alertSpy = jest.spyOn(Alert, "alert"); // Spy on Alert.alert
 
-    const { getByText } = render(
-      <PopupOPI isVisible={true} data={mockData} onClose={mockOnClose} />,
-    );
+  //const mockNavigation = { navigate: jest.fn() };
 
-    fireEvent.press(getByText("Get Directions"));
+  // const defaultProps = {
+  //   isVisible: true,
+  //   data: {
+  //     name: "Cafe/Restaurant Name",
+  //     address: "Address not available",
+  //     coordinate: {
+  //       latitude: 12.34,
+  //       longitude: 56.78,
+  //     },
+  //     targetLocation: "1455 DeMaisonneuve W"
+  //   },
+  //   onClose: mockOnClose,
+  //   navigation: mockNavigation,
+  // };
 
-    // Check if Alert.alert was called with correct arguments
-    expect(alertSpy).toHaveBeenCalledWith(
-      "Get Directions",
-      "Directions pressed",
-    );
-
-    alertSpy.mockRestore(); // Restore original Alert.alert function
-  });
   it("handles completely omitted data prop by using defaults", () => {
     const { getByText } = render(
       <PopupOPI isVisible={true} onClose={mockOnClose} />,

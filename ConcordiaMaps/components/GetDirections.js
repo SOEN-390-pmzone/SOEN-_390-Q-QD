@@ -18,7 +18,6 @@ import { useGoogleMapDirections } from "../hooks/useGoogleMapDirections";
 import DirectionsBox from "./DirectionsBox";
 import PropTypes from "prop-types";
 import { LocationContext } from "../contexts/LocationContext";
-import { useRoute } from "@react-navigation/native";
 
 // Helper function to geocode an address string into coordinates
 const geocodeAddress = async (address) => {
@@ -76,9 +75,12 @@ LocationMarkers.propTypes = {
 };
 
 const GetDirections = () => {
+  const [originText, setOriginText] = useState("");
+  const [destinationText, setDestinationText] = useState("");
   const routeParams = useRoute();
   const lat = routeParams.params?.latitude;
   const long = routeParams.params?.longitude;
+  const targetLocation = routeParams.params?.targetLocation || null;
   const fromPopup = routeParams.params?.fromPopup || null;
   const mapRef = useRef(null);
   const location = useContext(LocationContext);
@@ -108,6 +110,17 @@ const GetDirections = () => {
       setUseCurrentLocation(false);
     }
   }, [disableLiveLocation]);
+
+  useEffect(() => {
+    if (fromPopup) {
+      setDestination({
+        latitude: lat,
+        longitude: long,
+      });
+      setDestinationText(targetLocation);
+      console.log(targetLocation);
+    } else setDestination(null);
+  }, [fromPopup, lat, long, destinationText]);
 
   // If there is no passed origin and we're using the current location, set it from context.
   useEffect(() => {
@@ -269,9 +282,10 @@ const GetDirections = () => {
         {!isInNavigationMode && (
           <View>
             <FloatingSearchBar
-              onPlaceSelect={(location) => {
-                setUseCurrentLocation(false); // Disable auto-update when manual location entered
+              onPlaceSelect={(location, displayName) => {
+                setUseCurrentLocation(false);
                 setOrigin(location);
+                setOriginText(displayName);
               }}
               placeholder={
                 useCurrentLocation ? "Using Current Location" : "Enter Origin"
@@ -285,8 +299,9 @@ const GetDirections = () => {
               testID="search-bar-Enter Origin"
             />
             <FloatingSearchBar
-              onPlaceSelect={(location) => {
+              onPlaceSelect={(location, displayName) => {
                 setDestination(location);
+                setDestinationText(displayName);
               }}
               placeholder="Enter Destination"
               style={[styles.searchBar, { marginTop: 10 }]}

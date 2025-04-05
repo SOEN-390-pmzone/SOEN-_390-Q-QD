@@ -28,15 +28,10 @@ import convertToCoordinates from "../components/convertToCoordinates";
 import PropTypes from "prop-types";
 import PopupOPI from "../components/PopupOPI"; // Import the new popup component
 import NextEventModal from "../components/NextEventModal"; // Import the NextEventModal component
-import { PointsOfInterest } from "../constants/OutdoorPtsOfDirections"; // Import the new Points of Interest data
-
 // Marker image assets for Restaurant and Cafe
-const customMarkerImage = require("../assets/PinLogo.png");
 
 import PopupModal from "../components/PopupModal";
 import MapMarkers from "../components/MapMarkers";
-import PopupOPI from "../components/PopupOPI";
-
 const ModalContext = createContext();
 
 // Correctly defined wrapper component with navigation prop
@@ -69,13 +64,13 @@ PopupModalWrapper.propTypes = {
   isVisible: PropTypes.bool.isRequired,
   data: PropTypes.object.isRequired,
   onClose: PropTypes.func.isRequired,
-  navigation: PropTypes.object.isRequired
+  navigation: PropTypes.object.isRequired,
 };
 OPIModalWrapper.propTypes = {
   opiPopupVisible: PropTypes.bool.isRequired,
-  selectedOPI: PropTypes.object,  // Remove isRequired
+  selectedOPI: PropTypes.object, // Remove isRequired
   onClose: PropTypes.func.isRequired,
-  navigation: PropTypes.object.isRequired
+  navigation: PropTypes.object.isRequired,
 };
 function HomeScreen({ asyncKey = "Campus" }) {
   const loyolaPostalCode = process.env.EXPO_PUBLIC_LOYOLA_POSTAL_CODE;
@@ -292,6 +287,7 @@ function HomeScreen({ asyncKey = "Campus" }) {
           <Text>Loading...</Text>
         )}
         {error ? <Text>Error: {error}</Text> : null}
+
         <Footer />
         <PopupModalWrapper
           navigation={navigation}
@@ -304,6 +300,18 @@ function HomeScreen({ asyncKey = "Campus" }) {
           opiPopupVisible={opiPopupVisible}
           selectedOPI={selectedOPI}
           onClose={opiToggleModal}
+        />
+        <TouchableOpacity
+          testID="next-class-button"
+          style={styles.buttonNext}
+          onPress={() => setEventModalVisible(true)}
+        >
+          <Text style={styles.buttonNextText}>Next Class</Text>
+        </TouchableOpacity>
+        <NextEventModal
+          testID="next-event-modal"
+          isVisible={eventModalVisible}
+          onClose={() => setEventModalVisible(false)}
         />
       </ModalContext.Provider>
     </View>

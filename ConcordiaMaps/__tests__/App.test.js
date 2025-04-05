@@ -74,10 +74,10 @@ jest.mock("react-native-maps", () => {
 
 // Mock the PopupModal component but capture its props
 
+const mockNavigate = jest.fn();
 
 describe("App", () => {
   beforeEach(() => {
-    mockPopupModalProps = {};
     mockNavigate.mockClear();
   });
 
@@ -95,51 +95,10 @@ describe("App", () => {
     });
   });
 
-  it("initializes with modal hidden", async () => {
-    render(<App />);
-    await waitFor(() => {
-      expect(mockPopupModalProps.isVisible).toBeFalsy();
-    });
-  });
-
-  it("passes default modal data", async () => {
-    render(<App />);
-    await waitFor(() => {
-      expect(mockPopupModalProps.data).toEqual({
-        name: "",
-        coordinate: { latitude: 0, longitude: 0 },
-      });
-    });
-  });
-
-  it("handles modal toggling through context", async () => {
-    render(<App />);
-
-    // Access the modal context and call toggleModal
-    await waitFor(() => {
-      expect(mockPopupModalProps.onClose).toBeDefined();
-    });
-
-    // Simulate clicking the close button on modal
-    mockPopupModalProps.onClose();
-
-    await waitFor(() => {
-      expect(mockPopupModalProps.isVisible).toBeDefined();
-    });
-  });
-
   it("provides LocationProvider to child components", async () => {
     const { getByTestId } = render(<App />);
     await waitFor(() => {
       expect(getByTestId("home-screen")).toBeTruthy();
-    });
-  });
-
-  it("handles modal data updates correctly", async () => {
-    render(<App />);
-
-    await waitFor(() => {
-      expect(mockPopupModalProps.data).toBeDefined();
     });
   });
 });

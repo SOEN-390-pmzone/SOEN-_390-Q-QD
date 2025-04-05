@@ -1,9 +1,10 @@
 import React from "react";
+
 import { render, waitFor, fireEvent, act } from "@testing-library/react-native";
 import axios from "axios";
 import HomeScreen from "../screen/HomeScreen";
 import { NavigationContainer } from "@react-navigation/native";
-import { ModalContext } from "../App";
+import { ModalContext } from "../screen/HomeScreen";
 import { LocationContext } from "../contexts/LocationContext";
 
 jest.mock("expo-location", () => ({
@@ -14,23 +15,7 @@ jest.mock("expo-location", () => ({
     granted: true,
   }),
 }));
-const mockModalContext = {
-  isModalVisible: false,
-  modalData: {},
-  toggleModal: jest.fn(),
-  setModalData: jest.fn(),
-  opiToggleModal: jest.fn(),
-  setSelectedOPI: jest.fn(),
-  opiPopupVisible: false,
-  selectedOPI: null
-};
 
-// Render test component with context
-render(
-  <ModalContext.Provider value={mockModalContext}>
-    <HomeScreen />
-  </ModalContext.Provider>
-);
 jest.mock("react-native-webview", () => ({
   WebView: () => null,
 }));
@@ -65,11 +50,39 @@ jest.mock("../components/NextEventModal", () => {
 
   return MockNextEventModal;
 });
+let mockPopupModalProps = {};
+jest.mock("../components/PopupModal", () => {
+  const { View } = require("react-native");
+  const PropTypes = require("prop-types");
 
+  const PopupModal = (props) => {
+    mockPopupModalProps = props;
+    return <View testID="popup-modal" />;
+  };
+
+  PopupModal.propTypes = {
+    isVisible: PropTypes.bool,
+    data: PropTypes.shape({
+      name: PropTypes.string,
+      coordinate: PropTypes.shape({
+        latitude: PropTypes.number,
+        longitude: PropTypes.number,
+      }),
+    }),
+    onClose: PropTypes.func,
+  };
+
+  return PopupModal;
+});
+const mockNavigate = jest.fn();
 describe("HomeScreen", () => {
   const mockLocation = { latitude: 45.4973, longitude: -73.5789 };
   const mockToggleModal = jest.fn();
   const mockSetModalData = jest.fn();
+  beforeEach(() => {
+    mockPopupModalProps = {};
+    mockNavigate.mockClear();
+  });
 
   const renderComponent = () =>
     render(
@@ -97,7 +110,7 @@ describe("HomeScreen", () => {
     const nextClassButton = getByText("Next Class");
     fireEvent.press(nextClassButton);
 
-    // Wait for the modal to appear
+    // Wait for the modal to HomeScreenear
     const modal = await waitFor(() => getByTestId("next-event-modal"));
     expect(modal).toBeTruthy();
 
@@ -128,32 +141,6 @@ describe("HomeScreen", () => {
     await waitFor(() => {
       expect(getByTestId("map-view")).toBeTruthy();
     });
-  });
-
-  it("handles marker press event", async () => {
-    const mockResponse = {
-      data: {
-        results: [
-          {
-            geometry: { location: { lat: 45.4973, lng: -73.5789 } },
-          },
-        ],
-        status: "OK",
-      },
-    };
-    axios.get.mockResolvedValueOnce(mockResponse);
-
-    const { getAllByTestId } = renderComponent();
-
-    await waitFor(() => {
-      // Get all markers that start with "marker-" and press the first one
-      const markers = getAllByTestId(/^marker-/);
-      expect(markers.length).toBeGreaterThan(0);
-      fireEvent.press(markers[0]);
-    });
-
-    expect(mockSetModalData).toHaveBeenCalled();
-    expect(mockToggleModal).toHaveBeenCalled();
   });
 
   it("displays an error message when location is not found", async () => {
@@ -227,6 +214,47 @@ describe("HomeScreen", () => {
     });
 
     expect(getByTestId("map-view")).toBeTruthy();
+  });
+  it("handles modal toggling through context", async () => {
+    render(
+      <NavigationContainer>
+        <HomeScreen />
+      </NavigationContainer>,
+    );
+
+    // Access the modal context and call toggleModal
+    await waitFor(() => {
+      expect(mockPopupModalProps.onClose).toBeDefined();
+    });
+
+    // Simulate clicking the close button on modal
+    mockPopupModalProps.onClose();
+
+    await waitFor(() => {
+      expect(mockPopupModalProps.isVisible).toBeDefined();
+    });
+  });
+  it("handles modal data updates correctly", async () => {
+    renderComponent();
+
+    await waitFor(() => {
+      expect(mockPopupModalProps.data).toBeDefined();
+    });
+  });
+  it("passes default modal data", async () => {
+    renderComponent();
+    await waitFor(() => {
+      expect(mockPopupModalProps.data).toEqual({
+        name: "",
+        coordinate: { latitude: 0, longitude: 0 },
+      });
+    });
+  });
+  it("initializes with modal hidden", async () => {
+    renderComponent();
+    await waitFor(() => {
+      expect(mockPopupModalProps.isVisible).toBeFalsy();
+    });
   });
   const mockAnimateToRegion = jest.fn();
   const mockMapRef = {

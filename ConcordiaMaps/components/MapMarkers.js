@@ -1,4 +1,4 @@
-import React, { useContext} from "react";
+import React, { useContext } from "react";
 import { Marker } from "react-native-maps";
 import { Image } from "react-native";
 import styles from "../styles";
@@ -19,6 +19,7 @@ const MapMarkers = () => {
       address: building.address,
       fullBuildingName: building.fullBuildingName,
     }); // Update modalData
+
     toggleModal(); // Show modal
   };
   const handleOPIMarkerPress = (poi) => {

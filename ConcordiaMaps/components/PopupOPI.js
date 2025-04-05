@@ -1,5 +1,5 @@
 import React from "react";
-import { Modal, View, Text, TouchableOpacity} from "react-native";
+import { Modal, View, Text, TouchableOpacity } from "react-native";
 import PropTypes from "prop-types";
 import styles from "../styles/DirectionBox.style"; // Use the same styles as the building popup
 
@@ -15,6 +15,7 @@ const PopupOPI = ({ isVisible, data = {}, onClose, navigation }) => {
       latitude: data.coordinate.latitude,
       longitude: data.coordinate.longitude,
       fromPopup: true,
+      targetLocation: data.address,
     });
   };
   return (
@@ -55,8 +56,8 @@ PopupOPI.propTypes = {
   }).isRequired,
   onClose: PropTypes.func.isRequired,
   navigation: PropTypes.shape({
-    navigate: PropTypes.func.isRequired
-  })
+    navigate: PropTypes.func.isRequired,
+  }),
 };
 
 export default PopupOPI;
