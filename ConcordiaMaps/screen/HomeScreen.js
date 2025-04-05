@@ -14,12 +14,11 @@ import TemporaryModal from "../components/temporaryModal";
 import { LocationContext } from "../contexts/LocationContext";
 import Footer from "../components/Footer";
 import styles from "../styles";
-import { Building } from "../constants/Building";
-import { ModalContext } from "../App";
+import { useNavigation } from "@react-navigation/native";
 import BuildingColoring from "../components/buildingColoring";
 import Legend from "../components/Legend";
 import ShuttleStop from "../components/ShuttleStop";
-import FloatingSearchBar from "../components/OutdoorNavigation/FloatingSearchBar";
+import FloatingSearchBar from "../components/FloatingSearchBar";
 import LiveBusTracker from "../components/LiveBusTracker";
 import {
   saveToAsyncStorage,
@@ -197,21 +196,6 @@ function HomeScreen({ asyncKey = "Campus" }) {
     }, 100);
   };
 
-  const handleMarkerPress = (building) => {
-    setModalData({
-      name: building.name,
-      coordinate: building.coordinate,
-      address: building.address,
-      fullBuildingName: building.fullBuildingName,
-    });
-    toggleModal();
-  };
-
-  const handleOPIMarkerPress = (pointOfInterest) => {
-    setSelectedOPI(pointOfInterest);
-    setOpiPopupVisible(true);
-  };
-
   const [modalState, setModalState] = useState(true);
   useEffect(() => {
     if (modalState) {
@@ -241,83 +225,29 @@ function HomeScreen({ asyncKey = "Campus" }) {
               TestID="toggleModal"
             />
 
-          <MapView
-            testID="map-view"
-            style={styles.map}
-            ref={mapRef}
-            initialRegion={
-              location
-                ? {
-                    latitude: location.latitude,
-                    longitude: location.longitude,
-                    latitudeDelta: 0.005,
-                    longitudeDelta: 0.005,
-                  }
-                : {
-                    latitude: coordinates.latitude,
-                    longitude: coordinates.longitude,
-                    latitudeDelta: 0.01,
-                    longitudeDelta: 0.01,
-                  }
-            }
-            showsUserLocation={true}
-            loadingEnabled={true}
-            watchUserLocation={true}
-            onRegionChangeComplete={(region) => setMapRegion(region)}
-          >
-            {Building.map((building) => (
-              <Marker
-                key={`${building.name}-${building.coordinate.latitude}-${building.coordinate.longitude}`}
-                testID={`marker-${building.name?.toLowerCase().replace(/\s+/g, "-") || building.id}`}
-                coordinate={building.coordinate}
-                title={building.name}
-                address={building.address}
-                fullBuildingName={building.fullBuildingName}
-                onPress={() => handleMarkerPress(building)}
-              >
-                <Image
-                  source={customMarkerImage}
-                  style={styles.customMarkerImage}
-                />
-              </Marker>
-            ))}
-            {PointsOfInterest.map((pointOfInterest) => (
-              <Marker
-                key={pointOfInterest.name}
-                coordinate={pointOfInterest.coordinate}
-                title={pointOfInterest.name}
-                description={pointOfInterest.address}
-                onPress={() => handleOPIMarkerPress(pointOfInterest)}
-              >
-                <Image
-                  source={pointOfInterest.markerImage}
-                  style={styles.customMarkerImage}
-                />
-              </Marker>
-            ))}
-            <BuildingColoring />
-            {selectedLocation && (
-              <Marker
-                coordinate={{
-                  latitude: selectedLocation.latitude,
-                  longitude: selectedLocation.longitude,
-                }}
-                title="Selected Location"
-              />
-            )}
-            <ShuttleStop />
-            <LiveBusTracker mapRef={mapRef} />
-          </MapView>
-          <View style={styles.toggleView}>
-            <TouchableOpacity
-              testID="change-campus-button"
-              onPress={handleChangeCampuses}
-              activeOpacity={0.7}
-              style={{
-                borderColor: borderColor,
-                borderWidth: 2,
-                borderRadius: 10,
-              }}
+            <MapView
+              testID="map-view"
+              style={styles.map}
+              ref={mapRef}
+              initialRegion={
+                location
+                  ? {
+                      latitude: location.latitude,
+                      longitude: location.longitude,
+                      latitudeDelta: 0.005,
+                      longitudeDelta: 0.005,
+                    }
+                  : {
+                      latitude: coordinates.latitude,
+                      longitude: coordinates.longitude,
+                      latitudeDelta: 0.01,
+                      longitudeDelta: 0.01,
+                    }
+              }
+              showsUserLocation={true}
+              loadingEnabled={true}
+              watchUserLocation={true}
+              onRegionChangeComplete={(region) => setMapRegion(region)}
             >
               <MapMarkers />
               <BuildingColoring />
