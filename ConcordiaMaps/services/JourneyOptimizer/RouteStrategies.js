@@ -122,20 +122,19 @@ const RouteStrategies = {
         return 500; // Fallback distance
       }
 
-      // Step 2: Create entrance locations using the building ID and floor 1
       const entranceA = {
         type: "indoor",
         buildingId: locationA.buildingId,
         floor: "1",
-        room: "entrance", // Or use "Main lobby" depending on building convention
+        room: FloorRegistry.normalizeRoomId("entrance"), // Use normalization
         title: `${locationA.buildingId} Entrance`,
       };
-
+      
       const entranceB = {
         type: "indoor",
         buildingId: locationB.buildingId,
         floor: "1",
-        room: "entrance",
+        room: FloorRegistry.normalizeRoomId("entrance"), // Use normalization
         title: `${locationB.buildingId} Entrance`,
       };
 
@@ -295,9 +294,123 @@ const RouteStrategies = {
   },
 
   /**
-   * Mixed strategy for paths between indoor and outdoor locations
-   */
-  Mixed: {},
+ * Mixed strategy for paths between indoor and outdoor locations
+ */
+Mixed: {
+  calculateDistance(locationA, locationB) {
+    console.log("Mixed strategy chosen, calculating distance between indoor and outdoor locations");
+    
+    // Step 1: Determine which location is indoor and which is outdoor
+    const indoorLocation = locationA.type === "indoor" ? locationA : locationB;
+    const outdoorLocation = locationA.type === "outdoor" ? locationA : locationB;
+    
+    // Step 2: Get building coordinates for the indoor location
+    const buildingCoords = FloorRegistry.getCoordinatesForBuilding(
+      indoorLocation.buildingId
+    );
+    
+    if (!buildingCoords) {
+      console.error(
+        `Building coordinates not found for ${indoorLocation.buildingId}, using fallback distance`
+      );
+      return 300; // Fallback distance
+    }
+    
+    // Step 3: Create a building entrance location on floor 1
+    const buildingEntrance = {
+      type: "indoor",
+      buildingId: indoorLocation.buildingId,
+      floor: "1",
+      // Use the normalization function to get the correct room ID
+      room: FloorRegistry.normalizeRoomId("entrance"),
+      title: `${indoorLocation.buildingId} Entrance`
+    };
+    
+    // Step 4: Calculate the indoor segment (from indoor location to building entrance)
+    let indoorDistance;
+    try {
+      if (indoorLocation.floor === "1") {
+        // If already on floor 1, use SameFloorSameBuilding strategy
+        indoorDistance = RouteStrategies.SameFloorSameBuilding.calculateDistance(
+          indoorLocation,
+          buildingEntrance
+        );
+      } else {
+        // If on different floor, use DifferentFloorSameBuilding strategy
+        indoorDistance = RouteStrategies.DifferentFloorSameBuilding.calculateDistance(
+          indoorLocation,
+          buildingEntrance
+        );
+      }
+    } catch (error) {
+      console.error("Error calculating indoor distance:", error);
+      indoorDistance = 50; // Fallback if calculation fails
+    }
+    
+    // Step 5: Calculate the outdoor segment (from building entrance to outdoor location)
+    const entranceOutdoor = {
+      type: "outdoor",
+      latitude: buildingCoords.latitude,
+      longitude: buildingCoords.longitude,
+      title: `${indoorLocation.buildingId} Outside Entrance`
+    };
+    
+    const outdoorDistance = RouteStrategies.Outdoor.calculateDistance(
+      entranceOutdoor,
+      outdoorLocation
+    );
+    
+    // Step 6: Sum the distances
+    const totalDistance = indoorDistance + outdoorDistance;
+    
+    console.log(
+      `Mixed path: ${indoorDistance}m (indoor) + ${outdoorDistance}m (outdoor) = ${totalDistance}m total`
+    );
+    
+    return totalDistance;
+  },
+  
+  isPathAllowed(locationA, locationB, avoidOutdoor) {
+    // Cannot use this path if avoiding outdoor travel
+    if (avoidOutdoor) {
+      console.log("Mixed indoor/outdoor paths are being avoided by user preference");
+      return false;
+    }
+    
+    // Verify one location is indoor and one is outdoor
+    const hasIndoor = (locationA.type === "indoor" || locationB.type === "indoor");
+    const hasOutdoor = (locationA.type === "outdoor" || locationB.type === "outdoor");
+    
+    if (!hasIndoor || !hasOutdoor) {
+      console.log("Mixed strategy requires one indoor and one outdoor location");
+      return false;
+    }
+    
+    // For indoor location, check that it has a valid buildingId
+    const indoorLocation = locationA.type === "indoor" ? locationA : locationB;
+    if (!indoorLocation.buildingId) {
+      console.warn("Indoor location missing buildingId");
+      return false;
+    }
+    
+    // For outdoor location, check that it has valid coordinates
+    const outdoorLocation = locationA.type === "outdoor" ? locationA : locationB;
+    if (
+      outdoorLocation.latitude === undefined || 
+      outdoorLocation.latitude === null ||
+      outdoorLocation.longitude === undefined || 
+      outdoorLocation.longitude === null
+    ) {
+      console.warn(
+        "Outdoor location missing coordinates:",
+        `(${outdoorLocation.latitude},${outdoorLocation.longitude})`
+      );
+      return false;
+    }
+    
+    return true;
+  }
+}
 };
 
 export default RouteStrategies;
