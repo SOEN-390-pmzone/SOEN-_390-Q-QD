@@ -1,5 +1,4 @@
 import { renderHook, act } from "@testing-library/react-native";
-import { Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import useDirectionsHandler from "../../hooks/useDirectionsHandler";
 import FloorRegistry from "../../services/BuildingDataService";
@@ -129,7 +128,6 @@ describe("useDirectionsHandler", () => {
     });
 
     expect(result.current.destinationLocation).toBe("H-920");
-    expect(Alert.alert).toHaveBeenCalledWith("Get directions to H-920");
     expect(mockNavigate).toHaveBeenCalledWith("MultistepNavigationScreen", {
       prefillNavigation: true,
       originInputType: "classroom",
@@ -179,7 +177,6 @@ describe("useDirectionsHandler", () => {
     });
 
     expect(result.current.destinationLocation).toBe("1450 Guy St.");
-    expect(Alert.alert).toHaveBeenCalledWith("Get directions to 1450 Guy St.");
     expect(convertToCoordinates).toHaveBeenCalledWith("1450 Guy St.");
     expect(mockNavigate).toHaveBeenCalledWith("MultistepNavigationScreen", {
       prefillNavigation: true,

@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import FloorRegistry, {
   CONCORDIA_BUILDINGS,
@@ -50,7 +49,6 @@ const useDirectionsHandler = ({ location, isIndoors, buildingName }) => {
     debugLog("Origin building:", buildingName || "Not in a building");
     debugLog("Destination location:", loc);
     setDestinationLocation(loc);
-    Alert.alert(`Get directions to ${loc}`);
 
     // Create navigation parameters that will be used for both room and address cases
     const navigationParams = {

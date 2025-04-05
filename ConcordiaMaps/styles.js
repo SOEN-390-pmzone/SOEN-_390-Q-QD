@@ -370,7 +370,7 @@ const styles = StyleSheet.create({
   },
   buttonNext: {
     bottom: 650,
-    left: "75%",
+    left: "68%",
     transform: [{ translateX: -80 }],
     backgroundColor: "#912338",
     borderRadius: 20,
