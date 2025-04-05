@@ -29,7 +29,7 @@ const NavigationSteps = ({ steps, customStyles = {} }) => {
       >
         {steps.map((step, index) => (
           <View
-            key={`step-${step.type}-${index}`}
+            key={index}
             style={[styles.stepItem, customStyles.stepItem]}
             accessible={true}
             accessibilityLabel={step.text}

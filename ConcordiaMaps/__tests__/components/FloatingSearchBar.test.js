@@ -1,6 +1,6 @@
 import React from "react";
 import { render, fireEvent, waitFor, act } from "@testing-library/react-native";
-import FloatingSearchBar from "../../components/OutdoorNavigation/FloatingSearchBar";
+import FloatingSearchBar from "../../components/FloatingSearchBar";
 
 // Mock the fetch function
 global.fetch = jest.fn();
@@ -21,10 +21,6 @@ jest.mock("expo-location", () => ({
       },
     }),
   ),
-}));
-
-jest.mock("expo-crypto", () => ({
-  getRandomBytesAsync: jest.fn(),
 }));
 
 // Correctly mock the styles import based on the actual path
@@ -334,163 +330,6 @@ describe("FloatingSearchBar Component", () => {
         Promise.resolve({
           predictions: [{ place_id: "1", description: "Montreal, QC, Canada" }],
         }),
-    });
-  });
-  describe("Session Token Handling", () => {
-    it("generates a new session token when component mounts", async () => {
-      // Mock successful implementation of getRandomBytesAsync
-      const mockRandomBytes = new Uint8Array([
-        65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80,
-      ]);
-      require("expo-crypto").getRandomBytesAsync.mockResolvedValue(
-        mockRandomBytes,
-      );
-
-      // Spy on global.btoa function which is used in generateRandomToken
-      const btoaSpy = jest.spyOn(global, "btoa");
-
-      render(<FloatingSearchBar {...defaultProps} />);
-
-      // Wait for async operations to complete
-      await waitFor(() => {
-        expect(require("expo-crypto").getRandomBytesAsync).toHaveBeenCalledWith(
-          16,
-        );
-        expect(btoaSpy).toHaveBeenCalled();
-      });
-    });
-
-    it("uses a new session token for each Google API request", async () => {
-      // Mock successful implementation of getRandomBytesAsync
-      const mockRandomBytes = new Uint8Array([
-        65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80,
-      ]);
-      require("expo-crypto").getRandomBytesAsync.mockResolvedValue(
-        mockRandomBytes,
-      );
-
-      // Mock successful API responses
-      fetch.mockImplementation((url) => {
-        if (url.includes("autocomplete")) {
-          return Promise.resolve({
-            json: () =>
-              Promise.resolve({
-                predictions: [
-                  { place_id: "1", description: "Montreal, QC, Canada" },
-                ],
-              }),
-          });
-        } else if (url.includes("details")) {
-          return Promise.resolve({
-            json: () =>
-              Promise.resolve({
-                result: {
-                  geometry: {
-                    location: {
-                      lat: 45.5017,
-                      lng: -73.5673,
-                    },
-                  },
-                },
-              }),
-          });
-        }
-      });
-
-      const { getByPlaceholderText, findByText } = render(
-        <FloatingSearchBar {...defaultProps} />,
-      );
-
-      const input = getByPlaceholderText("Test placeholder");
-
-      // Type to trigger the autocomplete request
-      await act(async () => {
-        fireEvent.changeText(input, "Mon");
-        await new Promise((resolve) => setTimeout(resolve, 0));
-      });
-
-      // Verify the first API call contains the session token
-      expect(fetch).toHaveBeenCalledWith(
-        expect.stringContaining("sessiontoken="),
-      );
-
-      // Select a prediction to trigger the details request
-      const prediction = await findByText("Montreal, QC, Canada");
-      await act(async () => {
-        fireEvent.press(prediction);
-        await new Promise((resolve) => setTimeout(resolve, 0));
-      });
-
-      // Verify the second API call also contains the session token
-      expect(fetch).toHaveBeenNthCalledWith(
-        2,
-        expect.stringContaining("sessiontoken="),
-      );
-    });
-
-    it("handles crypto API errors gracefully", async () => {
-      // Mock the crypto API failing
-      console.error = jest.fn(); // Mock console.error to prevent test output noise
-      console.warn = jest.fn(); // Mock console.warn
-
-      // Force getRandomBytesAsync to fail
-      require("expo-crypto").getRandomBytesAsync.mockRejectedValue(
-        new Error("Crypto API error"),
-      );
-
-      // Also mock Web Crypto API to be unavailable
-      const originalCrypto = global.crypto;
-      delete global.crypto;
-
-      render(<FloatingSearchBar {...defaultProps} />);
-
-      // Wait for async operations to complete
-      await waitFor(() => {
-        expect(console.error).toHaveBeenCalledWith(
-          "Error generating random token:",
-          expect.any(Error),
-        );
-        expect(console.warn).toHaveBeenCalledWith(
-          expect.stringContaining("Failed to generate secure token"),
-        );
-      });
-
-      // Restore global crypto object
-      global.crypto = originalCrypto;
-    });
-
-    it("uses Web Crypto API as fallback when expo-crypto fails", async () => {
-      // Mock the expo-crypto API failing
-      require("expo-crypto").getRandomBytesAsync.mockRejectedValue(
-        new Error("Crypto API error"),
-      );
-
-      // Create a mock for Web Crypto API
-      const mockWebCrypto = {
-        getRandomValues: jest.fn((array) => {
-          // Fill array with predictable values
-          for (let i = 0; i < array.length; i++) {
-            array[i] = i + 65;
-          }
-          return array;
-        }),
-      };
-
-      // Replace global crypto with our mock
-      global.crypto = mockWebCrypto;
-
-      // Spy on console.error
-      console.error = jest.fn();
-
-      render(<FloatingSearchBar {...defaultProps} />);
-
-      // Wait for async operations to complete
-      await waitFor(() => {
-        expect(console.error).toHaveBeenCalledWith(
-          "Error generating random token:",
-          expect.any(Error),
-        );
-      });
     });
   });
 });

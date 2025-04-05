@@ -1,6 +1,5 @@
 import Header from "./Header";
 import NavBar from "./NavBar";
-import Footer from "./Footer";
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -9,14 +8,13 @@ import {
   TouchableOpacity,
   Modal,
   ScrollView,
-  Alert,
 } from "react-native";
 import * as Calendar from "expo-calendar";
 import { format, addDays, subDays } from "date-fns";
 import styles from "../styles";
 import { Ionicons } from "@expo/vector-icons";
-import useLocationStatus from "../hooks/useLocationStatus";
-import useDirectionsHandler from "../hooks/useDirectionsHandler";
+import Footer from "./Footer";
+import { useNavigation } from "@react-navigation/native";
 
 const CalendarScreen = () => {
   const [events, setEvents] = useState([]);
@@ -25,14 +23,6 @@ const CalendarScreen = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [modalVisible, setModalVisible] = useState(false);
   const navigation = useNavigation(); // Initialize navigation
-
-  // Use the new hook
-  const { location, isIndoors, buildingName } = useLocationStatus();
-  const { getDirectionsTo } = useDirectionsHandler({
-    location,
-    isIndoors,
-    buildingName,
-  });
 
   useEffect(() => {
     requestCalendarPermission();
@@ -47,7 +37,7 @@ const CalendarScreen = () => {
     if (status === "granted") {
       fetchCalendars();
     } else {
-      Alert.alert("Permission to access the calendar was denied.");
+      alert("Permission to access the calendar was denied.");
     }
   };
 
@@ -205,7 +195,7 @@ const CalendarScreen = () => {
                 <TouchableOpacity
                   testID="getClassDirectionsButton"
                   style={styles.classDirectionsButton}
-                  onPress={() => getDirectionsTo(item.location)}
+                  onPress={() => handleGetDirections(item)}
                 >
                   <Text style={styles.classDirectionsButtonText}>
                     Get Directions

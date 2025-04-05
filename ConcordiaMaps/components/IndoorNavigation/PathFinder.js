@@ -13,7 +13,7 @@ export function findShortestPath(graph, start, end) {
   return buildPath(previous, end);
 }
 
-export function initializeGraphData(graph, start) {
+function initializeGraphData(graph, start) {
   const distances = {};
   const previous = {};
   const nodes = new Set();
@@ -27,7 +27,7 @@ export function initializeGraphData(graph, start) {
   return { distances, previous, nodes };
 }
 
-export function findMinDistanceNode(nodes, distances) {
+function findMinDistanceNode(nodes, distances) {
   return Array.from(nodes).reduce(
     (minNode, node) =>
       !minNode || distances[node] < distances[minNode] ? node : minNode,

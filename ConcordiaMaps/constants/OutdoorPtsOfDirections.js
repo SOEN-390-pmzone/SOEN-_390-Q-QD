@@ -83,7 +83,7 @@ export const PointsOfInterest = [
     markerImage: storeMarker,
   },
   {
-    name: "Infinite",
+    name: "Infinithe",
     coordinate: { latitude: 45.45576662226191, longitude: -73.64108986672184 },
     address: "7363 Sherbrooke St W, Montreal, Quebec H4B 1S1",
     markerImage: cafeMarker,
