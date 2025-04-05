@@ -5,7 +5,7 @@ on:
     branches:
       - develop
       - FixingSonarQubeCodeSmells
-
+#Workflow to trigger dependabot on push to develop branch and FixingSonarQubeCodeSmells branch
 jobs:
   dependabot:
     runs-on: ubuntu-latest
