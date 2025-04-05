@@ -13,17 +13,31 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCalendarsUsageDescription": "Allow ConcordiaMaps to access your calendar.",
+        "NSRemindersUsageDescription": "Allow ConcordiaMaps to access your reminders."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
+      "permissions": ["READ_CALENDAR", "WRITE_CALENDAR"],
       "package": "com.anonymous.ConcordiaMaps"
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      [
+        "expo-calendar",
+        {
+          "calendarPermission": "Allow ConcordiaMaps to access your calendar.",
+          "remindersPermission": "Allow ConcordiaMaps to access your reminders."
+        }
+      ]
+    ]
   }
 }

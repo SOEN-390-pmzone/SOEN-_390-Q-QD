@@ -1,0 +1,39 @@
+appId: com.anonymous.ConcordiaMaps
+---
+- launchApp
+- assertVisible: "Legend"
+- tapOn:
+    id: "hamburger-button"
+- tapOn:
+    point: "22%,29%"
+    label: 'Tap on "Room-to-Room Navigation"'
+- tapOn: "John Molson Building"
+- tapOn:
+    text: "Floor 1"
+    index: 0
+    label: "Select Floor 1 as Start Floor"
+- tapOn:
+    text: "Floor 2"
+    index: 0
+    label: "Select Floor 2 as End Floor"
+- tapOn: "1.265"
+- tapOn: "S2.210"
+- tapOn: "Find Path"
+- tapOn:
+    text: "Expand"
+    index: 0
+    label: "Expand Floor 1 map"
+- tapOn:
+    point: "89%,13%"
+    label: "Close Floor 1 map"
+- tapOn:
+    text: "Expand"
+    index: 1
+    label: "Expand Floor 2 map"
+- tapOn:
+    point: "89%,13%"
+    label: "Close Floor 2 map"
+- swipe:
+    start: "50%,90%"
+    end: "50%,70%"
+    label: "Scroll through Navigation Steps description"

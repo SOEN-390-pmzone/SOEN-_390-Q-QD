@@ -16,6 +16,7 @@ import RoomToRoomNavigation from "./components/IndoorNavigation/RoomToRoomNaviga
 import TunnelNavigation from "./components/IndoorNavigation/TunnelNavigation";
 import MultistepNavigationScreen from "./components/MultistepNavigation/MultistepNavigationScreen";
 import PropTypes from "prop-types";
+import CalendarScreen from "./components/CalendarScreen";
 
 // Create Context for modal data and visibility
 export const ModalContext = createContext();
@@ -89,6 +90,8 @@ export default function App() {
               name="MultistepNavigationScreen"
               component={MultistepNavigationScreen}
             />
+
+            <Stack.Screen name="Calendar" component={CalendarScreen} />
           </Stack.Navigator>
 
           <PopupModalWrapper

@@ -4141,3 +4141,51 @@ test("handles route change by resetting all navigation state", async () => {
   const navigationScreen = getByTestId("navigation-screen");
   expect(navigationScreen).toBeTruthy();
 });
+
+test("handles prefilled navigation data from CalendarScreen", async () => {
+  // Mock route with prefillNavigation data
+  const prefillData = {
+    prefillNavigation: true,
+    origin: {
+      originInputType: "location",
+      originDetails: {
+        formatted_address: "1455 De Maisonneuve Blvd W, Montreal, QC H3G 1M8",
+        latitude: 45.497092,
+        longitude: -73.5788,
+      },
+    },
+    destination: {
+      destinationInputType: "classroom",
+      building: {
+        id: "H",
+        name: "Hall Building",
+        address: "1455 De Maisonneuve Blvd. Ouest",
+      },
+      room: "H-920",
+    },
+  };
+
+  useRoute.mockReturnValue({
+    params: prefillData,
+  });
+
+  // Render the component with prefilled data
+  const { getByText, getByPlaceholderText, getByTestId } = render(
+    <MultistepNavigationScreen />,
+  );
+
+  // Verify the component renders with the navigation form
+  await waitFor(() => {
+    expect(getByText("Plan Your Route")).toBeTruthy();
+  });
+
+  // Verify the room input has the correct value
+  const roomInput = getByPlaceholderText("Enter room number in Hall Building");
+  expect(roomInput.props.value).toBe("H-920");
+
+  // Verify navigation can be started
+  expect(getByText("Start Navigation")).toBeTruthy();
+
+  // Verify the component rendered completely
+  expect(getByTestId("navigation-screen")).toBeTruthy();
+});

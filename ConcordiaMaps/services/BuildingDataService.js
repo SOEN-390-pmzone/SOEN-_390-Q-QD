@@ -21,6 +21,11 @@ import {
   rooms as JMSB2Rooms,
   graph as JMSB2Graph,
 } from "../constants/coordinates/msb2";
+//CC
+import {
+  rooms as CC1Rooms,
+  graph as CC1Graph,
+} from "../constants/coordinates/cc1";
 
 //Loyola
 import {
@@ -50,30 +55,84 @@ export const CONCORDIA_BUILDINGS = [
     id: "LB",
     name: "J.W. McConnell Building",
     address: "1400 De Maisonneuve Blvd. Ouest",
+    latitude: 45.4968158,
+    longitude: -73.5779337,
   },
   {
     id: "MB",
     name: "John Molson Building",
     address: "1450 Guy St.",
+    latitude: 45.495304,
+    longitude: -73.579044,
   },
   {
     id: "EV",
     name: "Engineering & Visual Arts Complex",
     address: "1515 St. Catherine St. Ouest",
+    latitude: 45.495376,
+    longitude: -73.577997,
   },
   {
     id: "VL",
     name: "Vanier Library",
     address: "7141 Sherbrooke St. W",
+    latitude: 45.459026,
+    longitude: -73.638606,
   },
   {
     id: "VE",
     name: "Vanier Extension",
     address: "7141 Sherbrooke St. W",
+    latitude: 45.459026,
+    longitude: -73.638606,
   },
 ];
 
 class FloorRegistry {
+  // Add this method to your BuildingDataService module
+
+  /**
+   * Find a building by name, partial name, or building code
+   *
+   * @param {string} nameOrCode - The building name or code to search for
+   * @returns {object|null} The building object if found, null otherwise
+   */
+  static findBuildingByName(nameOrCode) {
+    // Handle empty inputs
+    if (!nameOrCode) {
+      return null;
+    }
+
+    const searchTerm = nameOrCode.toLowerCase();
+    const buildings = this.getBuildings();
+
+    // Find the first building that matches the search term
+    const building = buildings.find((building) => {
+      // Check for exact name match (case insensitive)
+      if (building.name.toLowerCase() === searchTerm) {
+        return true;
+      }
+
+      // Check for partial name match (case insensitive)
+      if (building.name.toLowerCase().includes(searchTerm)) {
+        return true;
+      }
+
+      // Check for building code match (case insensitive)
+      if (building.code.toLowerCase() === searchTerm) {
+        return true;
+      }
+
+      return false;
+    });
+
+    return building || null;
+  }
+  static getAddressByID(id) {
+    const building = CONCORDIA_BUILDINGS.find((building) => building.id === id);
+    return building ? building.address : null;
+  }
+
   static parseRoomFormat(text) {
     // Common formats: "H-920", "H 920", "Hall Building 920"
     const buildingMatch = text.match(/^([A-Za-z]+)-?(\d+)$/);
@@ -517,6 +576,24 @@ class FloorRegistry {
           rooms: VE2Rooms,
           graph: VE2graph,
           getSVG: () => SVGs.VEfloor2SVG,
+        },
+      },
+    },
+    // Add CC Building
+    CCBuilding: {
+      id: "cc",
+      name: "CC Building",
+      code: "CC",
+      description: "Communication Studies and Journalism Building",
+      address: "7141 Sherbrooke St W",
+      floors: {
+        1: {
+          id: "1",
+          name: "CC 1",
+          description: "First floor of CC Building",
+          rooms: CC1Rooms,
+          graph: CC1Graph,
+          getSVG: () => SVGs.CCfloor1SVG,
         },
       },
     },
