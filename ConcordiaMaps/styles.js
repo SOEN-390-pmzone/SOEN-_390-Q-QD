@@ -1,6 +1,24 @@
 import { Platform, StyleSheet } from "react-native";
 
 const styles = StyleSheet.create({
+  markerImage: {
+    width: 40,
+    height: 40,
+  },
+  calloutContainer: {
+    width: 160,
+    height: 50,
+    padding: 5,
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    borderRadius: 8,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  calloutText: {
+    fontSize: 14,
+    color: "#333",
+    textAlign: "center",
+  },
   container: {
     flex: 1,
     backgroundColor: "#912338",

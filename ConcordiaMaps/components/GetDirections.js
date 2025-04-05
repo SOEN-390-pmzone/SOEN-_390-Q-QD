@@ -6,6 +6,7 @@ import React, {
   useContext,
   useMemo,
 } from "react";
+import { useRoute } from "@react-navigation/native";
 import { View, Button } from "react-native";
 import MapView, { Polyline, Marker } from "react-native-maps";
 import * as Location from "expo-location";
@@ -17,7 +18,6 @@ import { useGoogleMapDirections } from "../hooks/useGoogleMapDirections";
 import DirectionsBox from "./DirectionsBox";
 import PropTypes from "prop-types";
 import { LocationContext } from "../contexts/LocationContext";
-import { useRoute } from "@react-navigation/native";
 
 // Helper function to geocode an address string into coordinates
 const geocodeAddress = async (address) => {
@@ -75,6 +75,13 @@ LocationMarkers.propTypes = {
 };
 
 const GetDirections = () => {
+  const [originText, setOriginText] = useState("");
+  const [destinationText, setDestinationText] = useState("");
+  const routeParams = useRoute();
+  const lat = routeParams.params?.latitude;
+  const long = routeParams.params?.longitude;
+  const targetLocation = routeParams.params?.targetLocation || null;
+  const fromPopup = routeParams.params?.fromPopup || null;
   const mapRef = useRef(null);
   const location = useContext(LocationContext);
   const { getStepsInHTML, getPolyline } = useGoogleMapDirections();
@@ -87,8 +94,6 @@ const GetDirections = () => {
   const [isDirectionsBoxCollapsed, setIsDirectionsBoxCollapsed] =
     useState(true);
   const [useCurrentLocation, setUseCurrentLocation] = useState(true);
-  const [originText, setOriginText] = useState("");
-  const [destinationText, setDestinationText] = useState("");
 
   // Extract any passed parameters from the navigation route.
   // disableLiveLocation will be true when we want to lock the origin to the default.
@@ -105,6 +110,17 @@ const GetDirections = () => {
       setUseCurrentLocation(false);
     }
   }, [disableLiveLocation]);
+
+  useEffect(() => {
+    if (fromPopup) {
+      setDestination({
+        latitude: lat,
+        longitude: long,
+      });
+      setDestinationText(targetLocation);
+      console.log(targetLocation);
+    } else setDestination(null);
+  }, [fromPopup, lat, long, destinationText]);
 
   // If there is no passed origin and we're using the current location, set it from context.
   useEffect(() => {
@@ -282,7 +298,6 @@ const GetDirections = () => {
               }}
               testID="search-bar-Enter Origin"
             />
-
             <FloatingSearchBar
               onPlaceSelect={(location, displayName) => {
                 setDestination(location);
