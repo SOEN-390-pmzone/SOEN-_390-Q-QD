@@ -60,10 +60,10 @@ jest.mock("../../components/OutdoorNavigation/FloatingSearchBar", () => {
   return { __esModule: true, default: MockFloatingSearchBar };
 });
 
-jest.mock("../../Components/Header", () => "Header");
-jest.mock("../../Components/NavBar", () => "NavBar");
+jest.mock("../../components/Header", () => "Header");
+jest.mock("../../components/NavBar", () => "NavBar");
 jest.mock(
-  "../../Components/OutdoorNavigation/DirectionsBox",
+  "../../components/OutdoorNavigation/DirectionsBox",
   () => "DirectionsBox",
 );
 
