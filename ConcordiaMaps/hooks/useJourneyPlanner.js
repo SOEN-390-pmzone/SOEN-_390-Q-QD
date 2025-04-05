@@ -71,7 +71,7 @@ const addBuildingRoomTask = (title, buildingId, room, selectedFloor) => {
     title: title,
     buildingId: buildingId,
     room: room,
-    floor: floor,
+    floor: selectedFloor,
     description: `Visit ${title} in ${buildingId}, room ${room}`,
   };
 
@@ -107,12 +107,13 @@ const addBuildingRoomTask = (title, buildingId, room, selectedFloor) => {
       return false;
     }
 
-    // try {
-    //   // Call the JourneyOptimizerService to get optimized navigation steps
-    //   const steps = JourneyOptimizerService.generateOptimalJourney(
-    //     tasks,
-    //     avoidOutdoor,
-    //   );
+    try {
+      console.log("useJourneyPlanner: Sending steps for optimal journey Generation!")
+      // Call the JourneyOptimizerService to get optimized navigation steps
+      const steps = JourneyOptimizerService.generateOptimalJourney(
+        tasks,
+        avoidOutdoor,
+      );
 
     //   // Navigate to the MultistepNavigationScreen with the generated steps
     //   navigation.navigate('MultistepNavigationScreen', { 
@@ -123,15 +124,15 @@ const addBuildingRoomTask = (title, buildingId, room, selectedFloor) => {
     //       currentStep: 0
     //     }
     //   });
-    //   return true;
-    // } catch (error) {
-    //   console.error('Error generating journey:', error);
-    //   Alert.alert(
-    //     'Error',
-    //     'Failed to generate journey. Please check your locations and try again.',
-    //   );
-    //   return false;
-    // }
+      return true;
+    } catch (error) {
+      console.error('Error generating journey:', error);
+      Alert.alert(
+        'Error',
+        'Failed to generate journey. Please check your locations and try again.',
+      );
+      return false;
+    }
   };
 
   return {

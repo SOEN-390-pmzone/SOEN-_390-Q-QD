@@ -1,52 +1,48 @@
 /**
  * Route strategies for different types of location pairs
  */
+import { RoomToRoomSameFloor, BaseCalculation } from './RouteDecorators';
 
 const RouteStrategies = {
   /**
-   * Indoor strategy for paths between rooms in buildings
+   * Indoor Strategy for rooms in the same floor
    */
-  Indoor: {
+  SameFloorSameBuilding: {
     calculateDistance(locationA, locationB) {
-      // If in same building, use direct indoor distance
-      if (locationA.buildingId === locationB.buildingId) {
-        return this._calculateSameBuildingDistance(locationA, locationB);
-      }
-
-      // Different buildings - use tunnel system or known indoor paths
-      return this._calculateCrossBuildingDistance(locationA, locationB);
+      console.log("Same Floor, same BuildingStrategy chosen, now calculating distance");
+        // Create a base calculation that returns 0
+        const baseCalculation = () => 0;
+        // Use the RoomToRoomSameFloor decorator to calculate distance
+        const roomToRoomCalculator = RoomToRoomSameFloor(baseCalculation);
+          // Get the distance using the decorated calculator
+        return roomToRoomCalculator(locationA, locationB);
     },
 
     isPathAllowed(locationA, locationB, avoidOutdoor) {
-      // Different buildings - check if connected by tunnels/indoor paths
-      if (locationA.buildingId !== locationB.buildingId) {
-        // Check building connectivity through indoor paths
-        return this._buildingsHaveIndoorConnection(
-          locationA.buildingId,
-          locationB.buildingId,
-        );
+      // Same floor check
+      if (locationA.floor !== locationB.floor) {
+        return false;
       }
       return true; // Same building is always allowed
+    }
+  },
+  DifferentFloorSameBuilding: {
+    calculateDistance(locationA, locationB) {
+        // Create a base calculation that returns 0
+        const baseCalculation = () => 0;
+        // Use the RoomToRoomSameFloor decorator to calculate distance
+        const roomToRoomCalculator = RoomToRoomSameFloor(baseCalculation);
+          // Get the distance using the decorated calculator
+        return roomToRoomCalculator(locationA, locationB);
     },
 
-    _calculateSameBuildingDistance(locationA, locationB) {
-      // Implement indoor distance logic (floor differences, etc.)
-      // ...
-      return 1; // Placeholder
-    },
-
-    _calculateCrossBuildingDistance(locationA, locationB) {
-      // Implement cross-building distance logic
-      // ...
-      return 10; // Placeholder
-    },
-
-    _buildingsHaveIndoorConnection(buildingA, buildingB) {
-      // Check building connectivity (tunnels, bridges, etc.)
-      // This would use building data to determine connectivity
-      // ...
-      return true; // Placeholder
-    },
+    isPathAllowed(locationA, locationB, avoidOutdoor) {
+      // Same floor check
+      if (locationA.floor !== locationB.floor) {
+        return false;
+      }
+      return true; // Same building is always allowed
+    }
   },
 
   /**

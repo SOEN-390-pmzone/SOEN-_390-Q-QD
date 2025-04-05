@@ -129,12 +129,19 @@ class JourneyOptimizer {
         };
       }
     });
+    console.log("JourneyOptimizerService: Sending Locations to be optimized!")
+    optimizedLocations = this.findOptimalPath(locations);
+  // Log the entire array in a readable format
+    console.log("OPTIMIZED ROUTE CREATED:", optimizedLocations);
 
-    // Find optimal path
-    const optimizedLocations = this.findOptimalPath(locations);
-
+    // For a more detailed view that shows all properties
+    console.log("DETAILED OPTIMIZED ROUTE:");
+    optimizedLocations.forEach((location, index) => {
+      console.log(`Location ${index + 1}:`, JSON.stringify(location, null, 2));
+    });
+    //TODO: 
     // Generate steps using the dedicated service
-    return NavigationStepsService.generateNavigationSteps(optimizedLocations);
+    // return NavigationStepsService.generateNavigationSteps(optimizedLocations);
   }
 }
 

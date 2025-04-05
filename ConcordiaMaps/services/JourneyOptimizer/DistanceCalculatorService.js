@@ -46,10 +46,15 @@ class DistanceCalculatorService {
    * @returns {Object} Appropriate strategy object
    */
   _determineStrategy(locationA, locationB) {
-    // Both locations have building IDs - use indoor strategy
-    if (locationA.buildingId && locationB.buildingId) {
-      return this.strategies.Indoor;
+     // Both locations have building IDs - use indoor strategies
+  if (locationA.buildingId && locationB.buildingId) {
+    if (locationA.floor == locationB.floor) {
+      return this.strategies.SameFloorSameBuilding;
+    } else {
+      // Different floors but both indoor
+      return this.strategies.DifferentFloorSameBuilding; 
     }
+  }
 
     // One location is indoor, one is outdoor - use mixed strategy
     if (
