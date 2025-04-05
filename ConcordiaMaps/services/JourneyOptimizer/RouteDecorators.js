@@ -120,9 +120,6 @@ export const OutdoorTravel = (baseCalculation) => {
   };
 };
 
-// BuildingToEntrance decorator for calculating distance from a room to building entrance
-import RouteStrategies from "./RouteStrategies";
-
 // Remove the direct import to avoid circular dependency
 // import RouteStrategies from "./RouteStrategies";
 

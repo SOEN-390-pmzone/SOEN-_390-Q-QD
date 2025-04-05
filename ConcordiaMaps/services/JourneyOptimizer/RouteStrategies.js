@@ -193,34 +193,26 @@ const RouteStrategies = {
    */
   Outdoor: {
     calculateDistance: (locationA, locationB) => {
-      // Remove 'async'
       console.log("Outdoor strategy chosen, calculating distance");
-
-      // Calculate using Haversine formula synchronously
-      const R = 6371e3; // Earth radius in meters
-      const φ1 = (locationA.latitude * Math.PI) / 180;
-      const φ2 = (locationB.latitude * Math.PI) / 180;
-      const Δφ = ((locationB.latitude - locationA.latitude) * Math.PI) / 180;
-      const Δλ = ((locationB.longitude - locationA.longitude) * Math.PI) / 180;
-
-      const a =
-        Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-        Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-      const distance = R * c; // Distance in meters
+      
+      // Create a base calculation that returns 0
+      const baseCalculation = () => 0;
+      
+      // Use the OutdoorTravel decorator to calculate the distance
+      const outdoorTravelCalculator = OutdoorTravel(baseCalculation);
+      const distance = outdoorTravelCalculator(locationA, locationB);
+      
       console.log(`Distance calculated: ${distance} meters`);
-
-      return distance; // Return a number, not a Promise
+      return distance;
     },
-
+  
     isPathAllowed(locationA, locationB, avoidOutdoor) {
       // Check if outdoor paths should be avoided
       if (avoidOutdoor) {
         console.log("Outdoor paths are being avoided by user preference");
         return false;
       }
-
+  
       // Validate that both locations have coordinates (properly)
       if (
         locationA.latitude === undefined ||
@@ -239,127 +231,92 @@ const RouteStrategies = {
         );
         return false;
       }
-
+  
       return true; // Outdoor paths are allowed by default
     },
   },
 
-  /**
-   * Mixed strategy for paths between indoor and outdoor locations
-   */
   Mixed: {
     calculateDistance(locationA, locationB) {
-      console.log(
-        "Mixed strategy chosen, calculating distance between indoor and outdoor locations",
-      );
+      console.log("Mixed strategy chosen, calculating distance between indoor and outdoor locations");
+      
+      // Create a base calculation that returns 0
+      const baseCalculation = () => 0;
+      console.log("Mixed STEP1");
 
       // Step 1: Determine which location is indoor and which is outdoor
-      const indoorLocation =
-        locationA.type === "indoor" ? locationA : locationB;
-      const outdoorLocation =
-        locationA.type === "outdoor" ? locationA : locationB;
+      const indoorLocation = locationA.type === "indoor" ? locationA : locationB;
+      const outdoorLocation = locationA.type === "outdoor" ? locationA : locationB;
+      console.log("Mixed STEP2");
 
       // Step 2: Get building coordinates for the indoor location
       const buildingCoords = FloorRegistry.getCoordinatesForBuilding(
-        indoorLocation.buildingId,
+        indoorLocation.buildingId
       );
-
+      
       if (!buildingCoords) {
         console.error(
-          `Building coordinates not found for ${indoorLocation.buildingId}, using fallback distance`,
+          `Building coordinates not found for ${indoorLocation.buildingId}, using fallback distance`
         );
         return 300; // Fallback distance
       }
+      console.log("Mixed STEP3");
 
-      // Step 3: Create a building entrance location on floor 1
-      const buildingEntrance = {
-        type: "indoor",
-        buildingId: indoorLocation.buildingId,
-        floor: "1",
-        // Use the normalization function to get the correct room ID
-        room: FloorRegistry.normalizeRoomId("entrance"),
-        title: `${indoorLocation.buildingId} Entrance`,
-      };
+      // Step 3: Calculate the indoor segment (from indoor location to building entrance)
+      // Use the BuildingToEntrance decorator to calculate this part
+      const buildingToEntranceCalculator = BuildingToEntrance(baseCalculation);
+      const indoorDistance = buildingToEntranceCalculator(indoorLocation, RouteStrategies);
+      console.log("Mixed STEP4");
 
-      // Step 4: Calculate the indoor segment (from indoor location to building entrance)
-      let indoorDistance;
-      try {
-        if (indoorLocation.floor === "1") {
-          // If already on floor 1, use SameFloorSameBuilding strategy
-          indoorDistance =
-            RouteStrategies.SameFloorSameBuilding.calculateDistance(
-              indoorLocation,
-              buildingEntrance,
-            );
-        } else {
-          // If on different floor, use DifferentFloorSameBuilding strategy
-          indoorDistance =
-            RouteStrategies.DifferentFloorSameBuilding.calculateDistance(
-              indoorLocation,
-              buildingEntrance,
-            );
-        }
-      } catch (error) {
-        console.error("Error calculating indoor distance:", error);
-        indoorDistance = 50; // Fallback if calculation fails
-      }
-
-      // Step 5: Calculate the outdoor segment (from building entrance to outdoor location)
+      // Step 4: Calculate the outdoor segment (from building entrance to outdoor location)
+      // Create an outdoor point representing the building entrance
       const entranceOutdoor = {
         type: "outdoor",
         latitude: buildingCoords.latitude,
         longitude: buildingCoords.longitude,
-        title: `${indoorLocation.buildingId} Outside Entrance`,
+        title: `${indoorLocation.buildingId} Outside Entrance`
       };
+      
+      // Use the OutdoorTravel decorator to calculate this part
+      const outdoorTravelCalculator = OutdoorTravel(baseCalculation);
+      const outdoorDistance = outdoorTravelCalculator(entranceOutdoor, outdoorLocation);
+      console.log("Mixed STEP5");
 
-      const outdoorDistance = RouteStrategies.Outdoor.calculateDistance(
-        entranceOutdoor,
-        outdoorLocation,
-      );
-
-      // Step 6: Sum the distances
+      // Step 5: Sum the distances
       const totalDistance = indoorDistance + outdoorDistance;
-
+      
       console.log(
-        `Mixed path: ${indoorDistance}m (indoor) + ${outdoorDistance}m (outdoor) = ${totalDistance}m total`,
+        `Mixed path: ${indoorDistance}m (indoor) + ${outdoorDistance}m (outdoor) = ${totalDistance}m total`
       );
-
+      
       return totalDistance;
     },
-
+    
     isPathAllowed(locationA, locationB, avoidOutdoor) {
       // Cannot use this path if avoiding outdoor travel
       if (avoidOutdoor) {
-        console.log(
-          "Mixed indoor/outdoor paths are being avoided by user preference",
-        );
+        console.log("Mixed indoor/outdoor paths are being avoided by user preference");
         return false;
       }
-
+      
       // Verify one location is indoor and one is outdoor
-      const hasIndoor =
-        locationA.type === "indoor" || locationB.type === "indoor";
-      const hasOutdoor =
-        locationA.type === "outdoor" || locationB.type === "outdoor";
-
+      const hasIndoor = locationA.type === "indoor" || locationB.type === "indoor";
+      const hasOutdoor = locationA.type === "outdoor" || locationB.type === "outdoor";
+      
       if (!hasIndoor || !hasOutdoor) {
-        console.log(
-          "Mixed strategy requires one indoor and one outdoor location",
-        );
+        console.log("Mixed strategy requires one indoor and one outdoor location");
         return false;
       }
-
+      
       // For indoor location, check that it has a valid buildingId
-      const indoorLocation =
-        locationA.type === "indoor" ? locationA : locationB;
+      const indoorLocation = locationA.type === "indoor" ? locationA : locationB;
       if (!indoorLocation.buildingId) {
         console.warn("Indoor location missing buildingId");
         return false;
       }
-
+      
       // For outdoor location, check that it has valid coordinates
-      const outdoorLocation =
-        locationA.type === "outdoor" ? locationA : locationB;
+      const outdoorLocation = locationA.type === "outdoor" ? locationA : locationB;
       if (
         outdoorLocation.latitude === undefined ||
         outdoorLocation.latitude === null ||
@@ -368,11 +325,11 @@ const RouteStrategies = {
       ) {
         console.warn(
           "Outdoor location missing coordinates:",
-          `(${outdoorLocation.latitude},${outdoorLocation.longitude})`,
+          `(${outdoorLocation.latitude},${outdoorLocation.longitude})`
         );
         return false;
       }
-
+      
       return true;
     },
   },
