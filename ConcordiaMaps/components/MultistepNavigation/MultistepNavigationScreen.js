@@ -359,7 +359,8 @@ const MultistepNavigationScreen = () => {
   };
 
   const handleStartNavigation = () => {
-    NavigationPlanService.createNavigationPlan({
+    // Create an object with all parameters
+    const navigationParams = {
       originInputType,
       originDetails,
       origin,
@@ -369,7 +370,30 @@ const MultistepNavigationScreen = () => {
       destinationDetails,
       destination,
       building,
-      room,
+      room
+    };
+  
+    // Log the entire object
+    console.log('\n===== NAVIGATION START PARAMETERS =====');
+    console.log(JSON.stringify(navigationParams, null, 2));
+    console.log('\n--- Individual Parameter Details ---');
+    
+    // Log each parameter individually with type information
+    Object.entries(navigationParams).forEach(([key, value]) => {
+      console.log(`${key}: ${JSON.stringify(value)} (${value === null ? 'null' : typeof value})`);
+    });
+    
+    // Log callback functions (existence only since they can't be stringified)
+    console.log('\n--- Callbacks ---');
+    console.log('setInvalidOriginRoom: [Function]');
+    console.log('setInvalidDestinationRoom: [Function]');
+    console.log('setIsLoading: [Function]');
+    console.log('navigation: [Navigation Object]');
+    console.log('======================================\n');
+  
+    // Call the original function with the same parameters
+    NavigationPlanService.createNavigationPlan({
+      ...navigationParams,
       setInvalidOriginRoom,
       setInvalidDestinationRoom,
       setIsLoading,

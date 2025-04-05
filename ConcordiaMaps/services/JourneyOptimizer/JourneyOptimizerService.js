@@ -172,7 +172,10 @@ class JourneyOptimizer {
     console.log("=== PATH FINDING COMPLETE ===");
     console.log(`Final path length: ${orderedPath.length}`);
     console.log(`Unreachable locations: ${unreachableLocations.length}`);
-
+    // At the end of the function:
+    distanceLog = null;
+    unreachableLocations = null;
+    remainingLocations = null;
     return orderedPath;
   }
 
