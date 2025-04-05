@@ -9,6 +9,22 @@ import { findBuilding, getData } from "../components/userInPolygon";
 import { coloringData } from "../data/coloringData";
 
 /**
+ * Debug logger for the directions handler
+ * @param {string} message - The message to log
+ * @param {any} [data] - Optional data to log
+ */
+const debugLog = (message, data = undefined) => {
+  const DEBUG_ENABLED = true; // Can be easily toggled
+  if (DEBUG_ENABLED) {
+    if (data !== undefined) {
+      console.log(`[DirectionsHandler] ${message}`, data);
+    } else {
+      console.log(`[DirectionsHandler] ${message}`);
+    }
+  }
+};
+
+/**
  * Custom hook for handling navigation directions between locations
  * @param {Object} userContext - Information about the user's current location
  * @param {Object} userContext.location - User's GPS coordinates
@@ -26,13 +42,13 @@ const useDirectionsHandler = ({ location, isIndoors, buildingName }) => {
    */
   const getDirectionsTo = (loc) => {
     if (loc === null || loc === undefined) {
-      console.log("Make sure the address is included in the calendar event");
+      debugLog("Make sure the address is included in the calendar event");
       return;
     }
 
-    console.log("Origin location status:", isIndoors ? "indoors" : "outdoors");
-    console.log("Origin building:", buildingName || "Not in a building");
-    console.log("Destination location:", loc);
+    debugLog("Origin location status:", isIndoors ? "indoors" : "outdoors");
+    debugLog("Origin building:", buildingName || "Not in a building");
+    debugLog("Destination location:", loc);
     setDestinationLocation(loc);
     Alert.alert(`Get directions to ${loc}`);
 
@@ -71,7 +87,7 @@ const useDirectionsHandler = ({ location, isIndoors, buildingName }) => {
         mappedBuildingName = knownBuildings[buildingName] || buildingName;
       }
 
-      console.log(`Mapped building name: ${mappedBuildingName}`);
+      debugLog(`Mapped building name: ${mappedBuildingName}`);
 
       // Find the building ID using FloorRegistry's robust name matching
       let startBuildingId =
@@ -92,7 +108,7 @@ const useDirectionsHandler = ({ location, isIndoors, buildingName }) => {
       if (startBuilding) {
         const startAddress = FloorRegistry.getAddressByID(startBuildingId);
 
-        console.log(
+        debugLog(
           `Setting origin to building: ${startBuilding.name} (${startBuildingId})`,
         );
 
@@ -109,7 +125,7 @@ const useDirectionsHandler = ({ location, isIndoors, buildingName }) => {
           formatted_address: startAddress || startBuilding.name,
         };
       } else {
-        console.log(
+        debugLog(
           `Could not find building data for: ${buildingName} (mapped to: ${mappedBuildingName})`,
         );
         // Fallback to using current location if building data isn't found
@@ -127,7 +143,7 @@ const useDirectionsHandler = ({ location, isIndoors, buildingName }) => {
    * @returns {void}
    */
   const setOutdoorOrigin = (navigationParams) => {
-    console.log(
+    debugLog(
       "User is outdoors, using current GPS coordinates as starting point",
     );
     navigationParams.originInputType = "location";
@@ -165,7 +181,7 @@ const useDirectionsHandler = ({ location, isIndoors, buildingName }) => {
    * @returns {void}
    */
   const processRoomDestination = (roomInfo, navigationParams) => {
-    console.log("Processing room format:", roomInfo);
+    debugLog("Processing room format:", roomInfo);
     const buildingCode = roomInfo.buildingCode;
 
     // Find the building by code
@@ -174,7 +190,7 @@ const useDirectionsHandler = ({ location, isIndoors, buildingName }) => {
     );
 
     if (!targetBuilding) {
-      console.log("Could not find building with code:", buildingCode);
+      debugLog("Could not find building with code:", buildingCode);
       return;
     }
 
@@ -206,7 +222,7 @@ const useDirectionsHandler = ({ location, isIndoors, buildingName }) => {
     convertToCoordinates(loc)
       .then((coordinates) => {
         if (!coordinates) {
-          console.log("Could not convert address to coordinates");
+          debugLog("Could not convert address to coordinates");
           return;
         }
 
@@ -214,7 +230,7 @@ const useDirectionsHandler = ({ location, isIndoors, buildingName }) => {
         targetBuilding = getData(targetBuilding); // fetches the information about the destination Concordia building
 
         if (!targetBuilding) {
-          console.log("Could not find target building");
+          debugLog("Could not find target building");
           return;
         }
 
@@ -223,7 +239,7 @@ const useDirectionsHandler = ({ location, isIndoors, buildingName }) => {
           targetBuilding.buildingName;
 
         if (!endBuildingId) {
-          console.log(
+          debugLog(
             "Could not find end building ID for:",
             targetBuilding.buildingName,
           );
