@@ -9,6 +9,7 @@ import styles from "./styles";
 import GetDirections from "./components/OutdoorNavigation/GetDirections";
 
 //? SCREENS
+import NavigationOrchestratorScreen from "./screen/NavigationOrchestrator";
 import JourneyPlannerScreen from "./components/JourneyPlanner/JourneyPlannerScreen";
 import IndoorNavigation from "./components/IndoorNavigation/IndoorNavigation";
 import FloorSelector from "./components/IndoorNavigation/FloorSelector";
@@ -94,6 +95,11 @@ export default function App() {
               name="JourneyPlannerScreen"
               component={JourneyPlannerScreen}
             />
+            <Stack.Screen 
+            name="NavigationOrchestrator" 
+            component={NavigationOrchestratorScreen}
+            options={{ headerShown: false }} 
+          />
           </Stack.Navigator>
 
           <PopupModalWrapper

@@ -101,6 +101,7 @@ export const useJourneyPlanner = () => {
     setTasks(updatedTasks);
   };
 
+
   const generateJourney = () => {
     if (tasks.length < 2) {
       Alert.alert("Error", "Please add at least two locations for a journey");
@@ -117,16 +118,9 @@ export const useJourneyPlanner = () => {
         avoidOutdoor,
       );
 
-      // TODO: US 24.4 Implement NavigationOrchestrator
-      //   // Navigate to the MultistepNavigationScreen with the generated steps
-      //   navigation.navigate('MultistepNavigationScreen', {
-      //     navigationPlan: {
-      //       steps: steps,
-      //       title: "Optimized Journey",
-      //       id: `journey-${Date.now()}`,
-      //       currentStep: 0
-      //     }
-      //   });
+      // Navigate to the NavigationOrchestrator screen with the optimized steps
+      navigation.navigate("NavigationOrchestrator", { steps });
+      
       return true;
     } catch (error) {
       console.error("Error generating journey:", error);
