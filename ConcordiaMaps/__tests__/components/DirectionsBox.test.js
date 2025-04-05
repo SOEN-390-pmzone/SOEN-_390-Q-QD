@@ -1,6 +1,6 @@
 import React from "react";
 import { render, fireEvent, waitFor, act } from "@testing-library/react-native";
-import DirectionsBox from "../../components/DirectionsBox";
+import DirectionsBox from "../../components/OutdoorNavigation/DirectionsBox";
 
 describe("DirectionsBox", () => {
   const directions = [

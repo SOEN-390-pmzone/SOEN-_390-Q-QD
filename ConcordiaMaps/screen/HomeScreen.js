@@ -1,11 +1,4 @@
-import React, {
-  useState,
-  useEffect,
-  createContext,
-  useRef,
-  useContext,
-  useMemo,
-} from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import { View, Text, TouchableOpacity, Image } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import NavBar from "../components/NavBar";
@@ -14,11 +7,13 @@ import TemporaryModal from "../components/temporaryModal";
 import { LocationContext } from "../contexts/LocationContext";
 import Footer from "../components/Footer";
 import styles from "../styles";
-import { useNavigation } from "@react-navigation/native";
+const customMarkerImage = require("../assets/PinLogo.png");
+import { Building } from "../components/MapMarkers";
+import { ModalContext } from "../App";
 import BuildingColoring from "../components/buildingColoring";
 import Legend from "../components/Legend";
 import ShuttleStop from "../components/ShuttleStop";
-import FloatingSearchBar from "../components/FloatingSearchBar";
+import FloatingSearchBar from "../components/OutdoorNavigation/FloatingSearchBar";
 import LiveBusTracker from "../components/LiveBusTracker";
 import {
   saveToAsyncStorage,
@@ -26,100 +21,22 @@ import {
 } from "../components/AsyncPersistence";
 import convertToCoordinates from "../components/convertToCoordinates";
 import PropTypes from "prop-types";
-import PopupOPI from "../components/PopupOPI"; // Import the new popup component
-import NextEventModal from "../components/NextEventModal"; // Import the NextEventModal component
-// Marker image assets for Restaurant and Cafe
 
-import PopupModal from "../components/PopupModal";
-import MapMarkers from "../components/MapMarkers";
-const ModalContext = createContext();
-
-// Correctly defined wrapper component with navigation prop
-const PopupModalWrapper = ({ isVisible, data, onClose, navigation }) => {
-  return (
-    <PopupModal
-      isVisible={isVisible}
-      data={data}
-      onClose={onClose}
-      navigation={navigation}
-    />
-  );
-};
-const OPIModalWrapper = ({
-  opiPopupVisible,
-  selectedOPI,
-  onClose,
-  navigation,
-}) => {
-  return (
-    <PopupOPI
-      isVisible={opiPopupVisible}
-      data={selectedOPI || { name: "", address: "" }}
-      onClose={onClose}
-      navigation={navigation}
-    />
-  );
-};
-PopupModalWrapper.propTypes = {
-  isVisible: PropTypes.bool.isRequired,
-  data: PropTypes.object.isRequired,
-  onClose: PropTypes.func.isRequired,
-  navigation: PropTypes.object.isRequired,
-};
-OPIModalWrapper.propTypes = {
-  opiPopupVisible: PropTypes.bool.isRequired,
-  selectedOPI: PropTypes.object, // Remove isRequired
-  onClose: PropTypes.func.isRequired,
-  navigation: PropTypes.object.isRequired,
-};
 function HomeScreen({ asyncKey = "Campus" }) {
   const loyolaPostalCode = process.env.EXPO_PUBLIC_LOYOLA_POSTAL_CODE;
   const sgwPostalCode = process.env.EXPO_PUBLIC_SGW_POSTAL_CODE;
 
   const location = useContext(LocationContext);
-  const navigation = useNavigation();
+  const { toggleModal, setModalData } = useContext(ModalContext); // Access setModalData
 
   const [postalCode, setPostalCode] = useState(null);
   const [coordinates, setCoordinates] = useState(null);
   const [error, setError] = useState("");
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [, setMapRegion] = useState(null);
-  const borderColor = "#912338";
+  const borderColor = "#912338"; // Initial border color (red)
   const mapRef = useRef(null);
-  const TOGGLE_MODAL_TIMEOUT = 10000;
-
-  const [eventModalVisible, setEventModalVisible] = useState(false);
-
-  // Modals for building pop ups
-  const [isModalVisible, setModalVisible] = useState(false);
-  const [modalData, setModalData] = useState({
-    name: "",
-    coordinate: { latitude: 0, longitude: 0 },
-  });
-  const [opiPopupVisible, setOpiPopupVisible] = useState(false);
-  const [selectedOPI, setSelectedOPI] = useState(null);
-
-  const toggleModal = () => {
-    setModalVisible(!isModalVisible);
-  };
-  const opiToggleModal = () => {
-    setOpiPopupVisible((prev) => !prev);
-  };
-
-  // Memoize the context value
-  const modalContextValue = useMemo(
-    () => ({
-      isModalVisible,
-      modalData,
-      toggleModal,
-      setModalData,
-      opiToggleModal,
-      setSelectedOPI,
-      opiPopupVisible,
-      selectedOPI,
-    }),
-    [isModalVisible, modalData, selectedOPI, opiPopupVisible],
-  );
+  const toggleModalTime = "10000";
 
   useEffect(() => {
     const fetchLastCampus = async () => {
@@ -171,7 +88,7 @@ function HomeScreen({ asyncKey = "Campus" }) {
           longitudeDelta: 0.01,
         },
         2500,
-      );
+      ); // Duration of the animation in milliseconds
     }
   }, [coordinates]);
 
@@ -196,131 +113,126 @@ function HomeScreen({ asyncKey = "Campus" }) {
     }, 100);
   };
 
+  // Function to handle marker press and pass data to the modal
+  const handleMarkerPress = (building) => {
+    setModalData({
+      name: building.name,
+      coordinate: building.coordinat,
+      address: building.address,
+      fullBuildingName: building.fullBuildingName,
+    }); // Update modalData
+    toggleModal(); // Show modal
+  };
+
   const [modalState, setModalState] = useState(true);
   useEffect(() => {
     if (modalState) {
       const timer = setTimeout(() => {
         setModalState(false);
-      }, TOGGLE_MODAL_TIMEOUT);
+      }, toggleModalTime); // Modal will disappear after 3 seconds
 
-      return () => clearTimeout(timer);
+      return () => clearTimeout(timer); // Cleanup the timer if the component unmounts
     }
   }, [modalState]);
-
   return (
     <View style={styles.container} testID="home-screen">
-      <ModalContext.Provider value={modalContextValue}>
-        <Header />
-        <NavBar />
-        <FloatingSearchBar onPlaceSelect={handlePlaceSelect} />
-        {error ? <Text testID="error-message">{error}</Text> : null}
+      <Header />
+      <NavBar />
+      <FloatingSearchBar onPlaceSelect={handlePlaceSelect} />
+      {error ? <Text testID="error-message">{error}</Text> : null}
 
-        {coordinates ? (
-          <>
-            <TemporaryModal
-              text="Press the button to switch campuses"
-              time={TOGGLE_MODAL_TIMEOUT}
-              modalState={modalState}
-              onRequestClose={() => setModalState(false)}
-              TestID="toggleModal"
-            />
+      {coordinates ? (
+        <>
+          <TemporaryModal
+            text="Press the button to switch campuses"
+            time={toggleModalTime}
+            modalState={modalState}
+            onRequestClose={() => setModalState(false)}
+            TestID="toggleModal"
+          />
 
-            <MapView
-              testID="map-view"
-              style={styles.map}
-              ref={mapRef}
-              initialRegion={
-                location
-                  ? {
-                      latitude: location.latitude,
-                      longitude: location.longitude,
-                      latitudeDelta: 0.005,
-                      longitudeDelta: 0.005,
-                    }
-                  : {
-                      latitude: coordinates.latitude,
-                      longitude: coordinates.longitude,
-                      latitudeDelta: 0.01,
-                      longitudeDelta: 0.01,
-                    }
-              }
-              showsUserLocation={true}
-              loadingEnabled={true}
-              watchUserLocation={true}
-              onRegionChangeComplete={(region) => setMapRegion(region)}
-            >
-              <MapMarkers />
-              <BuildingColoring />
-              {selectedLocation && (
-                <Marker
-                  coordinate={{
-                    latitude: selectedLocation.latitude,
-                    longitude: selectedLocation.longitude,
-                  }}
-                  title="Selected Location"
-                />
-              )}
-              <ShuttleStop />
-              <LiveBusTracker mapRef={mapRef} />
-            </MapView>
-            <View style={styles.toggleView}>
-              <TouchableOpacity
-                testID="change-campus-button"
-                onPress={handleChangeCampuses}
-                activeOpacity={0.7}
-                style={{
-                  borderColor: borderColor,
-                  borderWidth: 2,
-                  borderRadius: 10,
-                }}
+          <MapView
+            testID="map-view"
+            style={styles.map}
+            ref={mapRef}
+            initialRegion={
+              location
+                ? {
+                    latitude: location.latitude,
+                    longitude: location.longitude,
+                    latitudeDelta: 0.005,
+                    longitudeDelta: 0.005,
+                  }
+                : {
+                    latitude: coordinates.latitude, // Default center (SGW campus)
+                    longitude: coordinates.longitude,
+                    latitudeDelta: 0.01,
+                    longitudeDelta: 0.01,
+                  }
+            }
+            showsUserLocation={true}
+            loadingEnabled={true}
+            watchUserLocation={true}
+            onRegionChangeComplete={(region) => setMapRegion(region)}
+          >
+            {Building.map((building) => (
+              <Marker
+                key={`${building.name}-${building.coordinate.latitude}-${building.coordinate.longitude}`}
+                testID={`marker-${building.name?.toLowerCase().replace(/\s+/g, "-") || building.id}`}
+                coordinate={building.coordinate}
+                title={building.name}
+                address={building.address}
+                fullBuildingName={building.fullBuildingName}
+                onPress={() => handleMarkerPress(building)}
               >
                 <Image
-                  style={styles.buttonImage}
-                  source={require("../assets/ToggleButton.png")}
-                  resizeMode={"cover"}
+                  source={customMarkerImage}
+                  style={styles.customMarkerImage}
                 />
-              </TouchableOpacity>
-            </View>
-            <Legend />
-          </>
-        ) : (
-          <Text>Loading...</Text>
-        )}
-        {error ? <Text>Error: {error}</Text> : null}
-
-        <Footer />
-        <PopupModalWrapper
-          navigation={navigation}
-          isVisible={isModalVisible}
-          data={modalData}
-          onClose={toggleModal}
-        />
-        <OPIModalWrapper
-          navigation={navigation}
-          opiPopupVisible={opiPopupVisible}
-          selectedOPI={selectedOPI}
-          onClose={opiToggleModal}
-        />
-        <TouchableOpacity
-          testID="next-class-button"
-          style={styles.buttonNext}
-          onPress={() => setEventModalVisible(true)}
-        >
-          <Text style={styles.buttonNextText}>Next Class</Text>
-        </TouchableOpacity>
-        <NextEventModal
-          testID="next-event-modal"
-          isVisible={eventModalVisible}
-          onClose={() => setEventModalVisible(false)}
-        />
-      </ModalContext.Provider>
+              </Marker>
+            ))}
+            <BuildingColoring />
+            {selectedLocation && (
+              <Marker
+                coordinate={{
+                  latitude: selectedLocation.latitude,
+                  longitude: selectedLocation.longitude,
+                }}
+                title="Selected Location"
+              />
+            )}
+            <ShuttleStop />
+            <LiveBusTracker mapRef={mapRef} />
+          </MapView>
+          <View style={styles.toggleView}>
+            <TouchableOpacity
+              testID="change-campus-button"
+              onPress={handleChangeCampuses}
+              activeOpacity={0.7}
+              style={{
+                borderColor: borderColor,
+                borderWidth: 2,
+                borderRadius: 10,
+              }}
+            >
+              <Image
+                style={styles.buttonImage}
+                source={require("../assets/ToggleButton.png")}
+                resizeMode={"cover"} // cover or contain its up to you view look
+              />
+            </TouchableOpacity>
+          </View>
+          <Legend />
+        </>
+      ) : (
+        <Text>Loading...</Text>
+      )}
+      {error ? <Text>Error: {error}</Text> : null}
+      <Footer />
     </View>
   );
 }
-
 HomeScreen.propTypes = {
   asyncKey: PropTypes.string,
 };
-
-export { ModalContext };
 export default HomeScreen;

@@ -21,11 +21,6 @@ import {
   rooms as JMSB2Rooms,
   graph as JMSB2Graph,
 } from "../constants/coordinates/msb2";
-//CC
-import {
-  rooms as CC1Rooms,
-  graph as CC1Graph,
-} from "../constants/coordinates/cc1";
 
 //Loyola
 import {
@@ -43,7 +38,388 @@ import {
 
 import SVGs from "../assets/svg/SVGtoString";
 
+export const CONCORDIA_BUILDINGS = [
+  {
+    id: "H",
+    name: "Hall Building",
+    address: "1455 De Maisonneuve Blvd. Ouest",
+    latitude: 45.497092,
+    longitude: -73.5788,
+  },
+  {
+    id: "LB",
+    name: "J.W. McConnell Building",
+    address: "1400 De Maisonneuve Blvd. Ouest",
+  },
+  {
+    id: "MB",
+    name: "John Molson Building",
+    address: "1450 Guy St.",
+  },
+  {
+    id: "EV",
+    name: "Engineering & Visual Arts Complex",
+    address: "1515 St. Catherine St. Ouest",
+  },
+  {
+    id: "VL",
+    name: "Vanier Library",
+    address: "7141 Sherbrooke St. W",
+  },
+  {
+    id: "VE",
+    name: "Vanier Extension",
+    address: "7141 Sherbrooke St. W",
+  },
+];
+
 class FloorRegistry {
+  static parseRoomFormat(text) {
+    // Common formats: "H-920", "H 920", "Hall Building 920"
+    const buildingMatch = text.match(/^([A-Za-z]+)-?(\d+)$/);
+    if (buildingMatch) {
+      const [, buildingCode, roomNumber] = buildingMatch;
+      return {
+        buildingCode,
+        roomNumber,
+        formatted: `${buildingCode}-${roomNumber}`,
+      };
+    }
+    return null;
+  }
+
+  static findBuildingByCode(buildingCode) {
+    return CONCORDIA_BUILDINGS.find(
+      (b) => b.id.toLowerCase() === buildingCode.toLowerCase(),
+    );
+  }
+
+  static filterBuildingSuggestions(text) {
+    return CONCORDIA_BUILDINGS.filter(
+      (building) =>
+        building.name.toLowerCase().includes(text.toLowerCase()) ||
+        building.id.toLowerCase().includes(text.toLowerCase()),
+    );
+  }
+  // Get building type from building ID
+  static getBuildingTypeFromId(buildingId) {
+    if (!buildingId) return "HallBuilding"; // Default
+
+    try {
+      // Look through available buildings in registry
+      const buildingTypes = Object.keys(this.#buildings);
+      const foundType = buildingTypes.find(
+        (key) => this.#buildings[key]?.code === buildingId.toUpperCase(),
+      );
+
+      if (foundType) return foundType;
+    } catch (error) {
+      console.error("Error finding building type:", error);
+    }
+
+    return "HallBuilding"; // Default to Hall Building if no match
+  }
+
+  // Extract floor from room ID (e.g. "H-920" => "9", "1.293" => "1")
+  static extractFloorFromRoom(roomId) {
+    if (!roomId || typeof roomId !== "string") return "1";
+
+    // Handle common room identifiers like "elevator", "stairs", etc.
+    const commonRoomTypes = [
+      "entrance",
+      "elevator",
+      "stairs",
+      "toilet",
+      "escalator",
+      "water_fountain",
+      "women_washroom",
+      "men_washroom",
+    ];
+    if (commonRoomTypes.includes(roomId.toLowerCase())) {
+      return "1"; // Most common rooms are on the first floor
+    }
+
+    // Try to extract floor from room number formats
+    let floor = "1"; // Default floor
+
+    // For Hall Building rooms like H-920, H920
+    const hallRegex = /^h-?(\d)/i;
+    const hallResult = hallRegex.exec(roomId);
+    if (hallResult) {
+      return hallResult[1];
+    }
+
+    // For MB/JMSB rooms like 1.293 or 1-293
+    const mbRegex = /^(mb-?)?(\d+)[.-]/i;
+    const mbResult = mbRegex.exec(roomId);
+    if (mbResult) {
+      return mbResult[2]; // Using index 2 for the capture group
+    }
+
+    // For other buildings with room numbers like VE-101, VL-201, etc.
+    const generalRegex = /^[a-z]{1,3}-?(\d)\d{2}/i;
+    const generalResult = generalRegex.exec(roomId);
+    if (generalResult) {
+      return generalResult[1];
+    }
+
+    return floor;
+  }
+
+  // Normalize room ID to match format in floor data
+  static normalizeRoomId(roomId) {
+    if (!roomId) return roomId;
+
+    // Handle entrance specially with multiple options to increase chances of finding a match
+    if (
+      typeof roomId === "string" &&
+      ["entrance", "main entrance", "main", "lobby", "main lobby"].includes(
+        roomId.toLowerCase(),
+      )
+    ) {
+      // For Hall Building, "Main lobby" seems to be the correct format
+      return "Main lobby";
+    }
+
+    // Make sure we're working with a string
+    const roomIdStr = String(roomId);
+
+    // Array of regex patterns and their replacement logic
+    const patterns = [
+      // For Hall Building: Convert H-903 format to H903 format
+      {
+        regex: /^(H)-(\d+)$/i,
+        replace: (match, p1, p2) => `${p1}${p2}`.toUpperCase(),
+      },
+      // For JMSB (MB) building: Format like 1.293 directly
+      {
+        regex: /^MB-(\d+\.\d+)$/i,
+        replace: (match, p1) => p1,
+      },
+      // For JMSB (MB) building: Convert MB-1-293 format to 1.293 format
+      {
+        regex: /^MB-(\d+)-(\d+)$/i,
+        replace: (match, p1, p2) => `${p1}.${p2}`,
+      },
+      // For VE building: Convert VE-191 format to 191 format
+      {
+        regex: /^VE-(\d+)$/i,
+        replace: (match, p1) => p1,
+      },
+      // For VL building: Convert VL-101 format to 101 format
+      {
+        regex: /^VL-(\d+)$/i,
+        replace: (match, p1) => p1,
+      },
+    ];
+
+    // Try each pattern in sequence
+    for (const pattern of patterns) {
+      const match = pattern.regex.exec(roomIdStr);
+      if (match) {
+        return pattern.replace(...match);
+      }
+    }
+
+    // Handle other special room types like stairs, elevator, toilet, etc.
+    const specialRooms = [
+      "stairs",
+      "elevator",
+      "toilet",
+      "water_fountain",
+      "escalator",
+      "women_washroom",
+      "men_washroom",
+    ];
+    for (const special of specialRooms) {
+      if (roomIdStr.toLowerCase().includes(special.toLowerCase())) {
+        return special;
+      }
+    }
+
+    // For other buildings, follow similar pattern
+    return roomIdStr.replace(/^([A-Za-z]+)-(\d+)$/, "$1$2").toUpperCase();
+  }
+
+  // Get valid rooms for building
+  static getValidRoomsForBuilding(buildingId) {
+    if (!buildingId) return [];
+
+    const buildingType = this.getBuildingTypeFromId(buildingId);
+    if (!buildingType) return [];
+
+    // Get all floors for the building
+    const building = this.getBuilding(buildingType);
+    if (!building?.floors) return [];
+
+    // Always add common room types for all buildings
+    const commonRooms = [
+      "entrance",
+      "elevator",
+      "stairs",
+      "escalator",
+      "toilet",
+      "women_washroom",
+      "men_washroom",
+      "water_fountain",
+    ];
+
+    // Gather all rooms from all floors
+    const validRooms = [...commonRooms];
+
+    // Helper function to add building-specific room formats
+    const addBuildingSpecificFormats = (roomId) => {
+      // For JMSB building
+      if (buildingId === "MB" && /^\d+\.\d+$/.test(roomId)) {
+        const floorNum = roomId.split(".")[0];
+        const roomNum = roomId.split(".")[1];
+        validRooms.push(`MB-${roomId}`);
+        validRooms.push(`MB-${floorNum}-${roomNum}`);
+      }
+
+      // For buildings with simple room numbers
+      if (/^\d+$/.test(roomId)) {
+        // Add building-prefixed versions
+        if (buildingId === "VE") validRooms.push(`VE-${roomId}`);
+        if (buildingId === "VL") validRooms.push(`VL-${roomId}`);
+        if (buildingId === "EV") validRooms.push(`EV-${roomId}`);
+        if (buildingId === "H") validRooms.push(`H-${roomId}`);
+      }
+
+      // For Hall Building with H-prefix
+      if (buildingId === "H" && /^H\d+$/.test(roomId)) {
+        const roomNum = roomId.replace(/^H/, "");
+        validRooms.push(`H-${roomNum}`);
+      }
+    };
+
+    Object.values(building.floors).forEach((floor) => {
+      if (floor?.rooms) {
+        // Process each room on this floor
+        Object.keys(floor.rooms).forEach((roomId) => {
+          validRooms.push(roomId);
+          addBuildingSpecificFormats(roomId);
+        });
+      }
+    });
+
+    return validRooms;
+  }
+
+  // Validate if a room exists in the building
+  static isValidRoom(buildingId, roomId) {
+    if (!buildingId || !roomId) return false;
+
+    // Special cases for common facilities
+    if (
+      ["entrance", "main lobby", "lobby", "main entrance"].includes(
+        roomId.toLowerCase(),
+      )
+    )
+      return true;
+
+    // Handle common facility types across buildings
+    if (
+      [
+        "elevator",
+        "stairs",
+        "escalator",
+        "toilet",
+        "water_fountain",
+        "women_washroom",
+        "men_washroom",
+      ].includes(roomId.toLowerCase())
+    )
+      return true;
+
+    // Get building type from ID
+    const buildingType = this.getBuildingTypeFromId(buildingId);
+    if (!buildingType) return false;
+
+    // Extract floor from room
+    const floor = this.extractFloorFromRoom(roomId);
+    if (!floor) return false;
+
+    // Check if the floor exists in the building
+    const floorObj = this.getFloor(buildingType, floor);
+    if (!floorObj) return false;
+
+    // Normalize room ID
+    const normalizedRoomId = this.normalizeRoomId(roomId);
+
+    // Check if room exists in floor's room registry
+    return normalizedRoomId in floorObj.rooms;
+  }
+  static getCoordinatesForBuilding(buildingId) {
+    if (!buildingId) return null;
+
+    const coordinates = {
+      H: { latitude: 45.497092, longitude: -73.5788 },
+      MB: { latitude: 45.495304, longitude: -73.577893 },
+      EV: { latitude: 45.495655, longitude: -73.578025 },
+      LB: { latitude: 45.49674, longitude: -73.57785 },
+      VE: { latitude: 45.459044, longitude: -73.638409 },
+      VL: { latitude: 45.459249, longitude: -73.638265 },
+    };
+
+    return coordinates[buildingId.toUpperCase()] || null;
+  }
+
+  static getReadableBuildingName(buildingId) {
+    if (!buildingId) return buildingId;
+
+    const buildingTypes = Object.keys(this.#buildings);
+    for (const type of buildingTypes) {
+      if (this.#buildings[type].code === buildingId.toUpperCase()) {
+        return this.#buildings[type].name;
+      }
+    }
+
+    return buildingId; // Return the ID if no match is found
+  }
+
+  // Common special rooms that are available in all buildings
+  static COMMON_ROOMS = [
+    "entrance",
+    "elevator",
+    "stairs",
+    "escalator",
+    "toilet",
+    "women_washroom",
+    "men_washroom",
+    "water_fountain",
+  ];
+
+  // Get placeholder suggestion for room input based on building
+  static getRoomPlaceholder(buildingId) {
+    if (!buildingId) return "Enter room number";
+
+    const placeholders = {
+      VE: "Enter room number (e.g. 101 or stairs)",
+      VL: "Enter room number (e.g. 101 or elevator)",
+      EV: "Enter room number (e.g. 200 or stairs)",
+      H: "Enter room number (e.g. 920 or elevator)",
+      MB: "Enter room number (e.g. 1.293 or stairs)",
+    };
+
+    return placeholders[buildingId] || `Enter room number`;
+  }
+
+  // Get error message for invalid room
+  static getErrorMessageForRoom(buildingId, buildingName) {
+    if (!buildingId) return "Room not found.";
+
+    const errorMessages = {
+      MB: "Room not found. Try a format like 1.293 or 1-293.",
+      VE: 'Room not found. Try a room number or "elevator"/"stairs".',
+      EV: 'Room not found. Try a room number or "elevator"/"stairs".',
+      H: "Room not found. Try a format like 920 or H-920.",
+    };
+
+    return (
+      errorMessages[buildingId] || `This room doesn't exist in ${buildingName}`
+    );
+  }
   static #buildings = {
     HallBuilding: {
       id: "hall",
@@ -141,24 +517,6 @@ class FloorRegistry {
           rooms: VE2Rooms,
           graph: VE2graph,
           getSVG: () => SVGs.VEfloor2SVG,
-        },
-      },
-    },
-    // Add CC Building
-    CCBuilding: {
-      id: "cc",
-      name: "CC Building",
-      code: "CC",
-      description: "Communication Studies and Journalism Building",
-      address: "7141 Sherbrooke St W",
-      floors: {
-        1: {
-          id: "1",
-          name: "CC 1",
-          description: "First floor of CC Building",
-          rooms: CC1Rooms,
-          graph: CC1Graph,
-          getSVG: () => SVGs.CCfloor1SVG,
         },
       },
     },

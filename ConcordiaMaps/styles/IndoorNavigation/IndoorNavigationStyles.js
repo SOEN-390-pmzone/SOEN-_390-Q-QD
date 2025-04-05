@@ -76,9 +76,6 @@ const styles = StyleSheet.create({
     padding: 16,
     maxHeight: 200,
   },
-  resultContentContainer: {
-    paddingBottom: 16, // Add padding to the bottom of the content
-  },
   pathContainer: {
     paddingHorizontal: 16,
   },

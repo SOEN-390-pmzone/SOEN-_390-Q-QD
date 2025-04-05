@@ -1,6 +1,6 @@
 import React from "react";
 import { render, fireEvent, waitFor, act } from "@testing-library/react-native";
-import FloatingSearchBar from "../../components/FloatingSearchBar";
+import FloatingSearchBar from "../../components/OutdoorNavigation/FloatingSearchBar";
 
 // Mock the fetch function
 global.fetch = jest.fn();
