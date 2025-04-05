@@ -12,9 +12,6 @@ const ExpandedFloorPlanModal = ({
   webViewProps = {},
   customStyles = {},
 }) => {
-  // Extract the key prop from webViewProps to avoid the React warning
-  const { key, ...restWebViewProps } = webViewProps;
-
   return (
     <Modal
       visible={visible}
@@ -56,13 +53,12 @@ const ExpandedFloorPlanModal = ({
             }
           >
             <WebView
-              key={key} // Pass key directly, not through the spread operator
               source={{ html: htmlContent }}
               style={customStyles.expandedWebView || styles.expandedWebView}
               originWhitelist={["*"]}
               javaScriptEnabled={true}
               domStorageEnabled={true}
-              {...restWebViewProps} // Spread the rest of the props
+              {...webViewProps}
             />
           </View>
         </View>

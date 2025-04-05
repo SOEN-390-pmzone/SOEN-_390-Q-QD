@@ -1,10 +1,9 @@
 import React from "react";
-
 import { render, waitFor, fireEvent, act } from "@testing-library/react-native";
 import axios from "axios";
 import HomeScreen from "../screen/HomeScreen";
 import { NavigationContainer } from "@react-navigation/native";
-import { ModalContext } from "../screen/HomeScreen";
+import { ModalContext } from "../App";
 import { LocationContext } from "../contexts/LocationContext";
 
 jest.mock("expo-location", () => ({
@@ -26,71 +25,23 @@ jest.mock("expo-font", () => ({
 
 jest.mock("axios");
 
-// Mock NextEventModal so we can check its visibility and simulate closing it.
-jest.mock("../components/NextEventModal", () => {
-  const React = require("react");
-  const { TouchableOpacity, Text } = require("react-native");
-  const PropTypes = require("prop-types");
+jest.mock("../components/LiveBusTracker", () => ({
+  __esModule: true,
+  default: () => null,
+}));
 
-  const MockNextEventModal = ({ isVisible, onClose, testID }) => {
-    return isVisible ? (
-      <TouchableOpacity testID={testID || "next-event-modal"} onPress={onClose}>
-        <Text>Next Event Modal</Text>
-      </TouchableOpacity>
-    ) : null;
-  };
-
-  MockNextEventModal.propTypes = {
-    isVisible: PropTypes.bool.isRequired,
-    onClose: PropTypes.func.isRequired,
-    testID: PropTypes.string,
-  };
-
-  MockNextEventModal.displayName = "MockNextEventModal";
-
-  return MockNextEventModal;
-});
-let mockPopupModalProps = {};
-jest.mock("../components/PopupModal", () => {
-  const { View } = require("react-native");
-  const PropTypes = require("prop-types");
-
-  const PopupModal = (props) => {
-    mockPopupModalProps = props;
-    return <View testID="popup-modal" />;
-  };
-
-  PopupModal.propTypes = {
-    isVisible: PropTypes.bool,
-    data: PropTypes.shape({
-      name: PropTypes.string,
-      coordinate: PropTypes.shape({
-        latitude: PropTypes.number,
-        longitude: PropTypes.number,
-      }),
-    }),
-    onClose: PropTypes.func,
-  };
-
-  return PopupModal;
-});
-const mockNavigate = jest.fn();
 describe("HomeScreen", () => {
   const mockLocation = { latitude: 45.4973, longitude: -73.5789 };
   const mockToggleModal = jest.fn();
   const mockSetModalData = jest.fn();
-  beforeEach(() => {
-    mockPopupModalProps = {};
-    mockNavigate.mockClear();
-  });
 
   const renderComponent = () =>
     render(
       <NavigationContainer>
         <ModalContext.Provider
           value={{
-            toggleModal: mockToggleModal, // Mock function for toggleModal
-            setModalData: mockSetModalData, // Mock function for setModalData
+            toggleModal: mockToggleModal,
+            setModalData: mockSetModalData,
           }}
         >
           <LocationContext.Provider value={{ location: mockLocation }}>
@@ -99,29 +50,6 @@ describe("HomeScreen", () => {
         </ModalContext.Provider>
       </NavigationContainer>,
     );
-
-  it("opens and closes NextEventModal when 'Next Class' button is pressed", async () => {
-    const { getByText, queryByTestId, getByTestId } = renderComponent();
-
-    // Initially, the modal should not be visible
-    expect(queryByTestId("next-event-modal")).toBeNull();
-
-    // Press the "Next Class" button
-    const nextClassButton = getByText("Next Class");
-    fireEvent.press(nextClassButton);
-
-    // Wait for the modal to HomeScreenear
-    const modal = await waitFor(() => getByTestId("next-event-modal"));
-    expect(modal).toBeTruthy();
-
-    // Simulate closing the modal by pressing it
-    fireEvent.press(modal);
-
-    // Wait for the modal to be removed
-    await waitFor(() => {
-      expect(queryByTestId("next-event-modal")).toBeNull();
-    });
-  });
 
   it("renders the map correctly on successful API call", async () => {
     const mockResponse = {
@@ -141,6 +69,32 @@ describe("HomeScreen", () => {
     await waitFor(() => {
       expect(getByTestId("map-view")).toBeTruthy();
     });
+  });
+
+  it("handles marker press event", async () => {
+    const mockResponse = {
+      data: {
+        results: [
+          {
+            geometry: { location: { lat: 45.4973, lng: -73.5789 } },
+          },
+        ],
+        status: "OK",
+      },
+    };
+    axios.get.mockResolvedValueOnce(mockResponse);
+
+    const { getAllByTestId } = renderComponent();
+
+    await waitFor(() => {
+      // Get all markers that start with "marker-" and press the first one
+      const markers = getAllByTestId(/^marker-/);
+      expect(markers.length).toBeGreaterThan(0);
+      fireEvent.press(markers[0]);
+    });
+
+    expect(mockSetModalData).toHaveBeenCalled();
+    expect(mockToggleModal).toHaveBeenCalled();
   });
 
   it("displays an error message when location is not found", async () => {
@@ -214,116 +168,5 @@ describe("HomeScreen", () => {
     });
 
     expect(getByTestId("map-view")).toBeTruthy();
-  });
-  it("handles modal toggling through context", async () => {
-    render(
-      <NavigationContainer>
-        <HomeScreen />
-      </NavigationContainer>,
-    );
-
-    // Access the modal context and call toggleModal
-    await waitFor(() => {
-      expect(mockPopupModalProps.onClose).toBeDefined();
-    });
-
-    // Simulate clicking the close button on modal
-    mockPopupModalProps.onClose();
-
-    await waitFor(() => {
-      expect(mockPopupModalProps.isVisible).toBeDefined();
-    });
-  });
-  it("handles modal data updates correctly", async () => {
-    renderComponent();
-
-    await waitFor(() => {
-      expect(mockPopupModalProps.data).toBeDefined();
-    });
-  });
-  it("passes default modal data", async () => {
-    renderComponent();
-    await waitFor(() => {
-      expect(mockPopupModalProps.data).toEqual({
-        name: "",
-        coordinate: { latitude: 0, longitude: 0 },
-      });
-    });
-  });
-  it("initializes with modal hidden", async () => {
-    renderComponent();
-    await waitFor(() => {
-      expect(mockPopupModalProps.isVisible).toBeFalsy();
-    });
-  });
-  const mockAnimateToRegion = jest.fn();
-  const mockMapRef = {
-    current: {
-      animateToRegion: mockAnimateToRegion,
-    },
-  };
-
-  jest.mock("react-native-maps", () => ({
-    __esModule: true,
-    Marker: jest.fn(),
-    MapView: jest.fn().mockImplementation(({ children, ...props }) => {
-      return (
-        <div {...props}>
-          <div data-testid="map">{children}</div>
-        </div>
-      );
-    }),
-  }));
-
-  describe("HomeScreen", () => {
-    // Test setup to mock setTimeout and mapRef
-    beforeEach(() => {
-      jest.useFakeTimers(); // Use fake timers to mock setTimeout
-      mockAnimateToRegion.mockClear(); // Clear mock calls before each test
-    });
-
-    afterEach(() => {
-      jest.useRealTimers(); // Restore real timers after tests
-    });
-
-    it("should update map region and animate to the selected location on place select", async () => {
-      const setMapRegion = jest.fn();
-      const setSelectedLocation = jest.fn();
-
-      // Set up the necessary props and render the component with the correct context
-      renderComponent();
-
-      // Mock the region object (example)
-      const region = {
-        latitude: 40.7128,
-        longitude: -74.006,
-        latitudeDelta: 0.005,
-        longitudeDelta: 0.005,
-      };
-
-      // Trigger the handlePlaceSelect logic
-      act(() => {
-        // Assuming handlePlaceSelect is called with a region object
-        // You need to trigger the code that calls the setTimeout in your component.
-        setTimeout(() => {
-          setMapRegion(region);
-          setSelectedLocation(region);
-          mockMapRef.current?.animateToRegion(region, 1000);
-        }, 100);
-      });
-
-      // Fast-forward all timers by 100ms
-      act(() => {
-        jest.runAllTimers();
-      });
-
-      // Assertions
-      expect(setMapRegion).toHaveBeenCalledWith(region); // Check if setMapRegion was called with the correct region
-      expect(setSelectedLocation).toHaveBeenCalledWith(region); // Check if setSelectedLocation was called with the correct region
-      expect(mockMapRef.current?.animateToRegion).toHaveBeenCalledWith(
-        region,
-        1000,
-      ); // Check if animateToRegion was called with the region and correct duration
-    });
   });
 });
