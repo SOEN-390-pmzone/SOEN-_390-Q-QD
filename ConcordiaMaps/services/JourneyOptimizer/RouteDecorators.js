@@ -22,16 +22,20 @@ export const OutdoorToOutdoor = (baseCalculation) => async (locationA, locationB
   }
 };
 export const RoomToRoomSameFloor = (baseCalculation) => (locationA, locationB) => {
-    // Verify both locations are in the same building and same floor
-    if (locationA.buildingId !== locationB.buildingId) {
-      console.error(`Locations are in different buildings: ${locationA.buildingId} and ${locationB.buildingId}`);
-      return baseCalculation(locationA, locationB);
-    }
+    const normalizedBuildingA = normalizeBuildingId(locationA.buildingId);
+    const normalizedBuildingB = normalizeBuildingId(locationB.buildingId);
     
-    if (locationA.floor !== locationB.floor) {
-      console.error(`Locations are on different floors: ${locationA.floor} and ${locationB.floor}`);
-      return baseCalculation(locationA, locationB);
-    }
+    // Verify both locations are in the same building and same floor
+    if (normalizedBuildingA !== normalizedBuildingB) {
+        console.error(`Locations are in different buildings: ${locationA.buildingId} and ${locationB.buildingId}`);
+        return baseCalculation(locationA, locationB);
+      }
+      
+      // Rest of your function remains the same
+      if (locationA.floor !== locationB.floor) {
+        console.error(`Locations are on different floors: ${locationA.floor} and ${locationB.floor}`);
+        return baseCalculation(locationA, locationB);
+      }
     
     // Fetch the graph for the specific building and floor
     const buildingType = FloorRegistry.getBuildingTypeFromId(locationA.buildingId);
@@ -50,7 +54,7 @@ export const RoomToRoomSameFloor = (baseCalculation) => (locationA, locationB) =
       return baseCalculation(locationA, locationB); // Fallback to base calculation
     }
   
-    // Calculate the total distance by summing the weights RoomToRoomSameFloor the edges in the path
+    // Calculate the total distance by summing the weights of the edges in the path
     let totalDistance = 0;
     for (let i = 0; i < path.length - 1; i++) {
       const currentNode = path[i];
@@ -66,6 +70,7 @@ export const RoomToRoomSameFloor = (baseCalculation) => (locationA, locationB) =
     const roomToExitDistance = 2; // Placeholder for actual logic
     return roomToExitDistance + baseCalculation(locationA, locationB);
   };
+  
   export const RoomToElevator = (baseCalculation) => (locationA, locationB) => {
     // Room-to-exit distance calculation logic
     const roomToExitDistance = 2; // Placeholder for actual logic
@@ -94,4 +99,24 @@ export const RoomToRoomSameFloor = (baseCalculation) => (locationA, locationB) =
   export const BaseCalculation = () => () => {
     // Base calculation returns 0 as the starting point
     return 0;
+  };
+
+  // Helper function to normalize building IDs
+const normalizeBuildingId = (buildingId) => {
+    if (!buildingId) return "";
+    
+    // Map of equivalent building IDs
+    const buildingIdMap = {
+      "h": "hall",
+      "hall": "hall",
+      "mb": "jmsb",
+      "jmsb": "jmsb",
+      "ev": "ev",
+      "lb": "library",
+      "library": "library",
+      "ve": "ve",
+      "vl": "vl"
+    };
+    
+    return buildingIdMap[buildingId.toLowerCase()] || buildingId.toLowerCase();
   };

@@ -34,6 +34,7 @@ class DistanceCalculatorService {
    * @returns {number} Distance between the locations
    */
   calculateDistance(locationA, locationB) {
+    console.log("DistanceCalculatorService: Dtermining the distance between A and B")
     const strategy = this._determineStrategy(locationA, locationB);
     return strategy.calculateDistance(locationA, locationB);
   }
@@ -96,7 +97,6 @@ _determineStrategy(locationA, locationB) {
       } 
       // CASE 1B-2: Same campus, different buildings
       else {
-        // If this strategy doesn't exist yet, it will need to be implemented
         return this.strategies.DifferentBuildingSameCampus || this.strategies.Outdoor;
       }
     }
