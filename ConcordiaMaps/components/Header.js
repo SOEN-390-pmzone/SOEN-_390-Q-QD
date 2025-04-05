@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   SafeAreaView,
   View,
@@ -13,7 +13,7 @@ import NavBar from "../components/NavBar";
 
 function Header() {
   const [isOpen, setIsOpen] = useState(false);
-  const animation = useState(new Animated.Value(0))[0];
+  const animation = useRef(new Animated.Value(0)).current;
   const navigation = useNavigation();
 
   const toggleMenu = () => {

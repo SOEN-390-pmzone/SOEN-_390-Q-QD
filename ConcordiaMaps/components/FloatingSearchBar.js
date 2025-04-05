@@ -26,7 +26,7 @@ const FloatingSearchBar = ({
   const [predictions, setPredictions] = useState([]);
   const [loading, setLoading] = useState(false);
   // eslint-disable-next-line no-unused-vars
-  const [_, setSelectedLocationDescription] = useState("");
+  const [selectedLocationDescription, setSelectedLocationDescription] = useState("");
   const [userLocation, setUserLocation] = useState(null);
   const sessionTokenRef = useRef("");
   const inputRef = useRef(null); // Add ref for TextInput
@@ -52,7 +52,7 @@ const FloatingSearchBar = ({
       try {
         // For client-side React Native environments
         const crypto = global.crypto || global.msCrypto;
-        if (crypto && crypto.getRandomValues) {
+        if (crypto?.getRandomValues) {
           const array = new Uint32Array(4);
           crypto.getRandomValues(array);
           return Array.from(array)
