@@ -371,23 +371,23 @@ class FloorRegistry {
   }
   static getCoordinatesForBuilding(buildingId) {
     if (!buildingId) return null;
-  
+
     // Map from long identifiers to short codes
     const idToCode = {
       hall: "H",
-      jmsb: "MB", 
+      jmsb: "MB",
       ev: "EV",
       library: "LB",
       ve: "VE",
-      vanierlibrary: "VL"
+      vanierlibrary: "VL",
     };
-    
+
     // Convert to uppercase for consistency
     const normalizedId = buildingId.toLowerCase();
-    
+
     // Use the code mapping if this is a long identifier
     const buildingCode = idToCode[normalizedId] || buildingId.toUpperCase();
-  
+
     const coordinates = {
       H: { latitude: 45.497092, longitude: -73.5788 },
       MB: { latitude: 45.495304, longitude: -73.577893 },
@@ -396,7 +396,7 @@ class FloorRegistry {
       VE: { latitude: 45.459044, longitude: -73.638409 },
       VL: { latitude: 45.459249, longitude: -73.638265 },
     };
-  
+
     return coordinates[buildingCode] || null;
   }
 
