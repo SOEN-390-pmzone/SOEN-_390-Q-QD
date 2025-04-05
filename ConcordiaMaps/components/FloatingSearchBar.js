@@ -26,7 +26,8 @@ const FloatingSearchBar = ({
   const [predictions, setPredictions] = useState([]);
   const [loading, setLoading] = useState(false);
   // eslint-disable-next-line no-unused-vars
-  const [selectedLocationDescription, setSelectedLocationDescription] = useState("");
+  const [selectedLocationDescription, setSelectedLocationDescription] =
+    useState("");
   const [userLocation, setUserLocation] = useState(null);
   const sessionTokenRef = useRef("");
   const inputRef = useRef(null); // Add ref for TextInput
