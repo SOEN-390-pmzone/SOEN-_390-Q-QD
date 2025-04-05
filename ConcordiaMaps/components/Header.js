@@ -9,7 +9,6 @@ import {
 } from "react-native";
 import styles from "../styles";
 import { useNavigation } from "@react-navigation/native";
-import NavBar from "../components/NavBar";
 
 function Header() {
   const [isOpen, setIsOpen] = useState(false);
@@ -32,11 +31,6 @@ function Header() {
   const handleCalendarPress = () => {
     navigation.navigate("Calendar");
   };
-
-  const translateX = animation.interpolate({
-    inputRange: [0, 1],
-    outputRange: [-270, 0],
-  });
 
   return (
     <SafeAreaView>
@@ -65,9 +59,6 @@ function Header() {
           />
         </TouchableOpacity>
       </View>
-      <Animated.View style={[styles.menu, { transform: [{ translateX }] }]}>
-        <NavBar />
-      </Animated.View>
     </SafeAreaView>
   );
 }

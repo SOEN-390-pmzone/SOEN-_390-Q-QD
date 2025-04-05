@@ -40,3 +40,11 @@ android/
 
 # test coverage
 coverage/
+
+
+
+#maestro
+maestro
+data
+android
+constants
