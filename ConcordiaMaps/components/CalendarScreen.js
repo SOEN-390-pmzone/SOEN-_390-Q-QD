@@ -17,12 +17,14 @@ import { format, addDays, subDays } from "date-fns";
 import styles from "../styles";
 import { Ionicons } from "@expo/vector-icons";
 import convertToCoordinates from "./convertToCoordinates";
-import useDataFlow from "../components/userInPolygon";
 import FloorRegistry, {
   CONCORDIA_BUILDINGS,
 } from "../services/BuildingDataService";
 
-import { findBuilding, getData } from "../components/userInPolygon";
+import useDataFlow, {
+  findBuilding,
+  getData,
+} from "../components/userInPolygon";
 import { coloringData } from "../data/coloringData";
 
 const CalendarScreen = () => {

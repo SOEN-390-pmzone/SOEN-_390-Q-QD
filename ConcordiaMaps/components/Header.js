@@ -13,7 +13,7 @@ import NavBar from "../components/NavBar";
 
 function Header() {
   const [isOpen, setIsOpen] = useState(false);
-  const animation = useState(new Animated.Value(0))[0];
+  const [animation] = useState(new Animated.Value(0));
   const navigation = useNavigation();
 
   const toggleMenu = () => {
