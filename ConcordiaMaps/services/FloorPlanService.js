@@ -15,15 +15,8 @@ export const generateFloorHtml = (floorPlan, pathNodes = [], rooms = {}) => {
     .map((node) => (rooms[node] ? rooms[node] : null))
     .filter((coord) => coord !== null);
 
-  // Get start and end points for special highlighting
-  const startPoint = pathNodes.length > 0 ? pathNodes[0] : null;
-  const endPoint =
-    pathNodes.length > 1 ? pathNodes[pathNodes.length - 1] : null;
-
   // Serialize path data for safe injection into HTML
   const pathDataJson = JSON.stringify(pathCoordinates);
-  const startPointJson = JSON.stringify(startPoint);
-  const endPointJson = JSON.stringify(endPoint);
 
   return `
       <!DOCTYPE html>
@@ -62,8 +55,8 @@ export const generateFloorHtml = (floorPlan, pathNodes = [], rooms = {}) => {
   
             .navigation-path { 
               fill: none;
-              stroke: #3498db; 
-              stroke-width: 5; 
+              stroke: #912338; 
+              stroke-width: 4; 
               stroke-linecap: round;
               stroke-linejoin: round;
               stroke-dasharray: 10,5;
@@ -77,26 +70,12 @@ export const generateFloorHtml = (floorPlan, pathNodes = [], rooms = {}) => {
             }
             
             .room-highlight {
+              fill: #912338;
               fill-opacity: 0.5;
+              stroke: #912338;
               stroke-width: 2;
               rx: 5;
               ry: 5;
-              animation: pulse 2s ease-in-out infinite;
-            }
-            
-            @keyframes pulse {
-              0% { fill-opacity: 0.5; }
-              50% { fill-opacity: 0.2; }
-              100% { fill-opacity: 0.5; }
-            }
-            
-            .navigation-button, .navigation-marker {
-              cursor: pointer;
-              transition: r 0.2s ease-in-out;
-            }
-            
-            .navigation-button:hover, .navigation-marker:hover {
-              r: 12;
             }
             
             /* Loading indicator */
@@ -163,59 +142,12 @@ export const generateFloorHtml = (floorPlan, pathNodes = [], rooms = {}) => {
                   // Set preserveAspectRatio to see the full floor plan
                   svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
                   
-                  // Function to clear all highlights and paths
-                  function clearAllHighlights() {
-                    const existingElements = document.querySelectorAll('.navigation-path, .navigation-button, .navigation-marker, .room-highlight');
-                    existingElements.forEach(p => p.remove());
-                  }
-                  
-                  // Function to highlight a room
-                  function highlightRoom(roomId, coordinates, color) {
-                    if (!coordinates[roomId]) {
-                      console.error('No coordinates found for room:', roomId);
-                      return;
-                    }
-
-                    const roomData = coordinates[roomId];
-                    const svgNS = "http://www.w3.org/2000/svg";
-                    
-                    // Create a rectangle for the room highlight
-                    const highlight = document.createElementNS(svgNS, "rect");
-                    highlight.classList.add('room-highlight');
-                    
-                    // Set position and size (making it slightly larger than the point for visibility)
-                    const x = parseInt(roomData.x || roomData.nearestPoint.x) - 20;
-                    const y = parseInt(roomData.y || roomData.nearestPoint.y) - 20;
-                    highlight.setAttribute('x', x);
-                    highlight.setAttribute('y', y);
-                    highlight.setAttribute('width', '40');
-                    highlight.setAttribute('height', '40');
-                    highlight.setAttribute('fill', color);
-                    highlight.setAttribute('fill-opacity', '0.5');
-                    highlight.setAttribute('stroke', color);
-                    highlight.setAttribute('stroke-width', '2');
-                    
-                    // Add animation
-                    const animate = document.createElementNS(svgNS, "animate");
-                    animate.setAttribute('attributeName', 'fill-opacity');
-                    animate.setAttribute('values', '0.5;0.2;0.5');
-                    animate.setAttribute('dur', '2s');
-                    animate.setAttribute('repeatCount', 'indefinite');
-                    highlight.appendChild(animate);
-
-                    // Add to SVG
-                    svg.appendChild(highlight);
-                  }
-                  
                   // Function to visualize the path
                   function visualizePath(coordinates) {
                     if (!coordinates || coordinates.length < 2) {
                       console.warn('Not enough coordinates to draw path');
                       return;
                     }
-                    
-                    // Clear any existing highlights and paths
-                    clearAllHighlights();
                     
                     // Create SVG path element
                     const svgNS = "http://www.w3.org/2000/svg";
@@ -258,46 +190,6 @@ export const generateFloorHtml = (floorPlan, pathNodes = [], rooms = {}) => {
                   // Get path coordinates and draw
                   const pathCoordinates = ${pathDataJson};
                   visualizePath(pathCoordinates);
-                  
-                  // Get start and end points
-                  const startPoint = ${startPointJson};
-                  const endPoint = ${endPointJson};
-                  const roomsData = ${JSON.stringify(rooms)};
-                  
-                  // Add markers and highlighting for start and end points if available
-                  if (pathCoordinates.length >= 2) {
-                    const svgNS = "http://www.w3.org/2000/svg";
-                    
-                    // Start navigation button (green circle)
-                    if (startPoint && roomsData[startPoint] && roomsData[startPoint].nearestPoint) {
-                      const startCoord = roomsData[startPoint].nearestPoint;
-                      const startButton = document.createElementNS(svgNS, "circle");
-                      startButton.setAttribute('cx', startCoord.x);
-                      startButton.setAttribute('cy', startCoord.y);
-                      startButton.setAttribute('r', '10');
-                      startButton.setAttribute('fill', '#4CAF50'); // Green
-                      startButton.classList.add('navigation-button');
-                      svg.appendChild(startButton);
-                      
-                      // Highlight start room with green
-                      highlightRoom(startPoint, roomsData, '#4CAF50');
-                    }
-                    
-                    // End marker (blue circle)
-                    if (endPoint && roomsData[endPoint] && roomsData[endPoint].nearestPoint) {
-                      const endCoord = roomsData[endPoint].nearestPoint;
-                      const endMarker = document.createElementNS(svgNS, "circle");
-                      endMarker.setAttribute('cx', endCoord.x);
-                      endMarker.setAttribute('cy', endCoord.y);
-                      endMarker.setAttribute('r', '10');
-                      endMarker.setAttribute('fill', '#2196F3'); // Blue
-                      endMarker.classList.add('navigation-marker');
-                      svg.appendChild(endMarker);
-                      
-                      // Highlight end room with blue
-                      highlightRoom(endPoint, roomsData, '#2196F3');
-                    }
-                  }
                   
                   // Make SVG visible after everything is ready
                   svg.style.visibility = 'visible';

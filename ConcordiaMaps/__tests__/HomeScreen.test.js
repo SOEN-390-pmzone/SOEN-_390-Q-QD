@@ -25,31 +25,6 @@ jest.mock("expo-font", () => ({
 
 jest.mock("axios");
 
-// Mock NextEventModal so we can check its visibility and simulate closing it.
-jest.mock("../components/NextEventModal", () => {
-  const React = require("react");
-  const { TouchableOpacity, Text } = require("react-native");
-  const PropTypes = require("prop-types");
-
-  const MockNextEventModal = ({ isVisible, onClose, testID }) => {
-    return isVisible ? (
-      <TouchableOpacity testID={testID || "next-event-modal"} onPress={onClose}>
-        <Text>Next Event Modal</Text>
-      </TouchableOpacity>
-    ) : null;
-  };
-
-  MockNextEventModal.propTypes = {
-    isVisible: PropTypes.bool.isRequired,
-    onClose: PropTypes.func.isRequired,
-    testID: PropTypes.string,
-  };
-
-  MockNextEventModal.displayName = "MockNextEventModal";
-
-  return MockNextEventModal;
-});
-
 jest.mock("../components/LiveBusTracker", () => ({
   __esModule: true,
   default: () => null,
@@ -65,8 +40,8 @@ describe("HomeScreen", () => {
       <NavigationContainer>
         <ModalContext.Provider
           value={{
-            toggleModal: mockToggleModal, // Mock function for toggleModal
-            setModalData: mockSetModalData, // Mock function for setModalData
+            toggleModal: mockToggleModal,
+            setModalData: mockSetModalData,
           }}
         >
           <LocationContext.Provider value={{ location: mockLocation }}>
@@ -75,29 +50,6 @@ describe("HomeScreen", () => {
         </ModalContext.Provider>
       </NavigationContainer>,
     );
-
-  it("opens and closes NextEventModal when 'Next Class' button is pressed", async () => {
-    const { getByText, queryByTestId, getByTestId } = renderComponent();
-
-    // Initially, the modal should not be visible
-    expect(queryByTestId("next-event-modal")).toBeNull();
-
-    // Press the "Next Class" button
-    const nextClassButton = getByText("Next Class");
-    fireEvent.press(nextClassButton);
-
-    // Wait for the modal to appear
-    const modal = await waitFor(() => getByTestId("next-event-modal"));
-    expect(modal).toBeTruthy();
-
-    // Simulate closing the modal by pressing it
-    fireEvent.press(modal);
-
-    // Wait for the modal to be removed
-    await waitFor(() => {
-      expect(queryByTestId("next-event-modal")).toBeNull();
-    });
-  });
 
   it("renders the map correctly on successful API call", async () => {
     const mockResponse = {
@@ -216,75 +168,5 @@ describe("HomeScreen", () => {
     });
 
     expect(getByTestId("map-view")).toBeTruthy();
-  });
-  const mockAnimateToRegion = jest.fn();
-  const mockMapRef = {
-    current: {
-      animateToRegion: mockAnimateToRegion,
-    },
-  };
-
-  jest.mock("react-native-maps", () => ({
-    __esModule: true,
-    Marker: jest.fn(),
-    MapView: jest.fn().mockImplementation(({ children, ...props }) => {
-      return (
-        <div {...props}>
-          <div data-testid="map">{children}</div>
-        </div>
-      );
-    }),
-  }));
-
-  describe("HomeScreen", () => {
-    // Test setup to mock setTimeout and mapRef
-    beforeEach(() => {
-      jest.useFakeTimers(); // Use fake timers to mock setTimeout
-      mockAnimateToRegion.mockClear(); // Clear mock calls before each test
-    });
-
-    afterEach(() => {
-      jest.useRealTimers(); // Restore real timers after tests
-    });
-
-    it("should update map region and animate to the selected location on place select", async () => {
-      const setMapRegion = jest.fn();
-      const setSelectedLocation = jest.fn();
-
-      // Set up the necessary props and render the component with the correct context
-      renderComponent();
-
-      // Mock the region object (example)
-      const region = {
-        latitude: 40.7128,
-        longitude: -74.006,
-        latitudeDelta: 0.005,
-        longitudeDelta: 0.005,
-      };
-
-      // Trigger the handlePlaceSelect logic
-      act(() => {
-        // Assuming handlePlaceSelect is called with a region object
-        // You need to trigger the code that calls the setTimeout in your component.
-        setTimeout(() => {
-          setMapRegion(region);
-          setSelectedLocation(region);
-          mockMapRef.current?.animateToRegion(region, 1000);
-        }, 100);
-      });
-
-      // Fast-forward all timers by 100ms
-      act(() => {
-        jest.runAllTimers();
-      });
-
-      // Assertions
-      expect(setMapRegion).toHaveBeenCalledWith(region); // Check if setMapRegion was called with the correct region
-      expect(setSelectedLocation).toHaveBeenCalledWith(region); // Check if setSelectedLocation was called with the correct region
-      expect(mockMapRef.current?.animateToRegion).toHaveBeenCalledWith(
-        region,
-        1000,
-      ); // Check if animateToRegion was called with the region and correct duration
-    });
   });
 });

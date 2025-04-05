@@ -23,10 +23,7 @@ const NavigationSteps = ({ steps, customStyles = {} }) => {
       <Text style={[styles.stepsTitle, customStyles.stepsTitle]}>
         Navigation Steps
       </Text>
-      <ScrollView
-        style={[styles.stepsList, customStyles.stepsList]}
-        contentContainerStyle={styles.stepsListContent} // Add content container style
-      >
+      <ScrollView style={[styles.stepsList, customStyles.stepsList]}>
         {steps.map((step, index) => (
           <View
             key={`step-${step.type}-${index}`}
@@ -66,9 +63,6 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderRadius: 10,
     padding: 12,
-  },
-  stepsListContent: {
-    paddingBottom: 16, // Add padding to the bottom of the content
   },
   stepItem: {
     flexDirection: "row",
