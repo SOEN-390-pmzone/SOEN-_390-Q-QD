@@ -9,6 +9,7 @@ import {
 import GetDirections from "../../components/OutdoorNavigation/GetDirections";
 import { useGoogleMapDirections } from "../../hooks/useGoogleMapDirections";
 import { LocationContext } from "../../contexts/LocationContext";
+import * as Location from "expo-location";
 
 const mockNavigate = jest.fn();
 
@@ -20,6 +21,13 @@ jest.mock("@react-navigation/native", () => {
     useNavigation: jest.fn(() => ({ navigate: mockNavigate })),
   };
 });
+
+jest.mock("expo-location", () => ({
+  geocodeAsync: jest.fn(),
+  getCurrentPositionAsync: jest.fn().mockResolvedValue({
+    coords: { latitude: 45.5017, longitude: -73.5673 },
+  }),
+}));
 
 jest.mock("../../hooks/useGoogleMapDirections");
 
@@ -367,5 +375,76 @@ describe("FloatingSearchBar onPlaceSelect", () => {
     });
 
     expect(originSearchBar.props.value).toBe(newDisplayName);
+  });
+});
+describe("geocodeAddress function", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("successfully geocodes an address", async () => {
+    const mockGeocodedLocation = [
+      {
+        latitude: 45.4972,
+        longitude: -73.5789,
+      },
+    ];
+
+    // Mock the Location.geocodeAsync function
+    jest
+      .spyOn(Location, "geocodeAsync")
+      .mockResolvedValueOnce(mockGeocodedLocation);
+
+    // Import the function we want to test
+    const {
+      geocodeAddress,
+    } = require("../../components/OutdoorNavigation/GetDirections");
+
+    const result = await geocodeAddress("Concordia University");
+
+    expect(Location.geocodeAsync).toHaveBeenCalledWith("Concordia University");
+    expect(result).toEqual({
+      latitude: 45.4972,
+      longitude: -73.5789,
+    });
+  });
+
+  it("returns null when no locations found", async () => {
+    // Mock empty response
+    jest.spyOn(Location, "geocodeAsync").mockResolvedValueOnce([]);
+    jest.spyOn(console, "warn").mockImplementation();
+
+    const {
+      geocodeAddress,
+    } = require("../../components/OutdoorNavigation/GetDirections");
+
+    const result = await geocodeAddress("Non-existent Place");
+
+    expect(Location.geocodeAsync).toHaveBeenCalledWith("Non-existent Place");
+    expect(console.warn).toHaveBeenCalledWith(
+      "No locations found for address:",
+      "Non-existent Place",
+    );
+    expect(result).toBeNull();
+  });
+
+  it("handles geocoding errors properly", async () => {
+    // Mock error
+    const mockError = new Error("Geocoding failed");
+    jest.spyOn(Location, "geocodeAsync").mockRejectedValueOnce(mockError);
+    jest.spyOn(console, "error").mockImplementation();
+
+    const {
+      geocodeAddress,
+    } = require("../../components/OutdoorNavigation/GetDirections");
+
+    const result = await geocodeAddress("Error Address");
+
+    expect(Location.geocodeAsync).toHaveBeenCalledWith("Error Address");
+    expect(console.error).toHaveBeenCalledWith(
+      "Error geocoding address:",
+      mockError,
+    );
+    expect(result).toBeNull();
   });
 });
