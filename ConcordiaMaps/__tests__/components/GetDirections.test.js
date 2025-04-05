@@ -41,7 +41,7 @@ jest.mock("react-native-maps", () => {
   };
 });
 
-jest.mock("../../Components/OutdoorNavigation/FloatingSearchBar", () => {
+jest.mock("../../components/OutdoorNavigation/FloatingSearchBar", () => {
   const React = require("react");
   const PropTypes = require("prop-types");
   const MockFloatingSearchBar = ({ onPlaceSelect, placeholder, value }) => (
@@ -70,17 +70,6 @@ jest.mock(
 const mockGetCurrentPositionAsync = jest.fn().mockResolvedValue({
   coords: { latitude: 45.5017, longitude: -73.5673 },
 });
-const mockGeocodeAsync = jest
-  .fn()
-  .mockResolvedValue([{ latitude: 1, longitude: 2 }]);
-jest.mock("expo-location", () => ({
-  getCurrentPositionAsync: mockGetCurrentPositionAsync,
-  Accuracy: { High: 6 },
-  geocodeAsync: mockGeocodeAsync,
-  requestForegroundPermissionsAsync: jest
-    .fn()
-    .mockResolvedValue({ granted: true }),
-}));
 
 const renderWithContext = (
   component,
