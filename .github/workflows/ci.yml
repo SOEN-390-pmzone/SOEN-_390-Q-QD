@@ -55,7 +55,7 @@ jobs:
             -Dsonar.projectKey=SOEN-390-pmzone_SOEN-_390-Q-QD \
             -Dsonar.organization=soen-390-pmzone \
             -Dsonar.sources=. \
-            -Dsonar.exclusions=**/node_modules/**,**/*.test.js \
+            -Dsonar.exclusions=**/node_modules/**,**/*.test.js,**/styles/**,**/styles.js \
             -Dsonar.javascript.lcov.reportPaths=./coverage/lcov.info \
             -Dsonar.host.url=https://sonarcloud.io
 

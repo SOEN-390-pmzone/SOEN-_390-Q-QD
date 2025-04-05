@@ -1,14 +1,23 @@
 import React from "react";
-import { Modal, View, Text, TouchableOpacity, Alert } from "react-native";
+import { Modal, View, Text, TouchableOpacity } from "react-native";
 import PropTypes from "prop-types";
 import styles from "../styles/DirectionBox.style"; // Use the same styles as the building popup
 
 const DEFAULT_NAME = "Cafe/Restaurant Name";
 const DEFAULT_ADDRESS = "Address not available";
 
-const PopupOPI = ({ isVisible, data = {}, onClose }) => {
+const PopupOPI = ({ isVisible, data = {}, onClose, navigation }) => {
   const { name = DEFAULT_NAME, address = DEFAULT_ADDRESS } = data;
+  const handleOutdoorsDirectionsSelect = () => {
+    onClose();
 
+    navigation.navigate("GetDirections", {
+      latitude: data.coordinate.latitude,
+      longitude: data.coordinate.longitude,
+      fromPopup: true,
+      targetLocation: data.address,
+    });
+  };
   return (
     <Modal
       transparent
@@ -28,9 +37,7 @@ const PopupOPI = ({ isVisible, data = {}, onClose }) => {
 
             <TouchableOpacity
               style={styles.getDirectionsButton}
-              onPress={() =>
-                Alert.alert("Get Directions", "Directions pressed")
-              }
+              onPress={() => handleOutdoorsDirectionsSelect()}
             >
               <Text style={styles.getDirectionsButtonText}>Get Directions</Text>
             </TouchableOpacity>
@@ -48,6 +55,9 @@ PopupOPI.propTypes = {
     address: PropTypes.string,
   }).isRequired,
   onClose: PropTypes.func.isRequired,
+  navigation: PropTypes.shape({
+    navigate: PropTypes.func.isRequired,
+  }),
 };
 
 export default PopupOPI;

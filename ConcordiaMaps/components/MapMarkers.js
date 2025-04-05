@@ -1,89 +1,60 @@
-import React, { useState } from "react";
-import { Marker, Callout } from "react-native-maps";
-import { Text, View, Image, StyleSheet } from "react-native";
-import PropTypes from "prop-types";
-import PopupModal from "./PopupModal";
+import React, { useContext } from "react";
+import { Marker } from "react-native-maps";
+import { Image } from "react-native";
+import styles from "../styles";
+import { Building } from "../constants/Building";
+import { ModalContext } from "../screen/HomeScreen";
+import { PointsOfInterest } from "../constants/OutdoorPtsOfDirections"; // Import the new Points of Interest data
 
 const customMarkerImage = require("../assets/PinLogo.png");
 
-const MapMarkers = ({ markers }) => {
-  const [popupVisible, setPopupVisible] = useState(false);
-  const [popupData, setPopupData] = useState(null);
+const MapMarkers = () => {
+  const { toggleModal, setModalData, opiToggleModal, setSelectedOPI } =
+    useContext(ModalContext); // Access setModalData
 
-  if (!markers || markers.length === 0) return null;
+  const handleMarkerPress = (building) => {
+    setModalData({
+      name: building.name,
+      coordinate: building.coordinate,
+      address: building.address,
+      fullBuildingName: building.fullBuildingName,
+    }); // Update modalData
 
-  const handleMarkerPress = (marker) => {
-    setPopupData(marker);
-    setPopupVisible(true);
+    toggleModal(); // Show modal
   };
-
-  const closePopup = () => {
-    setPopupVisible(false);
-    setPopupData(null);
+  const handleOPIMarkerPress = (poi) => {
+    setSelectedOPI(poi);
+    opiToggleModal();
   };
 
   return (
     <>
-      {markers.map((marker) => (
+      {Building.map((building) => (
         <Marker
-          key={`${marker.name}-${marker.coordinate.latitude}-${marker.coordinate.longitude}`}
-          coordinate={marker.coordinate}
-          title={marker.name}
-          address={marker.address}
-          fullBuildingName={marker.fullBuildingName}
-          onPress={() => handleMarkerPress(marker)}
+          key={`${building.name}-${building.coordinate.latitude}-${building.coordinate.longitude}`}
+          testID={`marker-${building.name?.toLowerCase().replace(/\s+/g, "-") || building.id}`}
+          coordinate={building.coordinate}
+          title={building.name}
+          address={building.address}
+          fullBuildingName={building.fullBuildingName}
+          onPress={() => handleMarkerPress(building)}
         >
           <Image source={customMarkerImage} style={styles.markerImage} />
-          <Callout>
-            <View style={styles.calloutContainer}>
-              <Text style={styles.calloutText}>{marker.name}</Text>
-              <Text style={styles.calloutText}>{marker.address}</Text>
-              <Text style={styles.calloutText}>{marker.fullBuildingName}</Text>
-            </View>
-          </Callout>
         </Marker>
       ))}
-
-      <PopupModal
-        isVisible={popupVisible}
-        data={popupData}
-        onClose={closePopup}
-      />
+      {PointsOfInterest.map((poi) => (
+        <Marker
+          key={poi.name}
+          coordinate={poi.coordinate}
+          title={poi.name}
+          description={poi.address}
+          onPress={() => handleOPIMarkerPress(poi)}
+        >
+          <Image source={poi.markerImage} style={styles.customMarkerImage} />
+        </Marker>
+      ))}
     </>
   );
-};
-
-const styles = StyleSheet.create({
-  markerImage: {
-    width: 40,
-    height: 40,
-  },
-  calloutContainer: {
-    width: 160,
-    height: 50,
-    padding: 5,
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
-    borderRadius: 8,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  calloutText: {
-    fontSize: 14,
-    color: "#333",
-    textAlign: "center",
-  },
-});
-
-MapMarkers.propTypes = {
-  markers: PropTypes.arrayOf(
-    PropTypes.shape({
-      coordinate: PropTypes.shape({
-        latitude: PropTypes.number.isRequired,
-        longitude: PropTypes.number.isRequired,
-      }).isRequired,
-      name: PropTypes.string.isRequired,
-    }),
-  ),
 };
 
 export default MapMarkers;
