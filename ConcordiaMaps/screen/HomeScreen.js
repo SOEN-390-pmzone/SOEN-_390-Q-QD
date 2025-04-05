@@ -1,4 +1,11 @@
-import React, { useState, useEffect, useRef, useContext } from "react";
+import React, {
+  useState,
+  useEffect,
+  createContext,
+  useRef,
+  useContext,
+  useMemo,
+} from "react";
 import { View, Text, TouchableOpacity, Image } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import NavBar from "../components/NavBar";
@@ -22,17 +29,56 @@ import convertToCoordinates from "../components/convertToCoordinates";
 import PropTypes from "prop-types";
 import PopupOPI from "../components/PopupOPI"; // Import the new popup component
 import NextEventModal from "../components/NextEventModal"; // Import the NextEventModal component
-import { PointsOfInterest } from "../constants/OutdoorPtsOfDirections"; // Import the new Points of Interest data
-
 // Marker image assets for Restaurant and Cafe
-const customMarkerImage = require("../assets/PinLogo.png");
 
+import PopupModal from "../components/PopupModal";
+import MapMarkers from "../components/MapMarkers";
+const ModalContext = createContext();
+
+// Correctly defined wrapper component with navigation prop
+const PopupModalWrapper = ({ isVisible, data, onClose, navigation }) => {
+  return (
+    <PopupModal
+      isVisible={isVisible}
+      data={data}
+      onClose={onClose}
+      navigation={navigation}
+    />
+  );
+};
+const OPIModalWrapper = ({
+  opiPopupVisible,
+  selectedOPI,
+  onClose,
+  navigation,
+}) => {
+  return (
+    <PopupOPI
+      isVisible={opiPopupVisible}
+      data={selectedOPI || { name: "", address: "" }}
+      onClose={onClose}
+      navigation={navigation}
+    />
+  );
+};
+PopupModalWrapper.propTypes = {
+  isVisible: PropTypes.bool.isRequired,
+  data: PropTypes.object.isRequired,
+  onClose: PropTypes.func.isRequired,
+  navigation: PropTypes.object.isRequired,
+};
+OPIModalWrapper.propTypes = {
+  opiPopupVisible: PropTypes.bool.isRequired,
+  selectedOPI: PropTypes.object, // Remove isRequired
+  onClose: PropTypes.func.isRequired,
+  navigation: PropTypes.object.isRequired,
+};
 function HomeScreen({ asyncKey = "Campus" }) {
   const loyolaPostalCode = process.env.EXPO_PUBLIC_LOYOLA_POSTAL_CODE;
   const sgwPostalCode = process.env.EXPO_PUBLIC_SGW_POSTAL_CODE;
 
   const location = useContext(LocationContext);
-  const { toggleModal, setModalData } = useContext(ModalContext);
+  const navigation = useNavigation();
 
   const [postalCode, setPostalCode] = useState(null);
   const [coordinates, setCoordinates] = useState(null);
@@ -45,9 +91,36 @@ function HomeScreen({ asyncKey = "Campus" }) {
 
   const [eventModalVisible, setEventModalVisible] = useState(false);
 
-  // State for OPI (Points of Interest) popup
+  // Modals for building pop ups
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [modalData, setModalData] = useState({
+    name: "",
+    coordinate: { latitude: 0, longitude: 0 },
+  });
   const [opiPopupVisible, setOpiPopupVisible] = useState(false);
   const [selectedOPI, setSelectedOPI] = useState(null);
+
+  const toggleModal = () => {
+    setModalVisible(!isModalVisible);
+  };
+  const opiToggleModal = () => {
+    setOpiPopupVisible((prev) => !prev);
+  };
+
+  // Memoize the context value
+  const modalContextValue = useMemo(
+    () => ({
+      isModalVisible,
+      modalData,
+      toggleModal,
+      setModalData,
+      opiToggleModal,
+      setSelectedOPI,
+      opiPopupVisible,
+      selectedOPI,
+    }),
+    [isModalVisible, modalData, selectedOPI, opiPopupVisible],
+  );
 
   useEffect(() => {
     const fetchLastCampus = async () => {
@@ -152,20 +225,21 @@ function HomeScreen({ asyncKey = "Campus" }) {
 
   return (
     <View style={styles.container} testID="home-screen">
-      <Header />
-      <NavBar />
-      <FloatingSearchBar onPlaceSelect={handlePlaceSelect} />
-      {error ? <Text testID="error-message">{error}</Text> : null}
+      <ModalContext.Provider value={modalContextValue}>
+        <Header />
+        <NavBar />
+        <FloatingSearchBar onPlaceSelect={handlePlaceSelect} />
+        {error ? <Text testID="error-message">{error}</Text> : null}
 
-      {coordinates ? (
-        <>
-          <TemporaryModal
-            text="Press the button to switch campuses"
-            time={TOGGLE_MODAL_TIMEOUT}
-            modalState={modalState}
-            onRequestClose={() => setModalState(false)}
-            TestID="toggleModal"
-          />
+        {coordinates ? (
+          <>
+            <TemporaryModal
+              text="Press the button to switch campuses"
+              time={TOGGLE_MODAL_TIMEOUT}
+              modalState={modalState}
+              onRequestClose={() => setModalState(false)}
+              TestID="toggleModal"
+            />
 
           <MapView
             testID="map-view"
@@ -288,4 +362,5 @@ HomeScreen.propTypes = {
   asyncKey: PropTypes.string,
 };
 
+export { ModalContext };
 export default HomeScreen;

@@ -559,7 +559,6 @@ const IndoorNavigation = ({ route, navigation }) => {
       <TouchableOpacity style={styles.button} onPress={calculatePath}>
         <Text style={styles.buttonText}>Find Path</Text>
       </TouchableOpacity>
-
       <View style={styles.resultContainerWrapper}>
         <Text style={styles.resultTitle}>Navigation Path:</Text>
         <ScrollView
