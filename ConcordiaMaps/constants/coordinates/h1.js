@@ -52,6 +52,7 @@ const graph = {
   },
 
   "main-stairs": {
+    entrance:1,
     118: 1,
     "entrance-east": 1,
   },
@@ -59,6 +60,7 @@ const graph = {
     "main-stairs": 1,
     "underground-stairs": 1,
   },
+  
   "entrance-east": {
     "main-stairs": 1,
     "underground-stairs": 1,
@@ -66,6 +68,7 @@ const graph = {
   "underground-stairs": {
     "entrance-east": 1,
     "Main lobby": 3,
+    entrance:1,
   },
 };
 

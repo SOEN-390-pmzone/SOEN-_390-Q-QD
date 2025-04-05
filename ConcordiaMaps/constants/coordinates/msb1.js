@@ -29,7 +29,7 @@ const rooms = {
   1.494: createRoom(830, 890, 827, 855),
   1.115: createRoom(803, 980, 673, 953),
   1.437: createRoom(873, 752, 882, 845),
-  entrance: createRoom(434, 552, 434, 845),
+  entrance: createRoom(434, 552, 434, 552),
 };
 
 const graph = {
