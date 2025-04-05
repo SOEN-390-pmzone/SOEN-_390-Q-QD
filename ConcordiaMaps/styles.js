@@ -387,8 +387,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   buttonNext: {
-    bottom: Platform.OS === "ios" ? 525 : 650,
-    left: "25%",
+    bottom: 650,
+    left: "68%",
     transform: [{ translateX: -80 }],
     backgroundColor: "#912338",
     borderRadius: 20,

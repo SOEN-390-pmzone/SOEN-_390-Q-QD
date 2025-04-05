@@ -1,6 +1,34 @@
 import React from "react";
 import { render, fireEvent, waitFor, act } from "@testing-library/react-native";
-import DirectionsBox from "../../components/DirectionsBox";
+import DirectionsBox from "../../components/OutdoorNavigation/DirectionsBox";
+import PropTypes from "prop-types";
+
+// Wrapper component to manage state for testing
+const DirectionsBoxWrapper = ({ directions }) => {
+  const [isCollapsed, setIsCollapsed] = useState(true);
+  return (
+    <DirectionsBox
+      directions={directions}
+      isCollapsed={isCollapsed}
+      setIsCollapsed={setIsCollapsed}
+    />
+  );
+};
+
+// Add PropTypes for the wrapper component
+DirectionsBoxWrapper.propTypes = {
+  directions: PropTypes.arrayOf(
+    PropTypes.shape({
+      html_instructions: PropTypes.string.isRequired,
+      distance: PropTypes.string.isRequired,
+    }),
+  ),
+};
+
+// Add default props
+DirectionsBoxWrapper.defaultProps = {
+  directions: [],
+};
 
 describe("DirectionsBox", () => {
   const directions = [

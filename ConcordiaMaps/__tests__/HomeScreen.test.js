@@ -55,26 +55,11 @@ jest.mock("../components/PopupModal", () => {
   const { View } = require("react-native");
   const PropTypes = require("prop-types");
 
-  const PopupModal = (props) => {
-    mockPopupModalProps = props;
-    return <View testID="popup-modal" />;
-  };
+jest.mock("../components/LiveBusTracker", () => ({
+  __esModule: true,
+  default: () => null,
+}));
 
-  PopupModal.propTypes = {
-    isVisible: PropTypes.bool,
-    data: PropTypes.shape({
-      name: PropTypes.string,
-      coordinate: PropTypes.shape({
-        latitude: PropTypes.number,
-        longitude: PropTypes.number,
-      }),
-    }),
-    onClose: PropTypes.func,
-  };
-
-  return PopupModal;
-});
-const mockNavigate = jest.fn();
 describe("HomeScreen", () => {
   const mockLocation = { latitude: 45.4973, longitude: -73.5789 };
   const mockToggleModal = jest.fn();

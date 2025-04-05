@@ -9,10 +9,12 @@ import {
 } from "react-native";
 import styles from "../styles";
 import { useNavigation } from "@react-navigation/native";
+import NavBar from "../components/NavBar";
+import HamburgerButton from "../components/HamburgerButton";
 
 function Header() {
   const [isOpen, setIsOpen] = useState(false);
-  const animation = useState(new Animated.Value(0))[0];
+  const [animation] = useState(new Animated.Value(0));
   const navigation = useNavigation();
 
   const toggleMenu = () => {
@@ -35,15 +37,7 @@ function Header() {
   return (
     <SafeAreaView>
       <View style={styles.header}>
-        <TouchableOpacity
-          testID="hamburger-button"
-          onPress={toggleMenu}
-          style={styles.hamburger}
-        >
-          <View style={styles.hamburgerLine}></View>
-          <View style={styles.hamburgerLine}></View>
-          <View style={styles.hamburgerLine}></View>
-        </TouchableOpacity>
+        <HamburgerButton onPress={toggleMenu} />
 
         <TouchableOpacity testID="logoButton" onPress={handlePress}>
           <Image
