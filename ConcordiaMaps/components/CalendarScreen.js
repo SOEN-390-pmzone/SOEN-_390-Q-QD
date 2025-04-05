@@ -2,7 +2,6 @@ import Header from "./Header";
 import NavBar from "./NavBar";
 import Footer from "./Footer";
 import React, { useEffect, useState } from "react";
-import { useNavigation } from "@react-navigation/native";
 import {
   View,
   Text,
@@ -16,16 +15,8 @@ import * as Calendar from "expo-calendar";
 import { format, addDays, subDays } from "date-fns";
 import styles from "../styles";
 import { Ionicons } from "@expo/vector-icons";
-import convertToCoordinates from "./convertToCoordinates";
-import FloorRegistry, {
-  CONCORDIA_BUILDINGS,
-} from "../services/BuildingDataService";
-
-import useDataFlow, {
-  findBuilding,
-  getData,
-} from "../components/userInPolygon";
-import { coloringData } from "../data/coloringData";
+import useDataFlow from "../components/userInPolygon";
+import useDirectionsHandler from "../hooks/useDirectionsHandler";
 
 const CalendarScreen = () => {
   const [events, setEvents] = useState([]);
@@ -34,10 +25,13 @@ const CalendarScreen = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [modalVisible, setModalVisible] = useState(false);
 
-  const [destinationLocation, setDestinationLocation] = useState(null);
   const [userLocationStatus, setUserLocationStatus] = useState("");
   const { location, isIndoors, buildingName } = useDataFlow();
-  const navigation = useNavigation();
+  const { getDirectionsTo, destinationLocation } = useDirectionsHandler({
+    location,
+    isIndoors,
+    buildingName,
+  });
 
   useEffect(() => {
     requestCalendarPermission();
@@ -115,198 +109,6 @@ const CalendarScreen = () => {
     setSelectedCalendarIds((prev) =>
       prev.includes(id) ? prev.filter((calId) => calId !== id) : [...prev, id],
     );
-  };
-
-  const getDestination = (loc) => {
-    if (loc === null || loc === undefined) {
-      console.log("Make sure the address is included in the calendar event");
-      Alert.alert(`Get directions to `);
-      return;
-    }
-
-    console.log("Origin location status:", isIndoors ? "indoors" : "outdoors");
-    console.log("Origin building:", buildingName || "Not in a building");
-    console.log("Destination location:", loc);
-    setDestinationLocation(loc);
-    Alert.alert(`Get directions to ${loc}`);
-
-    // Create navigation parameters that will be used for both room and address cases
-    const navigationParams = {
-      prefillNavigation: true, // Flag to ensure params are processed
-    };
-
-    // First, handle origin data regardless of destination type
-    if (isIndoors && buildingName) {
-      // We know the user is in a Concordia building
-      const knownBuildings = FloorRegistry.KNOWN_BUILDINGS || {};
-
-      // Fix building name mapping
-      let mappedBuildingName = buildingName;
-
-      // Special handling for JMSB (John Molson School Of Business)
-      if (
-        buildingName.includes("John Molson") ||
-        buildingName.includes("JMSB")
-      ) {
-        mappedBuildingName = "John Molson Building";
-      } else {
-        mappedBuildingName = knownBuildings[buildingName] || buildingName;
-      }
-
-      console.log(`Mapped building name: ${mappedBuildingName}`);
-
-      // Find the building ID using FloorRegistry's robust name matching
-      let startBuildingId =
-        FloorRegistry.findBuildingByName(mappedBuildingName);
-
-      // If no match found, try with the original building name
-      if (!startBuildingId && buildingName !== mappedBuildingName) {
-        startBuildingId = FloorRegistry.findBuildingByName(buildingName);
-      }
-
-      let startBuilding = null;
-      if (startBuildingId) {
-        startBuilding = CONCORDIA_BUILDINGS.find(
-          (b) => b.id === startBuildingId,
-        );
-      }
-
-      if (startBuilding) {
-        const startAddress = FloorRegistry.getAddressByID(startBuildingId);
-
-        console.log(
-          `Setting origin to building: ${startBuilding.name} (${startBuildingId})`,
-        );
-
-        navigationParams.originInputType = "classroom";
-        navigationParams.origin = startBuilding.name;
-        navigationParams.originRoom = ""; // No specific room, just the building
-        navigationParams.originBuilding = {
-          id: startBuildingId,
-          name: startBuilding.name,
-        };
-        navigationParams.originDetails = {
-          latitude: location.latitude,
-          longitude: location.longitude,
-          formatted_address: startAddress || startBuilding.name,
-        };
-      } else {
-        console.log(
-          `Could not find building data for: ${buildingName} (mapped to: ${mappedBuildingName})`,
-        );
-        // Fallback to using current location if building data isn't found
-        navigationParams.originInputType = "location";
-        navigationParams.origin = "Current Location";
-        navigationParams.originDetails = {
-          latitude: location.latitude,
-          longitude: location.longitude,
-          formatted_address: "Current Location",
-        };
-      }
-    } else {
-      // User is outdoors or location is unknown, use current coordinates
-      console.log(
-        "User is outdoors, using current GPS coordinates as starting point",
-      );
-      navigationParams.originInputType = "location";
-      navigationParams.origin = "Current Location";
-      navigationParams.originDetails = {
-        latitude: location?.latitude || 0,
-        longitude: location?.longitude || 0,
-        formatted_address: "Current Location",
-      };
-    }
-
-    // Check if the location is a room number like "H-920"
-    const roomInfo = FloorRegistry.parseRoomFormat(loc);
-
-    if (roomInfo) {
-      // This is a room number format, get building info directly
-      console.log("Processing room format:", roomInfo);
-      const buildingCode = roomInfo.buildingCode;
-
-      // Find the building by code
-      const targetBuilding = CONCORDIA_BUILDINGS.find(
-        (building) => building.id === buildingCode,
-      );
-
-      if (!targetBuilding) {
-        console.log("Could not find building with code:", buildingCode);
-        return;
-      }
-
-      // Add destination information
-      navigationParams.destinationInputType = "classroom";
-      navigationParams.destination = targetBuilding.name;
-      navigationParams.room = `${buildingCode}-${roomInfo.roomNumber}`;
-      navigationParams.building = {
-        id: targetBuilding.id,
-        name: targetBuilding.name,
-      };
-      navigationParams.destinationDetails = {
-        latitude: targetBuilding.latitude,
-        longitude: targetBuilding.longitude,
-        formatted_address: targetBuilding.address,
-      };
-
-      // Navigate with parameters - set prefillNavigation flag to ensure params are processed
-      navigationParams.prefillNavigation = true;
-      navigation.navigate("MultistepNavigationScreen", navigationParams);
-    } else {
-      // Handle as an address, use convertToCoordinates
-      convertToCoordinates(loc)
-        .then((coordinates) => {
-          if (!coordinates) {
-            console.log("Could not convert address to coordinates");
-            return;
-          }
-
-          let targetBuilding = findBuilding(coloringData, coordinates);
-          targetBuilding = getData(targetBuilding); // fetches the information about the destination Concordia building
-
-          if (!targetBuilding) {
-            console.log("Could not find target building");
-            return;
-          }
-
-          // Use safer approach to get building ID
-
-          const endBuildingId =
-            FloorRegistry.findBuildingByName(targetBuilding.buildingName) ||
-            targetBuilding.buildingName;
-
-          if (!endBuildingId) {
-            console.log(
-              "Could not find end building ID for:",
-              targetBuilding.buildingName,
-            );
-
-            return;
-          }
-          const endBuildingName = targetBuilding.buildingName;
-          const endAddress = FloorRegistry.getAddressByID(endBuildingId);
-
-          // Add destination information
-          navigationParams.destinationInputType = "location";
-          navigationParams.destination = endBuildingName;
-          navigationParams.destinationDetails = {
-            latitude: coordinates.latitude,
-            longitude: coordinates.longitude,
-            formatted_address: endAddress,
-          };
-          navigationParams.building = {
-            id: endBuildingId,
-            name: endBuildingName,
-          };
-
-          // Navigate with parameters - set prefillNavigation flag to ensure params are processed
-          navigationParams.prefillNavigation = true;
-          navigation.navigate("MultistepNavigationScreen", navigationParams);
-        })
-        .catch((error) => {
-          console.error("Error getting directions:", error);
-        });
-    }
   };
 
   return (
@@ -404,7 +206,7 @@ const CalendarScreen = () => {
                 <TouchableOpacity
                   testID="getClassDirectionsButton"
                   style={styles.classDirectionsButton}
-                  onPress={() => getDestination(item.location)}
+                  onPress={() => getDirectionsTo(item.location)}
                 >
                   <Text style={styles.classDirectionsButtonText}>
                     {" "}

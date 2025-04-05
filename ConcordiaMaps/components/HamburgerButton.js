@@ -8,7 +8,7 @@ import styles from "../styles";
  * @param {function} onPress - Function to call when the hamburger button is pressed
  * @param {object} style - Additional styles to apply to the hamburger button container
  */
-const HamburgerButton = ({ onPress, style }) => {
+const HamburgerButton = ({ onPress, style = null }) => {
   return (
     <TouchableOpacity
       testID="hamburger-button"
@@ -30,11 +30,6 @@ const HamburgerButton = ({ onPress, style }) => {
 HamburgerButton.propTypes = {
   onPress: PropTypes.func.isRequired,
   style: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
-};
-
-// Add default props
-HamburgerButton.defaultProps = {
-  style: null,
 };
 
 export default HamburgerButton;
