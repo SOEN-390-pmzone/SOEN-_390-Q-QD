@@ -149,7 +149,7 @@ class FloorRegistry {
 
   static findBuildingByCode(buildingCode) {
     return CONCORDIA_BUILDINGS.find(
-      (b) => b.id.toLowerCase() === buildingCode.toLowerCase(),
+      (b) => b.id.toLowerCase() === buildingCode.toLowerCase()
     );
   }
 
@@ -157,7 +157,7 @@ class FloorRegistry {
     return CONCORDIA_BUILDINGS.filter(
       (building) =>
         building.name.toLowerCase().includes(text.toLowerCase()) ||
-        building.id.toLowerCase().includes(text.toLowerCase()),
+        building.id.toLowerCase().includes(text.toLowerCase())
     );
   }
   // Get building type from building ID
@@ -168,7 +168,7 @@ class FloorRegistry {
       // Look through available buildings in registry
       const buildingTypes = Object.keys(this.#buildings);
       const foundType = buildingTypes.find(
-        (key) => this.#buildings[key]?.code === buildingId.toUpperCase(),
+        (key) => this.#buildings[key]?.code === buildingId.toUpperCase()
       );
 
       if (foundType) return foundType;
@@ -201,6 +201,12 @@ class FloorRegistry {
     // Try to extract floor from room number formats
     let floor = "1"; // Default floor
 
+    // For JMSB second floor format: S2.230
+    const mbS2Regex = /^(?:MB-)?S2\./i;
+    if (mbS2Regex.test(roomId)) {
+      return "2";
+    }
+
     // For Hall Building rooms like H-920, H920
     const hallRegex = /^h-?(\d)/i;
     const hallResult = hallRegex.exec(roomId);
@@ -226,6 +232,7 @@ class FloorRegistry {
   }
 
   // Normalize room ID to match format in floor data
+  // Normalize room ID to match format in floor data
   static normalizeRoomId(roomId) {
     if (!roomId) return roomId;
 
@@ -233,7 +240,7 @@ class FloorRegistry {
     if (
       typeof roomId === "string" &&
       ["entrance", "main entrance", "main", "lobby", "main lobby"].includes(
-        roomId.toLowerCase(),
+        roomId.toLowerCase()
       )
     ) {
       // For Hall Building, "Main lobby" seems to be the correct format
@@ -253,6 +260,11 @@ class FloorRegistry {
       // For JMSB (MB) building: Format like 1.293 directly
       {
         regex: /^MB-(\d+\.\d+)$/i,
+        replace: (match, p1) => p1,
+      },
+      // For JMSB (MB) building second floor: Convert MB-S2.230 format to S2.230 format
+      {
+        regex: /^MB-(S2\.\d+)$/i,
         replace: (match, p1) => p1,
       },
       // For JMSB (MB) building: Convert MB-1-293 format to 1.293 format
@@ -372,7 +384,7 @@ class FloorRegistry {
     // Special cases for common facilities
     if (
       ["entrance", "main lobby", "lobby", "main entrance"].includes(
-        roomId.toLowerCase(),
+        roomId.toLowerCase()
       )
     )
       return true;
@@ -545,9 +557,9 @@ class FloorRegistry {
           getSVG: () => SVGs.MBfloor1SVG,
         },
         2: {
-          id: "2",
-          name: "MSB 2",
-          description: "Second floor of JMSB",
+          id: "S2",
+          name: "MSB S2",
+          description: "S2 floor of JMSB",
           rooms: JMSB2Rooms,
           graph: JMSB2Graph,
           getSVG: () => SVGs.MBfloor2SVG,
