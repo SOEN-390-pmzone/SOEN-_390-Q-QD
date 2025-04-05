@@ -8,7 +8,6 @@ import PopupModal from "./components/PopupModal"; // Import the PopupModal
 import styles from "./styles";
 import GetDirections from "./components/GetDirections";
 
-
 // Create Context for modal data and visibility
 export const ModalContext = createContext();
 
