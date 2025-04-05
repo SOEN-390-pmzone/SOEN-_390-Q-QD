@@ -101,22 +101,8 @@ class DistanceCalculatorService {
       }
       // CASE 1B: Different buildings
       else {
-        // CASE 1B-1: Different campuses
-        if (
-          this._areOnDifferentCampuses(
-            locationA.buildingId,
-            locationB.buildingId,
-          )
-        ) {
-          return this.strategies.DifferentCampuses;
-        }
-        // CASE 1B-2: Same campus, different buildings
-        else {
-          return (
-            this.strategies.DifferentBuildingSameCampus ||
-            this.strategies.Outdoor
-          );
-        }
+        // Use DifferentBuilding strategy for all different buildings
+        return this.strategies.DifferentBuilding;
       }
     }
     // CASE 2: Both locations are outdoor
@@ -144,27 +130,6 @@ class DistanceCalculatorService {
 
       return this.strategies.Mixed;
     }
-  }
-
-  /**
-   * Determines if two buildings are on different campuses
-   * @private
-   * @param {string} buildingA - First building ID
-   * @param {string} buildingB - Second building ID
-   * @returns {boolean} Whether the buildings are on different campuses
-   */
-  _areOnDifferentCampuses(buildingA, buildingB) {
-    const loyolaCampusBuildings = ["VL", "VE"]; // Loyola campus buildings
-    const sgwCampusBuildings = ["H", "MB", "EV", "LB"]; // SGW campus buildings
-
-    const isALoyola = loyolaCampusBuildings.includes(buildingA);
-    const isBLoyola = loyolaCampusBuildings.includes(buildingB);
-
-    const isASGW = sgwCampusBuildings.includes(buildingA);
-    const isBSGW = sgwCampusBuildings.includes(buildingB);
-
-    // Different campuses if one is Loyola and the other is SGW
-    return (isALoyola && isBSGW) || (isASGW && isBLoyola);
   }
 }
 

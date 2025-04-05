@@ -11,19 +11,18 @@ jest.mock("../../../services/JourneyOptimizer/RouteStrategies", () => ({
     calculateDistance: jest.fn(() => 20),
     isPathAllowed: jest.fn(() => true),
   },
-  DifferentCampuses: {
+  // Use DifferentBuilding for all building-to-building strategies
+  DifferentBuilding: {
     calculateDistance: jest.fn(() => 100),
     isPathAllowed: jest.fn(
       (locationA, locationB, avoidOutdoor) => !avoidOutdoor,
     ),
   },
-  DifferentBuildingSameCampus: {
-    calculateDistance: jest.fn(() => 50),
-    isPathAllowed: jest.fn(() => true),
-  },
   Outdoor: {
     calculateDistance: jest.fn(() => 30),
-    isPathAllowed: jest.fn(() => true),
+    isPathAllowed: jest.fn(
+      (locationA, locationB, avoidOutdoor) => !avoidOutdoor,
+    ),
   },
   Mixed: {
     calculateDistance: jest.fn(() => 40),
@@ -170,25 +169,21 @@ describe("DistanceCalculatorService", () => {
 
       // CASE 1B: Different buildings
       describe("when locations are in different buildings", () => {
-        // CASE 1B-1: Different campuses
-        it("should use DifferentCampuses strategy for buildings on different campuses", () => {
+        // All different buildings now use the DifferentBuilding strategy
+        it("should use DifferentBuilding strategy for different buildings", () => {
           const strategy = service._determineStrategy(
             mockIndoorLocations.hallNinthFloor,
             mockIndoorLocations.vanier,
           );
-          expect(strategy).toBe(RouteStrategies.DifferentCampuses);
+          expect(strategy).toBe(RouteStrategies.DifferentBuilding);
         });
 
-        // CASE 1B-2: Same campus, different buildings
-        it("should use DifferentBuildingSameCampus strategy for different buildings on same campus", () => {
+        it("should use DifferentBuilding strategy for different buildings on same campus", () => {
           const strategy = service._determineStrategy(
             mockIndoorLocations.hallNinthFloor,
             mockIndoorLocations.jmsb,
           );
-          expect(strategy).toBe(
-            RouteStrategies.DifferentBuildingSameCampus ||
-              RouteStrategies.Outdoor,
-          );
+          expect(strategy).toBe(RouteStrategies.DifferentBuilding);
         });
       });
 
@@ -251,18 +246,6 @@ describe("DistanceCalculatorService", () => {
     });
   });
 
-  describe("_areOnDifferentCampuses", () => {
-    it("should return true for buildings on different campuses", () => {
-      expect(service._areOnDifferentCampuses("H", "VL")).toBe(true);
-      expect(service._areOnDifferentCampuses("VL", "MB")).toBe(true);
-    });
-
-    it("should return false for buildings on the same campus", () => {
-      expect(service._areOnDifferentCampuses("H", "MB")).toBe(false);
-      expect(service._areOnDifferentCampuses("VL", "VE")).toBe(false);
-    });
-  });
-
   describe("calculateDistance", () => {
     it("should delegate to SameFloorSameBuilding strategy for same floor indoor locations", () => {
       service.calculateDistance(
@@ -287,6 +270,19 @@ describe("DistanceCalculatorService", () => {
         mockOutdoorLocations.loyolaCampus,
       );
     });
+
+    it("should delegate to DifferentBuilding strategy for different buildings", () => {
+      service.calculateDistance(
+        mockIndoorLocations.hallNinthFloor,
+        mockIndoorLocations.jmsb,
+      );
+      expect(
+        RouteStrategies.DifferentBuilding.calculateDistance,
+      ).toHaveBeenCalledWith(
+        mockIndoorLocations.hallNinthFloor,
+        mockIndoorLocations.jmsb,
+      );
+    });
   });
 
   describe("isPathAllowed", () => {
@@ -300,7 +296,7 @@ describe("DistanceCalculatorService", () => {
       );
 
       expect(
-        RouteStrategies.DifferentCampuses.isPathAllowed,
+        RouteStrategies.DifferentBuilding.isPathAllowed,
       ).toHaveBeenCalledWith(
         mockIndoorLocations.hallNinthFloor,
         mockIndoorLocations.vanier,

@@ -14,6 +14,7 @@ const rooms = {
   toilet: createRoom(723, 1044, 808, 1049),
   elevator: createRoom(967, 1157, 968, 1096),
   "entrance-east": createRoom(1363, 1351, 1363, 1351),
+  entrance: createRoom(1363, 1351, 1363, 1351),
   "main-stairs": createRoom(1339, 1196, 1240, 1216),
   "underground-stairs": createRoom(1074, 1446, 1172, 1439),
   "entrance-south": createRoom(485, 1469, 507, 1432),
@@ -49,9 +50,14 @@ const graph = {
   elevator: {
     toilet: 1,
   },
+
   "main-stairs": {
     118: 1,
     "entrance-east": 1,
+  },
+  entrance: {
+    "main-stairs": 1,
+    "underground-stairs": 1,
   },
   "entrance-east": {
     "main-stairs": 1,

@@ -7,6 +7,14 @@ const rooms = {
       y: "611",
     },
   },
+  entrance: {
+    x: "0",
+    y: "625",
+    nearestPoint: {
+      x: "131",
+      y: "625",
+    },
+  },
   stairs: {
     x: "718",
     y: "424",
@@ -25,8 +33,12 @@ const rooms = {
   },
 };
 const graph = {
+  entrance: {
+    191: 0.5,
+  },
   191: {
     elevator: 0.5,
+    entrance: 0.5,
   },
   stairs: {
     elevator: 1,
