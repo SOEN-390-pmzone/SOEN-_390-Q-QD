@@ -59,15 +59,15 @@ describe("InputTypeSwitcher", () => {
     const { getByTestId } = render(<InputTypeSwitcher {...props} />);
     const buildingTab = getByTestId("building-tab");
     const addressTab = getByTestId("address-tab");
-  
+
     // Check if the activeTab style is applied to the building tab
     expect(buildingTab.props.style).toEqual(
-      expect.objectContaining({ backgroundColor: "blue" })
+      expect.objectContaining({ backgroundColor: "blue" }),
     );
-  
+
     // Check if the activeTab style is not applied to the address tab
     expect(addressTab.props.style).not.toEqual(
-      expect.objectContaining({ backgroundColor: "blue" })
+      expect.objectContaining({ backgroundColor: "blue" }),
     );
   });
 });

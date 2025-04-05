@@ -17,14 +17,14 @@ export const useBuildingRoomSelection = () => {
   // Update available floors when building changes
   useEffect(() => {
     if (selectedBuilding) {
-      console.log("Getting available floors from building")
-      const buildingType = FloorRegistry.getBuildingTypeFromId(selectedBuilding);
+      console.log("Getting available floors from building");
+      const buildingType =
+        FloorRegistry.getBuildingTypeFromId(selectedBuilding);
       if (buildingType) {
         const building = FloorRegistry.getBuilding(buildingType);
         if (building && building.floors) {
           setAvailableFloors(Object.keys(building.floors));
-          console.log("Getting available floors from building")
-
+          console.log("Getting available floors from building");
         }
       }
       // Reset floor and room when building changes
@@ -38,7 +38,8 @@ export const useBuildingRoomSelection = () => {
   // Update available rooms when floor changes
   useEffect(() => {
     if (selectedBuilding && selectedFloor) {
-      const buildingType = FloorRegistry.getBuildingTypeFromId(selectedBuilding);
+      const buildingType =
+        FloorRegistry.getBuildingTypeFromId(selectedBuilding);
       if (buildingType) {
         const rooms = FloorRegistry.getRooms(buildingType, selectedFloor);
         if (rooms) {

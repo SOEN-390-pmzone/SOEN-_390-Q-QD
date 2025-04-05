@@ -68,7 +68,9 @@ describe("LocationsList", () => {
     const { getByText } = render(<LocationsList {...props} />);
 
     expect(
-      getByText("No locations added yet. Add at least two locations to create a journey.")
+      getByText(
+        "No locations added yet. Add at least two locations to create a journey.",
+      ),
     ).toBeTruthy();
   });
 

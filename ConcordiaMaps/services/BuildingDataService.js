@@ -103,37 +103,39 @@ class FloorRegistry {
   }
   static getBuildingTypeFromId(buildingId) {
     if (!buildingId) return "HallBuilding"; // Default
-  
+
     // Direct mappings for common building codes
     const directMappings = {
-      "MB": "JMSB",
-      "JMSB": "JMSB",
-      "H": "HallBuilding",
-      "HALL": "HallBuilding",
-      "VE": "VanierExtension",
-      "VL": "VanierLibrary",
-      "EV": "EVBuilding",
-      "LB": "Library"
+      MB: "JMSB",
+      JMSB: "JMSB",
+      H: "HallBuilding",
+      HALL: "HallBuilding",
+      VE: "VanierExtension",
+      VL: "VanierLibrary",
+      EV: "EVBuilding",
+      LB: "Library",
     };
-  
+
     // Check for direct mapping first
     const upperBuildingId = buildingId.toUpperCase();
     if (directMappings[upperBuildingId]) {
       return directMappings[upperBuildingId];
     }
-  
+
     try {
       // Look through available buildings in registry as fallback
       const buildingTypes = Object.keys(this.#buildings);
       const foundType = buildingTypes.find(
-        (key) => this.#buildings[key]?.code === upperBuildingId
+        (key) => this.#buildings[key]?.code === upperBuildingId,
       );
-  
+
       if (foundType) return foundType;
     } catch (error) {
       console.error("Error finding building type:", error);
     }
-    console.log("Couldnt find floor from FloorRegistry. defaulting to Hall Building")
+    console.log(
+      "Couldnt find floor from FloorRegistry. defaulting to Hall Building",
+    );
     return "HallBuilding"; // Default to Hall Building if no match
   }
 
@@ -610,107 +612,115 @@ class FloorRegistry {
     },
   };
   /**
- * Finds elevators for a specific building and floor
- * @private
- * @param {string} buildingType - The building type (e.g., "HallBuilding")
- * @param {string} floor - The floor number
- * @returns {Object} An elevator location object or null if not found
- */
-static _findElevatorForBuilding(buildingType, floor) {
-  // Validate inputs
-  if (!buildingType || !floor) {
-    console.warn("Missing building type or floor when searching for elevators");
-    return null;
-  }
+   * Finds elevators for a specific building and floor
+   * @private
+   * @param {string} buildingType - The building type (e.g., "HallBuilding")
+   * @param {string} floor - The floor number
+   * @returns {Object} An elevator location object or null if not found
+   */
+  static _findElevatorForBuilding(buildingType, floor) {
+    // Validate inputs
+    if (!buildingType || !floor) {
+      console.warn(
+        "Missing building type or floor when searching for elevators",
+      );
+      return null;
+    }
 
-  // Get the floor data from FloorRegistry
-  const floorData = FloorRegistry.getFloor(buildingType, floor);
-  if (!floorData) {
-    console.warn(`Floor data not found for ${buildingType}, floor ${floor}`);
-    return null;
-  }
+    // Get the floor data from FloorRegistry
+    const floorData = FloorRegistry.getFloor(buildingType, floor);
+    if (!floorData) {
+      console.warn(`Floor data not found for ${buildingType}, floor ${floor}`);
+      return null;
+    }
 
-  // Get the rooms for this floor
-  const rooms = floorData.rooms;
-  if (!rooms) {
-    console.warn(`No rooms found for ${buildingType}, floor ${floor}`);
-    return null;
-  }
+    // Get the rooms for this floor
+    const rooms = floorData.rooms;
+    if (!rooms) {
+      console.warn(`No rooms found for ${buildingType}, floor ${floor}`);
+      return null;
+    }
 
-  // Get the building code for creating the location object later
-  const building = FloorRegistry.getBuilding(buildingType);
-  const buildingCode = building?.code || "H"; // Default to "H" if not found
+    // Get the building code for creating the location object later
+    const building = FloorRegistry.getBuilding(buildingType);
+    const buildingCode = building?.code || "H"; // Default to "H" if not found
 
-  // Try to find elevator nodes based on common patterns
-  const possibleElevatorKeys = [
-    "elevator",
-    "Elevator",
-    "ELEVATOR",
-    "elevators",
-    `${buildingCode}${floor}elevator`,
-    `${buildingCode}-${floor}-elevator`,
-    `${buildingCode}-elevator`,
-    `${buildingCode.toLowerCase()}-elevator`
-  ];
+    // Try to find elevator nodes based on common patterns
+    const possibleElevatorKeys = [
+      "elevator",
+      "Elevator",
+      "ELEVATOR",
+      "elevators",
+      `${buildingCode}${floor}elevator`,
+      `${buildingCode}-${floor}-elevator`,
+      `${buildingCode}-elevator`,
+      `${buildingCode.toLowerCase()}-elevator`,
+    ];
 
-  // Look for elevator in room keys
-  for (const key of possibleElevatorKeys) {
-    if (rooms[key]) {
-      // Found an elevator, create a location object
+    // Look for elevator in room keys
+    for (const key of possibleElevatorKeys) {
+      if (rooms[key]) {
+        // Found an elevator, create a location object
+        return {
+          buildingId: buildingCode,
+          floor: floor,
+          room: key,
+          type: "indoor",
+          title: "Elevator",
+        };
+      }
+    }
+
+    // Alternative approach: search for any room key containing "elevator"
+    for (const key in rooms) {
+      if (key.toLowerCase().includes("elevator")) {
+        return {
+          buildingId: buildingCode,
+          floor: floor,
+          room: key,
+          type: "indoor",
+          title: "Elevator",
+        };
+      }
+    }
+
+    // If no elevator was found, create a virtual elevator near the stairs
+    // (Many buildings have stairs but not explicitly labeled elevators in the data)
+    for (const key in rooms) {
+      if (key.toLowerCase().includes("stair")) {
+        console.warn(
+          `No elevator found on floor ${floor} of ${buildingType}, using stairs instead`,
+        );
+        return {
+          buildingId: buildingCode,
+          floor: floor,
+          room: key,
+          type: "indoor",
+          title: "Stairs",
+        };
+      }
+    }
+
+    // Last resort: use the first room on the floor as an approximation
+    const roomKeys = Object.keys(rooms);
+    if (roomKeys.length > 0) {
+      console.warn(
+        `No elevator or stairs found on floor ${floor} of ${buildingType}, using first available room`,
+      );
       return {
         buildingId: buildingCode,
         floor: floor,
-        room: key,
+        room: roomKeys[0],
         type: "indoor",
-        title: "Elevator"
+        title: "Virtual Elevator",
       };
     }
-  }
 
-  // Alternative approach: search for any room key containing "elevator"
-  for (const key in rooms) {
-    if (key.toLowerCase().includes("elevator")) {
-      return {
-        buildingId: buildingCode,
-        floor: floor,
-        room: key,
-        type: "indoor",
-        title: "Elevator"
-      };
-    }
+    console.error(
+      `Could not find any elevator or room on floor ${floor} of ${buildingType}`,
+    );
+    return null;
   }
-
-  // If no elevator was found, create a virtual elevator near the stairs
-  // (Many buildings have stairs but not explicitly labeled elevators in the data)
-  for (const key in rooms) {
-    if (key.toLowerCase().includes("stair")) {
-      console.warn(`No elevator found on floor ${floor} of ${buildingType}, using stairs instead`);
-      return {
-        buildingId: buildingCode,
-        floor: floor,
-        room: key,
-        type: "indoor",
-        title: "Stairs"
-      };
-    }
-  }
-
-  // Last resort: use the first room on the floor as an approximation
-  const roomKeys = Object.keys(rooms);
-  if (roomKeys.length > 0) {
-    console.warn(`No elevator or stairs found on floor ${floor} of ${buildingType}, using first available room`);
-    return {
-      buildingId: buildingCode,
-      floor: floor,
-      room: roomKeys[0],
-      type: "indoor",
-      title: "Virtual Elevator"
-    };
-  }
-
-  console.error(`Could not find any elevator or room on floor ${floor} of ${buildingType}`);
-  return null;
-}
 
   // Get list of all buildings
   static getBuildings() {

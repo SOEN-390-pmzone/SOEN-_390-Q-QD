@@ -5,8 +5,8 @@ import FloorRegistry from "../../../../services/BuildingDataService";
 // Mock BuildingDataService
 jest.mock("../../../../services/BuildingDataService", () => {
   const mockRooms = {
-    "1": { "H-101": {}, "H-102": {} },
-    "2": { "H-201": {}, "H-202": {} }
+    1: { "H-101": {}, "H-102": {} },
+    2: { "H-201": {}, "H-202": {} },
   };
 
   return {
@@ -14,26 +14,26 @@ jest.mock("../../../../services/BuildingDataService", () => {
     default: {
       getBuildings: jest.fn().mockReturnValue([
         { id: "H", name: "Hall Building" },
-        { id: "MB", name: "JMSB Building" }
+        { id: "MB", name: "JMSB Building" },
       ]),
       getBuilding: jest.fn().mockReturnValue({
         id: "H",
         name: "Hall Building",
         floors: {
-          "1": { rooms: { "H-101": {}, "H-102": {} } },
-          "2": { rooms: { "H-201": {}, "H-202": {} } }
-        }
+          1: { rooms: { "H-101": {}, "H-102": {} } },
+          2: { rooms: { "H-201": {}, "H-202": {} } },
+        },
       }),
       getRooms: jest.fn().mockImplementation((building, floor) => {
         return mockRooms[floor] || {};
       }),
-      getBuildingTypeFromId: jest.fn().mockImplementation(id => {
+      getBuildingTypeFromId: jest.fn().mockImplementation((id) => {
         if (id === "H") return "HallBuilding";
         if (id === "MB" || id === "JMSB") return "JMSB";
         return null;
       }),
-      extractFloorFromRoom: jest.fn().mockReturnValue("1")
-    }
+      extractFloorFromRoom: jest.fn().mockReturnValue("1"),
+    },
   };
 });
 
@@ -44,7 +44,7 @@ describe("useBuildingRoomSelection", () => {
 
   it("initializes with empty values", () => {
     const { result } = renderHook(() => useBuildingRoomSelection());
-    
+
     expect(result.current.selectedBuilding).toBe("");
     expect(result.current.selectedRoom).toBe("");
     expect(result.current.selectedFloor).toBe("");
@@ -54,11 +54,11 @@ describe("useBuildingRoomSelection", () => {
 
   it("loads buildings on mount", () => {
     const { result } = renderHook(() => useBuildingRoomSelection());
-    
+
     expect(FloorRegistry.getBuildings).toHaveBeenCalledTimes(1);
     expect(result.current.buildings).toEqual([
       { id: "H", name: "Hall Building" },
-      { id: "MB", name: "JMSB Building" }
+      { id: "MB", name: "JMSB Building" },
     ]);
   });
 
@@ -68,26 +68,29 @@ describe("useBuildingRoomSelection", () => {
     mockGetRooms.mockImplementation(() => ({ "H-101": {}, "H-102": {} }));
 
     const { result } = renderHook(() => useBuildingRoomSelection());
-    
+
     // Step 1: Set the building
     act(() => {
       result.current.setSelectedBuilding("H");
     });
-    
+
     // Verify floors are updated
     expect(FloorRegistry.getBuildingTypeFromId).toHaveBeenCalledWith("H");
     expect(FloorRegistry.getBuilding).toHaveBeenCalledWith("HallBuilding");
-    
+
     // Step 2: Set the floor
     act(() => {
       result.current.setSelectedFloor("1");
     });
-    
+
     // Verify rooms are updated
     expect(FloorRegistry.getRooms).toHaveBeenCalledWith("HallBuilding", "1");
-    
+
     // Check if availableRooms is correctly updated - this is synchronized
-    expect(Object.keys(mockGetRooms.mock.results[0].value)).toEqual(["H-101", "H-102"]);
+    expect(Object.keys(mockGetRooms.mock.results[0].value)).toEqual([
+      "H-101",
+      "H-102",
+    ]);
   });
 
   it("resets the selected room when the building changes", () => {
@@ -97,11 +100,11 @@ describe("useBuildingRoomSelection", () => {
     act(() => {
       result.current.setSelectedBuilding("H");
     });
-    
+
     act(() => {
       result.current.setSelectedFloor("1");
     });
-    
+
     act(() => {
       result.current.setSelectedRoom("H-101");
     });

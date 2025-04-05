@@ -27,21 +27,21 @@ class JourneyOptimizer {
     if (!locations || locations.length <= 2) {
       return locations;
     }
-  
+
     // Always start with the first location
     const startLocation = locations[0];
-  
+
     // All other locations need to be visited
     let currentLocation = startLocation;
     let remainingLocations = [...locations.slice(1)];
     let orderedPath = [startLocation];
     let unreachableLocations = []; // Track locations that cannot be reached
-  
+
     // Process locations until none remain or no valid paths exist
     while (remainingLocations.length > 0) {
       let nearestIndex = -1;
       let minDistance = Infinity;
-  
+
       // Find nearest valid location
       remainingLocations.forEach((location, index) => {
         // Check if this path is allowed
@@ -56,7 +56,7 @@ class JourneyOptimizer {
           }
         }
       });
-  
+
       // If no valid path was found, mark remaining locations as unreachable
       if (nearestIndex === -1) {
         console.warn(
@@ -66,16 +66,16 @@ class JourneyOptimizer {
         unreachableLocations = [...remainingLocations];
         break;
       }
-  
+
       // Add nearest location to path
       const nextLocation = remainingLocations[nearestIndex];
       orderedPath.push(nextLocation);
       currentLocation = nextLocation;
-  
+
       // Remove the visited location from the remaining list
       remainingLocations.splice(nearestIndex, 1);
     }
-  
+
     // Log unreachable locations if any
     if (unreachableLocations.length > 0) {
       console.warn(
@@ -83,7 +83,7 @@ class JourneyOptimizer {
         unreachableLocations.map((loc) => loc.id),
       );
     }
-  
+
     return orderedPath;
   }
 
@@ -100,10 +100,11 @@ class JourneyOptimizer {
         id: task.id,
         title: task.title,
         type: task.type || (task.buildingId ? "indoor" : "outdoor"),
-        description: task.description || 
-          (task.type === "indoor" ? 
-            `Visit ${task.title} in ${task.buildingId}, room ${task.room}` : 
-            `Visit ${task.title} at this location`)
+        description:
+          task.description ||
+          (task.type === "indoor"
+            ? `Visit ${task.title} in ${task.buildingId}, room ${task.room}`
+            : `Visit ${task.title} at this location`),
       };
 
       // Add type-specific properties based on location type
@@ -115,24 +116,25 @@ class JourneyOptimizer {
           room: task.room,
           floor: task.floor,
           // Include coordinates if available
-          ...(task.latitude && task.longitude && {
-            latitude: task.latitude,
-            longitude: task.longitude
-          })
+          ...(task.latitude &&
+            task.longitude && {
+              latitude: task.latitude,
+              longitude: task.longitude,
+            }),
         };
       } else {
         // Outdoor location - include coordinates
         return {
           ...baseLocation,
           latitude: task.latitude,
-          longitude: task.longitude
+          longitude: task.longitude,
         };
       }
     });
-    console.log("JourneyOptimizerService: Sending Locations to be optimized!")
+    console.log("JourneyOptimizerService: Sending Locations to be optimized!");
     optimizedLocations = this.findOptimalPath(locations);
-    
-  // Log the entire array in a readable format
+
+    // Log the entire array in a readable format
     console.log("OPTIMIZED ROUTE CREATED:", optimizedLocations);
 
     // For a more detailed view that shows all properties

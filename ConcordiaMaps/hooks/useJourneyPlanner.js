@@ -42,42 +42,42 @@ export const useJourneyPlanner = () => {
   };
 
   /**
- * Add an indoor location task with room and building
- * @param {string} title - Title for the location
- * @param {string} buildingId - Building identifier
- * @param {string} room - Room identifier
- * @param {string} selectedFloor - Floor identifier
- * @returns {boolean} Success indicator
- */
-const addBuildingRoomTask = (title, buildingId, room, selectedFloor) => {
-  if (title.trim() === "") {
-    Alert.alert("Error", "Please enter a title for this location");
-    return false;
-  }
+   * Add an indoor location task with room and building
+   * @param {string} title - Title for the location
+   * @param {string} buildingId - Building identifier
+   * @param {string} room - Room identifier
+   * @param {string} selectedFloor - Floor identifier
+   * @returns {boolean} Success indicator
+   */
+  const addBuildingRoomTask = (title, buildingId, room, selectedFloor) => {
+    if (title.trim() === "") {
+      Alert.alert("Error", "Please enter a title for this location");
+      return false;
+    }
 
-  if (!buildingId) {
-    Alert.alert("Error", "Please select a building");
-    return false;
-  }
+    if (!buildingId) {
+      Alert.alert("Error", "Please select a building");
+      return false;
+    }
 
-  if (!room) {
-    Alert.alert("Error", "Please select a room");
-    return false;
-  }
+    if (!room) {
+      Alert.alert("Error", "Please select a room");
+      return false;
+    }
 
-  const newTask = {
-    id: `task-${Date.now()}`,
-    type: "indoor",
-    title: title,
-    buildingId: buildingId,
-    room: room,
-    floor: selectedFloor,
-    description: `Visit ${title} in ${buildingId}, room ${room}`,
+    const newTask = {
+      id: `task-${Date.now()}`,
+      type: "indoor",
+      title: title,
+      buildingId: buildingId,
+      room: room,
+      floor: selectedFloor,
+      description: `Visit ${title} in ${buildingId}, room ${room}`,
+    };
+
+    setTasks([...tasks, newTask]);
+    return true;
   };
-
-  setTasks([...tasks, newTask]);
-  return true;
-};
 
   const removeTask = (id) => {
     setTasks(tasks.filter((task) => task.id !== id));
@@ -108,7 +108,9 @@ const addBuildingRoomTask = (title, buildingId, room, selectedFloor) => {
     }
 
     try {
-      console.log("useJourneyPlanner: Sending steps for optimal journey Generation!")
+      console.log(
+        "useJourneyPlanner: Sending steps for optimal journey Generation!",
+      );
       // Call the JourneyOptimizerService to get optimized navigation steps
       const steps = JourneyOptimizerService.generateOptimalJourney(
         tasks,
@@ -116,21 +118,21 @@ const addBuildingRoomTask = (title, buildingId, room, selectedFloor) => {
       );
 
       // TODO: US 24.4 Implement NavigationOrchestrator
-    //   // Navigate to the MultistepNavigationScreen with the generated steps
-    //   navigation.navigate('MultistepNavigationScreen', { 
-    //     navigationPlan: {
-    //       steps: steps,
-    //       title: "Optimized Journey",
-    //       id: `journey-${Date.now()}`,
-    //       currentStep: 0
-    //     }
-    //   });
+      //   // Navigate to the MultistepNavigationScreen with the generated steps
+      //   navigation.navigate('MultistepNavigationScreen', {
+      //     navigationPlan: {
+      //       steps: steps,
+      //       title: "Optimized Journey",
+      //       id: `journey-${Date.now()}`,
+      //       currentStep: 0
+      //     }
+      //   });
       return true;
     } catch (error) {
-      console.error('Error generating journey:', error);
+      console.error("Error generating journey:", error);
       Alert.alert(
-        'Error',
-        'Failed to generate journey. Please check your locations and try again.',
+        "Error",
+        "Failed to generate journey. Please check your locations and try again.",
       );
       return false;
     }

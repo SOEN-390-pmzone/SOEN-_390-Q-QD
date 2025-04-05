@@ -32,12 +32,12 @@ const JourneyPlannerScreen = () => {
   const {
     buildings,
     selectedBuilding,
-    selectedFloor,      
-    availableFloors,  
+    selectedFloor,
+    availableFloors,
     selectedRoom,
     availableRooms,
     setSelectedBuilding,
-    setSelectedFloor,   
+    setSelectedFloor,
     setSelectedRoom,
     resetSelection,
   } = useBuildingRoomSelection();
@@ -49,7 +49,14 @@ const JourneyPlannerScreen = () => {
   };
 
   const handleBuildingRoomAdd = () => {
-    if (addBuildingRoomTask(taskTitle, selectedBuilding, selectedRoom, selectedFloor)) {
+    if (
+      addBuildingRoomTask(
+        taskTitle,
+        selectedBuilding,
+        selectedRoom,
+        selectedFloor,
+      )
+    ) {
       setTaskTitle("");
       resetSelection();
     }
@@ -79,22 +86,20 @@ const JourneyPlannerScreen = () => {
           />
 
           {inputMode === "address" ? (
-            <AddressSelector
-              onAddressSelect={handleAddressSelect}
-            />
+            <AddressSelector onAddressSelect={handleAddressSelect} />
           ) : (
             <BuildingRoomSelector
-                buildings={buildings}
-                selectedBuilding={selectedBuilding}
-                setSelectedBuilding={setSelectedBuilding}
-                selectedFloor={selectedFloor}      
-                setSelectedFloor={setSelectedFloor} 
-                availableFloors={availableFloors}   
-                selectedRoom={selectedRoom}
-                setSelectedRoom={setSelectedRoom}
-                availableRooms={availableRooms}
-                onAddLocation={handleBuildingRoomAdd}
-              />
+              buildings={buildings}
+              selectedBuilding={selectedBuilding}
+              setSelectedBuilding={setSelectedBuilding}
+              selectedFloor={selectedFloor}
+              setSelectedFloor={setSelectedFloor}
+              availableFloors={availableFloors}
+              selectedRoom={selectedRoom}
+              setSelectedRoom={setSelectedRoom}
+              availableRooms={availableRooms}
+              onAddLocation={handleBuildingRoomAdd}
+            />
           )}
         </View>
 
