@@ -115,6 +115,7 @@ const addBuildingRoomTask = (title, buildingId, room, selectedFloor) => {
         avoidOutdoor,
       );
 
+      // TODO: US 24.4 Implement NavigationOrchestrator
     //   // Navigate to the MultistepNavigationScreen with the generated steps
     //   navigation.navigate('MultistepNavigationScreen', { 
     //     navigationPlan: {
