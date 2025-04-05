@@ -9,6 +9,11 @@ import {
   graph as Floor8Graph,
 } from "../constants/coordinates/h8";
 import {
+  rooms as VL2Rooms,
+  graph as VL2Graph,
+} from "../constants/coordinates/vl2";
+
+import {
   rooms as Floor9Rooms,
   graph as Floor9Graph,
 } from "../constants/coordinates/h9";
@@ -230,6 +235,14 @@ class FloorRegistry {
           rooms: VL1Rooms,
           graph: VL1graph,
           getSVG: () => SVGs.VLfloor1SVG,
+        },
+        2: {
+          id: "2",
+          name: "VL 2nd Floor",
+          description: "Second floor of the Vanier Library",
+          rooms: VL2Rooms,
+          graph: VL2Graph,
+          getSVG: () => SVGs.VLfloor2SVG,
         },
       },
     },
