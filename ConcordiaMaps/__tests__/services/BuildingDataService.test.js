@@ -437,8 +437,8 @@ describe("edge cases in FloorRegistry methods", () => {
     const jmsb1 = FloorRegistry.getFloor("JMSB", "1");
     expect(jmsb1.description).toBe("First floor of JMSB");
 
-    const jmsb2 = FloorRegistry.getFloor("JMSB", "2");
-    expect(jmsb2.description).toBe("Second floor of JMSB");
+    const jmsb2 = FloorRegistry.getFloor("JMSB", "S2");
+    expect(jmsb2.description).toBe("S2 floor of JMSB");
 
     // Vanier Library floor
     const vl1 = FloorRegistry.getFloor("VanierLibrary", "1");
@@ -451,7 +451,7 @@ describe("edge cases in FloorRegistry methods", () => {
     const jmsb1Nav = FloorRegistry.supportsNavigation("JMSB", "1");
     expect(jmsb1Nav).toBe(true);
 
-    const jmsb2Nav = FloorRegistry.supportsNavigation("JMSB", "2");
+    const jmsb2Nav = FloorRegistry.supportsNavigation("JMSB", "S2");
     expect(jmsb2Nav).toBe(true);
 
     const jmsbTNav = FloorRegistry.supportsNavigation("JMSB", "T");
@@ -482,7 +482,7 @@ describe("edge cases in FloorRegistry methods", () => {
     const jmsb1SVG = await FloorRegistry.getFloorPlan("JMSB", "1");
     expect(jmsb1SVG).toBe("<svg>MB Floor 1</svg>");
 
-    const jmsb2SVG = await FloorRegistry.getFloorPlan("JMSB", "2");
+    const jmsb2SVG = await FloorRegistry.getFloorPlan("JMSB", "S2");
     expect(jmsb2SVG).toBe("<svg>MB Floor 2</svg>");
 
     // VE SVGs
