@@ -2,9 +2,7 @@ import { renderHook, act } from "@testing-library/react-native";
 import { Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import useDirectionsHandler from "../../hooks/useDirectionsHandler";
-import FloorRegistry, {
-  CONCORDIA_BUILDINGS,
-} from "../../services/BuildingDataService";
+import FloorRegistry from "../../services/BuildingDataService";
 import convertToCoordinates from "../../components/convertToCoordinates";
 import { findBuilding, getData } from "../../components/userInPolygon";
 
