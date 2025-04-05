@@ -1,5 +1,60 @@
 import * as Calendar from "expo-calendar";
 
+// Encapsulated variable with comprehensive course prefix list
+const COURSE_PREFIXES = [
+  // Engineering & Computer Science
+  "SOEN",
+  "COMP",
+  "ENGR",
+  "ELEC",
+  "MECH",
+  "CIVI",
+  "INDU",
+  "AERO",
+  "BLDG",
+  "COEN",
+  // Arts & Science
+  "MATH",
+  "PHYS",
+  "CHEM",
+  "BIOL",
+  "GEOG",
+  "GEOL",
+  "PSYC",
+  "SOCI",
+  "ANTH",
+  "POLI",
+  "HIST",
+  "PHIL",
+  "ECON",
+  "ENGL",
+  "FRAN",
+  "SPAN",
+  "ITAL",
+  "GERM",
+  "RELI",
+  // JMSB
+  "COMM",
+  "FINA",
+  "MANA",
+  "MARK",
+  "ACCO",
+  // Fine Arts
+  "DART",
+  "DSGN",
+  "FMST",
+  "MUSI",
+  "THEA",
+  // Others
+  "LING",
+  "INTE",
+  "ETHN",
+  "CLAS",
+  "URBS",
+  "JOUR",
+  "EXCI",
+];
+
 /**
  * Fetches the next upcoming calendar event with allowed prefixes.
  * Throws an error if calendar permission is denied.
@@ -44,10 +99,9 @@ export async function getNextEvent() {
       );
 
   // Filter events to include only those with titles starting with allowed prefixes.
-  const allowedPrefixes = ["SOEN", "COMP", "ENGR"];
   const filteredEvents = sortedEvents.filter((event) => {
     const title = event.title || "";
-    return allowedPrefixes.some((prefix) => title.startsWith(prefix));
+    return COURSE_PREFIXES.some((prefix) => title.startsWith(prefix));
   });
 
   return filteredEvents.length > 0 ? filteredEvents[0] : null;
