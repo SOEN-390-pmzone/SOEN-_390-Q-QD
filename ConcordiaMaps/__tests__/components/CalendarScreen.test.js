@@ -280,3 +280,93 @@ describe("CalendarScreen", () => {
     expect(alertSpy).toHaveBeenCalledWith("Get directions to ");
   });
 });
+
+jest.mock("../../components/userInPolygon", () => {
+  return {
+    __esModule: true,
+    default: jest.fn().mockReturnValue({
+      location: { latitude: 45.495, longitude: -73.578 },
+      isIndoors: false,
+      buildingName: null,
+    }),
+    findBuilding: jest.fn(),
+    getData: jest.fn(),
+  };
+});
+
+// In the test that needs to change the mock:
+describe("CalendarScreen navigation functions", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    // Reset mocks for each test
+    require("../../components/convertToCoordinates").mockReset();
+    require("../../services/BuildingDataService").default.parseRoomFormat.mockReset();
+    mockNavigate.mockClear();
+  });
+
+  it("handles indoor origin with recognized building name", async () => {
+    // Override the userInPolygon mock for this test
+    const useDataFlowMock = require("../../components/userInPolygon").default;
+    useDataFlowMock.mockReturnValue({
+      location: { latitude: 45.495, longitude: -73.578 },
+      isIndoors: true,
+      buildingName: "Hall Building",
+    });
+
+    // Mock BuildingDataService functions for this test
+    const FloorRegistry = require("../../services/BuildingDataService").default;
+    FloorRegistry.findBuildingByName.mockReturnValue("H");
+    FloorRegistry.getAddressByID.mockReturnValue("1455 De Maisonneuve Blvd. W");
+
+    // Mock CONCORDIA_BUILDINGS
+    require("../../services/BuildingDataService").CONCORDIA_BUILDINGS = [
+      {
+        id: "H",
+        name: "Hall Building",
+        latitude: 45.497,
+        longitude: -73.578,
+        address: "1455 De Maisonneuve Blvd. W",
+      },
+    ];
+
+    // Mock room format with valid building code
+    FloorRegistry.parseRoomFormat.mockReturnValue({
+      buildingCode: "H",
+      roomNumber: "920",
+    });
+
+    const { getByText } = render(
+      <NavigationContainer>
+        <CalendarScreen />
+      </NavigationContainer>,
+    );
+
+    // Wait for rendering
+    await waitFor(() => getByText("Get Directions"));
+
+    // Press Get Directions
+    // Press Get Directions
+    fireEvent.press(getByText("Get Directions"));
+
+    // Update the expected parameters to match the actual implementation
+    expect(mockNavigate).toHaveBeenCalledWith(
+      "MultistepNavigationScreen",
+      expect.objectContaining({
+        prefillNavigation: true,
+        originInputType: "classroom",
+        origin: "Hall Building",
+        originBuilding: expect.objectContaining({
+          id: "H",
+          name: "Hall Building",
+        }),
+        destinationInputType: "classroom",
+        room: "H-920",
+        building: expect.objectContaining({
+          id: "H",
+          name: "Hall Building",
+        }),
+      }),
+    );
+  });
+});
