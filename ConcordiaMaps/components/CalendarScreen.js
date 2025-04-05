@@ -48,7 +48,7 @@ const CalendarScreen = () => {
 
   // Function to update user location status message
   const updateUserLocationStatus = () => {
-    console.log("you are here")
+    console.log("you are here");
     console.log(destinationLocation);
     console.log("User location status:", userLocationStatus);
     if (!location || (!location.latitude && !location.longitude)) {
@@ -268,19 +268,19 @@ const CalendarScreen = () => {
           }
 
           // Use safer approach to get building ID
-          
-          const endBuildingId = FloorRegistry.findBuildingByName(targetBuilding.buildingName)||
-          targetBuilding.buildingName;
-            
+
+          const endBuildingId =
+            FloorRegistry.findBuildingByName(targetBuilding.buildingName) ||
+            targetBuilding.buildingName;
 
           if (!endBuildingId) {
             console.log(
               "Could not find end building ID for:",
               targetBuilding.buildingName,
             );
-            
+
             return;
-          } 
+          }
           const endBuildingName = targetBuilding.buildingName;
           const endAddress = FloorRegistry.getAddressByID(endBuildingId);
 

@@ -926,7 +926,7 @@ const MultistepNavigationScreen = () => {
       <Header />
       <NavBar />
       <View style={styles.navigationContainer}>
-      <Footer />
+        <Footer />
         {navigationPlan ? (
           <NavigationStepsContainer
             navigationPlan={navigationPlan}
@@ -998,7 +998,6 @@ const MultistepNavigationScreen = () => {
         />
         {shouldShowIndoorNavigation() && renderIndoorNavigation()}
       </View>
-      
     </SafeAreaView>
   );
 };
