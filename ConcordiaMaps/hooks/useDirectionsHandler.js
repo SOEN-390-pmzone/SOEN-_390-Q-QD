@@ -27,7 +27,6 @@ const useDirectionsHandler = ({ location, isIndoors, buildingName }) => {
   const getDirectionsTo = (loc) => {
     if (loc === null || loc === undefined) {
       console.log("Make sure the address is included in the calendar event");
-      Alert.alert(`Get directions to `);
       return;
     }
 
