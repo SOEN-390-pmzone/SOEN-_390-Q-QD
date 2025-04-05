@@ -134,8 +134,8 @@ function HomeScreen({ asyncKey = "Campus" }) {
     toggleModal();
   };
 
-  const handleOPIMarkerPress = (poi) => {
-    setSelectedOPI(poi);
+  const handleOPIMarkerPress = (pointOfInterest) => {
+    setSelectedOPI(pointOfInterest);
     setOpiPopupVisible(true);
   };
 
@@ -207,16 +207,16 @@ function HomeScreen({ asyncKey = "Campus" }) {
                 />
               </Marker>
             ))}
-            {PointsOfInterest.map((poi) => (
+            {PointsOfInterest.map((pointOfInterest) => (
               <Marker
-                key={poi.name}
-                coordinate={poi.coordinate}
-                title={poi.name}
-                description={poi.address}
-                onPress={() => handleOPIMarkerPress(poi)}
+                key={pointOfInterest.name}
+                coordinate={pointOfInterest.coordinate}
+                title={pointOfInterest.name}
+                description={pointOfInterest.address}
+                onPress={() => handleOPIMarkerPress(pointOfInterest)}
               >
                 <Image
-                  source={poi.markerImage}
+                  source={pointOfInterest.markerImage}
                   style={styles.customMarkerImage}
                 />
               </Marker>

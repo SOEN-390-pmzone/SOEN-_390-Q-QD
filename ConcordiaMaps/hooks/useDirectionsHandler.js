@@ -40,7 +40,7 @@ const useDirectionsHandler = ({ location, isIndoors, buildingName }) => {
    * @returns {void}
    */
   const getDirectionsTo = (loc) => {
-    if (loc === null || loc === undefined) {
+    if (!loc) {
       debugLog("Make sure the address is included in the calendar event");
       return;
     }
