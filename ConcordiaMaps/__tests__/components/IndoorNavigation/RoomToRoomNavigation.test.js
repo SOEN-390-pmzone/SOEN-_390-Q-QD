@@ -292,7 +292,7 @@ describe("RoomToRoomNavigation Component", () => {
 
     // Should go directly to navigation screen
     await waitFor(() => {
-      expect(getByText("Navigation")).toBeTruthy();
+      expect(getByText("Navigation Route")).toBeTruthy(); // Changed from "Navigation" to "Navigation Route"
       // Check if navigation steps component is rendered
       expect(getByTestId("navigation-steps")).toBeTruthy();
 
@@ -338,7 +338,7 @@ describe("RoomToRoomNavigation Component", () => {
 
     // Wait for navigation screen
     await waitFor(() => {
-      expect(getByText("Navigation")).toBeTruthy();
+      expect(getByText("Navigation Route")).toBeTruthy(); // Changed from "Navigation" to "Navigation Route"
       expect(getByText("Return to Journey")).toBeTruthy();
     });
 
