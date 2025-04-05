@@ -6,7 +6,7 @@ updates:
       interval: "weekly"
     target-branch: "develop"
   - package-ecosystem: "npm"
-    directory: "/"
+    directory: "/ConcordiaMaps"
     schedule:
       interval: "weekly"
     target-branch: "main"
