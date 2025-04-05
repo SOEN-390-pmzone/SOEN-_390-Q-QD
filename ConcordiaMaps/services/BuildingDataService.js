@@ -43,15 +43,6 @@ import {
 
 import SVGs from "../assets/svg/SVGtoString";
 
-const KNOWN_BUILDINGS = {
-  "John Molson School Of Business": "John Molson Building",
-  "Henry F. Hall": "Hall Building",
-  "Vanier Extension": "Vanier Extension",
-  "Webster Library": "J.W. McConnell Building",
-  "Vanier Library": "Vanier Library",
-  "EV Building": "Engineering & Visual Arts Complex",
-};
-
 export const CONCORDIA_BUILDINGS = [
   {
     id: "H",
@@ -98,60 +89,44 @@ export const CONCORDIA_BUILDINGS = [
 ];
 
 class FloorRegistry {
-  static findBuildingByName(buildingName) {
-    if (!buildingName) return null;
+  // Add this method to your BuildingDataService module
 
-    // First try using the KNOWN_BUILDINGS mapping
-    const mappedName = KNOWN_BUILDINGS[buildingName];
-    let building = null;
-
-    if (mappedName) {
-      building = CONCORDIA_BUILDINGS.find((b) => b.name === mappedName);
-      if (building) return building.id;
+  /**
+   * Find a building by name, partial name, or building code
+   *
+   * @param {string} nameOrCode - The building name or code to search for
+   * @returns {object|null} The building object if found, null otherwise
+   */
+  static findBuildingByName(nameOrCode) {
+    // Handle empty inputs
+    if (!nameOrCode) {
+      return null;
     }
 
-    // If not found by mapped name, try direct match
-    building = CONCORDIA_BUILDINGS.find((b) => b.name === buildingName);
-    if (building) return building.id;
+    const searchTerm = nameOrCode.toLowerCase();
+    const buildings = this.getBuildings();
 
-    // Try matching by building ID (e.g., "EV" for EV Building)
-    if (buildingName.includes("EV")) {
-      return "EV";
-    } else if (buildingName.includes("Hall")) {
-      return "H";
-    } else if (
-      buildingName.includes("Molson") ||
-      buildingName.includes("JMSB")
-    ) {
-      return "MB";
-    } else if (
-      buildingName.includes("Webster") &&
-      buildingName.includes("Library")
-    ) {
-      return "LB";
-    } else if (
-      buildingName.includes("Vanier") &&
-      buildingName.includes("Extension")
-    ) {
-      return "VE";
-    } else if (
-      buildingName.includes("Vanier") &&
-      buildingName.includes("Library")
-    ) {
-      return "VL";
-    }
-
-    // Last resort: try to match any part of the name
-    for (const building of CONCORDIA_BUILDINGS) {
-      if (
-        buildingName.toLowerCase().includes(building.name.toLowerCase()) ||
-        building.name.toLowerCase().includes(buildingName.toLowerCase())
-      ) {
-        return building.id;
+    // Find the first building that matches the search term
+    const building = buildings.find((building) => {
+      // Check for exact name match (case insensitive)
+      if (building.name.toLowerCase() === searchTerm) {
+        return true;
       }
-    }
 
-    return null;
+      // Check for partial name match (case insensitive)
+      if (building.name.toLowerCase().includes(searchTerm)) {
+        return true;
+      }
+
+      // Check for building code match (case insensitive)
+      if (building.code.toLowerCase() === searchTerm) {
+        return true;
+      }
+
+      return false;
+    });
+
+    return building || null;
   }
   static getAddressByID(id) {
     const building = CONCORDIA_BUILDINGS.find((building) => building.id === id);
