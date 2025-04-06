@@ -4,6 +4,39 @@ describe("JourneyOptimizer - Robust NN Algorithm Tests", () => {
   let mockDistanceCalculator;
   let journeyOptimizer;
 
+  // Helper functions for mock configurations
+  const allowAllPaths = () => {
+    mockDistanceCalculator.isPathAllowed.mockReturnValue(true);
+  };
+
+  const disallowSpecificNodes = (nodeIds) => {
+    mockDistanceCalculator.isPathAllowed.mockImplementation((loc1, loc2) => {
+      return !nodeIds.includes(loc2.id);
+    });
+  };
+
+  const useEuclideanDistance = () => {
+    mockDistanceCalculator.calculateDistance.mockImplementation(
+      (loc1, loc2) => {
+        return Math.sqrt(
+          Math.pow(loc1.latitude - loc2.latitude, 2) +
+            Math.pow(loc1.longitude - loc2.longitude, 2)
+        );
+      }
+    );
+  };
+
+  const useManhattanDistance = () => {
+    mockDistanceCalculator.calculateDistance.mockImplementation(
+      (loc1, loc2) => {
+        return (
+          Math.abs(loc1.latitude - loc2.latitude) +
+          Math.abs(loc1.longitude - loc2.longitude)
+        );
+      }
+    );
+  };
+
   beforeEach(() => {
     // Mock the distanceCalculator methods
     mockDistanceCalculator = {
@@ -12,23 +45,12 @@ describe("JourneyOptimizer - Robust NN Algorithm Tests", () => {
     };
 
     // Assume createOptimizer returns an object we can modify
-    // Adjust this if createOptimizer has a different structure
-    journeyOptimizer = JourneyOptimizerService.createOptimizer(false); // Assuming this creates the optimizer instance
+    journeyOptimizer = JourneyOptimizerService.createOptimizer(false);
     journeyOptimizer.distanceCalculator = mockDistanceCalculator;
 
-    // Mock isPathAllowed to always return true for simplicity in these geometric tests
-    mockDistanceCalculator.isPathAllowed.mockReturnValue(true);
-
-    // Default mock for distance calculation (Euclidean) - can be overridden in specific tests if needed
-    mockDistanceCalculator.calculateDistance.mockImplementation(
-      (loc1, loc2) => {
-        // Standard Euclidean distance
-        return Math.sqrt(
-          Math.pow(loc1.latitude - loc2.latitude, 2) +
-            Math.pow(loc1.longitude - loc2.longitude, 2),
-        );
-      },
-    );
+    // Use the extracted helper functions
+    allowAllPaths();
+    useEuclideanDistance();
   });
 
   // --- Existing Tests (Keep them here) ---
@@ -40,15 +62,10 @@ describe("JourneyOptimizer - Robust NN Algorithm Tests", () => {
       { id: "C", latitude: 2, longitude: 0 },
       { id: "D", latitude: 3, longitude: 0 },
     ];
-    // Override distance calc for simplicity if needed (Manhattan distance)
-    mockDistanceCalculator.calculateDistance.mockImplementation(
-      (loc1, loc2) => {
-        return (
-          Math.abs(loc1.latitude - loc2.latitude) +
-          Math.abs(loc1.longitude - loc2.longitude)
-        );
-      },
-    );
+    
+    // Use the extracted helper function
+    useManhattanDistance();
+    
     const result = journeyOptimizer.findOptimalPath(locations);
     const expectedResult = locations; // NN follows the order
     expect(result).toEqual(expectedResult);
@@ -241,19 +258,9 @@ describe("JourneyOptimizer - Robust NN Algorithm Tests", () => {
       { id: "D", latitude: 3, longitude: 3 }, // Unreachable
     ];
 
-    // Mock the distanceCalculator behavior
-    mockDistanceCalculator.isPathAllowed.mockImplementation((loc1, loc2) => {
-      // Disallow paths to locations "C" and "D"
-      return loc2.id !== "C" && loc2.id !== "D";
-    });
-    mockDistanceCalculator.calculateDistance.mockImplementation(
-      (loc1, loc2) => {
-        return Math.sqrt(
-          Math.pow(loc1.latitude - loc2.latitude, 2) +
-            Math.pow(loc1.longitude - loc2.longitude, 2),
-        );
-      },
-    );
+    // Use the extracted helper function
+    disallowSpecificNodes(["C", "D"]);
+    useEuclideanDistance();
 
     // Mock console.warn to capture warnings
     const consoleWarnSpy = jest
