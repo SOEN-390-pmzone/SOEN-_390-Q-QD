@@ -35,7 +35,7 @@ class DistanceCalculatorService {
    */
   calculateDistance(locationA, locationB) {
     console.log(
-      "DistanceCalculatorService: Dtermining the distance between A and B",
+      "DistanceCalculatorService: Determining the distance between A and B",
     );
     const strategy = this._determineStrategy(locationA, locationB);
     return strategy.calculateDistance(locationA, locationB);
