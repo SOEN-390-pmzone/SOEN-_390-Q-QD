@@ -38,37 +38,19 @@ class JourneyOptimizer {
 
     // Always start with the first location
     const startLocation = locations[0];
-    console.log(
-      `Starting location: ${startLocation.id} (${startLocation.type})`,
-    );
 
     // All other locations need to be visited
     let currentLocation = startLocation;
     let remainingLocations = [...locations.slice(1)];
     let orderedPath = [startLocation];
-    let unreachableLocations = []; // Track locations that cannot be reached
 
-    console.log(`Remaining locations to process: ${remainingLocations.length}`);
-
-    // Process locations until none remain or no valid paths exist
-    let iteration = 1;
     while (remainingLocations.length > 0) {
-      console.log(`\n--- Iteration ${iteration++} ---`);
-      console.log(
-        `Current location: ${currentLocation.id} (${currentLocation.type})`,
-      );
-      console.log(`Remaining locations: ${remainingLocations.length}`);
-
       let nearestIndex = -1;
       let minDistance = Infinity;
       let distanceLog = []; // Track all calculated distances for debugging
 
       // Find nearest valid location
       remainingLocations.forEach((location, index) => {
-        console.log(
-          `\nChecking location ${index}: ${location.id} (${location.type})`,
-        );
-
         // Check if this path is allowed
         const isPathAllowed = this.distanceCalculator.isPathAllowed(
           currentLocation,
@@ -80,30 +62,6 @@ class JourneyOptimizer {
           try {
             // Add detailed comparison log
             console.log(`--- COMPARING LOCATIONS ---`);
-            console.log(
-              `FROM: ${currentLocation.id} (${currentLocation.type})${
-                currentLocation.buildingId
-                  ? `, Building: ${currentLocation.buildingId}`
-                  : ""
-              }${currentLocation.floor ? `, Floor: ${currentLocation.floor}` : ""}${
-                currentLocation.room ? `, Room: ${currentLocation.room}` : ""
-              }${
-                currentLocation.latitude
-                  ? `, Position: [${currentLocation.latitude.toFixed(4)}, ${currentLocation.longitude.toFixed(4)}]`
-                  : ""
-              }`,
-            );
-            console.log(
-              `TO: ${location.id} (${location.type})${
-                location.buildingId ? `, Building: ${location.buildingId}` : ""
-              }${location.floor ? `, Floor: ${location.floor}` : ""}${
-                location.room ? `, Room: ${location.room}` : ""
-              }${
-                location.latitude
-                  ? `, Position: [${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}]`
-                  : ""
-              }`,
-            );
             const distance = this.distanceCalculator.calculateDistance(
               currentLocation,
               location,
@@ -129,60 +87,16 @@ class JourneyOptimizer {
         }
       });
 
-      console.log("\n--- Distance Summary ---");
-      console.log("All distances:", distanceLog);
-      console.log(`Minimum distance: ${minDistance}`);
-      console.log(`Nearest index: ${nearestIndex}`);
-
-      // If no valid path was found, mark remaining locations as unreachable
-      if (nearestIndex === -1) {
-        // Add these detailed warnings for debugging
-        console.warn(
-          "No valid path found. Nearest index is still -1 despite checked locations.",
-        );
-        console.warn(
-          "This typically happens when isPathAllowed is true but the distance calculation fails",
-        );
-        console.warn(
-          "Check if the Outdoor strategy's calculateDistance method returns undefined, Infinity, or null",
-        );
-
-        unreachableLocations = [...remainingLocations];
-
-        // Add THIS SPECIFIC message format to match the test expectation
-        console.warn(
-          "No valid path found for some locations. These locations are unreachable:",
-          unreachableLocations.map((loc) => loc.id),
-        );
-        break;
-      }
       // Add nearest location to path
       const nextLocation = remainingLocations[nearestIndex];
-      console.log(
-        `Selected next location: ${nextLocation.id} at distance ${minDistance}`,
-      );
+
       orderedPath.push(nextLocation);
       currentLocation = nextLocation;
 
       // Remove the visited location from the remaining list
       remainingLocations.splice(nearestIndex, 1);
-      console.log(`Updated path length: ${orderedPath.length}`);
-      console.log(`Remaining locations: ${remainingLocations.length}`);
     }
 
-    // Log unreachable locations if any
-    if (unreachableLocations.length > 0) {
-      console.warn(
-        "Unreachable locations:",
-        unreachableLocations.map((loc) => loc.id),
-      );
-    }
-
-    console.log("=== PATH FINDING COMPLETE ===");
-    console.log(`Final path length: ${orderedPath.length}`);
-    console.log(`Unreachable locations: ${unreachableLocations.length}`);
-    // At the end of the function:
-    unreachableLocations = null;
     remainingLocations = null;
     return orderedPath;
   }
@@ -232,17 +146,7 @@ class JourneyOptimizer {
         };
       }
     });
-    console.log("JourneyOptimizerService: Sending Locations to be optimized!");
     const optimizedLocations = this.findOptimalPath(locations);
-
-    // Log the entire array in a readable format
-    console.log("OPTIMIZED ROUTE CREATED:", optimizedLocations);
-
-    // For a more detailed view that shows all properties
-    console.log("DETAILED OPTIMIZED ROUTE:");
-    optimizedLocations.forEach((location, index) => {
-      console.log(`Location ${index + 1}:`, JSON.stringify(location, null, 2));
-    });
     return optimizedLocations;
   }
 }

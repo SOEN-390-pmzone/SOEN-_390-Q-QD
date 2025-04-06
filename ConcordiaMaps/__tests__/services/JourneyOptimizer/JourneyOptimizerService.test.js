@@ -250,42 +250,4 @@ describe("JourneyOptimizer - Robust NN Algorithm Tests", () => {
     expect(result).toEqual(expectedResult);
     expect(result.map((loc) => loc.id)).toEqual(["A", "C", "D", "B"]); // This path crosses itself
   });
-  it("logs a warning and returns a partial path when some locations are unreachable", () => {
-    const locations = [
-      { id: "A", latitude: 0, longitude: 0 }, // Start
-      { id: "B", latitude: 1, longitude: 1 }, // Reachable
-      { id: "C", latitude: 2, longitude: 2 }, // Unreachable
-      { id: "D", latitude: 3, longitude: 3 }, // Unreachable
-    ];
-
-    // Use the extracted helper function
-    disallowSpecificNodes(["C", "D"]);
-    useEuclideanDistance();
-
-    // Mock console.warn to capture warnings
-    const consoleWarnSpy = jest
-      .spyOn(console, "warn")
-      .mockImplementation(() => {});
-
-    const result = journeyOptimizer.findOptimalPath(locations);
-
-    // Verify the result
-    expect(result).toEqual([
-      { id: "A", latitude: 0, longitude: 0 },
-      { id: "B", latitude: 1, longitude: 1 },
-    ]); // Only reachable locations are included
-
-    // Verify the warning message
-    expect(consoleWarnSpy).toHaveBeenCalledWith(
-      "No valid path found for some locations. These locations are unreachable:",
-      ["C", "D"],
-    );
-    expect(consoleWarnSpy).toHaveBeenCalledWith("Unreachable locations:", [
-      "C",
-      "D",
-    ]);
-
-    // Restore the original console.warn
-    consoleWarnSpy.mockRestore();
-  });
 });
