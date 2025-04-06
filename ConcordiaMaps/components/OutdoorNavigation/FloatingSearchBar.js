@@ -18,6 +18,7 @@ const FloatingSearchBar = ({
   value,
   onChangeText,
   onFocus,
+  maxSuggestions = 4, // Default to 4, but can be overridden
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [predictions, setPredictions] = useState([]);
@@ -85,7 +86,8 @@ const FloatingSearchBar = ({
       if (error) {
         console.error("Error searching places:", error);
       } else {
-        setPredictions(placePredictions);
+        // Use the maxSuggestions prop to limit predictions
+        setPredictions(placePredictions.slice(0, maxSuggestions));
       }
     } catch (error) {
       console.error("Error in searchPlaces:", error);
@@ -194,6 +196,7 @@ FloatingSearchBar.propTypes = {
   onChangeText: PropTypes.func,
   onFocus: PropTypes.func,
   nestedScrollEnabled: PropTypes.bool,
+  maxSuggestions: PropTypes.number,
 };
 
 export default FloatingSearchBar;
