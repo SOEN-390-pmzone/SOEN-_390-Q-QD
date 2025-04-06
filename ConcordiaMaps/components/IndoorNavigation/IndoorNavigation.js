@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, Text, ScrollView, TouchableOpacity } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, Switch } from "react-native";
 import { WebView } from "react-native-webview";
 import { findShortestPath } from "./PathFinder";
 import Header from "../Header";
@@ -8,12 +8,74 @@ import FloorRegistry from "../../services/BuildingDataService";
 import PropTypes from "prop-types";
 import styles from "../../styles/IndoorNavigation/IndoorNavigationStyles";
 
+// Define POI categories and their identification rules
+const POI_CATEGORIES = {
+  WASHROOM: {
+    keywords: ["washroom", "toilet", "bathroom", "restroom", "wc"],
+    color: "#FF9800", // Orange
+    icon: "🚻",
+    label: "Washrooms"
+  },
+  ELEVATOR: {
+    keywords: ["elevator", "lift"],
+    color: "#9C27B0", // Purple
+    icon: "🔼",
+    label: "Elevators"
+  },
+  STAIRS: {
+    keywords: ["stairs", "stairwell", "staircase"],
+    color: "#2196F3", // Blue
+    icon: "🪜",
+    label: "Stairs"
+  },
+  ESCALATOR: {
+    keywords: ["escalator"],
+    color: "#4CAF50", // Green
+    icon: "⤴️",
+    label: "Escalators"
+  },
+  WATER_FOUNTAIN: {
+    keywords: ["water", "fountain", "water_fountain", "water_foutain"],
+    color: "#03A9F4", // Light blue
+    icon: "💧",
+    label: "Water Fountains"
+  },
+  EXIT: {
+    keywords: ["exit", "emergency", "entrance"],
+    color: "#F44336", // Red
+    icon: "🚪",
+    label: "Exits/Entrances"
+  }
+};
+
+// Function to categorize a room/node based on its ID
+const categorizePOI = (nodeId) => {
+  const normalizedId = nodeId.toString().toLowerCase();
+  
+  for (const [category, details] of Object.entries(POI_CATEGORIES)) {
+    if (details.keywords.some(keyword => normalizedId.includes(keyword))) {
+      return category;
+    }
+  }
+  
+  return null; // Not a POI
+};
+
 const IndoorNavigation = ({ route, navigation }) => {
   const [startPoint, setStartPoint] = useState("");
   const [endPoint, setEndPoint] = useState("");
   const [path, setPath] = useState([]);
   const [allNodes, setAllNodes] = useState([]);
   const [floorPlan, setFloorPlan] = useState("");
+  const [poiNodes, setPOINodes] = useState([]); // All POI nodes
+  const [poiCategories, setPOICategories] = useState({}); // Categorized POIs
+  const [visibleCategories, setVisibleCategories] = useState(
+    // Initially show all POI categories
+    Object.keys(POI_CATEGORIES).reduce((acc, key) => {
+      acc[key] = true;
+      return acc;
+    }, {})
+  );
   const webViewRef = useRef(null);
 
   // Get both buildingType and floor from route params, default to hall
@@ -22,7 +84,7 @@ const IndoorNavigation = ({ route, navigation }) => {
   const building = FloorRegistry.getBuilding(buildingType);
 
   useEffect(() => {
-    // Set up navigation healder
+    // Set up navigation header
     navigation.setOptions({
       headerTitle: "Indoor Navigation",
       headerStyle: {
@@ -38,9 +100,34 @@ const IndoorNavigation = ({ route, navigation }) => {
     const graph = FloorRegistry.getGraph(buildingType, floor);
     setAllNodes(Object.keys(graph));
 
+    // Identify POI nodes
+    identifyPOINodes(Object.keys(graph));
+
     // Load the SVG floor plan dynamically
     loadFloorPlan();
   }, [navigation, buildingType, floor]);
+
+  // Identify and categorize POI nodes
+  const identifyPOINodes = (nodes) => {
+    const pois = [];
+    const categorized = {};
+    
+    // Initialize categories
+    Object.keys(POI_CATEGORIES).forEach(category => {
+      categorized[category] = [];
+    });
+    
+    nodes.forEach(node => {
+      const category = categorizePOI(node);
+      if (category) {
+        pois.push(node);
+        categorized[category].push(node);
+      }
+    });
+    
+    setPOINodes(pois);
+    setPOICategories(categorized);
+  };
 
   const loadFloorPlan = async () => {
     try {
@@ -288,6 +375,39 @@ const IndoorNavigation = ({ route, navigation }) => {
               border-radius: 3px;
               cursor: pointer;
             }
+            
+            /* POI Marker Styles */
+            .poi-marker {
+              pointer-events: all;
+              cursor: pointer;
+            }
+            
+            .poi-marker:hover .poi-icon {
+              transform: scale(1.2);
+            }
+            
+            .poi-icon {
+              transition: transform 0.2s ease;
+              font-size: 16px;
+              text-anchor: middle;
+              alignment-baseline: middle;
+            }
+            
+            .poi-tooltip {
+              opacity: 0;
+              pointer-events: none;
+              transition: opacity 0.2s ease;
+              background: white;
+              border: 1px solid #ccc;
+              border-radius: 4px;
+              padding: 2px 6px;
+              font-size: 12px;
+              position: absolute;
+            }
+            
+            .poi-marker:hover .poi-tooltip {
+              opacity: 1;
+            }
           </style>
           <script>
             // Pan and zoom functionality
@@ -314,11 +434,17 @@ const IndoorNavigation = ({ route, navigation }) => {
 
               // Start panning
               svgContainer.addEventListener('mousedown', function(e) {
+                // Don't start panning if clicking on a POI marker
+                if (e.target.closest('.poi-marker')) return;
+                
                 isPanning = true;
                 startPoint = { x: e.clientX, y: e.clientY };
               });
 
               svgContainer.addEventListener('touchstart', function(e) {
+                // Don't start panning if touching a POI marker
+                if (e.target.closest('.poi-marker')) return;
+                
                 if (e.touches.length === 1) {
                   isPanning = true;
                   startPoint = { x: e.touches[0].clientX, y: e.touches[0].clientY };
@@ -483,6 +609,163 @@ const IndoorNavigation = ({ route, navigation }) => {
 
     webViewRef.current.injectJavaScript(js);
   };
+
+  // Function to display POIs based on visible categories
+  const displayPOI = () => {
+    if (!webViewRef.current) return;
+
+    const coordinates = FloorRegistry.getRooms(buildingType, floor);
+    const coordinatesJSON = JSON.stringify(coordinates);
+    const poiCategoriesJSON = JSON.stringify(poiCategories);
+    const visibleCategoriesJSON = JSON.stringify(visibleCategories);
+    const poiDetailsJSON = JSON.stringify(POI_CATEGORIES);
+
+    const js = `
+    (function() {
+      // Clear existing POI markers
+      const existingPOIs = document.querySelectorAll('.poi-marker');
+      existingPOIs.forEach(p => p.remove());
+
+      const coordinates = ${coordinatesJSON};
+      const poiCategories = ${poiCategoriesJSON};
+      const visibleCategories = ${visibleCategoriesJSON};
+      const poiDetails = ${poiDetailsJSON};
+      const svgElement = document.querySelector('svg');
+      
+      if (!svgElement) {
+        console.error('SVG element not found');
+        return;
+      }
+      
+      const svgNS = "http://www.w3.org/2000/svg";
+      
+      // Create a POI marker with icon and tooltip
+      function createPOIMarker(nodeId, category) {
+        if (!coordinates[nodeId] || !coordinates[nodeId].nearestPoint) {
+          console.error('Missing coordinates for POI:', nodeId);
+          return;
+        }
+        
+        // Get coordinates and details for this POI
+        const point = coordinates[nodeId].nearestPoint;
+        const details = poiDetails[category];
+        
+        // Create group for the POI marker
+        const markerGroup = document.createElementNS(svgNS, "g");
+        markerGroup.classList.add('poi-marker');
+        markerGroup.setAttribute('data-node-id', nodeId);
+        markerGroup.setAttribute('data-category', category);
+        
+        // Create circular background
+        const circle = document.createElementNS(svgNS, "circle");
+        circle.setAttribute('cx', point.x);
+        circle.setAttribute('cy', point.y);
+        circle.setAttribute('r', '15');
+        circle.setAttribute('fill', details.color);
+        circle.setAttribute('stroke', '#fff');
+        circle.setAttribute('stroke-width', '2');
+        markerGroup.appendChild(circle);
+        
+        // Create icon/text label
+        const iconText = document.createElementNS(svgNS, "text");
+        iconText.classList.add('poi-icon');
+        iconText.setAttribute('x', point.x);
+        iconText.setAttribute('y', point.y);
+        iconText.setAttribute('text-anchor', 'middle');
+        iconText.setAttribute('dominant-baseline', 'middle');
+        iconText.setAttribute('fill', '#fff');
+        iconText.setAttribute('font-weight', 'bold');
+        iconText.textContent = details.icon;
+        markerGroup.appendChild(iconText);
+        
+        // Create tooltip content
+        const foreignObject = document.createElementNS(svgNS, "foreignObject");
+        foreignObject.classList.add('poi-tooltip');
+        foreignObject.setAttribute('x', parseInt(point.x) + 20);
+        foreignObject.setAttribute('y', parseInt(point.y) - 30);
+        foreignObject.setAttribute('width', '100');
+        foreignObject.setAttribute('height', '30');
+        
+        const tooltipDiv = document.createElement('div');
+        tooltipDiv.style.background = 'white';
+        tooltipDiv.style.padding = '4px';
+        tooltipDiv.style.borderRadius = '4px';
+        tooltipDiv.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+        tooltipDiv.style.fontSize = '12px';
+        tooltipDiv.style.fontFamily = 'Arial, sans-serif';
+        tooltipDiv.innerHTML = \`<b>\${details.label}:</b> \${nodeId}\`;
+        
+        foreignObject.appendChild(tooltipDiv);
+        markerGroup.appendChild(foreignObject);
+        
+        // Add a click event to select this POI as start or end point
+        markerGroup.addEventListener('click', function() {
+          window.ReactNativeWebView.postMessage(JSON.stringify({
+            type: 'poi_selected',
+            nodeId: nodeId
+          }));
+        });
+        
+        svgElement.appendChild(markerGroup);
+      }
+      
+      // Loop through each POI category and create markers for visible ones
+      Object.entries(poiCategories).forEach(([category, nodes]) => {
+        if (visibleCategories[category]) {
+          nodes.forEach(nodeId => {
+            createPOIMarker(nodeId, category);
+          });
+        }
+      });
+    })();
+    `;
+
+    webViewRef.current.injectJavaScript(js);
+  };
+
+  // Toggle a POI category visibility
+  const togglePOICategory = (category) => {
+    setVisibleCategories(prev => ({
+      ...prev,
+      [category]: !prev[category]
+    }));
+  };
+
+  // Handle messages from WebView (like POI selections)
+  const handleWebViewMessage = (event) => {
+    try {
+      const message = JSON.parse(event.nativeEvent.data);
+      if (message.type === 'poi_selected') {
+        // If no start point is selected, set it as start
+        if (!startPoint) {
+          setStartPoint(message.nodeId);
+        } 
+        // If start point is selected but no end point, set it as end
+        else if (!endPoint) {
+          setEndPoint(message.nodeId);
+        } 
+        // If both are selected, update the end point
+        else {
+          setEndPoint(message.nodeId);
+        }
+        
+        // Highlight the selected rooms
+        setTimeout(() => {
+          highlightSelectedRooms();
+        }, 100);
+      }
+    } catch (error) {
+      console.error('Error handling WebView message:', error);
+    }
+  };
+
+  // Execute POI display when visible categories change
+  useEffect(() => {
+    if (webViewRef.current) {
+      displayPOI();
+    }
+  }, [visibleCategories]);
+
   const getFloorSuffix = (floor) => {
     switch (floor) {
       case "1":
@@ -495,6 +778,7 @@ const IndoorNavigation = ({ route, navigation }) => {
         return "th";
     }
   };
+
   return (
     <View style={styles.container}>
       <Header />
@@ -503,12 +787,49 @@ const IndoorNavigation = ({ route, navigation }) => {
         {building.name} - {building.code} {floor}
         {getFloorSuffix(floor)} Floor
       </Text>
-      {/* SVG Floor Plan in WebView - generateHtmlContent remains the same */}
+      
+      {/* POI Categories Toggle Section */}
+      <View style={styles.poiCategoriesContainer}>
+        <Text style={styles.poiCategoriesTitle}>Point of Interest Filters:</Text>
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false}
+          style={styles.poiCategoriesScroll}
+          contentContainerStyle={styles.poiCategoriesContent}
+        >
+          {Object.entries(POI_CATEGORIES).map(([category, details]) => (
+            <View key={category} style={styles.poiCategoryItem}>
+              <Text style={styles.poiCategoryText}>
+                {details.icon} {details.label}
+              </Text>
+              <Switch
+                value={visibleCategories[category]}
+                onValueChange={() => togglePOICategory(category)}
+                trackColor={{ false: "#767577", true: details.color }}
+                thumbColor={visibleCategories[category] ? "#f5f5f5" : "#f4f3f4"}
+              />
+            </View>
+          ))}
+        </ScrollView>
+      </View>
+      
+      {/* SVG Floor Plan in WebView */}
       <View style={styles.webViewContainer}>
         <WebView
           ref={webViewRef}
           source={{ html: generateHtmlContent() }}
           style={styles.webView}
+          onMessage={handleWebViewMessage}
+          injectedJavaScriptBeforeContentLoaded={`
+            // Make window.ReactNativeWebView.postMessage available early
+            true;
+          `}
+          onLoad={() => {
+            // Display POIs after WebView is loaded
+            setTimeout(() => {
+              displayPOI();
+            }, 1000);
+          }}
         />
       </View>
 
@@ -601,4 +922,5 @@ IndoorNavigation.propTypes = {
     setOptions: PropTypes.func.isRequired,
   }).isRequired,
 };
+
 export default IndoorNavigation;
