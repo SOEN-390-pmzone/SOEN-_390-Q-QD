@@ -86,7 +86,7 @@ describe("RoomFormattingUtils", () => {
         "123",
         setRoomFn,
         setInvalidFn,
-        floorRegistry
+        floorRegistry,
       );
 
       expect(result).toBe("H-123");
