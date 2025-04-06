@@ -18,6 +18,7 @@ const LocationCard = ({ step, index, isSelected, onPress }) => {
 
   return (
     <TouchableOpacity
+      testID="location-card"
       style={[styles.card, isSelected && styles.selectedCard]}
       onPress={onPress}
     >
