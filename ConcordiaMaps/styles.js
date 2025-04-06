@@ -1,4 +1,4 @@
-import { Platform, StyleSheet } from "react-native";
+import { StyleSheet } from "react-native";
 
 const styles = StyleSheet.create({
   markerImage: {
@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderBottomLeftRadius: 10,
     borderBottomRightRadius: 10,
-    zIndex: 2,
+    zIndex: 20,
     position: "absolute",
     top: 60,
     left: 20,

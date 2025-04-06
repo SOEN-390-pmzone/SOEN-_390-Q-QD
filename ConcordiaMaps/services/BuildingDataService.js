@@ -149,7 +149,7 @@ class FloorRegistry {
 
   static findBuildingByCode(buildingCode) {
     return CONCORDIA_BUILDINGS.find(
-      (b) => b.id.toLowerCase() === buildingCode.toLowerCase()
+      (b) => b.id.toLowerCase() === buildingCode.toLowerCase(),
     );
   }
 
@@ -157,7 +157,7 @@ class FloorRegistry {
     return CONCORDIA_BUILDINGS.filter(
       (building) =>
         building.name.toLowerCase().includes(text.toLowerCase()) ||
-        building.id.toLowerCase().includes(text.toLowerCase())
+        building.id.toLowerCase().includes(text.toLowerCase()),
     );
   }
   // Get building type from building ID
@@ -168,7 +168,7 @@ class FloorRegistry {
       // Look through available buildings in registry
       const buildingTypes = Object.keys(this.#buildings);
       const foundType = buildingTypes.find(
-        (key) => this.#buildings[key]?.code === buildingId.toUpperCase()
+        (key) => this.#buildings[key]?.code === buildingId.toUpperCase(),
       );
 
       if (foundType) return foundType;
@@ -240,7 +240,7 @@ class FloorRegistry {
     if (
       typeof roomId === "string" &&
       ["entrance", "main entrance", "main", "lobby", "main lobby"].includes(
-        roomId.toLowerCase()
+        roomId.toLowerCase(),
       )
     ) {
       // For Hall Building, "Main lobby" seems to be the correct format
@@ -384,7 +384,7 @@ class FloorRegistry {
     // Special cases for common facilities
     if (
       ["entrance", "main lobby", "lobby", "main entrance"].includes(
-        roomId.toLowerCase()
+        roomId.toLowerCase(),
       )
     )
       return true;
