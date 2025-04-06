@@ -62,7 +62,9 @@ const RoomToRoomNavigation = () => {
   const [endFloorPath, setEndFloorPath] = useState([]);
   const [navigationSteps, setNavigationSteps] = useState([]);
 
-  const [avoidStairs, setAvoidStairs] = useState(false);
+  const [avoidStairs, setAvoidStairs] = useState(
+    route.params?.avoidStairs || false,
+  );
 
   // State for UI management
   const [expandedFloor, setExpandedFloor] = useState(null);
@@ -75,10 +77,6 @@ const RoomToRoomNavigation = () => {
 
   // Available buildings
   const buildings = FloorRegistry.getBuildings();
-
-  const handleToggleAccessibility = () => {
-    setAvoidStairs((prev) => !prev);
-  };
 
   const handleToggleAccessibility = () => {
     setAvoidStairs((prev) => !prev);
@@ -408,14 +406,17 @@ const RoomToRoomNavigation = () => {
         endFloor,
       );
 
-      const sFloorGraph = FloorRegistry.getGraph(buildingType, startFloor);
-      const eFloorGraph = FloorRegistry.getGraph(buildingType, endFloor);
+      const BaseStartFloorGraph = FloorRegistry.getGraph(
+        buildingType,
+        startFloor,
+      );
+      const BaseEndFloorGraph = FloorRegistry.getGraph(buildingType, endFloor);
       const building = FloorRegistry.getBuilding(buildingType);
 
-      const startFloorGraph = adjustGraphForAccessibility(sFloorGraph, {
+      const startFloorGraph = adjustGraphForAccessibility(BaseStartFloorGraph, {
         avoidStairs,
       });
-      const endFloorGraph = adjustGraphForAccessibility(eFloorGraph, {
+      const endFloorGraph = adjustGraphForAccessibility(BaseEndFloorGraph, {
         avoidStairs,
       });
       console.log(

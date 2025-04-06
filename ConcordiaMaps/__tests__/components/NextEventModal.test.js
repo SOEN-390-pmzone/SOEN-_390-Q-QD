@@ -1,5 +1,5 @@
 import React from "react";
-import { render, fireEvent, waitFor } from "@testing-library/react-native";
+import { render, fireEvent, waitFor, act } from "@testing-library/react-native";
 import NextEventModal from "../../components/NextEventModal";
 import * as Calendar from "expo-calendar";
 import { ActivityIndicator } from "react-native";
@@ -169,9 +169,8 @@ describe("NextEventModal additional coverage", () => {
     jest.clearAllMocks();
   });
 
-  it("renders the timer text when an event is found", async () => {
+  it("decrements timer countdown", async () => {
     jest.useFakeTimers();
-
     Calendar.requestCalendarPermissionsAsync.mockResolvedValue({
       status: "granted",
     });
@@ -181,7 +180,6 @@ describe("NextEventModal additional coverage", () => {
     const now = new Date();
     const future = new Date(now.getTime() + 10000); // 10 seconds from now
     const futureEnd = new Date(future.getTime() + 3600000);
-
     Calendar.getEventsAsync.mockResolvedValue([
       {
         id: "1",

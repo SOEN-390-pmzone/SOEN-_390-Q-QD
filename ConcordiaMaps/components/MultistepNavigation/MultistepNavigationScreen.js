@@ -66,7 +66,7 @@ const MultistepNavigationScreen = () => {
   const [indoorFloorPlans] = useState({});
   const [showIndoorNavigation, setShowIndoorNavigation] = useState(false);
   const [indoorNavigationParams, setIndoorNavigationParams] = useState(null);
-
+  const [avoidStairs, setAvoidStairs] = useState(false);
   const [navigationSteps] = useState([]);
 
   // State to track available rooms for building/validation
@@ -460,6 +460,7 @@ const MultistepNavigationScreen = () => {
       setInvalidOriginRoom,
       setInvalidDestinationRoom,
       setIsLoading,
+      avoidStairs,
       navigation,
     });
   };
@@ -562,6 +563,7 @@ const MultistepNavigationScreen = () => {
         endFloor: step.endFloor,
         skipSelection: true,
         returnScreen: "MultistepNavigation",
+        avoidStairs: avoidStairs, // Add this line
         returnParams: {
           navigationPlan: updatedPlan,
           currentStepIndex: currentStepIndex,
@@ -642,7 +644,7 @@ const MultistepNavigationScreen = () => {
         setTimeout(() => {
           loadFloorPlans().then((success) => {
             if (success) {
-              calculatePath();
+              calculatePath({ avoidStairs });
             }
           });
         }, 800); // Increased delay for more reliability
@@ -985,6 +987,8 @@ const MultistepNavigationScreen = () => {
             handleBuildingSelect={handleBuildingSelectHandler}
             handleDestinationSelection={handleDestinationSelection}
             handleStartNavigation={handleStartNavigation}
+            avoidStairs={avoidStairs}
+            setAvoidStairs={setAvoidStairs}
           />
         )}
         <ExpandedMapModal
