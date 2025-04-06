@@ -46,7 +46,7 @@
     "expo-auth-session": "~6.0.3",
     "expo-calendar": "~14.0.6",
     "expo-crypto": "^14.0.2",
-    "expo-location": "^18.0.8",
+    "expo-location": "^18.0.10",
     "expo-permissions": "^14.4.0",
     "expo-status-bar": "~2.0.1",
     "image-size": "^1.2.1",
