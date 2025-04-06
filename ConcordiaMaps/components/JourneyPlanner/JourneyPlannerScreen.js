@@ -61,6 +61,9 @@ const JourneyPlannerScreen = () => {
       resetSelection();
     }
   };
+  const isGenerateDisabled = () => {
+    return tasks.length < 2;
+  };
 
   return (
     <View style={styles.container}>
@@ -115,7 +118,7 @@ const JourneyPlannerScreen = () => {
           setAvoidOutdoor={setAvoidOutdoor}
         />
 
-        <GenerateButton disabled={tasks.length < 2} onPress={generateJourney} />
+        <GenerateButton disabled={isGenerateDisabled()} onPress={generateJourney} />
       </ScrollView>
     </View>
   );
