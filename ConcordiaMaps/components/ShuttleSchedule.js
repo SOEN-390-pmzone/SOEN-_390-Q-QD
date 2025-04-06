@@ -143,7 +143,8 @@ const getNextShuttle = (schedule) => {
     }
 
     // Use a safer, more explicit regex pattern with limits
-    const timeMatch = time.match(/^(\d{1,2}):(\d{2})\s(AM|PM)$/);
+    const timeRegex = /^(\d{1,2}):(\d{2})\s(AM|PM)$/;
+    const timeMatch = timeRegex.exec(time);
 
     // Skip invalid formats
     if (!timeMatch) continue;
@@ -285,11 +286,11 @@ function ShuttleSchedule({ visible, onClose }) {
           <View style={styles.scheduleContainer}>
             <View style={styles.table}>
               {/* Schedule Rows */}
-              {scheduleChunks.map((chunk, index) => (
-                <View key={index} style={styles.tableRow}>
-                  {chunk.map((time, i) => (
+              {scheduleChunks.map((chunk) => (
+                <View key={`row-${chunk.join("-")}`} style={styles.tableRow}>
+                  {chunk.map((time, colIndex) => (
                     <Text
-                      key={i}
+                      key={`cell-${time}-${colIndex}`}
                       style={[
                         styles.tableCell,
                         time === nextShuttle && styles.nextShuttleCell,
