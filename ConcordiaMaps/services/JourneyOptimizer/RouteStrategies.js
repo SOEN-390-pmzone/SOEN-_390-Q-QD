@@ -194,18 +194,11 @@ const RouteStrategies = {
     },
 
     isPathAllowed(locationA, locationB) {
-      // Check that both locations have building IDs
-      if (!locationA.buildingId || !locationB.buildingId) {
-        console.warn("Missing building ID for indoor location");
-        return false;
-      }
-
-      // Check that buildings are actually different
-      if (locationA.buildingId === locationB.buildingId) {
-        return false;
-      }
-
-      return true;
+      return (
+        !!locationA.buildingId &&
+        !!locationB.buildingId &&
+        locationA.buildingId !== locationB.buildingId
+      );
     },
   },
   /**

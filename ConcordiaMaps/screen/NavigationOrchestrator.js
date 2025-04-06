@@ -213,7 +213,7 @@ const NavigationOrchestratorScreen = () => {
   const processRoomNumber = (buildingId, room) => {
     if (!room) return null;
 
-    let processedRoom = room;
+    let processedRoom;
     if (isSpecialRoom(room)) {
       processedRoom = room.toLowerCase();
     } else {

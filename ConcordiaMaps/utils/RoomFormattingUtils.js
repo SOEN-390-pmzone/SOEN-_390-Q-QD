@@ -19,7 +19,7 @@ export const formatRoomNumber = (buildingId, roomText) => {
   // Special case for Hall building with redundant H prefix
   if (buildingId === "H") {
     // More aggressive handling of redundant H prefixes - catches all variants
-    if (text.match(/^H-?H-?\d+/i)) {
+    if (RegExp(/^H-?H-?\d+/i).exec(text)) {
       const correctedRoom = text.replace(/^H-?H-?(\d+)/i, "H-$1");
       console.log(`Corrected redundant H prefix: ${text} → ${correctedRoom}`);
       return correctedRoom;
