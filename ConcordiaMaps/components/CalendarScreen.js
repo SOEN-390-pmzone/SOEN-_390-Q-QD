@@ -15,8 +15,8 @@ import * as Calendar from "expo-calendar";
 import { format, addDays, subDays } from "date-fns";
 import styles from "../styles";
 import { Ionicons } from "@expo/vector-icons";
-import useLocationStatus from "../hooks/useLocationStatus";
 import useDirectionsHandler from "../hooks/useDirectionsHandler";
+import useDataFlow from "../components/userInPolygon";
 
 const CalendarScreen = () => {
   const [events, setEvents] = useState([]);
@@ -25,9 +25,9 @@ const CalendarScreen = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [modalVisible, setModalVisible] = useState(false);
 
-  // Use the new hook
-  const { location, isIndoors, buildingName } = useLocationStatus();
-  const { getDirectionsTo } = useDirectionsHandler({
+  const [userLocationStatus, setUserLocationStatus] = useState("");
+  const { location, isIndoors, buildingName } = useDataFlow();
+  const { getDirectionsTo, destinationLocation } = useDirectionsHandler({
     location,
     isIndoors,
     buildingName,
@@ -35,7 +35,26 @@ const CalendarScreen = () => {
 
   useEffect(() => {
     requestCalendarPermission();
+    updateUserLocationStatus();
   }, []);
+
+  useEffect(() => {
+    updateUserLocationStatus();
+  }, [location, isIndoors, buildingName]);
+
+  // Function to update user location status message
+  const updateUserLocationStatus = () => {
+    console.log("you are here");
+    console.log(destinationLocation);
+    console.log("User location status:", userLocationStatus);
+    if (!location || (!location.latitude && !location.longitude)) {
+      setUserLocationStatus("Obtaining your location...");
+    } else if (isIndoors && buildingName) {
+      setUserLocationStatus(`You are currently inside: ${buildingName}`);
+    } else {
+      setUserLocationStatus("You are currently outdoors");
+    }
+  };
 
   useEffect(() => {
     fetchCalendarEvents();

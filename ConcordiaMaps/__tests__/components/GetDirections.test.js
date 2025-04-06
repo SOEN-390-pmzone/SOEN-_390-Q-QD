@@ -225,6 +225,36 @@ describe("GetDirections", () => {
     });
     expect(mockGetStepsInHTML).toHaveBeenCalled();
   });
+
+  it("handles errors during location update gracefully", async () => {
+    mockGetCurrentPositionAsync.mockRejectedValueOnce(
+      new Error("Tracking error"),
+    );
+    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation();
+
+    const { getByText, getByTestId } = renderWithContext(<GetDirections />);
+    await act(async () => {
+      const destSearchBar = getByTestId("search-bar-Enter Destination");
+      fireEvent(destSearchBar, "onPlaceSelect", {
+        latitude: 45.5017,
+        longitude: -73.5673,
+      });
+    });
+    await act(async () => {
+      fireEvent.press(getByText("Get Directions"));
+      await jest.runAllTimers();
+    });
+    await act(async () => {
+      jest.advanceTimersByTime(20000);
+    });
+    await waitFor(() => {
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        "Error updating location",
+        expect.any(Error),
+      );
+    });
+    consoleErrorSpy.mockRestore();
+  });
 });
 
 describe("GetDirections - Transport Mode Tests", () => {

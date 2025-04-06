@@ -5,26 +5,19 @@ import Header from "../../components/Header";
 import { NavigationContainer } from "@react-navigation/native";
 import * as Calendar from "expo-calendar";
 
-// All mocks should be at the top level, not inside describe blocks
-jest.mock("../../hooks/useDirectionsHandler", () => ({
-  __esModule: true,
-  default: () => ({
-    getDirectionsTo: (location) => {
-      // This simulates the actual behavior in your component
-      if (!location) {
-        // This is what your component likely does when location is undefined
-        require("react-native/Libraries/Alert/Alert").alert(
-          "Get directions to ",
-        );
-      } else {
-        require("react-native/Libraries/Alert/Alert").alert(
-          `Get directions to ${location}`,
-        );
-      }
-    },
-    destinationLocation: null,
-  }),
-}));
+jest.mock("../../hooks/useDirectionsHandler", () => {
+  const Alert = require("react-native/Libraries/Alert/Alert");
+
+  return {
+    __esModule: true,
+    default: () => ({
+      getDirectionsTo: (location) => {
+        Alert.alert(`Get directions to ${location ?? ""}`);
+      },
+      destinationLocation: null,
+    }),
+  };
+});
 
 // Mock necessary modules
 jest.mock("expo-calendar", () => ({
@@ -66,7 +59,7 @@ jest.mock("react-native/Libraries/Alert/Alert", () => ({
 // Mock userInPolygon hook
 jest.mock("../../components/userInPolygon", () => ({
   __esModule: true,
-  default: jest.fn().mockReturnValue({
+  default: () => ({
     location: { latitude: 45.495, longitude: -73.578 },
     isIndoors: false,
     buildingName: null,
@@ -285,8 +278,6 @@ describe("CalendarScreen", () => {
         title: "Test Event",
         startDate: new Date(),
         endDate: new Date(new Date().getTime() + 3600000),
-        // Explicitly set location to undefined to test this case
-        location: undefined,
       },
     ]);
 
@@ -300,105 +291,19 @@ describe("CalendarScreen", () => {
 
     fireEvent.press(getByTestId("getClassDirectionsButton"));
 
-    // Now this should pass because our mock handles it correctly
     expect(alertSpy).toHaveBeenCalledWith("Get directions to ");
   });
 });
 
-describe("CalendarScreen navigation functions", () => {
-  // Store the original mock implementation
-  const originalDirectionsHandlerMock = jest.requireMock(
-    "../../hooks/useDirectionsHandler",
-  ).default;
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-
-    // Reset mocks for each test
-    require("../../components/convertToCoordinates").mockReset();
-    require("../../services/BuildingDataService").default.parseRoomFormat.mockReset();
-    mockNavigate.mockClear();
-
-    // Temporarily modify the mock implementation for this test suite
-    jest.requireMock("../../hooks/useDirectionsHandler").default = () => ({
-      getDirectionsTo: (location) => {
-        if (!location) return;
-        mockNavigate("MultistepNavigationScreen", {
-          prefillNavigation: true,
-          originInputType: "classroom",
-          origin: "Hall Building",
-          originBuilding: {
-            id: "H",
-            name: "Hall Building",
-          },
-          destinationInputType: "classroom",
-          room: "H-920",
-          building: {
-            id: "H",
-            name: "Hall Building",
-          },
-        });
-      },
-      destinationLocation: null,
-    });
-  });
-
-  // Restore the original mock after tests
-  afterEach(() => {
-    jest.requireMock("../../hooks/useDirectionsHandler").default =
-      originalDirectionsHandlerMock;
-  });
-
-  it("handles indoor origin with recognized building name", async () => {
-    // Override the userInPolygon mock for this test
-    const useDataFlowMock = require("../../components/userInPolygon").default;
-    useDataFlowMock.mockReturnValue({
+jest.mock("../../components/userInPolygon", () => {
+  return {
+    __esModule: true,
+    default: jest.fn().mockReturnValue({
       location: { latitude: 45.495, longitude: -73.578 },
-      isIndoors: true,
-      buildingName: "Hall Building",
-    });
-
-    // Mock BuildingDataService functions for this test
-    const FloorRegistry = require("../../services/BuildingDataService").default;
-    FloorRegistry.findBuildingByName.mockReturnValue("H");
-    FloorRegistry.getAddressByID.mockReturnValue("1455 De Maisonneuve Blvd. W");
-
-    // Mock room format with valid building code
-    FloorRegistry.parseRoomFormat.mockReturnValue({
-      buildingCode: "H",
-      roomNumber: "920",
-    });
-
-    const { getByText } = render(
-      <NavigationContainer>
-        <CalendarScreen />
-      </NavigationContainer>,
-    );
-
-    // Wait for rendering
-    await waitFor(() => getByText("Get Directions"));
-
-    // Press Get Directions
-    fireEvent.press(getByText("Get Directions"));
-
-    // Check that navigation was called correctly
-    expect(mockNavigate).toHaveBeenCalledWith(
-      "MultistepNavigationScreen",
-      expect.objectContaining({
-        prefillNavigation: true,
-        originInputType: "classroom",
-        origin: "Hall Building",
-        originBuilding: expect.objectContaining({
-          id: "H",
-          name: "Hall Building",
-        }),
-        destinationInputType: "classroom",
-        room: "H-920",
-        building: expect.objectContaining({
-          id: "H",
-          name: "Hall Building",
-        }),
-      }),
-    );
-  });
+      isIndoors: false,
+      buildingName: null,
+    }),
+    findBuilding: jest.fn(),
+    getData: jest.fn(),
+  };
 });

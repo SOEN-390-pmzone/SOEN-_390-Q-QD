@@ -30,6 +30,7 @@ import {
 } from "../IndoorNavigation/RoomToRoomNavigation";
 import Header from "../Header";
 import NavBar from "../NavBar";
+import Footer from "../Footer";
 import FloorRegistry from "../../services/BuildingDataService";
 import { getStepColor } from "../../services/NavigationStylesService";
 
@@ -925,6 +926,7 @@ const MultistepNavigationScreen = () => {
       <Header />
       <NavBar />
       <View style={styles.navigationContainer}>
+        <Footer />
         {navigationPlan ? (
           <NavigationStepsContainer
             navigationPlan={navigationPlan}
