@@ -19,19 +19,19 @@ export const useGoogleMapDirections = () => {
         step.startPoint,
         options.originDetails,
         options.buildingRegistry,
-        "startPoint"
+        "startPoint",
       );
 
       const destinationCoords = await resolveLocationCoordinates(
         step.endPoint,
         null,
         options.buildingRegistry,
-        "endPoint"
+        "endPoint",
       );
 
       if (!originCoords || !destinationCoords) {
         throw new Error(
-          "Could not determine origin or destination coordinates"
+          "Could not determine origin or destination coordinates",
         );
       }
 
@@ -50,7 +50,7 @@ export const useGoogleMapDirections = () => {
     point,
     fallbackDetails,
     buildingRegistry,
-    pointType
+    pointType,
   ) => {
     // If point is a string (address/name), try geocoding
     if (point && typeof point === "string") {
@@ -196,8 +196,8 @@ export const useGoogleMapDirections = () => {
     try {
       const response = await fetch(
         `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
-          address
-        )}&key=${GOOGLE_MAPS_API_KEY}`
+          address,
+        )}&key=${GOOGLE_MAPS_API_KEY}`,
       );
 
       const data = await response.json();
@@ -251,7 +251,7 @@ export const useGoogleMapDirections = () => {
       }
 
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/directions/json?origin=${o.latitude},${o.longitude}&destination=${d.latitude},${d.longitude}&mode=${mode}&key=${GOOGLE_MAPS_API_KEY}`
+        `https://maps.googleapis.com/maps/api/directions/json?origin=${o.latitude},${o.longitude}&destination=${d.latitude},${d.longitude}&mode=${mode}&key=${GOOGLE_MAPS_API_KEY}`,
       );
 
       if (!response.ok) {
@@ -262,7 +262,7 @@ export const useGoogleMapDirections = () => {
 
       if (!data || data.status !== "OK") {
         throw new Error(
-          `Direction API error: ${data?.status || "Unknown error"}`
+          `Direction API error: ${data?.status || "Unknown error"}`,
         );
       }
 
@@ -280,7 +280,7 @@ export const useGoogleMapDirections = () => {
   const getPolyline = async (origin, destination, mode) => {
     try {
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&mode=${mode}&key=${GOOGLE_MAPS_API_KEY}`
+        `https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&mode=${mode}&key=${GOOGLE_MAPS_API_KEY}`,
       );
       const data = await response.json();
 
@@ -299,7 +299,7 @@ export const useGoogleMapDirections = () => {
       if (!data?.routes?.[0]?.overview_polyline?.points) {
         console.error(
           "Error fetching polyline: No overview_polyline.points found",
-          data
+          data,
         );
         return [];
       }
@@ -329,12 +329,12 @@ export const useGoogleMapDirections = () => {
         locationParam = `&location=${userLocation.latitude},${userLocation.longitude}&radius=5000`;
       } else {
         console.warn(
-          "User location not available. Searching without location bias."
+          "User location not available. Searching without location bias.",
         );
       }
 
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_MAPS_API_KEY}&components=country:ca${locationParam}&sessiontoken=${sessionToken}`
+        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_MAPS_API_KEY}&components=country:ca${locationParam}&sessiontoken=${sessionToken}`,
       );
 
       const data = await response.json();
@@ -348,7 +348,7 @@ export const useGoogleMapDirections = () => {
   const fetchPlaceDetails = async (placeId, sessionToken) => {
     try {
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry,formatted_address&key=${GOOGLE_MAPS_API_KEY}&sessiontoken=${sessionToken}`
+        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry,formatted_address&key=${GOOGLE_MAPS_API_KEY}&sessiontoken=${sessionToken}`,
       );
       const data = await response.json();
 
