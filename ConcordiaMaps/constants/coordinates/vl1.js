@@ -38,10 +38,10 @@ const rooms = {
   "127-1": createRoom(525, 114, 476, 149),
   "121-1": createRoom(554, 110, 559, 154),
   "elevator-center": createRoom(664, 180, 615, 185),
-  "stairs-center": createRoom(559, 260, 599, 260),
+  "stairs-center": createRoom(559, 260, 660, 260),
   "elevator-west": createRoom(190, 149, 220, 154),
   "stairs-west": createRoom(220, 344, 225, 344),
-  "elevator-east": createRoom(834, 349, 814, 349),
+  "elevator": createRoom(834, 349, 814, 349),
   "elevator-east-2": createRoom(834, 145, 814, 149),
   "106-2": createRoom(758, 384, 713, 389),
   "106-1": createRoom(768, 429, 723, 433),
@@ -104,7 +104,7 @@ const graph = {
   "119": {
       "116": 1,
       "118": 1,
-      "elevator-east": 1,
+      "elevator": 1,
       "elevator-east-2": 1
   },
   "120": {
@@ -231,7 +231,7 @@ const graph = {
   "stairs-east": {
       "103-1": 2,
       "106-1": 1,
-      "elevator-east": 1
+      "elevator": 1
   },
   "106-1": {
       "103-1": 1,
@@ -243,7 +243,7 @@ const graph = {
       "120": 0.5,
       "106-1": 0.5
   },
-  "elevator-east": {
+  "elevator": {
       "119": 1,
       "stairs-east": 1
   },
