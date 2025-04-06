@@ -469,28 +469,53 @@ class FloorRegistry {
    * Checks if the room is a common facility like elevator, stairs, etc.
    * @private
    */
-static _isCommonFacility(roomIdStr) {
-  // Check for entrance aliases
-  const entranceAliases = [
-    "entrance", "main lobby", "lobby", "main entrance", "entry",
-    "main entry", "main", "atrium", "foyer", "hall", "vestibule", "reception"
-  ];
-  
-  if (entranceAliases.some(alias => roomIdStr.toLowerCase().includes(alias))) {
-    return true;
+  static _isCommonFacility(roomIdStr) {
+    // Check for entrance aliases
+    const entranceAliases = [
+      "entrance",
+      "main lobby",
+      "lobby",
+      "main entrance",
+      "entry",
+      "main entry",
+      "main",
+      "atrium",
+      "foyer",
+      "hall",
+      "vestibule",
+      "reception",
+    ];
+
+    if (
+      entranceAliases.some((alias) => roomIdStr.toLowerCase().includes(alias))
+    ) {
+      return true;
+    }
+
+    // Check for other common facilities
+    const commonFacilities = [
+      "elevator",
+      "lift",
+      "escalator",
+      "stairs",
+      "staircase",
+      "stairwell",
+      "toilet",
+      "washroom",
+      "restroom",
+      "bathroom",
+      "water_fountain",
+      "women",
+      "men",
+      "exit",
+      "gender neutral",
+      "accessible",
+    ];
+
+    return commonFacilities.some((facility) =>
+      roomIdStr.toLowerCase().includes(facility),
+    );
   }
-  
-  // Check for other common facilities
-  const commonFacilities = [
-    "elevator", "lift", "escalator", "stairs", "staircase", "stairwell",
-    "toilet", "washroom", "restroom", "bathroom", "water_fountain", 
-    "women", "men", "exit", "gender neutral", "accessible"
-  ];
-  
-  return commonFacilities.some(facility => 
-    roomIdStr.toLowerCase().includes(facility)
-  );
-}
 
   /**
    * Checks if the room is in the valid rooms list for the building
