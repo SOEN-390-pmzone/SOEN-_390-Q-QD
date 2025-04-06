@@ -133,105 +133,119 @@ const MultistepNavigationScreen = () => {
   }, [generateRandomToken]);
 
   useEffect(() => {
-    // Handle existing navigation plan if passed as parameter
-    if (route.params?.navigationPlan) {
-      setNavigationPlan(route.params.navigationPlan);
-      setCurrentStepIndex(route.params.navigationPlan.currentStep || 0);
+    const params = route.params || {};
+    const { navigationPlan, prefillNavigation, origin, destination } = params;
 
-      // If we have an outdoor step as the first step, fetch directions immediately
-      if (route.params.navigationPlan.steps[0].type === "outdoor") {
-        handleFetchOutdoorDirections(route.params.navigationPlan.steps[0]);
-      }
+    if (navigationPlan) {
+      handleNavigationPlan(navigationPlan);
     }
 
-    // Handle prefilled navigation data from CalendarScreen
-    if (route.params?.prefillNavigation) {
-      const { origin, destination } = route.params;
-
-      // Set origin details
-      if (origin) {
-        setOriginInputType(origin.originInputType || "location");
-        if (origin.originDetails) {
-          setOriginDetails(origin.originDetails);
-          setOrigin(origin.originDetails.formatted_address || "");
-        }
-        if (origin.originBuilding) {
-          setOriginBuilding(origin.originBuilding);
-        }
-        if (origin.originRoom) {
-          setOriginRoom(origin.originRoom);
-        }
-      }
-
-      // Set destination details
-      if (destination) {
-        setDestinationInputType(destination.destinationInputType || "location");
-        if (destination.destinationDetails) {
-          setDestinationDetails(destination.destinationDetails);
-          setDestination(
-            destination.destinationAddress ||
-              destination.destinationDetails.formatted_address ||
-              "",
-          );
-        }
-        if (destination.building) {
-          setBuilding(destination.building);
-        }
-        if (destination.room) {
-          setRoom(destination.room);
-        }
-      }
+    if (prefillNavigation) {
+      handlePrefillNavigation(origin, destination);
     }
   }, [route.params]);
 
+  const handleNavigationPlan = (plan) => {
+    setNavigationPlan(plan);
+    setCurrentStepIndex(plan.currentStep || 0);
+
+    const firstStep = plan.steps?.[0];
+    if (firstStep && firstStep.type === "outdoor") {
+      handleFetchOutdoorDirections(firstStep);
+    }
+  };
+
+  const handlePrefillNavigation = (origin, destination) => {
+    setOriginData(origin);
+    setDestinationData(destination);
+  };
+
+  const setOriginData = (origin) => {
+    if (!origin) return;
+
+    setOriginInputType(origin.originInputType || "location");
+
+    if (origin.originDetails) {
+      setOriginDetails(origin.originDetails);
+      setOrigin(origin.originDetails.formatted_address || "");
+    }
+
+    if (origin.originBuilding) {
+      setOriginBuilding(origin.originBuilding);
+    }
+
+    if (origin.originRoom) {
+      setOriginRoom(origin.originRoom);
+    }
+  };
+
+  const setDestinationData = (destination) => {
+    if (!destination) return;
+
+    setDestinationInputType(destination.destinationInputType || "location");
+
+    if (destination.destinationDetails) {
+      setDestinationDetails(destination.destinationDetails);
+      setDestination(
+        destination.destinationAddress ||
+          destination.destinationDetails.formatted_address ||
+          "",
+      );
+    }
+
+    if (destination.building) {
+      setBuilding(destination.building);
+    }
+
+    if (destination.room) {
+      setRoom(destination.room);
+    }
+  };
+
   useEffect(() => {
-    // Only process parameters if there's no navigation plan (form view is active)
     if (!navigationPlan && route.params) {
       console.log("Initializing form with parameters:", route.params);
-
-      // Handle destination parameters
-      if (route.params.destination) {
-        setDestination(route.params.destination);
-      }
-
-      if (route.params.destinationInputType) {
-        setDestinationInputType(route.params.destinationInputType);
-      }
-
-      if (route.params.building) {
-        setBuilding(route.params.building);
-      }
-
-      if (route.params.room) {
-        setRoom(route.params.room);
-      }
-
-      if (route.params.destinationDetails) {
-        setDestinationDetails(route.params.destinationDetails);
-      }
-
-      // Handle origin parameters
-      if (route.params.origin) {
-        setOrigin(route.params.origin);
-      }
-
-      if (route.params.originInputType) {
-        setOriginInputType(route.params.originInputType);
-      }
-
-      if (route.params.originBuilding) {
-        setOriginBuilding(route.params.originBuilding);
-      }
-
-      if (route.params.originRoom) {
-        setOriginRoom(route.params.originRoom);
-      }
-
-      if (route.params.originDetails) {
-        setOriginDetails(route.params.originDetails);
-      }
+      const params = route.params;
+      processDestinationParams(params);
+      processOriginParams(params);
     }
   }, [route.params, navigationPlan]);
+
+  const processDestinationParams = (params) => {
+    if (params.destination) {
+      setDestination(params.destination);
+    }
+    if (params.destinationInputType) {
+      setDestinationInputType(params.destinationInputType);
+    }
+    if (params.building) {
+      setBuilding(params.building);
+    }
+    if (params.room) {
+      setRoom(params.room);
+    }
+    if (params.destinationDetails) {
+      setDestinationDetails(params.destinationDetails);
+    }
+  };
+
+  const processOriginParams = (params) => {
+    if (params.origin) {
+      setOrigin(params.origin);
+    }
+    if (params.originInputType) {
+      setOriginInputType(params.originInputType);
+    }
+    if (params.originBuilding) {
+      setOriginBuilding(params.originBuilding);
+    }
+    if (params.originRoom) {
+      setOriginRoom(params.originRoom);
+    }
+    if (params.originDetails) {
+      setOriginDetails(params.originDetails);
+    }
+  };
 
   const handleFetchOutdoorDirections = async (step) => {
     if (step.type !== "outdoor") return;
@@ -499,77 +513,24 @@ const MultistepNavigationScreen = () => {
     const updatedPlan = JSON.parse(JSON.stringify(navigationPlan));
 
     try {
-      // Mark step as started in navigation plan
+      // Mark step as started in navigation plan if available
       if (updatedPlan?.steps?.[currentStepIndex]) {
         setNavigationPlan(updatedPlan);
       }
 
-      // Format room IDs properly with building-specific handling
-      let normalizedStartRoom;
-      let normalizedEndRoom;
+      // Normalize start and end rooms based on building-specific rules
+      const normalizedStartRoom = getNormalizedRoom(
+        step.startRoom,
+        step.buildingId,
+      );
+      const normalizedEndRoom = getNormalizedRoom(
+        step.endRoom,
+        step.buildingId,
+      );
 
-      // Handle building-specific entrance/lobby names
-      if (step.buildingId === "MB") {
-        // For JMSB building
-        if (
-          ["entrance", "main lobby", "main entrance", "lobby"].includes(
-            step.startRoom.toLowerCase(),
-          )
-        ) {
-          normalizedStartRoom = "main hall"; // JMSB uses "main hall" based on the available nodes
-        } else {
-          normalizedStartRoom = FloorRegistry.normalizeRoomId(step.startRoom);
-        }
+      // Map the building ID to its proper building type
+      const mappedBuildingType = getMappedBuildingType(step);
 
-        if (
-          ["entrance", "main lobby", "main entrance", "lobby"].includes(
-            step.endRoom.toLowerCase(),
-          )
-        ) {
-          normalizedEndRoom = "main hall"; // JMSB uses "main hall" based on the available nodes
-        } else {
-          normalizedEndRoom = FloorRegistry.normalizeRoomId(step.endRoom);
-        }
-      } else {
-        // For other buildings (Hall, etc.)
-        if (
-          ["entrance", "main entrance", "lobby"].includes(
-            step.startRoom.toLowerCase(),
-          )
-        ) {
-          normalizedStartRoom = "Main lobby"; // Hall building uses "Main lobby"
-        } else {
-          normalizedStartRoom = FloorRegistry.normalizeRoomId(step.startRoom);
-        }
-
-        if (
-          ["entrance", "main entrance", "lobby"].includes(
-            step.endRoom.toLowerCase(),
-          )
-        ) {
-          normalizedEndRoom = "Main lobby"; // Hall building uses "Main lobby"
-        } else {
-          normalizedEndRoom = FloorRegistry.normalizeRoomId(step.endRoom);
-        }
-      }
-
-      // Map building IDs directly to their proper types in FloorRegistry format
-      let mappedBuildingType = step.buildingType;
-      if (step.buildingId === "H") {
-        mappedBuildingType = "HallBuilding";
-      } else if (step.buildingId === "LB") {
-        mappedBuildingType = "Library";
-      } else if (step.buildingId === "MB") {
-        mappedBuildingType = "JMSB";
-      } else if (step.buildingId === "EV") {
-        mappedBuildingType = "EVBuilding";
-      } else if (step.buildingId === "VE") {
-        mappedBuildingType = "VanierExtension";
-      } else if (step.buildingId === "VL") {
-        mappedBuildingType = "VanierLibrary";
-      }
-
-      // Log the parameters before navigation
       console.log("Navigating with parameters:", {
         buildingId: step.buildingId,
         buildingType: mappedBuildingType,
@@ -579,7 +540,7 @@ const MultistepNavigationScreen = () => {
         endFloor: step.endFloor,
       });
 
-      // Navigate to RoomToRoomNavigation with correctly formatted parameters
+      // Navigate to RoomToRoomNavigation with the formatted parameters
       navigation.navigate("RoomToRoomNavigation", {
         buildingId: step.buildingId,
         buildingType: mappedBuildingType,
@@ -589,7 +550,7 @@ const MultistepNavigationScreen = () => {
         endFloor: step.endFloor,
         skipSelection: true,
         returnScreen: "MultistepNavigation",
-        avoidStairs: avoidStairs, // Add this line
+        avoidStairs: avoidStairs,
         returnParams: {
           navigationPlan: updatedPlan,
           currentStepIndex: currentStepIndex,
@@ -597,16 +558,52 @@ const MultistepNavigationScreen = () => {
       });
     } catch (err) {
       console.error("Error in handleIndoorNavigation:", err);
-      // If there's an error, show the indoor navigation modal as a fallback
+      // Fallback: Show the indoor navigation modal with fallback parameters
       setIndoorNavigationParams({
         buildingType: FloorRegistry.getBuildingTypeFromId(step.buildingId),
-        // Update fallback for JMSB to use "main hall" instead of "entrance"
         startRoom: step.buildingId === "MB" ? "main hall" : "Main lobby",
         endRoom: FloorRegistry.normalizeRoomId(step.endRoom),
         startFloor: step.startFloor,
         endFloor: step.endFloor,
       });
       setShowIndoorNavigation(true);
+    }
+  };
+
+  const getNormalizedRoom = (room, buildingId) => {
+    const lowerRoom = room.toLowerCase();
+    if (buildingId === "MB") {
+      // JMSB building: use "main hall" for any common entrance alias
+      const aliases = ["entrance", "main lobby", "main entrance", "lobby"];
+      if (aliases.includes(lowerRoom)) {
+        return "main hall";
+      }
+    } else {
+      // Other buildings: use "Main lobby" for any common entrance alias
+      const aliases = ["entrance", "main entrance", "lobby"];
+      if (aliases.includes(lowerRoom)) {
+        return "Main lobby";
+      }
+    }
+    return FloorRegistry.normalizeRoomId(room);
+  };
+
+  const getMappedBuildingType = (step) => {
+    switch (step.buildingId) {
+      case "H":
+        return "HallBuilding";
+      case "LB":
+        return "Library";
+      case "MB":
+        return "JMSB";
+      case "EV":
+        return "EVBuilding";
+      case "VE":
+        return "VanierExtension";
+      case "VL":
+        return "VanierLibrary";
+      default:
+        return step.buildingType;
     }
   };
 
