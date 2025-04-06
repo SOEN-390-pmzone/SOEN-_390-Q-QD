@@ -60,194 +60,32 @@ const NavigationOrchestratorScreen = () => {
     // Set loading state
     setIsLoading(true);
 
-    // Debug logging for step data analysis
-    console.log("\n====== NAVIGATION STEP DATA ANALYSIS ======");
-
-    console.log("\n----- FROM STEP (INDEX: " + fromIndex + ") -----");
-    Object.keys(fromStep).forEach((key) => {
-      console.log(`fromStep.${key}: ${JSON.stringify(fromStep[key])}`);
-    });
-
-    console.log("\n----- TO STEP (INDEX: " + toIndex + ") -----");
-    Object.keys(toStep).forEach((key) => {
-      console.log(`toStep.${key}: ${JSON.stringify(toStep[key])}`);
-    });
+    // Debug logging
+    logNavigationStepData(fromIndex, fromStep, toIndex, toStep);
 
     try {
-      // Mapping for non-standard building IDs to standard format
-      const buildingIdMap = {
-        jmsb: "MB",
-        hall: "H",
-        library: "LB",
-        ev: "EV",
-        visual: "EV",
-        vanier: "VL",
-        va: "VE",
-      };
+      // Prepare navigation parameters
+      const navigationParams = prepareNavigationParams(fromStep, toStep);
 
-      // Building names map (based on CONCORDIA_BUILDINGS)
-      const buildingNames = {
-        H: "Hall Building",
-        LB: "J.W. McConnell Building",
-        MB: "John Molson Building",
-        EV: "Engineering & Visual Arts Complex",
-        VL: "Vanier Library",
-        VE: "Vanier Extension",
-      };
-
-      // Normalize building ID to standard format
-      const normalizeBuilding = (buildingId) => {
-        if (!buildingId) return null;
-
-        // Convert to lowercase for comparison
-        const lowerBuildingId = buildingId.toLowerCase();
-
-        // Return mapped ID or original if no mapping exists
-        return buildingIdMap[lowerBuildingId] || buildingId.toUpperCase();
-      };
-
-      // Get standard building name from ID
-      const getBuildingName = (buildingId) => {
-        const normalizedId = normalizeBuilding(buildingId);
-        return buildingNames[normalizedId] || `${normalizedId} Building`;
-      };
-
-      // Normalize building IDs
-      const normalizedFromBuildingId = normalizeBuilding(fromStep.buildingId);
-      const normalizedToBuildingId = normalizeBuilding(toStep.buildingId);
-
-      console.log(
-        `Normalized building IDs: From ${fromStep.buildingId} → ${normalizedFromBuildingId}, To ${toStep.buildingId} → ${normalizedToBuildingId}`,
-      );
-
-      // Format room numbers using the standardized utility
-      let fromRoom = null;
-      if (fromStep.room) {
-        if (isSpecialRoom(fromStep.room)) {
-          fromRoom = fromStep.room.toLowerCase();
-        } else {
-          fromRoom = formatRoomNumber(normalizedFromBuildingId, fromStep.room);
-        }
-      }
-
-      let toRoom = null;
-      if (toStep.room) {
-        if (isSpecialRoom(toStep.room)) {
-          toRoom = toStep.room.toLowerCase();
-        } else {
-          toRoom = formatRoomNumber(normalizedToBuildingId, toStep.room);
-        }
-      }
-
-      // Double check Hall building rooms to fix any redundant H prefixes
-      fromRoom = doubleCheckHallRoomFormat(normalizedFromBuildingId, fromRoom);
-      toRoom = doubleCheckHallRoomFormat(normalizedToBuildingId, toRoom);
-
-      console.log(
-        `Properly formatted room numbers: From ${fromRoom}, To ${toRoom}`,
-      );
-
-      // Determine input types
-      const originInputType =
-        fromStep.type === "indoor" ? "classroom" : "location"; // Changed from "coordinates" to "location"
-      const destinationInputType =
-        toStep.type === "indoor" ? "classroom" : "location"; // Changed from "coordinates" to "location"
-
-      // Prepare location details
-      const originDetails =
-        fromStep.type === "indoor"
-          ? null
-          : {
-              latitude: fromStep.latitude,
-              longitude: fromStep.longitude,
-              formatted_address:
-                fromStep.title || `${fromStep.latitude}, ${fromStep.longitude}`, // Added formatted_address
-            };
-
-      const destinationDetails =
-        toStep.type === "indoor"
-          ? null
-          : {
-              latitude: toStep.latitude,
-              longitude: toStep.longitude,
-              formatted_address:
-                toStep.title || `${toStep.latitude}, ${toStep.longitude}`, // Added formatted_address
-            };
-
-      console.log(
-        `Navigating from: ${fromRoom || "outdoor"} to ${toRoom || "outdoor"}`,
-      );
-
-      console.log("\n===== NAVIGATION PLAN PARAMETERS =====");
-      const navigationParams = {
-        // Origin information
-        originInputType,
-        originDetails,
-        origin:
-          fromStep.type === "indoor"
-            ? fromRoom
-            : fromStep.address || "Current Location", // Added fallback string
-        originBuilding:
-          fromStep.type === "indoor"
-            ? {
-                id: normalizedFromBuildingId,
-                name: getBuildingName(normalizedFromBuildingId),
-              }
-            : null,
-        originRoom: fromRoom,
-
-        // Destination information
-        destinationInputType,
-        destinationDetails,
-        destination:
-          toStep.type === "indoor"
-            ? toRoom
-            : toStep.address || "Destination Location", // Added fallback string
-        building:
-          toStep.type === "indoor"
-            ? {
-                id: normalizedToBuildingId,
-                name: getBuildingName(normalizedToBuildingId),
-              }
-            : null,
-        room: toRoom,
-      };
-
-      // Print each parameter individually for clarity
-      console.log("originInputType:", navigationParams.originInputType);
-      console.log(
-        "originDetails:",
-        JSON.stringify(navigationParams.originDetails),
-      );
-      console.log("origin:", navigationParams.origin);
-      console.log(
-        "originBuilding:",
-        JSON.stringify(navigationParams.originBuilding),
-      );
-      console.log("originRoom:", navigationParams.originRoom);
-      console.log(
-        "destinationInputType:",
-        navigationParams.destinationInputType,
-      );
-      console.log(
-        "destinationDetails:",
-        JSON.stringify(navigationParams.destinationDetails),
-      );
-      console.log("destination:", navigationParams.destination);
-      console.log("building:", JSON.stringify(navigationParams.building));
-      console.log("room:", navigationParams.room);
-      console.log("======================================\n");
+      // Log navigation plan parameters for debugging
+      logNavigationPlanParameters(navigationParams);
 
       // Now call NavigationPlanService with these parameters
       NavigationPlanService.createNavigationPlan({
         ...navigationParams,
         // Callback handlers
         setInvalidOriginRoom: () => {
-          Alert.alert("Error", `Invalid origin room: ${fromRoom}`);
+          Alert.alert(
+            "Error",
+            `Invalid origin room: ${navigationParams.originRoom}`,
+          );
           setIsLoading(false);
         },
         setInvalidDestinationRoom: () => {
-          Alert.alert("Error", `Invalid destination room: ${toRoom}`);
+          Alert.alert(
+            "Error",
+            `Invalid destination room: ${navigationParams.room}`,
+          );
           setIsLoading(false);
         },
         setIsLoading,
@@ -262,6 +100,170 @@ const NavigationOrchestratorScreen = () => {
       );
       setIsLoading(false);
     }
+  };
+
+  // New helper function to log step data
+  const logNavigationStepData = (fromIndex, fromStep, toIndex, toStep) => {
+    console.log("\n====== NAVIGATION STEP DATA ANALYSIS ======");
+
+    console.log("\n----- FROM STEP (INDEX: " + fromIndex + ") -----");
+    Object.keys(fromStep).forEach((key) => {
+      console.log(`fromStep.${key}: ${JSON.stringify(fromStep[key])}`);
+    });
+
+    console.log("\n----- TO STEP (INDEX: " + toIndex + ") -----");
+    Object.keys(toStep).forEach((key) => {
+      console.log(`toStep.${key}: ${JSON.stringify(toStep[key])}`);
+    });
+  };
+
+  // New helper function to prepare navigation parameters
+  const prepareNavigationParams = (fromStep, toStep) => {
+    // Mapping for non-standard building IDs to standard format
+    const buildingIdMap = {
+      jmsb: "MB",
+      hall: "H",
+      library: "LB",
+      ev: "EV",
+      visual: "EV",
+      vanier: "VL",
+      va: "VE",
+      cc: "CC",
+    };
+
+    // Building names map
+    const buildingNames = {
+      H: "Hall Building",
+      LB: "J.W. McConnell Building",
+      MB: "John Molson Building",
+      EV: "Engineering & Visual Arts Complex",
+      VL: "Vanier Library",
+      VE: "Vanier Extension",
+      CC: "Central Building",
+    };
+
+    // Normalize building ID to standard format
+    const normalizeBuilding = (buildingId) => {
+      if (!buildingId) return null;
+      const lowerBuildingId = buildingId.toLowerCase();
+      return buildingIdMap[lowerBuildingId] || buildingId.toUpperCase();
+    };
+
+    // Get standard building name from ID
+    const getBuildingName = (buildingId) => {
+      const normalizedId = normalizeBuilding(buildingId);
+      return buildingNames[normalizedId] || `${normalizedId} Building`;
+    };
+
+    // Normalize building IDs
+    const normalizedFromBuildingId = normalizeBuilding(fromStep.buildingId);
+    const normalizedToBuildingId = normalizeBuilding(toStep.buildingId);
+
+    console.log(
+      `Normalized building IDs: From ${fromStep.buildingId} → ${normalizedFromBuildingId}, To ${toStep.buildingId} → ${normalizedToBuildingId}`,
+    );
+
+    // Process room numbers
+    const fromRoom = processRoomNumber(normalizedFromBuildingId, fromStep.room);
+    const toRoom = processRoomNumber(normalizedToBuildingId, toStep.room);
+
+    console.log(
+      `Properly formatted room numbers: From ${fromRoom}, To ${toRoom}`,
+    );
+
+    // Determine input types and prepare location details
+    const originInputType =
+      fromStep.type === "indoor" ? "classroom" : "location";
+    const destinationInputType =
+      toStep.type === "indoor" ? "classroom" : "location";
+
+    // Create navigation parameters object
+    return {
+      // Origin information
+      originInputType,
+      originDetails: createLocationDetails(fromStep),
+      origin:
+        fromStep.type === "indoor"
+          ? fromRoom
+          : fromStep.address || "Current Location",
+      originBuilding: createBuildingObject(
+        normalizedFromBuildingId,
+        getBuildingName,
+        fromStep.type,
+      ),
+      originRoom: fromRoom,
+
+      // Destination information
+      destinationInputType,
+      destinationDetails: createLocationDetails(toStep),
+      destination:
+        toStep.type === "indoor"
+          ? toRoom
+          : toStep.address || "Destination Location",
+      building: createBuildingObject(
+        normalizedToBuildingId,
+        getBuildingName,
+        toStep.type,
+      ),
+      room: toRoom,
+    };
+  };
+
+  // Helper function to process room numbers
+  const processRoomNumber = (buildingId, room) => {
+    if (!room) return null;
+
+    let processedRoom = room;
+    if (isSpecialRoom(room)) {
+      processedRoom = room.toLowerCase();
+    } else {
+      processedRoom = formatRoomNumber(buildingId, room);
+    }
+
+    // Double check Hall building rooms
+    return doubleCheckHallRoomFormat(buildingId, processedRoom);
+  };
+
+  // Helper function to create location details object
+  const createLocationDetails = (step) => {
+    if (step.type !== "indoor") {
+      return {
+        latitude: step.latitude,
+        longitude: step.longitude,
+        formatted_address: step.title || `${step.latitude}, ${step.longitude}`,
+      };
+    }
+    return null;
+  };
+
+  // Helper function to create building object
+  const createBuildingObject = (buildingId, getBuildingName, stepType) => {
+    if (stepType === "indoor") {
+      return {
+        id: buildingId,
+        name: getBuildingName(buildingId),
+      };
+    }
+    return null;
+  };
+
+  // Helper function to log navigation parameters
+  const logNavigationPlanParameters = (params) => {
+    console.log("\n===== NAVIGATION PLAN PARAMETERS =====");
+    console.log("originInputType:", params.originInputType);
+    console.log("originDetails:", JSON.stringify(params.originDetails));
+    console.log("origin:", params.origin);
+    console.log("originBuilding:", JSON.stringify(params.originBuilding));
+    console.log("originRoom:", params.originRoom);
+    console.log("destinationInputType:", params.destinationInputType);
+    console.log(
+      "destinationDetails:",
+      JSON.stringify(params.destinationDetails),
+    );
+    console.log("destination:", params.destination);
+    console.log("building:", JSON.stringify(params.building));
+    console.log("room:", params.room);
+    console.log("======================================\n");
   };
 
   // Handle card press to toggle selection

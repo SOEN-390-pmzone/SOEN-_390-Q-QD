@@ -114,10 +114,7 @@ const RouteStrategies = {
 
     isPathAllowed(locationA, locationB) {
       // Check if locations are in the same building but different floors
-      if (locationA.buildingId !== locationB.buildingId) {
-        return false;
-      }
-      return true; // Same building is always allowed
+      return locationA.buildingId === locationB.buildingId; // Return true only if buildings match
     },
   },
   DifferentBuilding: {
