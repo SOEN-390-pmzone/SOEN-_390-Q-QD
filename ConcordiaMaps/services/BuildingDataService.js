@@ -5,6 +5,10 @@ import {
   graph as Floor1Graph,
 } from "../constants/coordinates/h1";
 import {
+  rooms as Floor2Rooms,
+  graph as Floor2Graph,
+} from "../constants/coordinates/h2";
+import {
   rooms as Floor8Rooms,
   graph as Floor8Graph,
 } from "../constants/coordinates/h8";
@@ -519,6 +523,14 @@ class FloorRegistry {
           rooms: Floor1Rooms,
           graph: Floor1Graph,
           getSVG: () => SVGs.floor1SVG,
+        },
+        2: {
+          id: "2",
+          name: "2nd Floor",
+          description: "Hall Building - 2nd Floor",
+          rooms: Floor2Rooms,
+          graph: Floor2Graph,
+          getSVG: () => SVGs.floor2SVG,
         },
         8: {
           id: "8",
