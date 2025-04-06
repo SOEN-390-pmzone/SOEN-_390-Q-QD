@@ -11,7 +11,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import * as Location from "expo-location";
 import styles from "../../styles";
 import PropTypes from "prop-types";
-import * as Crypto from "expo-crypto";
+import { useGoogleMapDirections } from "../../hooks/useGoogleMapDirections";
 
 const FloatingSearchBar = ({
   onPlaceSelect,
@@ -20,58 +20,20 @@ const FloatingSearchBar = ({
   onChangeText,
   onFocus,
 }) => {
-  const GOOGLE_MAPS_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
-
   const [searchQuery, setSearchQuery] = useState("");
   const [predictions, setPredictions] = useState([]);
   const [loading, setLoading] = useState(false);
   const setSelectedLocationDescription = useState("")[1];
   const [userLocation, setUserLocation] = useState(null);
   const sessionTokenRef = useRef("");
-  const inputRef = useRef(null); // Add ref for TextInput
+  const inputRef = useRef(null);
 
-  const generateRandomToken = async () => {
-    try {
-      // Use expo-crypto for generating random bytes
-      const randomBytes = await Crypto.getRandomBytesAsync(16);
-
-      // Convert to base64 string
-      let base64 = "";
-      for (const byte of randomBytes) {
-        base64 += String.fromCharCode(byte);
-      }
-      base64 = btoa(base64);
-
-      // Remove non-alphanumeric characters and trim to length
-      return base64.replace(/[+/=]/g, "").substring(0, 16);
-    } catch (error) {
-      console.error("Error generating random token:", error);
-
-      // Fallback using the Web Crypto API as recommended by SonarQube
-      try {
-        // For client-side React Native environments
-        const crypto = global.crypto || global.msCrypto;
-        if (crypto && crypto.getRandomValues) {
-          const array = new Uint32Array(4);
-          crypto.getRandomValues(array);
-          return Array.from(array)
-            .map((n) => n.toString(36))
-            .join("")
-            .substring(0, 16);
-        }
-      } catch (webCryptoError) {
-        console.error("Web Crypto API fallback failed:", webCryptoError);
-      }
-
-      // If we've reached here, both secure methods failed
-      // Rather than using an insecure method, use a deterministic value
-      // This is safer than using Math.random() for security-sensitive operations
-      console.warn(
-        "Failed to generate secure token, using fallback constant value",
-      );
-      return "TOKEN_GENERATION_FAILED_" + Date.now().toString().substring(0, 8);
-    }
-  };
+  // Use the hook instead of importing the API key directly
+  const {
+    generateRandomToken,
+    searchPlaces: searchPlacesFromHook,
+    fetchPlaceDetails,
+  } = useGoogleMapDirections();
 
   // Generate a new session token when component mounts
   useEffect(() => {
@@ -117,24 +79,18 @@ const FloatingSearchBar = ({
     setLoading(true);
 
     try {
-      let locationParam = "";
-      if (userLocation?.latitude && userLocation?.longitude) {
-        locationParam = `&location=${userLocation.latitude},${userLocation.longitude}&radius=5000`;
+      // Use the searchPlaces method from the hook
+      const { predictions: placePredictions, error } =
+        await searchPlacesFromHook(text, userLocation, sessionTokenRef.current);
+
+      if (error) {
+        console.error("Error searching places:", error);
       } else {
-        console.warn(
-          "User location not available. Searching without location bias.",
-        );
+        setPredictions(placePredictions);
       }
-
-      //use the session token to prevent caching of search results
-      const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_MAPS_API_KEY}&components=country:ca${locationParam}&sessiontoken=${sessionTokenRef.current}`,
-      );
-
-      const { predictions } = await response.json();
-      setPredictions(predictions || []);
     } catch (error) {
-      console.error(error);
+      console.error("Error in searchPlaces:", error);
+      setPredictions([]);
     } finally {
       setLoading(false);
     }
@@ -142,19 +98,20 @@ const FloatingSearchBar = ({
 
   const handleSelection = async (placeId, description) => {
     try {
-      const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry&key=${GOOGLE_MAPS_API_KEY}&sessiontoken=${sessionTokenRef.current}`,
+      // Use the fetchPlaceDetails method from the hook
+      const placeDetails = await fetchPlaceDetails(
+        placeId,
+        sessionTokenRef.current,
       );
-      const { result } = await response.json();
-      if (result?.geometry?.location) {
+
+      if (placeDetails) {
         onPlaceSelect({
-          latitude: result.geometry.location.lat,
-          longitude: result.geometry.location.lng,
+          latitude: placeDetails.latitude,
+          longitude: placeDetails.longitude,
         });
         setSearchQuery(description);
         setSelectedLocationDescription(description);
         setPredictions([]);
-        setSearchQuery(description);
 
         // Get a new token for next search
         const newToken = await generateRandomToken();
