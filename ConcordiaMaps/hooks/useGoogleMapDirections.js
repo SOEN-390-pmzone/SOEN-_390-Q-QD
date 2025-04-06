@@ -15,130 +15,150 @@ export const useGoogleMapDirections = () => {
     }
 
     try {
-      // Handle origin coordinates
-      let originCoords;
-      if (step.startPoint && typeof step.startPoint === "string") {
-        try {
-          originCoords = await geocodeAddress(step.startPoint);
-        } catch (geocodeError) {
-          console.error("Error geocoding startPoint:", geocodeError);
+      const originCoords = await resolveLocationCoordinates(
+        step.startPoint,
+        options.originDetails,
+        options.buildingRegistry,
+        "startPoint"
+      );
 
-          // Try looking up building coordinates if available in options
-          if (options.buildingRegistry) {
-            const startBuilding = options.buildingRegistry.findBuilding(
-              step.startPoint,
-            );
-            if (startBuilding) {
-              originCoords = options.buildingRegistry.getCoordinatesForBuilding(
-                startBuilding.id,
-              );
-            }
-          }
-        }
-      } else if (step.startPoint?.latitude && step.startPoint?.longitude) {
-        originCoords = step.startPoint;
-      } else if (options.originDetails) {
-        originCoords = {
-          latitude: options.originDetails.latitude,
-          longitude: options.originDetails.longitude,
-        };
-      }
-
-      // Handle destination coordinates with similar pattern
-      let destinationCoords;
-      if (step.endPoint) {
-        if (typeof step.endPoint === "string") {
-          try {
-            destinationCoords = await geocodeAddress(step.endPoint);
-          } catch (geocodeError) {
-            console.error("Error geocoding endPoint:", geocodeError);
-
-            // Try building registry lookup
-            if (options.buildingRegistry) {
-              const destBuilding = options.buildingRegistry.findBuilding(
-                step.endPoint,
-              );
-              if (destBuilding) {
-                destinationCoords =
-                  options.buildingRegistry.getCoordinatesForBuilding(
-                    destBuilding.id,
-                  );
-              }
-            }
-          }
-        } else if (step.endPoint.latitude && step.endPoint.longitude) {
-          destinationCoords = step.endPoint;
-        }
-      }
+      const destinationCoords = await resolveLocationCoordinates(
+        step.endPoint,
+        null,
+        options.buildingRegistry,
+        "endPoint"
+      );
 
       if (!originCoords || !destinationCoords) {
         throw new Error(
-          "Could not determine origin or destination coordinates",
+          "Could not determine origin or destination coordinates"
         );
       }
 
-      // Get directions and route
-      const directions = await getStepsInHTML(
-        originCoords,
-        destinationCoords,
-        "walking",
-      );
-      const route = await getPolyline(
-        originCoords,
-        destinationCoords,
-        "walking",
-      );
+      return await getDirectionsAndRoute(originCoords, destinationCoords, step);
+    } catch (error) {
+      console.error("Error fetching outdoor directions:", error);
+      return createFallbackDirections(step);
+    }
+  };
 
-      // Format directions with improved text
-      let formattedDirections = [];
+  /**
+   * Resolves coordinates for a location point
+   * @private
+   */
+  const resolveLocationCoordinates = async (
+    point,
+    fallbackDetails,
+    buildingRegistry,
+    pointType
+  ) => {
+    // If point is a string (address/name), try geocoding
+    if (point && typeof point === "string") {
+      try {
+        return await geocodeAddress(point);
+      } catch (geocodeError) {
+        console.error(`Error geocoding ${pointType}:`, geocodeError);
+        return resolveFromBuildingRegistry(point, buildingRegistry);
+      }
+    }
 
-      if (directions && directions.length > 0) {
-        formattedDirections = directions.map((direction) => {
-          let text = parseHtmlInstructions(direction.html_instructions);
+    // If point is already coordinates
+    if (point?.latitude && point?.longitude) {
+      return point;
+    }
 
-          if (text.includes("Destination")) {
-            const destBuildingName =
-              step.endAddress && typeof step.endAddress === "string"
-                ? step.endAddress.split(",")[0]
-                : step.endPoint;
-            text = `You've arrived at ${destBuildingName}.`;
-          }
+    // Use fallback details if available
+    if (fallbackDetails?.latitude && fallbackDetails?.longitude) {
+      return {
+        latitude: fallbackDetails.latitude,
+        longitude: fallbackDetails.longitude,
+      };
+    }
 
-          return {
-            ...direction,
-            formatted_text: text,
-          };
-        });
-      } else {
-        // Provide fallback directions
-        formattedDirections = [
-          {
-            distance: "approx. 250m",
-            html_instructions: `Walk from ${step.startAddress || "starting location"} to ${step.endAddress || "destination building"}`,
-            formatted_text: `Walk from ${step.startAddress || "starting location"} to ${step.endAddress || "destination building"}`,
-          },
-        ];
+    return null;
+  };
+
+  /**
+   * Tries to resolve coordinates from building registry
+   * @private
+   */
+  const resolveFromBuildingRegistry = (buildingName, buildingRegistry) => {
+    if (!buildingRegistry) return null;
+
+    const building = buildingRegistry.findBuilding(buildingName);
+    if (building) {
+      return buildingRegistry.getCoordinatesForBuilding(building.id);
+    }
+    return null;
+  };
+
+  /**
+   * Gets directions and route between points
+   * @private
+   */
+  const getDirectionsAndRoute = async (origin, destination, step) => {
+    const directions = await getStepsInHTML(origin, destination, "walking");
+    const route = await getPolyline(origin, destination, "walking");
+
+    return {
+      directions: formatDirections(directions, step),
+      route: route || [],
+    };
+  };
+
+  /**
+   * Formats directions with improved text
+   * @private
+   */
+  const formatDirections = (directions, step) => {
+    if (!directions || directions.length === 0) {
+      return createFallbackDirections(step).directions;
+    }
+
+    return directions.map((direction) => {
+      let text = parseHtmlInstructions(direction.html_instructions);
+
+      if (text.includes("Destination")) {
+        const destBuildingName = getDestinationDisplayName(step);
+        text = `You've arrived at ${destBuildingName}.`;
       }
 
       return {
-        directions: formattedDirections,
-        route: route || [],
+        ...direction,
+        formatted_text: text,
       };
-    } catch (error) {
-      console.error("Error fetching outdoor directions:", error);
+    });
+  };
 
-      // Return fallback directions even on error
-      return {
-        directions: [
-          {
-            distance: "Unknown distance",
-            html_instructions: `Walk from ${step.startAddress || "starting location"} to ${step.endAddress || "destination building"}`,
-            formatted_text: `Walk from ${step.startAddress || "starting location"} to ${step.endAddress || "destination building"}`,
-          },
-        ],
-        route: [],
-      };
+  /**
+   * Gets destination name for display
+   * @private
+   */
+  const getDestinationDisplayName = (step) => {
+    if (step.endAddress && typeof step.endAddress === "string") {
+      return step.endAddress.split(",")[0];
     }
+    return step.endPoint;
+  };
+
+  /**
+   * Creates fallback directions when detailed directions can't be obtained
+   * @private
+   */
+  const createFallbackDirections = (step) => {
+    const startLocation = step.startAddress || "starting location";
+    const endLocation = step.endAddress || "destination building";
+
+    return {
+      directions: [
+        {
+          distance: "Unknown distance",
+          html_instructions: `Walk from ${startLocation} to ${endLocation}`,
+          formatted_text: `Walk from ${startLocation} to ${endLocation}`,
+        },
+      ],
+      route: [],
+    };
   };
 
   /**
@@ -176,8 +196,8 @@ export const useGoogleMapDirections = () => {
     try {
       const response = await fetch(
         `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
-          address,
-        )}&key=${GOOGLE_MAPS_API_KEY}`,
+          address
+        )}&key=${GOOGLE_MAPS_API_KEY}`
       );
 
       const data = await response.json();
@@ -231,7 +251,7 @@ export const useGoogleMapDirections = () => {
       }
 
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/directions/json?origin=${o.latitude},${o.longitude}&destination=${d.latitude},${d.longitude}&mode=${mode}&key=${GOOGLE_MAPS_API_KEY}`,
+        `https://maps.googleapis.com/maps/api/directions/json?origin=${o.latitude},${o.longitude}&destination=${d.latitude},${d.longitude}&mode=${mode}&key=${GOOGLE_MAPS_API_KEY}`
       );
 
       if (!response.ok) {
@@ -242,7 +262,7 @@ export const useGoogleMapDirections = () => {
 
       if (!data || data.status !== "OK") {
         throw new Error(
-          `Direction API error: ${data?.status || "Unknown error"}`,
+          `Direction API error: ${data?.status || "Unknown error"}`
         );
       }
 
@@ -260,7 +280,7 @@ export const useGoogleMapDirections = () => {
   const getPolyline = async (origin, destination, mode) => {
     try {
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&mode=${mode}&key=${GOOGLE_MAPS_API_KEY}`,
+        `https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&mode=${mode}&key=${GOOGLE_MAPS_API_KEY}`
       );
       const data = await response.json();
 
@@ -279,7 +299,7 @@ export const useGoogleMapDirections = () => {
       if (!data?.routes?.[0]?.overview_polyline?.points) {
         console.error(
           "Error fetching polyline: No overview_polyline.points found",
-          data,
+          data
         );
         return [];
       }
@@ -309,12 +329,12 @@ export const useGoogleMapDirections = () => {
         locationParam = `&location=${userLocation.latitude},${userLocation.longitude}&radius=5000`;
       } else {
         console.warn(
-          "User location not available. Searching without location bias.",
+          "User location not available. Searching without location bias."
         );
       }
 
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_MAPS_API_KEY}&components=country:ca${locationParam}&sessiontoken=${sessionToken}`,
+        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_MAPS_API_KEY}&components=country:ca${locationParam}&sessiontoken=${sessionToken}`
       );
 
       const data = await response.json();
@@ -328,15 +348,11 @@ export const useGoogleMapDirections = () => {
   const fetchPlaceDetails = async (placeId, sessionToken) => {
     try {
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry,formatted_address&key=${GOOGLE_MAPS_API_KEY}&sessiontoken=${sessionToken}`,
+        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry,formatted_address&key=${GOOGLE_MAPS_API_KEY}&sessiontoken=${sessionToken}`
       );
       const data = await response.json();
 
-      if (
-        !data.result ||
-        !data.result.geometry ||
-        !data.result.geometry.location
-      ) {
+      if (!data?.result?.geometry?.location) {
         throw new Error("Invalid place details response");
       }
 
