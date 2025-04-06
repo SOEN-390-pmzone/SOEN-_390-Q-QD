@@ -134,12 +134,7 @@ class FloorRegistry {
         return true;
       }
 
-      // Check for building code match (case insensitive)
-      if (building.code.toLowerCase() === searchTerm) {
-        return true;
-      }
-
-      return false;
+      return building.code.toLowerCase() === searchTerm;
     });
 
     return building || null;
@@ -563,11 +558,7 @@ class FloorRegistry {
 
     // Check normalized room ID
     const normalizedRoomId = this.normalizeRoomId(roomIdStr);
-    if (normalizedRoomId && normalizedRoomId in floorObj.rooms) {
-      return true;
-    }
-
-    return false;
+    return normalizedRoomId && normalizedRoomId in floorObj.rooms;
   }
 
   /**

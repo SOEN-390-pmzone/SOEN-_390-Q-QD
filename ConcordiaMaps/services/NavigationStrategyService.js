@@ -320,14 +320,14 @@ class NavigationStrategyService {
     // For MB-1-293 format
     const mbRegex = /^MB-(\d+)-\d+$/i;
     const mbMatch = mbRegex.exec(roomId);
-    if (mbMatch && mbMatch[1]) {
+    if (mbMatch?.[1]) {
       return mbMatch[1];
     }
 
     // For MB-1.293 format
     const mbDotRegex = /^MB-(\d+)\.\d+$/i;
     const mbDotMatch = mbDotRegex.exec(roomId);
-    if (mbDotMatch && mbDotMatch[1]) {
+    if (mbDotMatch?.[1]) {
       return mbDotMatch[1];
     }
 

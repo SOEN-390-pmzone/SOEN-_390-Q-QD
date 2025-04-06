@@ -68,6 +68,7 @@ class JourneyOptimizer {
             );
             console.log(`Distance calculated: ${distance}`);
             distanceLog.push({ locationId: location.id, index, distance });
+            console.log(distanceLog);
 
             if (distance < minDistance) {
               console.log(
