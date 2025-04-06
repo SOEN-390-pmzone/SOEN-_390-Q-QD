@@ -13,6 +13,7 @@ import NavBar from "../components/NavBar";
 import LocationCard from "../components/JourneyPlanner/NavigationOrchestrator/LocationCard";
 import NavigationButton from "../components/JourneyPlanner/NavigationOrchestrator/NavigationButton";
 import FloorRegistry from "../services/BuildingDataService";
+import NavigationPlanService from "../services/NavigationPlanService";
 /**
  * NavigationOrchestrator screen
  * Displays journey steps as interactive cards and provides navigation between them
@@ -206,21 +207,21 @@ const NavigationOrchestratorScreen = () => {
       console.log("room:", navigationParams.room);
       console.log("======================================\n");
       //TODO: Complete this call in a future commit. For now it is incomplete
-      // // Now call NavigationPlanService with these parameters
-      // NavigationPlanService.createNavigationPlan({
-      //   ...navigationParams,
-      //   // Callback handlers
-      //   setInvalidOriginRoom: () => {
-      //     Alert.alert("Error", `Invalid origin room: ${fromRoom}`);
-      //     setIsLoading(false);
-      //   },
-      //   setInvalidDestinationRoom: () => {
-      //     Alert.alert("Error", `Invalid destination room: ${toRoom}`);
-      //     setIsLoading(false);
-      //   },
-      //   setIsLoading,
-      //   navigation,
-      // });
+      // Now call NavigationPlanService with these parameters
+      NavigationPlanService.createNavigationPlan({
+        ...navigationParams,
+        // Callback handlers
+        setInvalidOriginRoom: () => {
+          Alert.alert("Error", `Invalid origin room: ${fromRoom}`);
+          setIsLoading(false);
+        },
+        setInvalidDestinationRoom: () => {
+          Alert.alert("Error", `Invalid destination room: ${toRoom}`);
+          setIsLoading(false);
+        },
+        setIsLoading,
+        navigation,
+      });
     } catch (error) {
       console.error("Error creating navigation plan:", error);
       Alert.alert(
