@@ -101,23 +101,22 @@ export const useJourneyPlanner = () => {
     setTasks(updatedTasks);
   };
 
-
   const generateJourney = () => {
     if (tasks.length < 2) {
       Alert.alert("Error", "Please add at least two locations for a journey");
       return false;
     }
-  
+
     try {
       console.log(
         "useJourneyPlanner: Sending steps for optimal journey Generation!",
       );
       // Call the JourneyOptimizerService to get optimized navigation steps
-      const steps = JourneyOptimizerService.generateOptimalJourney(tasks,);
-  
+      const steps = JourneyOptimizerService.generateOptimalJourney(tasks);
+
       // Pass both steps and avoidOutdoor flag
       navigation.navigate("NavigationOrchestrator", { steps, avoidOutdoor });
-      
+
       return true;
     } catch (error) {
       console.error("Error generating journey:", error);

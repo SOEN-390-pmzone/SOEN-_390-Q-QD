@@ -78,22 +78,32 @@ class JourneyOptimizer {
 
         if (isPathAllowed) {
           try {
-              // Add detailed comparison log
-      console.log(`--- COMPARING LOCATIONS ---`);
-      console.log(`FROM: ${currentLocation.id} (${currentLocation.type})${
-        currentLocation.buildingId ? `, Building: ${currentLocation.buildingId}` : ''
-      }${currentLocation.floor ? `, Floor: ${currentLocation.floor}` : ''}${
-        currentLocation.room ? `, Room: ${currentLocation.room}` : ''
-      }${
-        currentLocation.latitude ? `, Position: [${currentLocation.latitude.toFixed(4)}, ${currentLocation.longitude.toFixed(4)}]` : ''
-      }`);
-      console.log(`TO: ${location.id} (${location.type})${
-        location.buildingId ? `, Building: ${location.buildingId}` : ''
-      }${location.floor ? `, Floor: ${location.floor}` : ''}${
-        location.room ? `, Room: ${location.room}` : ''
-      }${
-        location.latitude ? `, Position: [${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}]` : ''
-      }`);
+            // Add detailed comparison log
+            console.log(`--- COMPARING LOCATIONS ---`);
+            console.log(
+              `FROM: ${currentLocation.id} (${currentLocation.type})${
+                currentLocation.buildingId
+                  ? `, Building: ${currentLocation.buildingId}`
+                  : ""
+              }${currentLocation.floor ? `, Floor: ${currentLocation.floor}` : ""}${
+                currentLocation.room ? `, Room: ${currentLocation.room}` : ""
+              }${
+                currentLocation.latitude
+                  ? `, Position: [${currentLocation.latitude.toFixed(4)}, ${currentLocation.longitude.toFixed(4)}]`
+                  : ""
+              }`,
+            );
+            console.log(
+              `TO: ${location.id} (${location.type})${
+                location.buildingId ? `, Building: ${location.buildingId}` : ""
+              }${location.floor ? `, Floor: ${location.floor}` : ""}${
+                location.room ? `, Room: ${location.room}` : ""
+              }${
+                location.latitude
+                  ? `, Position: [${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}]`
+                  : ""
+              }`,
+            );
             const distance = this.distanceCalculator.calculateDistance(
               currentLocation,
               location,
@@ -244,8 +254,7 @@ export default {
    * Create a journey optimizer with default settings
    * @returns {Object} Journey optimizer
    */
-  createOptimizer: () =>
-    new JourneyOptimizer(new DistanceCalculatorService()),
+  createOptimizer: () => new JourneyOptimizer(new DistanceCalculatorService()),
 
   /**
    * Generate optimal journey
@@ -253,9 +262,7 @@ export default {
    * @returns {Array} Navigation steps
    */
   generateOptimalJourney: (tasks) => {
-    const optimizer = new JourneyOptimizer(
-      new DistanceCalculatorService()
-    );
+    const optimizer = new JourneyOptimizer(new DistanceCalculatorService());
     return optimizer.generateOptimalJourney(tasks);
   },
 };

@@ -1,13 +1,13 @@
-import React from 'react';
-import { TouchableOpacity, Text, StyleSheet } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
-import PropTypes from 'prop-types';
+import React from "react";
+import { TouchableOpacity, Text, StyleSheet } from "react-native";
+import { MaterialIcons } from "@expo/vector-icons";
+import PropTypes from "prop-types";
 
-const NavigationButton = ({ 
-  onPress, 
-  style, 
-  hasTunnel = false, 
-  avoidOutdoor = false 
+const NavigationButton = ({
+  onPress,
+  style,
+  hasTunnel = false,
+  avoidOutdoor = false,
 }) => {
   return (
     <TouchableOpacity
@@ -15,24 +15,27 @@ const NavigationButton = ({
       onPress={onPress}
       testID={hasTunnel ? "tunnelButton" : "directionButton"}
     >
-      <MaterialIcons 
-        name={hasTunnel ? "subway" : "directions"} 
-        size={24} 
-        color="#fff" 
+      <MaterialIcons
+        name={hasTunnel ? "subway" : "directions"}
+        size={24}
+        color="#fff"
       />
       <Text style={styles.directionButtonText}>
-        {hasTunnel ? "Use Tunnel" : avoidOutdoor ? "Indoor Path" : "Get Directions"}
+        {hasTunnel
+          ? "Use Tunnel"
+          : avoidOutdoor
+            ? "Indoor Path"
+            : "Get Directions"}
       </Text>
     </TouchableOpacity>
   );
 };
 
-
 NavigationButton.propTypes = {
   onPress: PropTypes.func.isRequired,
   style: PropTypes.object,
   hasTunnel: PropTypes.bool,
-  avoidOutdoor: PropTypes.bool
+  avoidOutdoor: PropTypes.bool,
 };
 
 const styles = StyleSheet.create({

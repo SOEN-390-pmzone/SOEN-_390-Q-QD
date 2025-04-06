@@ -1,7 +1,7 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
-import PropTypes from 'prop-types';
+import React from "react";
+import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import { MaterialIcons } from "@expo/vector-icons";
+import PropTypes from "prop-types";
 
 const LocationCard = ({ step, index, isSelected, onPress }) => {
   const getStepIcon = (type) => {
@@ -32,9 +32,7 @@ const LocationCard = ({ step, index, isSelected, onPress }) => {
         </Text>
       </View>
       <View style={styles.cardContent}>
-        <Text style={styles.cardDescription}>
-          {getLocationDetails(step)}
-        </Text>
+        <Text style={styles.cardDescription}>{getLocationDetails(step)}</Text>
       </View>
       {isSelected && (
         <View style={styles.cardActions}>
@@ -43,7 +41,7 @@ const LocationCard = ({ step, index, isSelected, onPress }) => {
             onPress={() =>
               Alert.alert(
                 "Location Details",
-                `More details about ${step.title} will be available in future versions.`
+                `More details about ${step.title} will be available in future versions.`,
               )
             }
           >

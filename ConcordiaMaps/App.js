@@ -96,11 +96,11 @@ export default function App() {
               name="JourneyPlannerScreen"
               component={JourneyPlannerScreen}
             />
-            <Stack.Screen 
-            name="NavigationOrchestrator" 
-            component={NavigationOrchestratorScreen}
-            options={{ headerShown: false }} 
-          />
+            <Stack.Screen
+              name="NavigationOrchestrator"
+              component={NavigationOrchestratorScreen}
+              options={{ headerShown: false }}
+            />
 
             <Stack.Screen name="Calendar" component={CalendarScreen} />
           </Stack.Navigator>

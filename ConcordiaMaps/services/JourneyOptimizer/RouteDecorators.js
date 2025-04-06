@@ -4,7 +4,8 @@ import FloorRegistry from "../../services/BuildingDataService";
 
 const pathLengthToMetersRatio = 6.5; //The paths in the nodes are written in length units :0.5,1,2.5 etc. The ratio between those units and real distance is about 6.5m
 
-export const OutdoorToOutdoor = (baseCalculation) => async (locationA, locationB) => {
+export const OutdoorToOutdoor =
+  (baseCalculation) => async (locationA, locationB) => {
     const { getDirections } = useGoogleMapDirections();
 
     try {
@@ -21,10 +22,11 @@ export const OutdoorToOutdoor = (baseCalculation) => async (locationA, locationB
       return baseCalculation(locationA, locationB); // Fallback to base calculation
     }
   };
-export const RoomToRoomSameFloor = (baseCalculation) => (locationA, locationB) => {
+export const RoomToRoomSameFloor =
+  (baseCalculation) => (locationA, locationB) => {
     const normalizedBuildingA = normalizeBuildingId(locationA.buildingId);
     const normalizedBuildingB = normalizeBuildingId(locationB.buildingId);
-    console.log("RoomToRoomSameFloor Strategy called")
+    console.log("RoomToRoomSameFloor Strategy called");
     // Verify both locations are in the same building and same floor
     if (normalizedBuildingA !== normalizedBuildingB) {
       console.error(
@@ -79,25 +81,25 @@ export const RoomToRoomSameFloor = (baseCalculation) => (locationA, locationB) =
 
 // ElevatorTravel decorator to calculate cost of floor transitions
 export const ElevatorTravel = (baseCalculation) => (locationA, locationB) => {
-    // Calculate elevator transition cost between floors
-    const getFloorNumericValue = (floor) => {
-      if (!floor) return 0;
-      
-      // Handle special floor designations
-      if (floor === "T" || floor === "t") return 0; // Tunnel level is floor
-      
-      // Try to parse as integer, default to 0 if NaN
-      const parsed = parseInt(floor);
-      return isNaN(parsed) ? 0 : parsed;
-    };
-    
-    const floorValueA = getFloorNumericValue(locationA.floor);
-    const floorValueB = getFloorNumericValue(locationB.floor);
-    const floorDifference = Math.abs(floorValueA - floorValueB);
-    const elevatorTransitionCost = floorDifference * 5; // 5 units per floor transition
-    
-    return baseCalculation(locationA, locationB) + elevatorTransitionCost;
+  // Calculate elevator transition cost between floors
+  const getFloorNumericValue = (floor) => {
+    if (!floor) return 0;
+
+    // Handle special floor designations
+    if (floor === "T" || floor === "t") return 0; // Tunnel level is floor
+
+    // Try to parse as integer, default to 0 if NaN
+    const parsed = parseInt(floor);
+    return isNaN(parsed) ? 0 : parsed;
   };
+
+  const floorValueA = getFloorNumericValue(locationA.floor);
+  const floorValueB = getFloorNumericValue(locationB.floor);
+  const floorDifference = Math.abs(floorValueA - floorValueB);
+  const elevatorTransitionCost = floorDifference * 5; // 5 units per floor transition
+
+  return baseCalculation(locationA, locationB) + elevatorTransitionCost;
+};
 // OutdoorTravel decorator to calculate distance between outdoor points
 export const OutdoorTravel = (baseCalculation) => {
   return (locationA, locationB) => {
@@ -114,7 +116,7 @@ export const OutdoorTravel = (baseCalculation) => {
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
     const outdoorDistance = R * c; // Distance in meters
-    
+
     // Add the base calculation result
     return baseCalculation(locationA, locationB) + outdoorDistance;
   };
@@ -128,12 +130,12 @@ export const BuildingToEntrance = (baseCalculation) => {
   return (location, routeStrategies) => {
     // Extract building ID from location
     const buildingId = location.buildingId;
-    
+
     if (!buildingId) {
       console.error("Missing building ID for location");
       return baseCalculation(location, location) + 100; // Fallback distance
     }
-    
+
     const entrance = {
       type: "indoor",
       buildingId: buildingId,
@@ -141,27 +143,29 @@ export const BuildingToEntrance = (baseCalculation) => {
       room: "entrance", // Use entrance as the room ID
       title: `${buildingId} Entrance`,
     };
-    
+
     let distanceToEntrance;
     try {
       if (location.floor === "1") {
         // If already on floor 1, use SameFloorSameBuilding strategy
-        distanceToEntrance = routeStrategies.SameFloorSameBuilding.calculateDistance(
-          location,
-          entrance
-        );
+        distanceToEntrance =
+          routeStrategies.SameFloorSameBuilding.calculateDistance(
+            location,
+            entrance,
+          );
       } else {
         // If on different floor, use DifferentFloorSameBuilding strategy
-        distanceToEntrance = routeStrategies.DifferentFloorSameBuilding.calculateDistance(
-          location,
-          entrance
-        );
+        distanceToEntrance =
+          routeStrategies.DifferentFloorSameBuilding.calculateDistance(
+            location,
+            entrance,
+          );
       }
     } catch (error) {
       console.error("Error calculating distance to entrance:", error);
       distanceToEntrance = 100; // Fallback distance
     }
-    
+
     return baseCalculation(location, entrance) + distanceToEntrance;
   };
 };
@@ -171,12 +175,12 @@ export const EntranceToBuilding = (baseCalculation) => {
   return (location, routeStrategies) => {
     // Extract building ID from location
     const buildingId = location.buildingId;
-    
+
     if (!buildingId) {
       console.error("Missing building ID for location");
       return baseCalculation(location, location) + 100; // Fallback distance
     }
-    
+
     const entrance = {
       type: "indoor",
       buildingId: buildingId,
@@ -184,27 +188,29 @@ export const EntranceToBuilding = (baseCalculation) => {
       room: "entrance", // Use entrance as the room ID
       title: `${buildingId} Entrance`,
     };
-    
+
     let distanceFromEntrance;
     try {
       if (location.floor === "1") {
         // If already on floor 1, use SameFloorSameBuilding strategy
-        distanceFromEntrance = routeStrategies.SameFloorSameBuilding.calculateDistance(
-          entrance,
-          location
-        );
+        distanceFromEntrance =
+          routeStrategies.SameFloorSameBuilding.calculateDistance(
+            entrance,
+            location,
+          );
       } else {
         // If on different floor, use DifferentFloorSameBuilding strategy
-        distanceFromEntrance = routeStrategies.DifferentFloorSameBuilding.calculateDistance(
-          entrance,
-          location
-        );
+        distanceFromEntrance =
+          routeStrategies.DifferentFloorSameBuilding.calculateDistance(
+            entrance,
+            location,
+          );
       }
     } catch (error) {
       console.error("Error calculating distance from entrance:", error);
       distanceFromEntrance = 100; // Fallback distance
     }
-    
+
     return baseCalculation(entrance, location) + distanceFromEntrance;
   };
 };

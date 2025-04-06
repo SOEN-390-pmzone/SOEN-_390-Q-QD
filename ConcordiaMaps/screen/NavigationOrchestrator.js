@@ -20,7 +20,10 @@ import FloorRegistry from "../services/BuildingDataService";
 const NavigationOrchestratorScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
-  const { steps, avoidOutdoor } = route.params || { steps: [], avoidOutdoor: false };
+  const { steps, avoidOutdoor } = route.params || {
+    steps: [],
+    avoidOutdoor: false,
+  };
   const [selectedStep, setSelectedStep] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   console.log("Navigation preferences - Avoid outdoor paths:", avoidOutdoor);
@@ -28,144 +31,176 @@ const NavigationOrchestratorScreen = () => {
   const showDirections = (fromIndex, toIndex) => {
     const fromStep = steps[fromIndex];
     const toStep = steps[toIndex];
-    
+
     // Set loading state
     setIsLoading(true);
-    
+
     // Debug logging for step data analysis
     console.log("\n====== NAVIGATION STEP DATA ANALYSIS ======");
-    
+
     console.log("\n----- FROM STEP (INDEX: " + fromIndex + ") -----");
-    Object.keys(fromStep).forEach(key => {
+    Object.keys(fromStep).forEach((key) => {
       console.log(`fromStep.${key}: ${JSON.stringify(fromStep[key])}`);
     });
-    
+
     console.log("\n----- TO STEP (INDEX: " + toIndex + ") -----");
-    Object.keys(toStep).forEach(key => {
+    Object.keys(toStep).forEach((key) => {
       console.log(`toStep.${key}: ${JSON.stringify(toStep[key])}`);
     });
-    
+
     try {
       // Mapping for non-standard building IDs to standard format
       const buildingIdMap = {
-        'jmsb': 'MB',
-        'hall': 'H',
-        'library': 'LB',
-        'ev': 'EV',
-        'visual': 'EV',
-        'vanier': 'VL',
-        'va': 'VE'
+        jmsb: "MB",
+        hall: "H",
+        library: "LB",
+        ev: "EV",
+        visual: "EV",
+        vanier: "VL",
+        va: "VE",
       };
-  
+
       // Building names map (based on CONCORDIA_BUILDINGS)
       const buildingNames = {
-        'H': 'Hall Building',
-        'LB': 'J.W. McConnell Building',
-        'MB': 'John Molson Building',
-        'EV': 'Engineering & Visual Arts Complex',
-        'VL': 'Vanier Library',
-        'VE': 'Vanier Extension'
+        H: "Hall Building",
+        LB: "J.W. McConnell Building",
+        MB: "John Molson Building",
+        EV: "Engineering & Visual Arts Complex",
+        VL: "Vanier Library",
+        VE: "Vanier Extension",
       };
-  
+
       // Normalize building ID to standard format
       const normalizeBuilding = (buildingId) => {
         if (!buildingId) return null;
-        
+
         // Convert to lowercase for comparison
         const lowerBuildingId = buildingId.toLowerCase();
-        
+
         // Return mapped ID or original if no mapping exists
         return buildingIdMap[lowerBuildingId] || buildingId.toUpperCase();
       };
       const normalizeRoomNumber = (buildingId, roomNum) => {
         if (!roomNum || !buildingId) return roomNum;
-        
+
         // Get the first character of both buildingId and roomNum
         const buildingPrefix = buildingId.charAt(0).toUpperCase();
         const roomFirstChar = roomNum.charAt(0).toUpperCase();
-        
+
         // Check if room starts with a letter
         if (isNaN(parseInt(roomFirstChar))) {
           // If room starts with the same letter as building, remove it
           if (roomFirstChar === buildingPrefix) {
             return roomNum.substring(1);
           }
-          
+
           // For cases like S2.235 in MB building, also remove the first letter
           // since it's a floor indicator or section and not part of the room number format
           return roomNum.substring(1);
         }
-        
+
         return roomNum;
       };
-  
+
       // Get standard building name from ID
       const getBuildingName = (buildingId) => {
         const normalizedId = normalizeBuilding(buildingId);
         return buildingNames[normalizedId] || `${normalizedId} Building`;
       };
-      
+
       // Normalize building IDs
       const normalizedFromBuildingId = normalizeBuilding(fromStep.buildingId);
       const normalizedToBuildingId = normalizeBuilding(toStep.buildingId);
-      
-      console.log(`Normalized building IDs: From ${fromStep.buildingId} → ${normalizedFromBuildingId}, To ${toStep.buildingId} → ${normalizedToBuildingId}`);
-      
-      // Format room numbers
-      const fromRoom = fromStep.room ? `${normalizedFromBuildingId}-${normalizeRoomNumber(normalizedFromBuildingId, fromStep.room)}` : null;
-      const toRoom = toStep.room ? `${normalizedToBuildingId}-${normalizeRoomNumber(normalizedToBuildingId, toStep.room)}` : null;
-      console.log(`Formatted room numbers: From ${fromRoom}, To ${toRoom}`);
-      
-      // Determine input types
-      const originInputType = fromStep.type === "indoor" ? "classroom" : "coordinates";
-      const destinationInputType = toStep.type === "indoor" ? "classroom" : "coordinates";
-      
-      // Prepare location details
-      const originDetails = fromStep.type === "indoor" ? null : {
-        latitude: fromStep.latitude,
-        longitude: fromStep.longitude
-      };
-      
-      const destinationDetails = toStep.type === "indoor" ? null : {
-        latitude: toStep.latitude,
-        longitude: toStep.longitude
-      };
-      
-      console.log(`Navigating from: ${fromRoom || 'outdoor'} to ${toRoom || 'outdoor'}`);
 
-      
-      
+      console.log(
+        `Normalized building IDs: From ${fromStep.buildingId} → ${normalizedFromBuildingId}, To ${toStep.buildingId} → ${normalizedToBuildingId}`,
+      );
+
+      // Format room numbers
+      const fromRoom = fromStep.room
+        ? `${normalizedFromBuildingId}-${normalizeRoomNumber(normalizedFromBuildingId, fromStep.room)}`
+        : null;
+      const toRoom = toStep.room
+        ? `${normalizedToBuildingId}-${normalizeRoomNumber(normalizedToBuildingId, toStep.room)}`
+        : null;
+      console.log(`Formatted room numbers: From ${fromRoom}, To ${toRoom}`);
+
+      // Determine input types
+      const originInputType =
+        fromStep.type === "indoor" ? "classroom" : "coordinates";
+      const destinationInputType =
+        toStep.type === "indoor" ? "classroom" : "coordinates";
+
+      // Prepare location details
+      const originDetails =
+        fromStep.type === "indoor"
+          ? null
+          : {
+              latitude: fromStep.latitude,
+              longitude: fromStep.longitude,
+            };
+
+      const destinationDetails =
+        toStep.type === "indoor"
+          ? null
+          : {
+              latitude: toStep.latitude,
+              longitude: toStep.longitude,
+            };
+
+      console.log(
+        `Navigating from: ${fromRoom || "outdoor"} to ${toRoom || "outdoor"}`,
+      );
+
       console.log("\n===== NAVIGATION PLAN PARAMETERS =====");
       const navigationParams = {
         // Origin information
         originInputType,
         originDetails,
         origin: fromRoom,
-        originBuilding: fromStep.type === "indoor" ? { 
-          id: normalizedFromBuildingId, 
-          name: getBuildingName(normalizedFromBuildingId)
-        } : null,
+        originBuilding:
+          fromStep.type === "indoor"
+            ? {
+                id: normalizedFromBuildingId,
+                name: getBuildingName(normalizedFromBuildingId),
+              }
+            : null,
         originRoom: fromRoom,
-        
+
         // Destination information
         destinationInputType,
         destinationDetails,
         destination: toRoom,
-        building: toStep.type === "indoor" ? { 
-          id: normalizedToBuildingId, 
-          name: getBuildingName(normalizedToBuildingId)
-        } : null,
-        room: toRoom
+        building:
+          toStep.type === "indoor"
+            ? {
+                id: normalizedToBuildingId,
+                name: getBuildingName(normalizedToBuildingId),
+              }
+            : null,
+        room: toRoom,
       };
 
       // Print each parameter individually for clarity
       console.log("originInputType:", navigationParams.originInputType);
-      console.log("originDetails:", JSON.stringify(navigationParams.originDetails));
+      console.log(
+        "originDetails:",
+        JSON.stringify(navigationParams.originDetails),
+      );
       console.log("origin:", navigationParams.origin);
-      console.log("originBuilding:", JSON.stringify(navigationParams.originBuilding));
+      console.log(
+        "originBuilding:",
+        JSON.stringify(navigationParams.originBuilding),
+      );
       console.log("originRoom:", navigationParams.originRoom);
-      console.log("destinationInputType:", navigationParams.destinationInputType);
-      console.log("destinationDetails:", JSON.stringify(navigationParams.destinationDetails));
+      console.log(
+        "destinationInputType:",
+        navigationParams.destinationInputType,
+      );
+      console.log(
+        "destinationDetails:",
+        JSON.stringify(navigationParams.destinationDetails),
+      );
       console.log("destination:", navigationParams.destination);
       console.log("building:", JSON.stringify(navigationParams.building));
       console.log("room:", navigationParams.room);
@@ -191,7 +226,7 @@ const NavigationOrchestratorScreen = () => {
       Alert.alert(
         "Navigation Error",
         "There was a problem creating directions between these locations.",
-        [{ text: "OK" }]
+        [{ text: "OK" }],
       );
       setIsLoading(false);
     }
@@ -222,12 +257,15 @@ const NavigationOrchestratorScreen = () => {
                   toStep={step}
                   onPress={() => showDirections(index - 1, index)}
                   hasTunnel={
-                    steps[index - 1].type === "indoor" && 
-                    step.type === "indoor" && 
-                    steps[index - 1].buildingId && 
-                    step.buildingId && 
-                    steps[index - 1].buildingId !== step.buildingId && 
-                    FloorRegistry.hasTunnelConnection(steps[index - 1].buildingId, step.buildingId)
+                    steps[index - 1].type === "indoor" &&
+                    step.type === "indoor" &&
+                    steps[index - 1].buildingId &&
+                    step.buildingId &&
+                    steps[index - 1].buildingId !== step.buildingId &&
+                    FloorRegistry.hasTunnelConnection(
+                      steps[index - 1].buildingId,
+                      step.buildingId,
+                    )
                   }
                   avoidOutdoor={avoidOutdoor}
                 />

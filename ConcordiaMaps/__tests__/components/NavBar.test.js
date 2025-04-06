@@ -32,8 +32,6 @@ describe("NavBar Component", () => {
     expect(navigate).toHaveBeenCalledWith("GetDirections");
   });
 
-
-
   it("opens the shuttle schedule when Shuttle Schedule is pressed", async () => {
     const { getAllByText, queryByTestId } = render(<NavBar />);
 
