@@ -14,6 +14,30 @@ import LocationCard from "../components/JourneyPlanner/NavigationOrchestrator/Lo
 import NavigationButton from "../components/JourneyPlanner/NavigationOrchestrator/NavigationButton";
 import FloorRegistry from "../services/BuildingDataService";
 import NavigationPlanService from "../services/NavigationPlanService";
+// Import the room formatting utilities
+import { formatRoomNumber, isSpecialRoom } from "../utils/RoomFormattingUtils";
+
+/**
+ * Double-check for H building redundant prefixes as a last safety measure
+ * @param {string} buildingId - The building identifier
+ * @param {string} roomId - The room identifier to check
+ * @returns {string} - The fixed room identifier
+ */
+const doubleCheckHallRoomFormat = (buildingId, roomId) => {
+  if (!buildingId || !roomId) return roomId;
+  
+  // Only process H building rooms
+  if (buildingId === "H" && typeof roomId === "string") {
+    // Check for all possible redundant H prefix patterns
+    if (roomId.match(/^H-?H-?\d+/i)) {
+      const fixed = roomId.replace(/^H-?H-?(\d+)/i, "H-$1");
+      console.log(`🛠️ Fixed redundant H prefix: ${roomId} → ${fixed}`);
+      return fixed;
+    }
+  }
+  return roomId;
+};
+
 /**
  * NavigationOrchestrator screen
  * Displays journey steps as interactive cards and provides navigation between them
@@ -81,27 +105,6 @@ const NavigationOrchestratorScreen = () => {
         // Return mapped ID or original if no mapping exists
         return buildingIdMap[lowerBuildingId] || buildingId.toUpperCase();
       };
-      const normalizeRoomNumber = (buildingId, roomNum) => {
-        if (!roomNum || !buildingId) return roomNum;
-
-        // Get the first character of both buildingId and roomNum
-        const buildingPrefix = buildingId.charAt(0).toUpperCase();
-        const roomFirstChar = roomNum.charAt(0).toUpperCase();
-
-        // Check if room starts with a letter
-        if (isNaN(parseInt(roomFirstChar))) {
-          // If room starts with the same letter as building, remove it
-          if (roomFirstChar === buildingPrefix) {
-            return roomNum.substring(1);
-          }
-
-          // For cases like S2.235 in MB building, also remove the first letter
-          // since it's a floor indicator or section and not part of the room number format
-          return roomNum.substring(1);
-        }
-
-        return roomNum;
-      };
 
       // Get standard building name from ID
       const getBuildingName = (buildingId) => {
@@ -117,20 +120,30 @@ const NavigationOrchestratorScreen = () => {
         `Normalized building IDs: From ${fromStep.buildingId} → ${normalizedFromBuildingId}, To ${toStep.buildingId} → ${normalizedToBuildingId}`,
       );
 
-      // Format room numbers
-      const fromRoom = fromStep.room
-        ? `${normalizedFromBuildingId}-${normalizeRoomNumber(normalizedFromBuildingId, fromStep.room)}`
+      // Format room numbers using the standardized utility
+      let fromRoom = fromStep.room
+        ? isSpecialRoom(fromStep.room)
+          ? fromStep.room.toLowerCase()
+          : formatRoomNumber(normalizedFromBuildingId, fromStep.room)
         : null;
-      const toRoom = toStep.room
-        ? `${normalizedToBuildingId}-${normalizeRoomNumber(normalizedToBuildingId, toStep.room)}`
+
+      let toRoom = toStep.room
+        ? isSpecialRoom(toStep.room)
+          ? toStep.room.toLowerCase()
+          : formatRoomNumber(normalizedToBuildingId, toStep.room)
         : null;
-      console.log(`Formatted room numbers: From ${fromRoom}, To ${toRoom}`);
+      
+      // Double check Hall building rooms to fix any redundant H prefixes
+      fromRoom = doubleCheckHallRoomFormat(normalizedFromBuildingId, fromRoom);
+      toRoom = doubleCheckHallRoomFormat(normalizedToBuildingId, toRoom);
+
+      console.log(`Properly formatted room numbers: From ${fromRoom}, To ${toRoom}`);
 
       // Determine input types
       const originInputType =
-        fromStep.type === "indoor" ? "classroom" : "coordinates";
+        fromStep.type === "indoor" ? "classroom" : "location"; // Changed from "coordinates" to "location"
       const destinationInputType =
-        toStep.type === "indoor" ? "classroom" : "coordinates";
+        toStep.type === "indoor" ? "classroom" : "location"; // Changed from "coordinates" to "location"
 
       // Prepare location details
       const originDetails =
@@ -139,6 +152,7 @@ const NavigationOrchestratorScreen = () => {
           : {
               latitude: fromStep.latitude,
               longitude: fromStep.longitude,
+              formatted_address: fromStep.title || `${fromStep.latitude}, ${fromStep.longitude}`, // Added formatted_address
             };
 
       const destinationDetails =
@@ -147,6 +161,7 @@ const NavigationOrchestratorScreen = () => {
           : {
               latitude: toStep.latitude,
               longitude: toStep.longitude,
+              formatted_address: toStep.title || `${toStep.latitude}, ${toStep.longitude}`, // Added formatted_address
             };
 
       console.log(
@@ -158,7 +173,7 @@ const NavigationOrchestratorScreen = () => {
         // Origin information
         originInputType,
         originDetails,
-        origin: fromRoom,
+        origin: fromStep.type === "indoor" ? fromRoom : (fromStep.address || "Current Location"), // Added fallback string
         originBuilding:
           fromStep.type === "indoor"
             ? {
@@ -171,7 +186,7 @@ const NavigationOrchestratorScreen = () => {
         // Destination information
         destinationInputType,
         destinationDetails,
-        destination: toRoom,
+        destination: toStep.type === "indoor" ? toRoom : (toStep.address || "Destination Location"), // Added fallback string
         building:
           toStep.type === "indoor"
             ? {
@@ -206,7 +221,7 @@ const NavigationOrchestratorScreen = () => {
       console.log("building:", JSON.stringify(navigationParams.building));
       console.log("room:", navigationParams.room);
       console.log("======================================\n");
-      //TODO: Complete this call in a future commit. For now it is incomplete
+      
       // Now call NavigationPlanService with these parameters
       NavigationPlanService.createNavigationPlan({
         ...navigationParams,
