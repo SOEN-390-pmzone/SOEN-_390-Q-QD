@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
   webView: {
     flex: 1,
   },
-  
+
   // New styles for POI features
   poiCategoriesContainer: {
     paddingHorizontal: 16,

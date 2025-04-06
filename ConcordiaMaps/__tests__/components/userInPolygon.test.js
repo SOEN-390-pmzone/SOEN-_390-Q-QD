@@ -4,7 +4,7 @@
 import { findBuilding, getData } from "../../components/userInPolygon";
 import pointInPolygon from "point-in-polygon";
 import { coloringData } from "../../data/coloringData";
-import { renderHook } from "@testing-library/react"; // Updated import
+import { renderHook } from "@testing-library/react-native"; // Updated import
 import useDataFlow from "../../components/userInPolygon";
 import { LocationContext } from "../../contexts/LocationContext";
 import React from "react";

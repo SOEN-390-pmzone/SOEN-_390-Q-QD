@@ -14,50 +14,50 @@ const POI_CATEGORIES = {
     keywords: ["washroom", "toilet", "bathroom", "restroom", "wc"],
     color: "#FF9800", // Orange
     icon: "🚻",
-    label: "Washrooms"
+    label: "Washrooms",
   },
   ELEVATOR: {
     keywords: ["elevator", "lift"],
     color: "#9C27B0", // Purple
     icon: "🔼",
-    label: "Elevators"
+    label: "Elevators",
   },
   STAIRS: {
     keywords: ["stairs", "stairwell", "staircase"],
     color: "#2196F3", // Blue
     icon: "🪜",
-    label: "Stairs"
+    label: "Stairs",
   },
   ESCALATOR: {
     keywords: ["escalator"],
     color: "#4CAF50", // Green
     icon: "⤴️",
-    label: "Escalators"
+    label: "Escalators",
   },
   WATER_FOUNTAIN: {
     keywords: ["water", "fountain", "water_fountain", "water_foutain"],
     color: "#03A9F4", // Light blue
     icon: "💧",
-    label: "Water Fountains"
+    label: "Water Fountains",
   },
   EXIT: {
     keywords: ["exit", "emergency", "entrance"],
     color: "#F44336", // Red
     icon: "🚪",
-    label: "Exits/Entrances"
-  }
+    label: "Exits/Entrances",
+  },
 };
 
 // Function to categorize a room/node based on its ID
 const categorizePOI = (nodeId) => {
   const normalizedId = nodeId.toString().toLowerCase();
-  
+
   for (const [category, details] of Object.entries(POI_CATEGORIES)) {
-    if (details.keywords.some(keyword => normalizedId.includes(keyword))) {
+    if (details.keywords.some((keyword) => normalizedId.includes(keyword))) {
       return category;
     }
   }
-  
+
   return null; // Not a POI
 };
 
@@ -69,12 +69,13 @@ const IndoorNavigation = ({ route, navigation }) => {
   const [floorPlan, setFloorPlan] = useState("");
   const [poiNodes, setPOINodes] = useState([]); // All POI nodes
   const [poiCategories, setPOICategories] = useState({}); // Categorized POIs
+  console.log(poiNodes);
   const [visibleCategories, setVisibleCategories] = useState(
     // Initially show all POI categories
     Object.keys(POI_CATEGORIES).reduce((acc, key) => {
       acc[key] = true;
       return acc;
-    }, {})
+    }, {}),
   );
   const webViewRef = useRef(null);
 
@@ -111,20 +112,20 @@ const IndoorNavigation = ({ route, navigation }) => {
   const identifyPOINodes = (nodes) => {
     const pois = [];
     const categorized = {};
-    
+
     // Initialize categories
-    Object.keys(POI_CATEGORIES).forEach(category => {
+    Object.keys(POI_CATEGORIES).forEach((category) => {
       categorized[category] = [];
     });
-    
-    nodes.forEach(node => {
+
+    nodes.forEach((node) => {
       const category = categorizePOI(node);
       if (category) {
         pois.push(node);
         categorized[category].push(node);
       }
     });
-    
+
     setPOINodes(pois);
     setPOICategories(categorized);
   };
@@ -725,9 +726,9 @@ const IndoorNavigation = ({ route, navigation }) => {
 
   // Toggle a POI category visibility
   const togglePOICategory = (category) => {
-    setVisibleCategories(prev => ({
+    setVisibleCategories((prev) => ({
       ...prev,
-      [category]: !prev[category]
+      [category]: !prev[category],
     }));
   };
 
@@ -735,27 +736,27 @@ const IndoorNavigation = ({ route, navigation }) => {
   const handleWebViewMessage = (event) => {
     try {
       const message = JSON.parse(event.nativeEvent.data);
-      if (message.type === 'poi_selected') {
+      if (message.type === "poi_selected") {
         // If no start point is selected, set it as start
         if (!startPoint) {
           setStartPoint(message.nodeId);
-        } 
+        }
         // If start point is selected but no end point, set it as end
         else if (!endPoint) {
           setEndPoint(message.nodeId);
-        } 
+        }
         // If both are selected, update the end point
         else {
           setEndPoint(message.nodeId);
         }
-        
+
         // Highlight the selected rooms
         setTimeout(() => {
           highlightSelectedRooms();
         }, 100);
       }
     } catch (error) {
-      console.error('Error handling WebView message:', error);
+      console.error("Error handling WebView message:", error);
     }
   };
 
@@ -787,12 +788,14 @@ const IndoorNavigation = ({ route, navigation }) => {
         {building.name} - {building.code} {floor}
         {getFloorSuffix(floor)} Floor
       </Text>
-      
+
       {/* POI Categories Toggle Section */}
       <View style={styles.poiCategoriesContainer}>
-        <Text style={styles.poiCategoriesTitle}>Point of Interest Filters:</Text>
-        <ScrollView 
-          horizontal 
+        <Text style={styles.poiCategoriesTitle}>
+          Point of Interest Filters:
+        </Text>
+        <ScrollView
+          horizontal
           showsHorizontalScrollIndicator={false}
           style={styles.poiCategoriesScroll}
           contentContainerStyle={styles.poiCategoriesContent}
@@ -812,7 +815,7 @@ const IndoorNavigation = ({ route, navigation }) => {
           ))}
         </ScrollView>
       </View>
-      
+
       {/* SVG Floor Plan in WebView */}
       <View style={styles.webViewContainer}>
         <WebView
