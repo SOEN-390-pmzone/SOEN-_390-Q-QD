@@ -93,7 +93,7 @@ describe("FloorRegistry", () => {
     test("returns all floors for a valid building type", () => {
       const hallFloors = FloorRegistry.getFloors("HallBuilding");
       expect(hallFloors).toBeInstanceOf(Array);
-      expect(hallFloors.length).toBe(4); // T, 1, 8, 9
+      expect(hallFloors.length).toBe(5); // T, 1, 2, 8, 9
       expect(hallFloors[0]).toHaveProperty("id");
       expect(hallFloors[0]).toHaveProperty("name");
       expect(hallFloors[0]).toHaveProperty("description");
@@ -197,7 +197,7 @@ describe("FloorRegistry", () => {
     test("returns null for invalid building", () => {
       const supportsNav = FloorRegistry.supportsNavigation(
         "InvalidBuilding",
-        "1",
+        "1"
       );
       expect(supportsNav).toBeNull();
     });
@@ -205,7 +205,7 @@ describe("FloorRegistry", () => {
     test("returns undefined for invalid floor", () => {
       const supportsNav = FloorRegistry.supportsNavigation(
         "HallBuilding",
-        "99",
+        "99"
       );
       expect(supportsNav).toBeUndefined();
     });
@@ -320,7 +320,7 @@ describe("tunnel levels and special cases", () => {
   test("tunnel level does not support navigation", () => {
     const tunnelSupportsNav = FloorRegistry.supportsNavigation(
       "HallBuilding",
-      "T",
+      "T"
     );
     expect(tunnelSupportsNav).toBe(false);
   });
@@ -374,7 +374,7 @@ describe("edge cases in FloorRegistry methods", () => {
 
     const supportsNav1 = FloorRegistry.supportsNavigation(
       "HallBuilding",
-      "test",
+      "test"
     );
     expect(supportsNav1).toBe(false);
 
@@ -389,7 +389,7 @@ describe("edge cases in FloorRegistry methods", () => {
     getFloorSpy.mockReturnValueOnce(floorWithOnlyGraph);
     const supportsNav2 = FloorRegistry.supportsNavigation(
       "HallBuilding",
-      "test2",
+      "test2"
     );
     expect(supportsNav2).toBe(false);
 
@@ -540,7 +540,7 @@ describe("edge cases for building-specific features", () => {
 
     const supportsNav = FloorRegistry.supportsNavigation(
       "TestBuilding",
-      "partial",
+      "partial"
     );
     expect(supportsNav).toBe(false);
 
@@ -554,7 +554,7 @@ describe("edge cases for building-specific features", () => {
 
     const supportsNav = FloorRegistry.supportsNavigation(
       "TestBuilding",
-      "null",
+      "null"
     );
     expect(supportsNav).toBeNull();
 
@@ -574,7 +574,7 @@ describe("edge cases for building-specific features", () => {
 
     const supportsNav = FloorRegistry.supportsNavigation(
       "TestBuilding",
-      "undefined",
+      "undefined"
     );
     expect(supportsNav).toBe(false);
 
