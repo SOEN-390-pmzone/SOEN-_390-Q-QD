@@ -1,3 +1,4 @@
+/* eslint-disable jest/expect-expect */
 import React from "react";
 import { render, fireEvent, waitFor } from "@testing-library/react-native";
 import NavigationOrchestratorScreen from "../screen/NavigationOrchestrator";
