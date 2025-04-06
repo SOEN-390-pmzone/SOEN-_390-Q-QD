@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en" xml:lang="en">
+  <head>
+    <title>SVG Coordinate Extractor</title>
+    <style>
+      body {
+        margin: 0;
+        overflow: auto;
+      }
+
+      #container {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        height: 100vh;
+      }
+
+      #output {
+        width: 300px;
+        padding: 10px;
+        background: rgba(255, 255, 255, 0.8);
+        border-right: 1px solid #ccc;
+        box-sizing: border-box;
+      }
+
+      #jsonOutput {
+        width: 100%;
+        height: 200px;
+      }
+
+      #svgContainer {
+        flex-grow: 1;
+        overflow-x: auto;
+        overflow-y: hidden;
+        white-space: nowrap;
+      }
+
+      #svgObject {
+        width: auto;
+        height: 100%;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="container">
+      <div id="output">
+        <p>Click on a room, then its door/nearest point</p>
+        <p>X: <span id="x">0</span>, Y: <span id="y">0</span></p>
+        <button id="addRoom">Add Room</button>
+        <button id="addDoor">Add Door</button>
+        <button id="clear">Clear</button>
+        <textarea id="jsonOutput"></textarea>
+      </div>
+      <div id="svgContainer">
+        <!-- Replace with your SVG file -->
+        <object id="svgObject" type="image/svg+xml" data="VL-2.svg">
+          <p>
+            Your browser does not support SVGs. You can view the floor plan
+            <a href="VL-2.svg">here</a>.
+          </p>
+        </object>
+      </div>
+    </div>
+
+    <script>
+      let currentRoom = null;
+      let roomData = {};
+
+      document
+        .getElementById("svgObject")
+        .addEventListener("load", function () {
+          const svgDoc = this.contentDocument;
+          const svgElement = svgDoc.documentElement;
+
+          svgDoc.addEventListener("click", function (e) {
+            // Create SVG point
+            const point = svgElement.createSVGPoint();
+
+            // Set to click position in screen coordinates
+            point.x = e.clientX;
+            point.y = e.clientY;
+
+            // Convert to SVG coordinate system
+            const svgPoint = point.matrixTransform(
+              svgElement.getScreenCTM().inverse()
+            );
+
+            // Round values for cleaner display
+            const x = Math.round(svgPoint.x);
+            const y = Math.round(svgPoint.y);
+
+            document.getElementById("x").textContent = x;
+            document.getElementById("y").textContent = y;
+          });
+        });
+
+      document.getElementById("addRoom").addEventListener("click", function () {
+        const roomName = prompt("Enter room name:");
+        if (!roomName) return;
+
+        currentRoom = roomName;
+        const x = document.getElementById("x").textContent;
+        const y = document.getElementById("y").textContent;
+
+        roomData[roomName] = {
+          x: x,
+          y: y,
+          nearestPoint: {},
+        };
+
+        updateOutput();
+      });
+
+      document.getElementById("addDoor").addEventListener("click", function () {
+        if (!currentRoom) {
+          alert("Please select a room first");
+          return;
+        }
+
+        const x = document.getElementById("x").textContent;
+        const y = document.getElementById("y").textContent;
+
+        roomData[currentRoom].nearestPoint = {
+          x: x,
+          y: y,
+        };
+
+        currentRoom = null;
+        updateOutput();
+      });
+
+      document.getElementById("clear").addEventListener("click", function () {
+        roomData = {};
+        updateOutput();
+      });
+
+      function updateOutput() {
+        document.getElementById("jsonOutput").value = JSON.stringify(
+          roomData,
+          null,
+          4
+        );
+      }
+    </script>
+  </body>
+</html>

@@ -1,13 +1,29 @@
 import React, { useState } from "react";
 import { View, TouchableOpacity, Text, Animated } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import PropTypes from "prop-types"; // Add this import
 import styles from "../styles";
 import { Alert } from "react-native";
 import ShuttleSchedule from "./ShuttleSchedule";
+import { navigationItems } from "../constants/configuration/navigationItems";
+
+const MenuItem = ({ item }) => (
+  <TouchableOpacity onPress={item.action} testID={item.testID}>
+    <Text style={styles.menuItem}>{item.label}</Text>
+  </TouchableOpacity>
+);
+
+MenuItem.propTypes = {
+  item: PropTypes.shape({
+    action: PropTypes.func.isRequired,
+    testID: PropTypes.string,
+    label: PropTypes.string.isRequired,
+  }).isRequired,
+};
 
 function NavBar() {
   const [isOpen, setIsOpen] = useState(false);
-  const [isScheduleVisible, setIsScheduleVisible] = useState(false); // Added missing state
+  const [isScheduleVisible, setIsScheduleVisible] = useState(false);
   const animation = useState(new Animated.Value(0))[0];
   const navigation = useNavigation();
 
@@ -20,13 +36,35 @@ function NavBar() {
     }).start(() => setIsOpen(!isOpen));
   };
 
-  const handlePress = (item) => {
-    if (item === "Get directions") {
-      navigation.navigate("GetDirections");
-    } else {
-      Alert.alert(`You clicked: ${item}`);
+  // Process the menu items and attach the concrete implementations
+  const menuItems = navigationItems.map((item) => {
+    let action;
+
+    // Determine action based on actionType
+    switch (item.actionType) {
+      case "navigate":
+        action = () => navigation.navigate(item.screen);
+        break;
+      case "alert":
+        action = () => Alert.alert(`You clicked: ${item.label}`);
+        break;
+      case "custom":
+        // Special case for shuttle schedule
+        if (item.id === "shuttle") {
+          action = () => setIsScheduleVisible(true);
+        } else {
+          action = () => Alert.alert(`Custom action for: ${item.label}`);
+        }
+        break;
+      default:
+        action = () => Alert.alert(`No action defined for: ${item.label}`);
     }
-  };
+
+    return {
+      ...item,
+      action,
+    };
+  });
 
   const translateX = animation.interpolate({
     inputRange: [0, 1],
@@ -46,26 +84,9 @@ function NavBar() {
       </TouchableOpacity>
 
       <Animated.View style={[styles.menu, { transform: [{ translateX }] }]}>
-        <TouchableOpacity onPress={() => handlePress("Login")}>
-          <Text style={styles.menuItem}>Login</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => handlePress("Get directions")}>
-          <Text style={styles.menuItem}>Get directions</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => handlePress("Outdoor Points of Interest")}
-        >
-          <Text style={styles.menuItem}>Outdoor Points of Interest</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => handlePress("Smart Planner")}>
-          <Text style={styles.menuItem}>Smart Planner</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => setIsScheduleVisible(true)}
-          testID="shuttle-schedule-modal"
-        >
-          <Text style={styles.menuItem}>Shuttle Schedule</Text>
-        </TouchableOpacity>
+        {menuItems.map((item) => (
+          <MenuItem key={item.id} item={item} />
+        ))}
       </Animated.View>
 
       {/* Shuttle Schedule Popup */}
