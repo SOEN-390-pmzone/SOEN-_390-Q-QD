@@ -50,7 +50,7 @@ const determineUserLocationContext = (location, isIndoors, buildingName) => {
   // If we have a building name, check if it's a known building
   if (context.detectedBuilding) {
     context.isInKnownBuilding = isKnownConcordiaBuilding(
-      context.detectedBuilding
+      context.detectedBuilding,
     );
   }
 
@@ -118,7 +118,7 @@ const useDirectionsHandler = ({ location, isIndoors, buildingName }) => {
     const locationContext = determineUserLocationContext(
       location,
       isIndoors,
-      buildingName
+      buildingName,
     );
     if (locationContext.isInBuilding) {
       // We know the user is in a Concordia building
@@ -149,7 +149,7 @@ const useDirectionsHandler = ({ location, isIndoors, buildingName }) => {
       let startBuilding = null;
       if (startBuildingId) {
         startBuilding = CONCORDIA_BUILDINGS.find(
-          (b) => b.id === startBuildingId
+          (b) => b.id === startBuildingId,
         );
       }
 
@@ -157,7 +157,7 @@ const useDirectionsHandler = ({ location, isIndoors, buildingName }) => {
         const startAddress = FloorRegistry.getAddressByID(startBuildingId);
 
         debugLog(
-          `Setting origin to building: ${startBuilding.name} (${startBuildingId})`
+          `Setting origin to building: ${startBuilding.name} (${startBuildingId})`,
         );
 
         navigationParams.originInputType = "classroom";
@@ -174,7 +174,7 @@ const useDirectionsHandler = ({ location, isIndoors, buildingName }) => {
         };
       } else {
         debugLog(
-          `Could not find building data for: ${buildingName} (mapped to: ${mappedBuildingName})`
+          `Could not find building data for: ${buildingName} (mapped to: ${mappedBuildingName})`,
         );
         // Fallback to using current location if building data isn't found
         setOutdoorOrigin(navigationParams);
@@ -192,7 +192,7 @@ const useDirectionsHandler = ({ location, isIndoors, buildingName }) => {
    */
   const setOutdoorOrigin = (navigationParams) => {
     debugLog(
-      "User is outdoors, using current GPS coordinates as starting point"
+      "User is outdoors, using current GPS coordinates as starting point",
     );
     navigationParams.originInputType = "location";
     navigationParams.origin = "Current Location";
@@ -234,7 +234,7 @@ const useDirectionsHandler = ({ location, isIndoors, buildingName }) => {
 
     // Find the building by code
     const targetBuilding = CONCORDIA_BUILDINGS.find(
-      (building) => building.id === buildingCode
+      (building) => building.id === buildingCode,
     );
 
     if (!targetBuilding) {
@@ -289,7 +289,7 @@ const useDirectionsHandler = ({ location, isIndoors, buildingName }) => {
         if (!endBuildingId) {
           debugLog(
             "Could not find end building ID for:",
-            targetBuilding.buildingName
+            targetBuilding.buildingName,
           );
           return;
         }
