@@ -2594,7 +2594,7 @@ describe("MultistepNavigationScreen", () => {
         id: "VL",
         name: "Vanier Library",
         testRoom: "elevator",
-        expected: "VL-elevator",
+        expected: "elevator",
       },
       {
         id: "EV",
@@ -4180,7 +4180,10 @@ test("handles prefilled navigation data from CalendarScreen", async () => {
   });
 
   // Verify the room input has the correct value
-  const roomInput = getByPlaceholderText("Enter room number in Hall Building");
+  // Updated placeholder text to match what's actually rendered
+  const roomInput = getByPlaceholderText(
+    "Enter room number (e.g. 920 or elevator)",
+  );
   expect(roomInput.props.value).toBe("H-920");
 
   // Verify navigation can be started

@@ -14,6 +14,232 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import styles from "../../styles/MultistepNavigation/MultistepNavigationStyles";
 import FloorRegistry from "../../services/BuildingDataService";
 
+// Extract Location Input component
+const LocationInput = ({
+  searchQuery,
+  setSearchQuery,
+  predictions,
+  setPredictions,
+  loading,
+  placeholder,
+  searchPlaces,
+  handleSelection,
+}) => (
+  <>
+    <View
+      style={[
+        styles.searchBar,
+        searchQuery.length > 0 && styles.searchBarFocused,
+      ]}
+    >
+      <Ionicons name="location-outline" size={20} style={styles.icon} />
+      <TextInput
+        value={searchQuery}
+        onChangeText={searchPlaces}
+        placeholder={placeholder}
+        style={styles.input}
+      />
+      {loading ? (
+        <ActivityIndicator color="#912338" />
+      ) : (
+        searchQuery.length > 0 && (
+          <TouchableOpacity
+            onPress={() => {
+              setSearchQuery("");
+              setPredictions([]);
+            }}
+          >
+            <Ionicons name="close-circle" size={20} style={styles.icon} />
+          </TouchableOpacity>
+        )
+      )}
+    </View>
+
+    {predictions.length > 0 && (
+      <ScrollView style={styles.predictionsList} nestedScrollEnabled={true}>
+        {predictions.map((item) => (
+          <TouchableOpacity
+            key={item.place_id}
+            onPress={() => handleSelection(item.place_id, item.description)}
+            style={styles.predictionItem}
+          >
+            <Ionicons name="location-outline" size={20} style={styles.icon} />
+            <Text style={styles.predictionText}>{item.description}</Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+    )}
+  </>
+);
+
+// Extract Building Input component
+const BuildingInput = ({
+  value,
+  onChangeText,
+  selectedBuilding,
+  buildingPlaceholder,
+  room,
+  setRoom,
+  invalidRoom,
+  setInvalidRoom,
+  errorMessage,
+  showBuildingSuggestions,
+  buildingSuggestions,
+  handleBuildingSelect,
+}) => (
+  <>
+    <TextInput
+      style={styles.roomInput}
+      placeholder={buildingPlaceholder}
+      value={value}
+      onChangeText={onChangeText}
+    />
+
+    {selectedBuilding && (
+      <>
+        <TextInput
+          style={[
+            styles.roomInput,
+            { marginTop: 8 },
+            invalidRoom && styles.invalidInput,
+          ]}
+          placeholder={FloorRegistry.getRoomPlaceholder(selectedBuilding.id)}
+          value={room}
+          onChangeText={(text) => {
+            let formattedRoom;
+
+            if (selectedBuilding.id === "MB") {
+              // MB special handling
+              let match = /^\d+\.\d+$/.exec(text);
+              if (match) {
+                formattedRoom = `MB-${text}`;
+              } else if (/^\d+-\d+$/.test(text)) {
+                formattedRoom = `MB-${text}`;
+              } else if (!text.startsWith("MB-")) {
+                formattedRoom = `MB-${text}`;
+              } else {
+                formattedRoom = text;
+              }
+            } else if (["VE", "VL", "EV"].includes(selectedBuilding.id)) {
+              // Special buildings
+              const specialRooms = [
+                "stairs",
+                "elevator",
+                "toilet",
+                "escalator",
+                "water_fountain",
+              ];
+
+              if (specialRooms.includes(text.toLowerCase())) {
+                formattedRoom = text.toLowerCase();
+              } else if (/^\d+$/.exec(text)) {
+                formattedRoom = `${selectedBuilding.id}-${text}`;
+              } else if (
+                !text.includes(`${selectedBuilding.id}-`) &&
+                !specialRooms.includes(text.toLowerCase())
+              ) {
+                formattedRoom = `${selectedBuilding.id}-${text}`;
+              } else {
+                formattedRoom = text;
+              }
+            } else {
+              // Default handling
+              formattedRoom = !text.includes(`${selectedBuilding.id}-`)
+                ? `${selectedBuilding.id}-${text}`
+                : text;
+            }
+
+            setRoom(formattedRoom);
+
+            const isValid = FloorRegistry.isValidRoom(
+              selectedBuilding.id,
+              formattedRoom,
+            );
+            setInvalidRoom(!isValid && text.length > 0);
+          }}
+        />
+        {invalidRoom && <Text style={styles.errorText}>{errorMessage}</Text>}
+      </>
+    )}
+
+    {showBuildingSuggestions && (
+      <ScrollView
+        style={styles.suggestionsContainer}
+        nestedScrollEnabled={true}
+      >
+        {buildingSuggestions.map((item) => (
+          <TouchableOpacity
+            key={item.id}
+            style={styles.suggestionItem}
+            onPress={() => handleBuildingSelect(item)}
+          >
+            <Text style={styles.suggestionText}>
+              {item.name} ({item.id})
+            </Text>
+            <Text style={styles.suggestionAddress}>{item.address}</Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+    )}
+  </>
+);
+
+// Extract InputSection component
+const InputSection = ({
+  label,
+  inputType,
+  setInputType,
+  locationProps,
+  buildingProps,
+}) => (
+  <View style={styles.inputGroup}>
+    <View style={styles.inputHeader}>
+      <Text style={styles.label}>{label}</Text>
+      <View style={styles.toggleContainer}>
+        <TouchableOpacity
+          style={[
+            styles.toggleButton,
+            inputType === "location" && styles.toggleButtonActive,
+          ]}
+          onPress={() => setInputType("location")}
+        >
+          <Text
+            style={[
+              styles.toggleText,
+              inputType === "location" && styles.toggleTextActive,
+            ]}
+          >
+            Location
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            styles.toggleButton,
+            inputType === "classroom" && styles.toggleButtonActive,
+          ]}
+          onPress={() => setInputType("classroom")}
+        >
+          <Text
+            style={[
+              styles.toggleText,
+              inputType === "classroom" && styles.toggleTextActive,
+            ]}
+          >
+            Building
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+
+    {inputType === "location" ? (
+      <LocationInput {...locationProps} />
+    ) : (
+      <BuildingInput {...buildingProps} />
+    )}
+  </View>
+);
+
+// Main NavigationForm component
 const NavigationForm = ({
   origin = "",
   originSearchQuery,
@@ -60,6 +286,73 @@ const NavigationForm = ({
   avoidStairs,
   setAvoidStairs,
 }) => {
+  // Prepare props for Origin section
+  const originLocationProps = {
+    searchQuery: originSearchQuery,
+    setSearchQuery: setOriginSearchQuery,
+    predictions: originPredictions,
+    setPredictions: setOriginPredictions,
+    loading: loadingOrigin,
+    placeholder: origin || "Enter your starting location",
+    searchPlaces: searchOriginPlaces,
+    handleSelection: handleOriginSelection,
+  };
+
+  const originBuildingProps = {
+    value: origin,
+    onChangeText: parseOriginClassroom,
+    selectedBuilding: originBuilding,
+    buildingPlaceholder: "Enter Building (e.g. Hall)",
+    room: originRoom,
+    setRoom: setOriginRoom,
+    invalidRoom: invalidOriginRoom,
+    setInvalidRoom: setInvalidOriginRoom,
+    errorMessage: originBuilding
+      ? FloorRegistry.getErrorMessageForRoom(
+          originBuilding.id,
+          originBuilding.name,
+        )
+      : "",
+    showBuildingSuggestions: showOriginBuildingSuggestions,
+    buildingSuggestions: originBuildingSuggestions,
+    handleBuildingSelect: handleOriginBuildingSelect,
+  };
+
+  // Prepare props for Destination section
+  const destinationLocationProps = {
+    searchQuery: destinationSearchQuery,
+    setSearchQuery: setDestinationSearchQuery,
+    predictions: destinationPredictions,
+    setPredictions: setDestinationPredictions,
+    loading: loadingDestination,
+    placeholder: destination || "Enter your destination",
+    searchPlaces: searchDestinationPlaces,
+    handleSelection: handleDestinationSelection,
+  };
+
+  const destinationBuildingProps = {
+    value: destination,
+    onChangeText: parseDestination,
+    selectedBuilding: building,
+    buildingPlaceholder: "Enter classroom (e.g. Hall)",
+    room: room,
+    setRoom: setRoom,
+    invalidRoom: invalidDestinationRoom,
+    setInvalidRoom: setInvalidDestinationRoom,
+    errorMessage: building ? `This room doesn't exist in ${building.name}` : "",
+    showBuildingSuggestions: showBuildingSuggestions,
+    buildingSuggestions: buildingSuggestions,
+    handleBuildingSelect: handleBuildingSelect,
+  };
+
+  // Check if navigation button should be disabled
+  const isNavigationDisabled =
+    isLoading ||
+    (originInputType === "location" && !originDetails) ||
+    (originInputType === "classroom" && !originBuilding) ||
+    (destinationInputType === "location" && !destinationDetails) ||
+    (destinationInputType === "classroom" && !building);
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -87,7 +380,7 @@ const NavigationForm = ({
                 backgroundColor: avoidStairs ? "green" : "gray",
                 borderRadius: 5,
               }}
-              onPress={() => setAvoidStairs((prev) => !prev)} // <-- Add this
+              onPress={() => setAvoidStairs((prev) => !prev)}
             >
               <Text style={{ color: "white" }}>
                 {avoidStairs ? "ON" : "OFF"}
@@ -100,435 +393,28 @@ const NavigationForm = ({
           </Text>
         </View>
 
-        {/* Origin Input Section with Toggle */}
-        <View style={styles.inputGroup}>
-          <View style={styles.inputHeader}>
-            <Text style={styles.label}>Starting Point</Text>
-            <View style={styles.toggleContainer}>
-              <TouchableOpacity
-                style={[
-                  styles.toggleButton,
-                  originInputType === "location" && styles.toggleButtonActive,
-                ]}
-                onPress={() => setOriginInputType("location")}
-              >
-                <Text
-                  style={[
-                    styles.toggleText,
-                    originInputType === "location" && styles.toggleTextActive,
-                  ]}
-                >
-                  Location
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[
-                  styles.toggleButton,
-                  originInputType === "classroom" && styles.toggleButtonActive,
-                ]}
-                onPress={() => setOriginInputType("classroom")}
-              >
-                <Text
-                  style={[
-                    styles.toggleText,
-                    originInputType === "classroom" && styles.toggleTextActive,
-                  ]}
-                >
-                  Building
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+        {/* Origin Input Section */}
+        <InputSection
+          label="Starting Point"
+          inputType={originInputType}
+          setInputType={setOriginInputType}
+          locationProps={originLocationProps}
+          buildingProps={originBuildingProps}
+        />
 
-          {originInputType === "location" ? (
-            // Location input
-            <>
-              <View
-                style={[
-                  styles.searchBar,
-                  originSearchQuery.length > 0 && styles.searchBarFocused,
-                ]}
-              >
-                <Ionicons
-                  name="location-outline"
-                  size={20}
-                  style={styles.icon}
-                />
-                <TextInput
-                  value={originSearchQuery}
-                  onChangeText={searchOriginPlaces}
-                  placeholder={origin || "Enter your starting location"}
-                  style={styles.input}
-                />
-                {loadingOrigin ? (
-                  <ActivityIndicator color="#912338" />
-                ) : (
-                  originSearchQuery.length > 0 && (
-                    <TouchableOpacity
-                      onPress={() => {
-                        setOriginSearchQuery("");
-                        setOriginPredictions([]);
-                      }}
-                    >
-                      <Ionicons
-                        name="close-circle"
-                        size={20}
-                        style={styles.icon}
-                      />
-                    </TouchableOpacity>
-                  )
-                )}
-              </View>
-
-              {originPredictions.length > 0 && (
-                <ScrollView
-                  style={styles.predictionsList}
-                  nestedScrollEnabled={true}
-                >
-                  {originPredictions.map((item) => (
-                    <TouchableOpacity
-                      key={item.place_id}
-                      onPress={() =>
-                        handleOriginSelection(item.place_id, item.description)
-                      }
-                      style={styles.predictionItem}
-                    >
-                      <Ionicons
-                        name="location-outline"
-                        size={20}
-                        style={styles.icon}
-                      />
-                      <Text style={styles.predictionText}>
-                        {item.description}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
-              )}
-            </>
-          ) : (
-            // Building selection
-            <>
-              <TextInput
-                style={styles.roomInput}
-                placeholder="Enter Building (e.g. Hall)"
-                value={origin}
-                onChangeText={parseOriginClassroom}
-              />
-
-              {originBuilding && (
-                <>
-                  <TextInput
-                    style={[
-                      styles.roomInput,
-                      { marginTop: 8 },
-                      invalidOriginRoom && styles.invalidInput,
-                    ]}
-                    placeholder={FloorRegistry.getRoomPlaceholder(
-                      originBuilding.id,
-                    )}
-                    value={originRoom}
-                    onChangeText={(text) => {
-                      // Format the room ID properly based on building type
-                      let formattedRoom;
-
-                      if (originBuilding.id === "MB") {
-                        // Special handling for MB rooms
-                        let match;
-
-                        // Try matching format like 1.293
-                        match = /^\d+\.\d+$/.exec(text);
-                        if (match) {
-                          formattedRoom = `MB-${text}`;
-                        }
-                        // Try matching format like 1-293
-                        else if (/^\d+-\d+$/.test(text)) {
-                          formattedRoom = `MB-${text}`;
-                        }
-                        // If doesn't start with MB-, add the prefix
-                        else if (!text.startsWith("MB-")) {
-                          formattedRoom = `MB-${text}`;
-                        } else {
-                          formattedRoom = text;
-                        }
-                      } else if (
-                        originBuilding.id === "VE" ||
-                        originBuilding.id === "VL" ||
-                        originBuilding.id === "EV"
-                      ) {
-                        // Handle special rooms for Vanier Extension, Vanier Library and EV Building
-                        const specialRooms = [
-                          "stairs",
-                          "elevator",
-                          "toilet",
-                          "escalator",
-                          "water_fountain",
-                        ];
-
-                        if (specialRooms.includes(text.toLowerCase())) {
-                          formattedRoom = text.toLowerCase();
-                        } else if (/^\d+$/.exec(text)) {
-                          // Just a number like "101" - prefix with building code
-                          formattedRoom = `${originBuilding.id}-${text}`;
-                        } else if (
-                          !text.includes(`${originBuilding.id}-`) &&
-                          !specialRooms.includes(text.toLowerCase())
-                        ) {
-                          // Any other input without building prefix
-                          formattedRoom = `${originBuilding.id}-${text}`;
-                        } else {
-                          // Keep as is if already has building prefix
-                          formattedRoom = text;
-                        }
-                      } else {
-                        // Default handling for other buildings
-                        formattedRoom = !text.includes(`${originBuilding.id}-`)
-                          ? `${originBuilding.id}-${text}`
-                          : text;
-                      }
-
-                      setOriginRoom(formattedRoom);
-
-                      // Check if it's a valid room
-                      const isValid = FloorRegistry.isValidRoom(
-                        originBuilding.id,
-                        formattedRoom,
-                      );
-                      setInvalidOriginRoom(!isValid && text.length > 0);
-                    }}
-                  />
-                  {invalidOriginRoom && (
-                    <Text style={styles.errorText}>
-                      {FloorRegistry.getErrorMessageForRoom(
-                        originBuilding.id,
-                        originBuilding.name,
-                      )}
-                    </Text>
-                  )}
-                </>
-              )}
-
-              {showOriginBuildingSuggestions && (
-                <ScrollView
-                  style={styles.suggestionsContainer}
-                  nestedScrollEnabled={true}
-                >
-                  {originBuildingSuggestions.map((item) => (
-                    <TouchableOpacity
-                      key={item.id}
-                      style={styles.suggestionItem}
-                      onPress={() => handleOriginBuildingSelect(item)}
-                    >
-                      <Text style={styles.suggestionText}>
-                        {item.name} ({item.id})
-                      </Text>
-                      <Text style={styles.suggestionAddress}>
-                        {item.address}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
-              )}
-            </>
-          )}
-        </View>
-
-        {/* Destination Input Section with Toggle */}
-        <View style={styles.inputGroup}>
-          <View style={styles.inputHeader}>
-            <Text style={styles.label}>Destination</Text>
-            <View style={styles.toggleContainer}>
-              <TouchableOpacity
-                style={[
-                  styles.toggleButton,
-                  destinationInputType === "location" &&
-                    styles.toggleButtonActive,
-                ]}
-                onPress={() => setDestinationInputType("location")}
-              >
-                <Text
-                  style={[
-                    styles.toggleText,
-                    destinationInputType === "location" &&
-                      styles.toggleTextActive,
-                  ]}
-                >
-                  Location
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[
-                  styles.toggleButton,
-                  destinationInputType === "classroom" &&
-                    styles.toggleButtonActive,
-                ]}
-                onPress={() => setDestinationInputType("classroom")}
-              >
-                <Text
-                  style={[
-                    styles.toggleText,
-                    destinationInputType === "classroom" &&
-                      styles.toggleTextActive,
-                  ]}
-                >
-                  Building
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          {destinationInputType === "location" ? (
-            // Location input for destination with autocomplete
-            <>
-              <View
-                style={[
-                  styles.searchBar,
-                  destinationSearchQuery.length > 0 && styles.searchBarFocused,
-                ]}
-              >
-                <Ionicons
-                  name="location-outline"
-                  size={20}
-                  style={styles.icon}
-                />
-                <TextInput
-                  value={destinationSearchQuery}
-                  onChangeText={searchDestinationPlaces}
-                  placeholder={destination || "Enter your destination"}
-                  style={styles.input}
-                />
-                {loadingDestination ? (
-                  <ActivityIndicator color="#912338" />
-                ) : (
-                  destinationSearchQuery.length > 0 && (
-                    <TouchableOpacity
-                      onPress={() => {
-                        setDestinationSearchQuery("");
-                        setDestinationPredictions([]);
-                      }}
-                    >
-                      <Ionicons
-                        name="close-circle"
-                        size={20}
-                        style={styles.icon}
-                      />
-                    </TouchableOpacity>
-                  )
-                )}
-              </View>
-              {destinationPredictions.length > 0 && (
-                <ScrollView
-                  style={styles.predictionsList}
-                  nestedScrollEnabled={true}
-                >
-                  {destinationPredictions.map((item) => (
-                    <TouchableOpacity
-                      key={item.place_id}
-                      onPress={() =>
-                        handleDestinationSelection(
-                          item.place_id,
-                          item.description,
-                        )
-                      }
-                      style={styles.predictionItem}
-                    >
-                      <Ionicons
-                        name="location-outline"
-                        size={20}
-                        style={styles.icon}
-                      />
-                      <Text style={styles.predictionText}>
-                        {item.description}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
-              )}
-            </>
-          ) : (
-            // Building selection for destination
-            <>
-              <TextInput
-                style={styles.roomInput}
-                placeholder="Enter classroom (e.g. Hall)"
-                value={destination}
-                onChangeText={parseDestination}
-              />
-
-              {building && (
-                <>
-                  <TextInput
-                    style={[
-                      styles.roomInput,
-                      { marginTop: 8 },
-                      invalidDestinationRoom && styles.invalidInput,
-                    ]}
-                    placeholder={`Enter room number in ${building.name}`}
-                    value={room}
-                    onChangeText={(text) => {
-                      // Format the room ID properly
-                      const formattedRoom = !text.includes(`${building.id}-`)
-                        ? `${building.id}-${text}`
-                        : text;
-                      setRoom(formattedRoom);
-
-                      // Check if it's a valid room
-                      const isValid = FloorRegistry.isValidRoom(
-                        building.id,
-                        formattedRoom,
-                      );
-                      setInvalidDestinationRoom(!isValid && text.length > 0);
-                    }}
-                  />
-                  {invalidDestinationRoom && (
-                    <Text style={styles.errorText}>
-                      This room doesn&apos;t exist in {building.name}
-                    </Text>
-                  )}
-                </>
-              )}
-              {showBuildingSuggestions && (
-                <ScrollView
-                  style={styles.suggestionsContainer}
-                  nestedScrollEnabled={true}
-                >
-                  {buildingSuggestions.map((item) => (
-                    <TouchableOpacity
-                      key={item.id}
-                      style={styles.suggestionItem}
-                      onPress={() => handleBuildingSelect(item)}
-                    >
-                      <Text style={styles.suggestionText}>
-                        {item.name} ({item.id})
-                      </Text>
-                      <Text style={styles.suggestionAddress}>
-                        {item.address}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
-              )}
-            </>
-          )}
-        </View>
+        {/* Destination Input Section */}
+        <InputSection
+          label="Destination"
+          inputType={destinationInputType}
+          setInputType={setDestinationInputType}
+          locationProps={destinationLocationProps}
+          buildingProps={destinationBuildingProps}
+        />
 
         <TouchableOpacity
-          style={[
-            styles.button,
-            ((originInputType === "location" && !originDetails) ||
-              (originInputType === "classroom" && !originBuilding) ||
-              (destinationInputType === "location" && !destinationDetails) ||
-              (destinationInputType === "classroom" && !building)) &&
-              styles.disabledButton,
-          ]}
+          style={[styles.button, isNavigationDisabled && styles.disabledButton]}
           onPress={handleStartNavigation}
-          disabled={
-            isLoading ||
-            (originInputType === "location" && !originDetails) ||
-            (originInputType === "classroom" && !originBuilding) ||
-            (destinationInputType === "location" && !destinationDetails) ||
-            (destinationInputType === "classroom" && !building)
-          }
+          disabled={isNavigationDisabled}
         >
           {isLoading ? (
             <ActivityIndicator color="#fff" />
@@ -539,6 +425,41 @@ const NavigationForm = ({
       </ScrollView>
     </KeyboardAvoidingView>
   );
+};
+
+// PropTypes definitions for sub-components
+LocationInput.propTypes = {
+  searchQuery: PropTypes.string.isRequired,
+  setSearchQuery: PropTypes.func.isRequired,
+  predictions: PropTypes.array.isRequired,
+  setPredictions: PropTypes.func.isRequired,
+  loading: PropTypes.bool.isRequired,
+  placeholder: PropTypes.string.isRequired,
+  searchPlaces: PropTypes.func.isRequired,
+  handleSelection: PropTypes.func.isRequired,
+};
+
+BuildingInput.propTypes = {
+  value: PropTypes.string.isRequired,
+  onChangeText: PropTypes.func.isRequired,
+  selectedBuilding: PropTypes.object,
+  buildingPlaceholder: PropTypes.string.isRequired,
+  room: PropTypes.string.isRequired,
+  setRoom: PropTypes.func.isRequired,
+  invalidRoom: PropTypes.bool.isRequired,
+  setInvalidRoom: PropTypes.func.isRequired,
+  errorMessage: PropTypes.string.isRequired,
+  showBuildingSuggestions: PropTypes.bool.isRequired,
+  buildingSuggestions: PropTypes.array.isRequired,
+  handleBuildingSelect: PropTypes.func.isRequired,
+};
+
+InputSection.propTypes = {
+  label: PropTypes.string.isRequired,
+  inputType: PropTypes.string.isRequired,
+  setInputType: PropTypes.func.isRequired,
+  locationProps: PropTypes.object.isRequired,
+  buildingProps: PropTypes.object.isRequired,
 };
 
 NavigationForm.propTypes = {

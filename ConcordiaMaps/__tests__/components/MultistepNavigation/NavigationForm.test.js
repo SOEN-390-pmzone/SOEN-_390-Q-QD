@@ -391,7 +391,8 @@ describe("NavigationForm", () => {
       />,
     );
 
-    const input = getByPlaceholderText("Enter room number in Hall Building");
+    // Update the placeholder text to match what our mock returns
+    const input = getByPlaceholderText("Enter room number");
     fireEvent.changeText(input, "920");
 
     expect(mockProps.setRoom).toHaveBeenCalledWith("H-920");
@@ -431,7 +432,8 @@ describe("NavigationForm", () => {
       />,
     );
 
-    const input = getByPlaceholderText("Enter room number in Hall Building");
+    // Update the placeholder text to match what our mock returns
+    const input = getByPlaceholderText("Enter room number");
     fireEvent.changeText(input, "999");
 
     expect(mockProps.setInvalidDestinationRoom).toHaveBeenCalledWith(true);
