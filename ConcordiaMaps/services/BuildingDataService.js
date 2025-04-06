@@ -86,6 +86,13 @@ export const CONCORDIA_BUILDINGS = [
     latitude: 45.459026,
     longitude: -73.638606,
   },
+  {
+    id: "CC",
+    name: "CC Building",
+    address: "7141 Sherbrooke St. W",
+    latitude: 45.459026,
+    longitude: -73.638606,
+  },
 ];
 
 class FloorRegistry {
@@ -636,6 +643,8 @@ class FloorRegistry {
       library: "LB",
       ve: "VE",
       vanierlibrary: "VL",
+      vanierextension: "VE",
+      cc: "CC",
     };
 
     // Convert to uppercase for consistency
@@ -651,6 +660,7 @@ class FloorRegistry {
       LB: { latitude: 45.49674, longitude: -73.57785 },
       VE: { latitude: 45.459044, longitude: -73.638409 },
       VL: { latitude: 45.459249, longitude: -73.638265 },
+      CC: { latitude: 45.459044, longitude: -73.638409 },
     };
 
     return coordinates[buildingCode] || null;
@@ -691,6 +701,7 @@ class FloorRegistry {
       EV: "Enter room number (e.g. 200 or stairs)",
       H: "Enter room number (e.g. 920 or elevator)",
       MB: "Enter room number (e.g. 1.293 or stairs)",
+      CC: "Enter room number (e.g. 101 or elevator)",
     };
 
     return placeholders[buildingId] || `Enter room number`;
@@ -705,6 +716,8 @@ class FloorRegistry {
       VE: 'Room not found. Try a room number or "elevator"/"stairs".',
       EV: 'Room not found. Try a room number or "elevator"/"stairs".',
       H: "Room not found. Try a format like 920 or H-920.",
+      VL: 'Room not found. Try a room number or "elevator"/"stairs".',
+      CC: 'Room not found. Try a room number or "elevator"/"stairs".',
     };
 
     return (
@@ -1067,6 +1080,9 @@ class FloorRegistry {
 
       ve: "vanierextension",
       vanierextension: "vanierextension",
+
+      cc: "ccbuilding",
+      ccbuilding: "ccbuilding",
     };
 
     return buildingIdMap[lowerBuildingId] || lowerBuildingId;
