@@ -20,7 +20,9 @@ export const EventDetails = ({
   <>
     <View style={styles.eventContainer}>
       <View style={styles.timeCircle}>
-        <Text style={styles.timeText}>{formatTime(timeRemaining)}</Text>
+        <Text testID="timer-text" style={styles.timeText}>
+          {formatTime(timeRemaining)}
+        </Text>
       </View>
       <View style={styles.eventDetails}>
         <Text style={styles.eventTitleNext}>{event.title}</Text>

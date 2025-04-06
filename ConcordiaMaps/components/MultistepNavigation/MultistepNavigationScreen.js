@@ -30,7 +30,6 @@ import {
 } from "../IndoorNavigation/RoomToRoomNavigation";
 import Header from "../Header";
 import NavBar from "../NavBar";
-import Footer from "../Footer";
 import FloorRegistry from "../../services/BuildingDataService";
 import { getStepColor } from "../../services/NavigationStylesService";
 
@@ -67,7 +66,7 @@ const MultistepNavigationScreen = () => {
   const [indoorFloorPlans] = useState({});
   const [showIndoorNavigation, setShowIndoorNavigation] = useState(false);
   const [indoorNavigationParams, setIndoorNavigationParams] = useState(null);
-
+  const [avoidStairs, setAvoidStairs] = useState(false);
   const [navigationSteps] = useState([]);
 
   // State to track available rooms for building/validation
@@ -447,7 +446,8 @@ const MultistepNavigationScreen = () => {
   };
 
   const handleStartNavigation = () => {
-    NavigationPlanService.createNavigationPlan({
+    // Create an object with all parameters
+    const navigationParams = {
       originInputType,
       originDetails,
       origin,
@@ -458,9 +458,35 @@ const MultistepNavigationScreen = () => {
       destination,
       building,
       room,
+    };
+
+    // Log the entire object
+    console.log("\n===== NAVIGATION START PARAMETERS =====");
+    console.log(JSON.stringify(navigationParams, null, 2));
+    console.log("\n--- Individual Parameter Details ---");
+
+    // Log each parameter individually with type information
+    Object.entries(navigationParams).forEach(([key, value]) => {
+      console.log(
+        `${key}: ${JSON.stringify(value)} (${value === null ? "null" : typeof value})`,
+      );
+    });
+
+    // Log callback functions (existence only since they can't be stringified)
+    console.log("\n--- Callbacks ---");
+    console.log("setInvalidOriginRoom: [Function]");
+    console.log("setInvalidDestinationRoom: [Function]");
+    console.log("setIsLoading: [Function]");
+    console.log("navigation: [Navigation Object]");
+    console.log("======================================\n");
+
+    // Call the original function with the same parameters
+    NavigationPlanService.createNavigationPlan({
+      ...navigationParams,
       setInvalidOriginRoom,
       setInvalidDestinationRoom,
       setIsLoading,
+      avoidStairs,
       navigation,
     });
   };
@@ -563,6 +589,7 @@ const MultistepNavigationScreen = () => {
         endFloor: step.endFloor,
         skipSelection: true,
         returnScreen: "MultistepNavigation",
+        avoidStairs: avoidStairs, // Add this line
         returnParams: {
           navigationPlan: updatedPlan,
           currentStepIndex: currentStepIndex,
@@ -643,7 +670,7 @@ const MultistepNavigationScreen = () => {
         setTimeout(() => {
           loadFloorPlans().then((success) => {
             if (success) {
-              calculatePath();
+              calculatePath({ avoidStairs });
             }
           });
         }, 800); // Increased delay for more reliability
@@ -926,7 +953,6 @@ const MultistepNavigationScreen = () => {
       <Header />
       <NavBar />
       <View style={styles.navigationContainer}>
-        <Footer />
         {navigationPlan ? (
           <NavigationStepsContainer
             navigationPlan={navigationPlan}
@@ -987,6 +1013,8 @@ const MultistepNavigationScreen = () => {
             handleBuildingSelect={handleBuildingSelectHandler}
             handleDestinationSelection={handleDestinationSelection}
             handleStartNavigation={handleStartNavigation}
+            avoidStairs={avoidStairs}
+            setAvoidStairs={setAvoidStairs}
           />
         )}
         <ExpandedMapModal
