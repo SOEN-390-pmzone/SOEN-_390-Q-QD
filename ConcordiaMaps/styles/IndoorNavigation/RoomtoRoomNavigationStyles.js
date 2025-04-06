@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#912338",
     borderRadius: 4,
     padding: 4,
-    zIndex: 10,
+    zIndex: 2,
   },
   expandButtonText: {
     color: "white",

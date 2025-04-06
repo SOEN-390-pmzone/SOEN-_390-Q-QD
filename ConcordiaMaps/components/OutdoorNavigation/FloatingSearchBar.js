@@ -11,46 +11,40 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import * as Location from "expo-location";
 import styles from "../../styles";
 import PropTypes from "prop-types";
-import * as Crypto from "expo-crypto";
+import { useGoogleMapDirections } from "../../hooks/useGoogleMapDirections";
 
 const FloatingSearchBar = ({
   onPlaceSelect,
   placeholder,
+  value,
+  onChangeText,
+  onFocus,
   nestedScrollEnabled = true,
 }) => {
   const GOOGLE_MAPS_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
-
   const [searchQuery, setSearchQuery] = useState("");
   const [predictions, setPredictions] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState("");
+  const setSelectedLocationDescription = useState("")[1];
   const [userLocation, setUserLocation] = useState(null);
   const sessionTokenRef = useRef("");
+  const inputRef = useRef(null);
 
-  const generateRandomToken = async () => {
-    try {
-      // Generate random bytes
-      const randomBytes = await Crypto.getRandomBytesAsync(16);
-
-      // Convert to base64 string
-      let base64 = "";
-      for (const byte of randomBytes) {
-        base64 += String.fromCharCode(byte);
-      }
-      base64 = btoa(base64);
-
-      // Remove non-alphanumeric characters and trim to length
-      return base64.replace(/[+/=]/g, "").substring(0, 16);
-    } catch (error) {
-      console.error("Error generating random token:", error);
-    }
-  };
+  // Use the hook instead of importing the API key directly
+  const {
+    generateRandomToken,
+    searchPlaces: searchPlacesFromHook,
+    fetchPlaceDetails,
+  } = useGoogleMapDirections();
 
   // Generate a new session token when component mounts
   useEffect(() => {
-    const token = generateRandomToken();
-    sessionTokenRef.current = token;
+    const initToken = async () => {
+      const token = await generateRandomToken();
+      sessionTokenRef.current = token;
+    };
 
+    initToken();
     return () => {
       // Clear session token on unmount
       sessionTokenRef.current = "";
@@ -67,12 +61,10 @@ const FloatingSearchBar = ({
         }
 
         let location = await Location.getCurrentPositionAsync({});
-        const userCoords = {
+        setUserLocation({
           latitude: location.coords.latitude,
           longitude: location.coords.longitude,
-        };
-
-        setUserLocation(userCoords);
+        });
       } catch (error) {
         console.error("Error getting location:", error);
       }
@@ -81,7 +73,7 @@ const FloatingSearchBar = ({
 
   const searchPlaces = async (text) => {
     setSearchQuery(text);
-    setSelectedLocation("");
+    setSelectedLocationDescription("");
     if (text.length < 3) {
       setPredictions([]);
       return;
@@ -89,67 +81,84 @@ const FloatingSearchBar = ({
     setLoading(true);
 
     try {
-      let locationParam = "";
-      if (userLocation?.latitude && userLocation?.longitude) {
-        locationParam = `&location=${userLocation.latitude},${userLocation.longitude}&radius=5000`;
+      // Use the searchPlaces method from the hook
+      const { predictions: placePredictions, error } =
+        await searchPlacesFromHook(text, userLocation, sessionTokenRef.current);
+
+      if (error) {
+        console.error("Error searching places:", error);
       } else {
-        console.warn(
-          "User location not available. Searching without location bias.",
-        );
+        setPredictions(placePredictions);
       }
-
-      //use the session token to prevent caching of search results
-      const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${GOOGLE_MAPS_API_KEY}&components=country:ca${locationParam}&sessiontoken=${sessionTokenRef.current}`,
-      );
-
-      const { predictions } = await response.json();
-      setPredictions(predictions || []);
     } catch (error) {
-      console.error(error);
+      console.error("Error in searchPlaces:", error);
+      setPredictions([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSelection = async (placeId) => {
+  const handleSelection = async (placeId, description) => {
     try {
-      const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry&key=${GOOGLE_MAPS_API_KEY}&sessiontoken=${sessionTokenRef.current}`,
+      // Use the fetchPlaceDetails method from the hook
+      const placeDetails = await fetchPlaceDetails(
+        placeId,
+        sessionTokenRef.current,
       );
-      const { result } = await response.json();
-      if (result?.geometry?.location) {
+
+      if (placeDetails) {
         onPlaceSelect({
-          latitude: result.geometry.location.lat,
-          longitude: result.geometry.location.lng,
+          latitude: placeDetails.latitude,
+          longitude: placeDetails.longitude,
         });
-        setSearchQuery("");
+        setSearchQuery(description);
+        setSelectedLocationDescription(description);
         setPredictions([]);
 
-        // Use the function defined above
-        sessionTokenRef.current = generateRandomToken();
+        // Get a new token for next search
+        const newToken = await generateRandomToken();
+        sessionTokenRef.current = newToken;
+
+        // Reset cursor position to beginning after a short delay
+        setTimeout(() => {
+          if (inputRef.current) {
+            inputRef.current.setSelection(0, 0);
+          }
+        }, 100);
       }
     } catch (error) {
       console.error("Error fetching place details:", error);
     }
   };
 
+  // Use controlled input if value is provided
+  const displayValue = value !== undefined ? value : searchQuery;
+
   return (
     <View style={{ width: "90%" }}>
       <View style={styles.searchBar}>
         <Ionicons name="search" size={20} color="#888" style={styles.icon} />
         <TextInput
-          value={searchQuery}
-          onChangeText={searchPlaces}
-          placeholder={selectedLocation || placeholder}
+          ref={inputRef}
+          value={displayValue}
+          onChangeText={(text) => {
+            if (onChangeText) onChangeText(text);
+            searchPlaces(text);
+          }}
+          placeholder={placeholder || "Search for a place..."}
           style={styles.input}
+          onFocus={onFocus}
         />
         {loading && <ActivityIndicator />}
-        {searchQuery.length > 0 && (
+        {displayValue.length > 0 && (
           <TouchableOpacity
             onPress={() => {
               setSearchQuery("");
+              setSelectedLocationDescription("");
               setPredictions([]);
+              if (onChangeText) {
+                onChangeText("");
+              }
             }}
           >
             <Ionicons name="close-circle" size={20} color="#888" />
@@ -163,7 +172,7 @@ const FloatingSearchBar = ({
           {predictions.map((item) => (
             <TouchableOpacity
               key={item.place_id}
-              onPress={() => handleSelection(item.place_id)}
+              onPress={() => handleSelection(item.place_id, item.description)}
               style={styles.item}
             >
               <Ionicons
@@ -184,6 +193,9 @@ const FloatingSearchBar = ({
 FloatingSearchBar.propTypes = {
   onPlaceSelect: PropTypes.func.isRequired,
   placeholder: PropTypes.string,
+  value: PropTypes.string,
+  onChangeText: PropTypes.func,
+  onFocus: PropTypes.func,
   nestedScrollEnabled: PropTypes.bool,
 };
 

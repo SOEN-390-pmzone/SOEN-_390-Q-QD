@@ -559,10 +559,13 @@ const IndoorNavigation = ({ route, navigation }) => {
       <TouchableOpacity style={styles.button} onPress={calculatePath}>
         <Text style={styles.buttonText}>Find Path</Text>
       </TouchableOpacity>
-
       <View style={styles.resultContainerWrapper}>
         <Text style={styles.resultTitle}>Navigation Path:</Text>
-        <ScrollView style={styles.resultContainer} nestedScrollEnabled={true}>
+        <ScrollView
+          style={styles.resultContainer}
+          contentContainerStyle={styles.resultContentContainer}
+          nestedScrollEnabled={true}
+        >
           {path.length > 0 ? (
             <View style={styles.pathContainer}>
               {path.map((node) => (
