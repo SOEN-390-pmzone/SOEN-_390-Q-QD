@@ -13,6 +13,7 @@ const AddressSelector = ({ onAddressSelect }) => {
         placeholder="Enter an address or landmark"
         testID="address-search-bar"
         nestedScrollEnabled={true}
+        maxSuggestions={3}
       />
     </View>
   );
