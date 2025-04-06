@@ -57,109 +57,171 @@ class DistanceCalculatorService {
    */
   _determineStrategy(locationA, locationB) {
     // Validate input parameters
+    if (!this._areLocationsValid(locationA, locationB)) {
+      return this.strategies.Outdoor; // Fallback
+    }
+
+    // Normalize location types
+    const { typeA, typeB } = this._getNormalizedTypes(locationA, locationB);
+
+    // Handle by location type combinations
+    if (typeA === "indoor" && typeB === "indoor") {
+      return this._getIndoorToIndoorStrategy(locationA, locationB);
+    } else if (typeA === "outdoor" && typeB === "outdoor") {
+      return this._getOutdoorToOutdoorStrategy(locationA, locationB);
+    } else {
+      return this._getMixedStrategy(locationA, locationB);
+    }
+  }
+
+  /**
+   * Validates that both locations exist
+   * @private
+   */
+  _areLocationsValid(locationA, locationB) {
     if (!locationA || !locationB) {
       console.warn(
         "Missing location parameter, using Outdoor strategy as fallback",
       );
-      return this.strategies.Outdoor;
+      return false;
     }
+    return true;
+  }
 
-    // Normalize types if not explicitly set
+  /**
+   * Normalizes location types
+   * @private
+   */
+  _getNormalizedTypes(locationA, locationB) {
     const typeA =
       locationA.type || (locationA.buildingId ? "indoor" : "outdoor");
     const typeB =
       locationB.type || (locationB.buildingId ? "indoor" : "outdoor");
+    return { typeA, typeB };
+  }
 
-    // Normalize building IDs for comparison (if they exist)
-    const normalizeBuildingId = (id) => {
-      return id ? id.toString().trim().toUpperCase() : null;
-    };
+  /**
+   * Normalizes building IDs for comparison
+   * @private
+   */
+  _normalizeBuildingId(id) {
+    return id ? id.toString().trim().toUpperCase() : null;
+  }
 
-    const buildingIdA = normalizeBuildingId(locationA.buildingId);
-    const buildingIdB = normalizeBuildingId(locationB.buildingId);
+  /**
+   * Determines strategy for indoor-to-indoor routing
+   * @private
+   */
+  _getIndoorToIndoorStrategy(locationA, locationB) {
+    const buildingIdA = this._normalizeBuildingId(locationA.buildingId);
+    const buildingIdB = this._normalizeBuildingId(locationB.buildingId);
 
-    // CASE 1: Both locations are indoor
-    if (typeA === "indoor" && typeB === "indoor") {
-      // Validate building IDs
-      if (!buildingIdA || !buildingIdB) {
-        console.warn(
-          "Indoor location missing buildingId, using Mixed strategy",
-        );
-        return this.strategies.Mixed;
-      }
-
-      // CASE 1A: Same building
-      if (buildingIdA === buildingIdB) {
-        // Validate floor information
-        if (
-          locationA.floor === undefined ||
-          locationA.floor === null ||
-          locationB.floor === undefined ||
-          locationB.floor === null
-        ) {
-          console.warn(
-            "Indoor location missing floor information, using DifferentFloorSameBuilding strategy",
-          );
-          return this.strategies.DifferentFloorSameBuilding;
-        }
-
-        // CASE 1A-1: Same floor
-        if (locationA.floor === locationB.floor) {
-          return this.strategies.SameFloorSameBuilding;
-        }
-        // CASE 1A-2: Different floors
-        else {
-          return this.strategies.DifferentFloorSameBuilding;
-        }
-      }
-      // CASE 1B: Different buildings
-      else {
-        // Use DifferentBuilding strategy for all different buildings
-        return this.strategies.DifferentBuilding;
-      }
-    }
-    // CASE 2: Both locations are outdoor
-    else if (typeA === "outdoor" && typeB === "outdoor") {
-      // Validate coordinates properly - check for undefined or null specifically
-      const isMissingCoordinates =
-        locationA.latitude === undefined ||
-        locationA.latitude === null ||
-        locationA.longitude === undefined ||
-        locationA.longitude === null ||
-        locationB.latitude === undefined ||
-        locationB.latitude === null ||
-        locationB.longitude === undefined ||
-        locationB.longitude === null;
-
-      if (isMissingCoordinates) {
-        console.warn(
-          "Outdoor location missing coordinates, using Outdoor strategy anyway",
-        );
-      }
-      return this.strategies.Outdoor;
-    }
-    // CASE 3: Mixed indoor and outdoor locations
-    else {
-      // Identify the indoor location using normalized types
-      const indoorLocation = typeA === "indoor" ? locationA : locationB;
-      const indoorLocationBuildingId = normalizeBuildingId(
-        indoorLocation.buildingId,
-      );
-
-      if (!indoorLocationBuildingId) {
-        console.warn("Indoor location missing buildingId in mixed scenario");
-      }
-
-      // Ensure the strategy exists
-      if (!this.strategies.Mixed) {
-        console.error(
-          "Mixed strategy not found, using Outdoor strategy as fallback",
-        );
-        return this.strategies.Outdoor;
-      }
-
+    // Validate building IDs
+    if (!buildingIdA || !buildingIdB) {
+      console.warn("Indoor location missing buildingId, using Mixed strategy");
       return this.strategies.Mixed;
     }
+
+    // Different buildings
+    if (buildingIdA !== buildingIdB) {
+      return this.strategies.DifferentBuilding;
+    }
+
+    // Same building - check floors
+    return this._getSameBuildingStrategy(locationA, locationB);
+  }
+
+  /**
+   * Determines strategy for same building routing
+   * @private
+   */
+  _getSameBuildingStrategy(locationA, locationB) {
+    // Validate floor information
+    const hasValidFloors = this._hasValidFloorInfo(locationA, locationB);
+
+    if (!hasValidFloors) {
+      console.warn(
+        "Indoor location missing floor information, using DifferentFloorSameBuilding strategy",
+      );
+      return this.strategies.DifferentFloorSameBuilding;
+    }
+
+    // Check if same floor
+    return locationA.floor === locationB.floor
+      ? this.strategies.SameFloorSameBuilding
+      : this.strategies.DifferentFloorSameBuilding;
+  }
+
+  /**
+   * Checks if both locations have valid floor information
+   * @private
+   */
+  _hasValidFloorInfo(locationA, locationB) {
+    return !(
+      locationA.floor === undefined ||
+      locationA.floor === null ||
+      locationB.floor === undefined ||
+      locationB.floor === null
+    );
+  }
+
+  /**
+   * Determines strategy for outdoor-to-outdoor routing
+   * @private
+   */
+  _getOutdoorToOutdoorStrategy(locationA, locationB) {
+    const isMissingCoordinates = this._isMissingCoordinates(
+      locationA,
+      locationB,
+    );
+
+    if (isMissingCoordinates) {
+      console.warn(
+        "Outdoor location missing coordinates, using Outdoor strategy anyway",
+      );
+    }
+
+    return this.strategies.Outdoor;
+  }
+
+  /**
+   * Checks if any location is missing coordinates
+   * @private
+   */
+  _isMissingCoordinates(locationA, locationB) {
+    return (
+      locationA.latitude === undefined ||
+      locationA.latitude === null ||
+      locationA.longitude === undefined ||
+      locationA.longitude === null ||
+      locationB.latitude === undefined ||
+      locationB.latitude === null ||
+      locationB.longitude === undefined ||
+      locationB.longitude === null
+    );
+  }
+
+  /**
+   * Determines strategy for mixed indoor/outdoor routing
+   * @private
+   */
+  _getMixedStrategy(locationA, locationB) {
+    const { typeA } = this._getNormalizedTypes(locationA, locationB);
+    const indoorLocation = typeA === "indoor" ? locationA : locationB;
+    const buildingId = this._normalizeBuildingId(indoorLocation.buildingId);
+
+    if (!buildingId) {
+      console.warn("Indoor location missing buildingId in mixed scenario");
+    }
+
+    if (!this.strategies.Mixed) {
+      console.error(
+        "Mixed strategy not found, using Outdoor strategy as fallback",
+      );
+      return this.strategies.Outdoor;
+    }
+
+    return this.strategies.Mixed;
   }
 }
 
