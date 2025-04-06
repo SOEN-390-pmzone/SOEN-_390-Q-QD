@@ -195,7 +195,6 @@ FloatingSearchBar.propTypes = {
   value: PropTypes.string,
   onChangeText: PropTypes.func,
   onFocus: PropTypes.func,
-  nestedScrollEnabled: PropTypes.bool,
   maxSuggestions: PropTypes.number,
 };
 

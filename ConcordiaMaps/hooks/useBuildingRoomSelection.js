@@ -26,7 +26,7 @@ export const useBuildingRoomSelection = () => {
       const buildingType = getBuildingType(selectedBuilding);
       if (buildingType) {
         const building = FloorRegistry.getBuilding(buildingType);
-        if (building && building.floors) {
+        if (building?.floors) {
           setAvailableFloors(Object.keys(building.floors));
           console.log("Getting available floors from building");
         }

@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import React, { useState } from "react";
 import {
   View,
@@ -30,7 +29,7 @@ const doubleCheckHallRoomFormat = (buildingId, roomId) => {
   // Only process H building rooms
   if (buildingId === "H" && typeof roomId === "string") {
     // Check for all possible redundant H prefix patterns
-    if (roomId.match(/^H-?H-?\d+/i)) {
+    if (RegExp(/^H-?H-?\d+/i).exec(roomId)) {
       const fixed = roomId.replace(/^H-?H-?(\d+)/i, "H-$1");
       console.log(`🛠️ Fixed redundant H prefix: ${roomId} → ${fixed}`);
       return fixed;
@@ -53,7 +52,7 @@ const NavigationOrchestratorScreen = () => {
   const [selectedStep, setSelectedStep] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   console.log("Navigation preferences - Avoid outdoor paths:", avoidOutdoor);
-
+  console.log(isLoading);
   const showDirections = (fromIndex, toIndex) => {
     const fromStep = steps[fromIndex];
     const toStep = steps[toIndex];
@@ -122,17 +121,23 @@ const NavigationOrchestratorScreen = () => {
       );
 
       // Format room numbers using the standardized utility
-      let fromRoom = fromStep.room
-        ? isSpecialRoom(fromStep.room)
-          ? fromStep.room.toLowerCase()
-          : formatRoomNumber(normalizedFromBuildingId, fromStep.room)
-        : null;
+      let fromRoom = null;
+      if (fromStep.room) {
+        if (isSpecialRoom(fromStep.room)) {
+          fromRoom = fromStep.room.toLowerCase();
+        } else {
+          fromRoom = formatRoomNumber(normalizedFromBuildingId, fromStep.room);
+        }
+      }
 
-      let toRoom = toStep.room
-        ? isSpecialRoom(toStep.room)
-          ? toStep.room.toLowerCase()
-          : formatRoomNumber(normalizedToBuildingId, toStep.room)
-        : null;
+      let toRoom = null;
+      if (toStep.room) {
+        if (isSpecialRoom(toStep.room)) {
+          toRoom = toStep.room.toLowerCase();
+        } else {
+          toRoom = formatRoomNumber(normalizedToBuildingId, toStep.room);
+        }
+      }
 
       // Double check Hall building rooms to fix any redundant H prefixes
       fromRoom = doubleCheckHallRoomFormat(normalizedFromBuildingId, fromRoom);

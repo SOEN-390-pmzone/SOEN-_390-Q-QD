@@ -12,6 +12,17 @@ const NavigationButton = ({
   // Only show subway icon when both conditions are true
   const showTunnelIcon = hasTunnel && avoidOutdoor;
 
+  // Extract the nested ternary into a function that determines button text
+  const getButtonText = () => {
+    if (showTunnelIcon) {
+      return "Use Tunnel";
+    } else if (avoidOutdoor) {
+      return "Indoor Path";
+    } else {
+      return "Get Directions";
+    }
+  };
+
   return (
     <TouchableOpacity
       style={[
@@ -27,13 +38,7 @@ const NavigationButton = ({
         size={24}
         color="#fff"
       />
-      <Text style={styles.directionButtonText}>
-        {showTunnelIcon
-          ? "Use Tunnel"
-          : avoidOutdoor
-            ? "Indoor Path"
-            : "Get Directions"}
-      </Text>
+      <Text style={styles.directionButtonText}>{getButtonText()}</Text>
     </TouchableOpacity>
   );
 };
