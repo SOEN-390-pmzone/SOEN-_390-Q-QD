@@ -3,11 +3,16 @@ import FloorRegistry from "../services/BuildingDataService";
 
 export const useBuildingRoomSelection = () => {
   const [selectedBuilding, setSelectedBuilding] = useState("");
-  const [selectedFloor, setSelectedFloor] = useState(""); // Add this state
+  const [selectedFloor, setSelectedFloor] = useState("");
   const [selectedRoom, setSelectedRoom] = useState("");
   const [buildings, setBuildings] = useState([]);
-  const [availableFloors, setAvailableFloors] = useState([]); // Add this state
+  const [availableFloors, setAvailableFloors] = useState([]);
   const [availableRooms, setAvailableRooms] = useState([]);
+
+  // Helper function to get building type from building ID
+  const getBuildingType = (buildingId) => {
+    return FloorRegistry.getBuildingTypeFromId(buildingId);
+  };
 
   // Load buildings on mount
   useEffect(() => {
@@ -18,8 +23,7 @@ export const useBuildingRoomSelection = () => {
   useEffect(() => {
     if (selectedBuilding) {
       console.log("Getting available floors from building");
-      const buildingType =
-        FloorRegistry.getBuildingTypeFromId(selectedBuilding);
+      const buildingType = getBuildingType(selectedBuilding);
       if (buildingType) {
         const building = FloorRegistry.getBuilding(buildingType);
         if (building && building.floors) {
@@ -38,8 +42,7 @@ export const useBuildingRoomSelection = () => {
   // Update available rooms when floor changes
   useEffect(() => {
     if (selectedBuilding && selectedFloor) {
-      const buildingType =
-        FloorRegistry.getBuildingTypeFromId(selectedBuilding);
+      const buildingType = getBuildingType(selectedBuilding);
       if (buildingType) {
         const rooms = FloorRegistry.getRooms(buildingType, selectedFloor);
         if (rooms) {
@@ -61,9 +64,9 @@ export const useBuildingRoomSelection = () => {
     buildings,
     selectedBuilding,
     setSelectedBuilding,
-    selectedFloor, // Add this
-    setSelectedFloor, // Add this
-    availableFloors, // Add this
+    selectedFloor,
+    setSelectedFloor,
+    availableFloors,
     selectedRoom,
     setSelectedRoom,
     availableRooms,
