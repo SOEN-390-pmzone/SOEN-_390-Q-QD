@@ -1,7 +1,5 @@
 import {
   OutdoorToOutdoor,
-  RoomToExit,
-  ExitToRoom,
   BaseCalculation,
 } from "../../../services/JourneyOptimizer/RouteDecorators";
 import { useGoogleMapDirections } from "../../../hooks/useGoogleMapDirections";
