@@ -1,4 +1,5 @@
 import * as Calendar from "expo-calendar";
+import { COURSE_PREFIXES } from "../constants/CoursePrefixes";
 
 /**
  * Fetches the next upcoming calendar event with allowed prefixes.
@@ -44,10 +45,9 @@ export async function getNextEvent() {
       );
 
   // Filter events to include only those with titles starting with allowed prefixes.
-  const allowedPrefixes = ["SOEN", "COMP", "ENGR"];
   const filteredEvents = sortedEvents.filter((event) => {
     const title = event.title || "";
-    return allowedPrefixes.some((prefix) => title.startsWith(prefix));
+    return COURSE_PREFIXES.some((prefix) => title.startsWith(prefix));
   });
 
   return filteredEvents.length > 0 ? filteredEvents[0] : null;

@@ -1,5 +1,6 @@
 import Header from "./Header";
 import NavBar from "./NavBar";
+import Footer from "./Footer";
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -8,13 +9,14 @@ import {
   TouchableOpacity,
   Modal,
   ScrollView,
+  Alert,
 } from "react-native";
 import * as Calendar from "expo-calendar";
 import { format, addDays, subDays } from "date-fns";
 import styles from "../styles";
 import { Ionicons } from "@expo/vector-icons";
-import Footer from "./Footer";
-import { useNavigation } from "@react-navigation/native";
+import useDirectionsHandler from "../hooks/useDirectionsHandler";
+import useDataFlow from "../components/userInPolygon";
 
 const CalendarScreen = () => {
   const [events, setEvents] = useState([]);
@@ -22,11 +24,37 @@ const CalendarScreen = () => {
   const [selectedCalendarIds, setSelectedCalendarIds] = useState([]);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [modalVisible, setModalVisible] = useState(false);
-  const navigation = useNavigation(); // Initialize navigation
+
+  const [userLocationStatus, setUserLocationStatus] = useState("");
+  const { location, isIndoors, buildingName } = useDataFlow();
+  const { getDirectionsTo, destinationLocation } = useDirectionsHandler({
+    location,
+    isIndoors,
+    buildingName,
+  });
 
   useEffect(() => {
     requestCalendarPermission();
+    updateUserLocationStatus();
   }, []);
+
+  useEffect(() => {
+    updateUserLocationStatus();
+  }, [location, isIndoors, buildingName]);
+
+  // Function to update user location status message
+  const updateUserLocationStatus = () => {
+    console.log("you are here");
+    console.log(destinationLocation);
+    console.log("User location status:", userLocationStatus);
+    if (!location || (!location.latitude && !location.longitude)) {
+      setUserLocationStatus("Obtaining your location...");
+    } else if (isIndoors && buildingName) {
+      setUserLocationStatus(`You are currently inside: ${buildingName}`);
+    } else {
+      setUserLocationStatus("You are currently outdoors");
+    }
+  };
 
   useEffect(() => {
     fetchCalendarEvents();
@@ -37,7 +65,7 @@ const CalendarScreen = () => {
     if (status === "granted") {
       fetchCalendars();
     } else {
-      alert("Permission to access the calendar was denied.");
+      Alert.alert("Permission to access the calendar was denied.");
     }
   };
 
@@ -81,23 +109,6 @@ const CalendarScreen = () => {
     setSelectedCalendarIds((prev) =>
       prev.includes(id) ? prev.filter((calId) => calId !== id) : [...prev, id],
     );
-  };
-
-  // Helper function to handle Get Directions button press
-  const handleGetDirections = (event) => {
-    if (event.location) {
-      const defaultOrigin = {
-        latitude: 45.494971642137095,
-        longitude: -73.57791280320929,
-      };
-      navigation.navigate("GetDirections", {
-        origin: defaultOrigin,
-        destination: event.location,
-        disableLiveLocation: true,
-      });
-    } else {
-      alert("There is no location associated with this event.");
-    }
   };
 
   return (
@@ -185,7 +196,7 @@ const CalendarScreen = () => {
               <View style={styles.eventCard}>
                 <Text style={styles.eventTitle}>{item.title}</Text>
                 <Text style={styles.eventInfo}>
-                  {item.location ?? "No additional information"}
+                  {item.location ?? "No additionnal information"}
                 </Text>
                 <Text style={styles.eventInfo}>
                   {format(new Date(item.startDate), "hh:mm a")} -{" "}
@@ -195,10 +206,11 @@ const CalendarScreen = () => {
                 <TouchableOpacity
                   testID="getClassDirectionsButton"
                   style={styles.classDirectionsButton}
-                  onPress={() => handleGetDirections(item)}
+                  onPress={() => getDirectionsTo(item.location)}
                 >
                   <Text style={styles.classDirectionsButtonText}>
-                    Get Directions
+                    {" "}
+                    Get Directions{" "}
                   </Text>
                 </TouchableOpacity>
               </View>

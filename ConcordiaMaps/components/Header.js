@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import {
   SafeAreaView,
   View,
@@ -9,10 +9,12 @@ import {
 } from "react-native";
 import styles from "../styles";
 import { useNavigation } from "@react-navigation/native";
+import NavBar from "../components/NavBar";
+import HamburgerButton from "../components/HamburgerButton";
 
 function Header() {
   const [isOpen, setIsOpen] = useState(false);
-  const animation = useRef(new Animated.Value(0)).current;
+  const [animation] = useState(new Animated.Value(0));
   const navigation = useNavigation();
 
   const toggleMenu = () => {
@@ -32,18 +34,15 @@ function Header() {
     navigation.navigate("Calendar");
   };
 
+  const translateX = animation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [-270, 0],
+  });
+
   return (
     <SafeAreaView>
       <View style={styles.header}>
-        <TouchableOpacity
-          testID="hamburger-button"
-          onPress={toggleMenu}
-          style={styles.hamburger}
-        >
-          <View style={styles.hamburgerLine}></View>
-          <View style={styles.hamburgerLine}></View>
-          <View style={styles.hamburgerLine}></View>
-        </TouchableOpacity>
+        <HamburgerButton onPress={toggleMenu} />
 
         <TouchableOpacity testID="logoButton" onPress={handlePress}>
           <Image
@@ -59,6 +58,9 @@ function Header() {
           />
         </TouchableOpacity>
       </View>
+      <Animated.View style={[styles.menu, { transform: [{ translateX }] }]}>
+        <NavBar />
+      </Animated.View>
     </SafeAreaView>
   );
 }
