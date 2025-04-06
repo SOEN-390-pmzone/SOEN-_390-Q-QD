@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { render, fireEvent, waitFor, act } from "@testing-library/react-native";
-import DirectionsBox from "../../components/DirectionsBox";
+import DirectionsBox from "../../components/OutdoorNavigation/DirectionsBox";
 import PropTypes from "prop-types";
 
 // Wrapper component to manage state for testing

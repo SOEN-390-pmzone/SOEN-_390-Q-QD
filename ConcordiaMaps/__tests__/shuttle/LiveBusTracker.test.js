@@ -5,15 +5,11 @@ import LiveBusTracker from "../../components/LiveBusTracker";
 
 jest.mock("axios");
 
-beforeAll(() => {
-  jest.spyOn(console, "error").mockImplementation(() => {});
-});
-
-afterAll(() => {
-  console.error.mockRestore();
-});
-
 describe("LiveBusTracker Component", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it("fetches and displays bus markers correctly", async () => {
     const mockBusData = {
       data: {
@@ -37,12 +33,15 @@ describe("LiveBusTracker Component", () => {
     axios.get.mockResolvedValue({});
     axios.post.mockResolvedValue(mockBusData);
 
-    const { getByTestId } = render(<LiveBusTracker />);
+    const { findByTestId } = render(<LiveBusTracker />);
 
-    await waitFor(() => {
-      expect(getByTestId("bus-marker-BUS123")).toBeTruthy();
-      expect(getByTestId("bus-marker-BUS456")).toBeTruthy();
-    });
+    await waitFor(
+      async () => {
+        expect(await findByTestId("bus-marker-BUS123")).toBeTruthy();
+        expect(await findByTestId("bus-marker-BUS456")).toBeTruthy();
+      },
+      { timeout: 5000 },
+    );
   });
 
   it("handles API fetch error gracefully", async () => {
@@ -51,8 +50,26 @@ describe("LiveBusTracker Component", () => {
 
     const { queryByTestId } = render(<LiveBusTracker />);
 
-    await waitFor(() => {
-      expect(queryByTestId("bus-marker-BUS123")).toBeNull();
-    });
+    await waitFor(
+      () => {
+        expect(queryByTestId("bus-marker-BUS123")).toBeNull();
+      },
+      { timeout: 5000 },
+    );
+  });
+
+  it("handles missing data structure in API response", async () => {
+    axios.get.mockResolvedValue({});
+    axios.post.mockResolvedValue({ data: { d: {} } });
+
+    const { queryByTestId } = render(<LiveBusTracker />);
+
+    await waitFor(
+      () => {
+        expect(queryByTestId("bus-marker-BUS123")).toBeNull();
+        expect(queryByTestId("bus-marker-BUS456")).toBeNull();
+      },
+      { timeout: 5000 },
+    );
   });
 });
