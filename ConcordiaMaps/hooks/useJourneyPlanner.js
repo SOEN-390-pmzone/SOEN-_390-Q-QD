@@ -27,7 +27,7 @@ export const useJourneyPlanner = () => {
       Alert.alert("Error", "Please enter a title for this location");
       return false;
     }
-  
+
     // Create task with address information explicitly included
     const newTask = {
       id: `task-${Date.now()}`,
@@ -36,10 +36,13 @@ export const useJourneyPlanner = () => {
       latitude: location.latitude,
       longitude: location.longitude,
       // Add the complete address from Google Places API
-      address: location.formatted_address || location.description || `${title} (${location.latitude}, ${location.longitude})`,
+      address:
+        location.formatted_address ||
+        location.description ||
+        `${title} (${location.latitude}, ${location.longitude})`,
       description: `Visit ${title} at this address`,
     };
-  
+
     console.log("Creating new outdoor task with address:", newTask.address);
     setTasks([...tasks, newTask]);
     return true;

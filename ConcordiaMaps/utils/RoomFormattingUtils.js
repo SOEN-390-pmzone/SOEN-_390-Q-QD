@@ -12,10 +12,10 @@
  */
 export const formatRoomNumber = (buildingId, roomText) => {
   if (!buildingId || !roomText) return roomText;
-  
+
   let formattedRoom;
   const text = roomText.trim();
-  
+
   // Special case for Hall building with redundant H prefix
   if (buildingId === "H") {
     // More aggressive handling of redundant H prefixes - catches all variants
@@ -50,7 +50,7 @@ export const formatRoomNumber = (buildingId, roomText) => {
       "elevator",
       "toilet",
       "escalator",
-      "water_fountain"
+      "water_fountain",
     ];
 
     if (specialRooms.includes(text.toLowerCase())) {
@@ -58,7 +58,10 @@ export const formatRoomNumber = (buildingId, roomText) => {
     } else if (/^\d+$/.exec(text)) {
       // Just a number like "101" - prefix with building code
       formattedRoom = `${buildingId}-${text}`;
-    } else if (!text.includes(`${buildingId}-`) && !specialRooms.includes(text.toLowerCase())) {
+    } else if (
+      !text.includes(`${buildingId}-`) &&
+      !specialRooms.includes(text.toLowerCase())
+    ) {
       // Any other input without building prefix
       formattedRoom = `${buildingId}-${text}`;
     } else {
@@ -67,51 +70,59 @@ export const formatRoomNumber = (buildingId, roomText) => {
     }
   } else {
     // Default handling for other buildings
-    formattedRoom = !text.includes(`${buildingId}-`) ? `${buildingId}-${text}` : text;
+    formattedRoom = !text.includes(`${buildingId}-`)
+      ? `${buildingId}-${text}`
+      : text;
   }
 
   return formattedRoom;
 };
 
 /**
-* Special rooms that don't follow the standard building-room format
-*/
+ * Special rooms that don't follow the standard building-room format
+ */
 export const SPECIAL_ROOMS = [
-"stairs",
-"elevator",
-"toilet",
-"escalator",
-"water_fountain"
+  "stairs",
+  "elevator",
+  "toilet",
+  "escalator",
+  "water_fountain",
 ];
 
 /**
-* Checks if a room is a special facility room
-* @param {string} room - Room name to check
-* @returns {boolean} - Whether the room is a special facility
-*/
+ * Checks if a room is a special facility room
+ * @param {string} room - Room name to check
+ * @returns {boolean} - Whether the room is a special facility
+ */
 export const isSpecialRoom = (room) => {
-return SPECIAL_ROOMS.includes(room.toLowerCase());
+  return SPECIAL_ROOMS.includes(room.toLowerCase());
 };
 
 /**
-* Validates and formats a room input for a given building
-* @param {string} buildingId - Building identifier
-* @param {string} roomText - Room text to format
-* @param {Function} setRoomFn - Function to set the formatted room
-* @param {Function} setInvalidFn - Function to set invalid state
-* @param {Object} floorRegistry - Floor registry service with validation methods
-*/
-export const processRoomInput = (buildingId, roomText, setRoomFn, setInvalidFn, floorRegistry) => {
-const formattedRoom = formatRoomNumber(buildingId, roomText);
-setRoomFn(formattedRoom);
+ * Validates and formats a room input for a given building
+ * @param {string} buildingId - Building identifier
+ * @param {string} roomText - Room text to format
+ * @param {Function} setRoomFn - Function to set the formatted room
+ * @param {Function} setInvalidFn - Function to set invalid state
+ * @param {Object} floorRegistry - Floor registry service with validation methods
+ */
+export const processRoomInput = (
+  buildingId,
+  roomText,
+  setRoomFn,
+  setInvalidFn,
+  floorRegistry,
+) => {
+  const formattedRoom = formatRoomNumber(buildingId, roomText);
+  setRoomFn(formattedRoom);
 
-// Check if it's a valid room (only if text is provided)
-if (roomText.length > 0) {
-  const isValid = floorRegistry.isValidRoom(buildingId, formattedRoom);
-  setInvalidFn(!isValid);
-} else {
-  setInvalidFn(false);
-}
+  // Check if it's a valid room (only if text is provided)
+  if (roomText.length > 0) {
+    const isValid = floorRegistry.isValidRoom(buildingId, formattedRoom);
+    setInvalidFn(!isValid);
+  } else {
+    setInvalidFn(false);
+  }
 
-return formattedRoom;
+  return formattedRoom;
 };

@@ -25,7 +25,7 @@ import { formatRoomNumber, isSpecialRoom } from "../utils/RoomFormattingUtils";
  */
 const doubleCheckHallRoomFormat = (buildingId, roomId) => {
   if (!buildingId || !roomId) return roomId;
-  
+
   // Only process H building rooms
   if (buildingId === "H" && typeof roomId === "string") {
     // Check for all possible redundant H prefix patterns
@@ -132,12 +132,14 @@ const NavigationOrchestratorScreen = () => {
           ? toStep.room.toLowerCase()
           : formatRoomNumber(normalizedToBuildingId, toStep.room)
         : null;
-      
+
       // Double check Hall building rooms to fix any redundant H prefixes
       fromRoom = doubleCheckHallRoomFormat(normalizedFromBuildingId, fromRoom);
       toRoom = doubleCheckHallRoomFormat(normalizedToBuildingId, toRoom);
 
-      console.log(`Properly formatted room numbers: From ${fromRoom}, To ${toRoom}`);
+      console.log(
+        `Properly formatted room numbers: From ${fromRoom}, To ${toRoom}`,
+      );
 
       // Determine input types
       const originInputType =
@@ -152,7 +154,8 @@ const NavigationOrchestratorScreen = () => {
           : {
               latitude: fromStep.latitude,
               longitude: fromStep.longitude,
-              formatted_address: fromStep.title || `${fromStep.latitude}, ${fromStep.longitude}`, // Added formatted_address
+              formatted_address:
+                fromStep.title || `${fromStep.latitude}, ${fromStep.longitude}`, // Added formatted_address
             };
 
       const destinationDetails =
@@ -161,7 +164,8 @@ const NavigationOrchestratorScreen = () => {
           : {
               latitude: toStep.latitude,
               longitude: toStep.longitude,
-              formatted_address: toStep.title || `${toStep.latitude}, ${toStep.longitude}`, // Added formatted_address
+              formatted_address:
+                toStep.title || `${toStep.latitude}, ${toStep.longitude}`, // Added formatted_address
             };
 
       console.log(
@@ -173,7 +177,10 @@ const NavigationOrchestratorScreen = () => {
         // Origin information
         originInputType,
         originDetails,
-        origin: fromStep.type === "indoor" ? fromRoom : (fromStep.address || "Current Location"), // Added fallback string
+        origin:
+          fromStep.type === "indoor"
+            ? fromRoom
+            : fromStep.address || "Current Location", // Added fallback string
         originBuilding:
           fromStep.type === "indoor"
             ? {
@@ -186,7 +193,10 @@ const NavigationOrchestratorScreen = () => {
         // Destination information
         destinationInputType,
         destinationDetails,
-        destination: toStep.type === "indoor" ? toRoom : (toStep.address || "Destination Location"), // Added fallback string
+        destination:
+          toStep.type === "indoor"
+            ? toRoom
+            : toStep.address || "Destination Location", // Added fallback string
         building:
           toStep.type === "indoor"
             ? {
@@ -221,7 +231,7 @@ const NavigationOrchestratorScreen = () => {
       console.log("building:", JSON.stringify(navigationParams.building));
       console.log("room:", navigationParams.room);
       console.log("======================================\n");
-      
+
       // Now call NavigationPlanService with these parameters
       NavigationPlanService.createNavigationPlan({
         ...navigationParams,
