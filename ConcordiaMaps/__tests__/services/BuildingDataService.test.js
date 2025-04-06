@@ -630,4 +630,57 @@ describe("findBuildingByName", () => {
     const undefinedValue = FloorRegistry.findBuildingByName(undefined);
     expect(undefinedValue).toBeNull();
   });
+  jest.mock("../../constants/coordinates/h1", () => ({
+    rooms: { "H-101": { name: "H-101" } },
+    graph: { "H-101": { connectedTo: ["H-102"] } },
+  }));
+
+  jest.mock("../../constants/coordinates/h2", () => ({
+    rooms: { "H-201": { name: "H-201" } },
+    graph: { "H-201": { connectedTo: ["H-202"] } },
+  }));
+
+  jest.mock("../../constants/coordinates/h8", () => ({
+    rooms: { "H-801": { name: "H-801" } },
+    graph: { "H-801": { connectedTo: ["H-802"] } },
+  }));
+
+  jest.mock("../../constants/coordinates/vl2", () => ({
+    rooms: { "VL-201": { name: "VL-201" } },
+    graph: { "VL-201": { connectedTo: ["VL-202"] } },
+  }));
+
+  describe("FloorRegistry Floor Imports", () => {
+    test("should load H-1 floor data correctly", () => {
+      const rooms = FloorRegistry.getRooms("HallBuilding", "1");
+      expect(rooms).toHaveProperty("H-101");
+
+      const graph = FloorRegistry.getGraph("HallBuilding", "1");
+      expect(graph).toHaveProperty("H-101");
+    });
+
+    test("should load H-2 floor data correctly", () => {
+      const rooms = FloorRegistry.getRooms("HallBuilding", "2");
+      expect(rooms).toHaveProperty("H205");
+
+      const graph = FloorRegistry.getGraph("HallBuilding", "2");
+      expect(graph).toHaveProperty("H205");
+    });
+
+    test("should load H-8 floor data correctly", () => {
+      const rooms = FloorRegistry.getRooms("HallBuilding", "8");
+      expect(rooms).toHaveProperty("H-801");
+
+      const graph = FloorRegistry.getGraph("HallBuilding", "8");
+      expect(graph).toHaveProperty("H-801");
+    });
+
+    test("should load VL-2 floor data correctly", () => {
+      const rooms = FloorRegistry.getRooms("VanierLibrary", "2");
+      expect(rooms).toHaveProperty("201");
+
+      const graph = FloorRegistry.getGraph("VanierLibrary", "2");
+      expect(graph).toHaveProperty("201");
+    });
+  });
 });
