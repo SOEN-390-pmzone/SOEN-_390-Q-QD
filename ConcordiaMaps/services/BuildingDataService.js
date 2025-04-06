@@ -86,6 +86,13 @@ export const CONCORDIA_BUILDINGS = [
     latitude: 45.459026,
     longitude: -73.638606,
   },
+  {
+    id: "CC",
+    name: "CC Building",
+    address: "7141 Sherbrooke St. W",
+    latitude: 45.459026,
+    longitude: -73.638606,
+  },
 ];
 
 class FloorRegistry {
@@ -160,22 +167,41 @@ class FloorRegistry {
         building.id.toLowerCase().includes(text.toLowerCase()),
     );
   }
-  // Get building type from building ID
   static getBuildingTypeFromId(buildingId) {
     if (!buildingId) return "HallBuilding"; // Default
 
+    // Direct mappings for common building codes
+    const directMappings = {
+      MB: "JMSB",
+      JMSB: "JMSB",
+      H: "HallBuilding",
+      HALL: "HallBuilding",
+      VE: "VanierExtension",
+      VL: "VanierLibrary",
+      EV: "EVBuilding",
+      LB: "Library",
+    };
+
+    // Check for direct mapping first
+    const upperBuildingId = buildingId.toUpperCase();
+    if (directMappings[upperBuildingId]) {
+      return directMappings[upperBuildingId];
+    }
+
     try {
-      // Look through available buildings in registry
+      // Look through available buildings in registry as fallback
       const buildingTypes = Object.keys(this.#buildings);
       const foundType = buildingTypes.find(
-        (key) => this.#buildings[key]?.code === buildingId.toUpperCase(),
+        (key) => this.#buildings[key]?.code === upperBuildingId,
       );
 
       if (foundType) return foundType;
     } catch (error) {
       console.error("Error finding building type:", error);
     }
-
+    console.log(
+      "Couldnt find floor from FloorRegistry. defaulting to Hall Building",
+    );
     return "HallBuilding"; // Default to Hall Building if no match
   }
 
@@ -377,52 +403,248 @@ class FloorRegistry {
     return validRooms;
   }
 
-  // Validate if a room exists in the building
+  /**
+   * Validates if a room exists in the specified building
+   * @param {string} buildingId - Building identifier
+   * @param {string} roomId - Room identifier to validate
+   * @returns {boolean} - Whether the room is valid in the building
+   */
   static isValidRoom(buildingId, roomId) {
-    if (!buildingId || !roomId) return false;
+    // Basic input validation
+    if (!this._areInputsValid(buildingId, roomId)) {
+      return false;
+    }
 
-    // Special cases for common facilities
-    if (
-      ["entrance", "main lobby", "lobby", "main entrance"].includes(
-        roomId.toLowerCase(),
-      )
-    )
+    const buildingIdStr = String(buildingId).trim();
+    const roomIdStr = String(roomId).trim();
+
+    // Check for common facilities like entrances, elevators, etc.
+    if (this._isCommonFacility(roomIdStr)) {
       return true;
+    }
 
-    // Handle common facility types across buildings
+    try {
+      // Get building type and validate against known rooms
+      const buildingType = this.getBuildingTypeFromId(buildingIdStr);
+      if (!buildingType) {
+        return false;
+      }
+
+      // Check if room is in the valid rooms list for this building
+      if (this._isInValidRoomsList(buildingIdStr, roomIdStr)) {
+        return true;
+      }
+
+      // Check floor-specific room formats
+      if (this._isValidRoomByFloor(buildingType, roomIdStr)) {
+        return true;
+      }
+
+      // Check building-specific formats as last resort
+      return this._matchesBuildingSpecificFormat(buildingIdStr, roomIdStr);
+    } catch (error) {
+      console.error("Error in isValidRoom:", error);
+      return false;
+    }
+  }
+
+  /**
+   * Validates basic input parameters
+   * @private
+   */
+  static _areInputsValid(buildingId, roomId) {
     if (
-      [
-        "elevator",
-        "stairs",
-        "escalator",
-        "toilet",
-        "water_fountain",
-        "women_washroom",
-        "men_washroom",
-      ].includes(roomId.toLowerCase())
-    )
+      buildingId === null ||
+      buildingId === undefined ||
+      roomId === null ||
+      roomId === undefined
+    ) {
+      return false;
+    }
+
+    return String(buildingId).trim() !== "" && String(roomId).trim() !== "";
+  }
+
+  /**
+   * Checks if the room is a common facility like elevator, stairs, etc.
+   * @private
+   */
+  static _isCommonFacility(roomIdStr) {
+    // Check for entrance aliases
+    const entranceAliases = [
+      "entrance",
+      "main lobby",
+      "lobby",
+      "main entrance",
+      "entry",
+      "main entry",
+      "main",
+      "atrium",
+      "foyer",
+      "hall",
+      "vestibule",
+      "reception",
+    ];
+
+    if (
+      entranceAliases.some((alias) => roomIdStr.toLowerCase().includes(alias))
+    ) {
       return true;
+    }
 
-    // Get building type from ID
-    const buildingType = this.getBuildingTypeFromId(buildingId);
-    if (!buildingType) return false;
+    // Check for other common facilities
+    const commonFacilities = [
+      "elevator",
+      "lift",
+      "escalator",
+      "stairs",
+      "staircase",
+      "stairwell",
+      "toilet",
+      "washroom",
+      "restroom",
+      "bathroom",
+      "water_fountain",
+      "women",
+      "men",
+      "exit",
+      "gender neutral",
+      "accessible",
+    ];
 
-    // Extract floor from room
-    const floor = this.extractFloorFromRoom(roomId);
+    return commonFacilities.some((facility) =>
+      roomIdStr.toLowerCase().includes(facility),
+    );
+  }
+
+  /**
+   * Checks if the room is in the valid rooms list for the building
+   * @private
+   */
+  static _isInValidRoomsList(buildingIdStr, roomIdStr) {
+    const validRooms = this.getValidRoomsForBuilding(buildingIdStr);
+
+    // Check direct match
+    if (validRooms.includes(roomIdStr)) {
+      return true;
+    }
+
+    // Check common variations
+    const variations = [
+      roomIdStr,
+      `${buildingIdStr}-${roomIdStr}`,
+      `${buildingIdStr}${roomIdStr}`,
+    ];
+
+    return variations.some((variant) => validRooms.includes(variant));
+  }
+
+  /**
+   * Validates room against floor-specific data
+   * @private
+   */
+  static _isValidRoomByFloor(buildingType, roomIdStr) {
+    // Extract floor from room ID
+    const floor = this.extractFloorFromRoom(roomIdStr);
     if (!floor) return false;
 
-    // Check if the floor exists in the building
+    // Check if floor exists in building
     const floorObj = this.getFloor(buildingType, floor);
-    if (!floorObj) return false;
+    if (!floorObj?.rooms) return false;
 
-    // Normalize room ID
-    const normalizedRoomId = this.normalizeRoomId(roomId);
+    // Check normalized room ID
+    const normalizedRoomId = this.normalizeRoomId(roomIdStr);
+    if (normalizedRoomId && normalizedRoomId in floorObj.rooms) {
+      return true;
+    }
 
-    // Check if room exists in floor's room registry
-    return normalizedRoomId in floorObj.rooms;
+    return false;
+  }
+
+  /**
+   * Checks if room matches building-specific formats
+   * @private
+   */
+  static _matchesBuildingSpecificFormat(buildingIdStr, roomIdStr) {
+    const buildingUpper = buildingIdStr.toUpperCase();
+
+    // Check JMSB formats
+    if (buildingUpper === "MB" || buildingIdStr.toLowerCase() === "jmsb") {
+      return this._isValidMBFormat(roomIdStr);
+    }
+
+    // Check Hall Building formats
+    if (buildingUpper === "H" || buildingIdStr.toLowerCase() === "hall") {
+      return this._isValidHallFormat(roomIdStr);
+    }
+
+    // Check general format for other buildings
+    return this._isValidGeneralFormat(roomIdStr);
+  }
+
+  /**
+   * Validates JMSB/MB building room formats
+   * @private
+   */
+  static _isValidMBFormat(roomIdStr) {
+    const mbPatterns = [
+      /^(\d+)\.(\d+)$/, // 1.293
+      /^MB-(\d+)\.(\d+)$/i, // MB-1.293
+      /^(\d+)-(\d+)$/, // 1-293
+      /^MB-(\d+)-(\d+)$/i, // MB-1-293
+      /^S2\.(\d+)$/, // S2.230
+      /^MB-S2\.(\d+)$/i, // MB-S2.230
+    ];
+
+    return mbPatterns.some((pattern) => pattern.test(roomIdStr));
+  }
+
+  /**
+   * Validates Hall Building room formats
+   * @private
+   */
+  static _isValidHallFormat(roomIdStr) {
+    // Check pattern first
+    if (!/^H-?\d{3,4}$/i.test(roomIdStr) && !/^\d{3,4}$/.test(roomIdStr)) {
+      return false;
+    }
+
+    // Extract floor number
+    const floorNum = roomIdStr.replace(/^H-?/i, "")[0];
+
+    // Check if floor exists in Hall Building
+    return this.getFloor("HallBuilding", floorNum) !== null;
+  }
+
+  /**
+   * Validates general room number format for other buildings
+   * @private
+   */
+  static _isValidGeneralFormat(roomIdStr) {
+    return (
+      /^[A-Za-z]{1,3}-\d{3,4}$/i.test(roomIdStr) || /^\d{3,4}$/.test(roomIdStr)
+    );
   }
   static getCoordinatesForBuilding(buildingId) {
     if (!buildingId) return null;
+
+    // Map from long identifiers to short codes
+    const idToCode = {
+      hall: "H",
+      jmsb: "MB",
+      ev: "EV",
+      library: "LB",
+      ve: "VE",
+      vanierlibrary: "VL",
+      vanierextension: "VE",
+      cc: "CC",
+    };
+
+    // Convert to uppercase for consistency
+    const normalizedId = buildingId.toLowerCase();
+
+    // Use the code mapping if this is a long identifier
+    const buildingCode = idToCode[normalizedId] || buildingId.toUpperCase();
 
     const coordinates = {
       H: { latitude: 45.497092, longitude: -73.5788 },
@@ -431,9 +653,10 @@ class FloorRegistry {
       LB: { latitude: 45.49674, longitude: -73.57785 },
       VE: { latitude: 45.459044, longitude: -73.638409 },
       VL: { latitude: 45.459249, longitude: -73.638265 },
+      CC: { latitude: 45.459044, longitude: -73.638409 },
     };
 
-    return coordinates[buildingId.toUpperCase()] || null;
+    return coordinates[buildingCode] || null;
   }
 
   static getReadableBuildingName(buildingId) {
@@ -471,6 +694,7 @@ class FloorRegistry {
       EV: "Enter room number (e.g. 200 or stairs)",
       H: "Enter room number (e.g. 920 or elevator)",
       MB: "Enter room number (e.g. 1.293 or stairs)",
+      CC: "Enter room number (e.g. 101 or elevator)",
     };
 
     return placeholders[buildingId] || `Enter room number`;
@@ -485,6 +709,8 @@ class FloorRegistry {
       VE: 'Room not found. Try a room number or "elevator"/"stairs".',
       EV: 'Room not found. Try a room number or "elevator"/"stairs".',
       H: "Room not found. Try a format like 920 or H-920.",
+      VL: 'Room not found. Try a room number or "elevator"/"stairs".',
+      CC: 'Room not found. Try a room number or "elevator"/"stairs".',
     };
 
     return (
@@ -681,6 +907,179 @@ class FloorRegistry {
       },
     },
   };
+  /**
+   * Finds elevators for a specific building and floor
+   * @private
+   * @param {string} buildingType - The building type (e.g., "HallBuilding")
+   * @param {string} floor - The floor number
+   * @returns {Object} An elevator location object or null if not found
+   */
+  static _findElevatorForBuilding(buildingType, floor) {
+    // Validate inputs
+    if (!buildingType || !floor) {
+      console.warn(
+        "Missing building type or floor when searching for elevators",
+      );
+      return null;
+    }
+
+    // Get the floor data from FloorRegistry
+    const floorData = FloorRegistry.getFloor(buildingType, floor);
+    if (!floorData) {
+      console.warn(`Floor data not found for ${buildingType}, floor ${floor}`);
+      return null;
+    }
+
+    // Get the rooms for this floor
+    const rooms = floorData.rooms;
+    if (!rooms) {
+      console.warn(`No rooms found for ${buildingType}, floor ${floor}`);
+      return null;
+    }
+
+    // Get the building code for creating the location object later
+    const building = FloorRegistry.getBuilding(buildingType);
+    const buildingCode = building?.code || "H"; // Default to "H" if not found
+
+    // Try to find elevator nodes based on common patterns
+    const possibleElevatorKeys = [
+      "elevator",
+      "Elevator",
+      "ELEVATOR",
+      "elevators",
+      `${buildingCode}${floor}elevator`,
+      `${buildingCode}-${floor}-elevator`,
+      `${buildingCode}-elevator`,
+      `${buildingCode.toLowerCase()}-elevator`,
+    ];
+
+    // Look for elevator in room keys
+    for (const key of possibleElevatorKeys) {
+      if (rooms[key]) {
+        // Found an elevator, create a location object
+        return {
+          buildingId: buildingCode,
+          floor: floor,
+          room: key,
+          type: "indoor",
+          title: "Elevator",
+        };
+      }
+    }
+
+    // Alternative approach: search for any room key containing "elevator"
+    for (const key in rooms) {
+      if (key.toLowerCase().includes("elevator")) {
+        return {
+          buildingId: buildingCode,
+          floor: floor,
+          room: key,
+          type: "indoor",
+          title: "Elevator",
+        };
+      }
+    }
+
+    // If no elevator was found, create a virtual elevator near the stairs
+    // (Many buildings have stairs but not explicitly labeled elevators in the data)
+    for (const key in rooms) {
+      if (key.toLowerCase().includes("stair")) {
+        console.warn(
+          `No elevator found on floor ${floor} of ${buildingType}, using stairs instead`,
+        );
+        return {
+          buildingId: buildingCode,
+          floor: floor,
+          room: key,
+          type: "indoor",
+          title: "Stairs",
+        };
+      }
+    }
+
+    // Last resort: use the first room on the floor as an approximation
+    const roomKeys = Object.keys(rooms);
+    if (roomKeys.length > 0) {
+      console.warn(
+        `No elevator or stairs found on floor ${floor} of ${buildingType}, using first available room`,
+      );
+      return {
+        buildingId: buildingCode,
+        floor: floor,
+        room: roomKeys[0],
+        type: "indoor",
+        title: "Virtual Elevator",
+      };
+    }
+
+    console.error(
+      `Could not find any elevator or room on floor ${floor} of ${buildingType}`,
+    );
+    return null;
+  }
+
+  /**
+   * Checks if a tunnel connection exists between two buildings. This function is mainly only used for US24
+   * When user asks to protect from weather so we need to recommend them to use a tunnel
+   * @param {string} buildingId1 - First building identifier
+   * @param {string} buildingId2 - Second building identifier
+   * @returns {boolean} - True if a tunnel connection exists, false otherwise
+   */
+  static hasTunnelConnection(buildingId1, buildingId2) {
+    // Normalize building IDs to their canonical forms
+    const normalizedId1 = this.#normalizeBuildingIdForTunnel(buildingId1);
+    const normalizedId2 = this.#normalizeBuildingIdForTunnel(buildingId2);
+
+    if (!normalizedId1 || !normalizedId2) return false;
+    if (normalizedId1 === normalizedId2) return false; // Same building
+
+    // Check specifically for Hall-JMSB tunnel connection (in any order)
+    return (
+      (normalizedId1 === "hall" && normalizedId2 === "jmsb") ||
+      (normalizedId1 === "jmsb" && normalizedId2 === "hall")
+    );
+  }
+
+  /**
+   * Helper method to normalize building IDs for tunnel connection check
+   * @private
+   * @param {string} buildingId - Building identifier to normalize
+   * @returns {string} - Normalized building ID
+   */
+  static #normalizeBuildingIdForTunnel(buildingId) {
+    if (!buildingId) return null;
+
+    // Convert to lowercase for consistent comparison
+    const lowerBuildingId = buildingId.toLowerCase();
+
+    // Map of equivalent building IDs to canonical forms
+    const buildingIdMap = {
+      h: "hall",
+      hall: "hall",
+      hallbuilding: "hall",
+
+      mb: "jmsb",
+      jmsb: "jmsb",
+
+      ev: "ev",
+      evbuilding: "ev",
+
+      lb: "library",
+      library: "library",
+      websterlibrary: "library",
+
+      vl: "vanierlibrary",
+      vanierlibrary: "vanierlibrary",
+
+      ve: "vanierextension",
+      vanierextension: "vanierextension",
+
+      cc: "ccbuilding",
+      ccbuilding: "ccbuilding",
+    };
+
+    return buildingIdMap[lowerBuildingId] || lowerBuildingId;
+  }
 
   // Get list of all buildings
   static getBuildings() {
