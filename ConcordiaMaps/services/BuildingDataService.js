@@ -738,6 +738,66 @@ class FloorRegistry {
     return null;
   }
 
+/**
+ * Checks if a tunnel connection exists between two buildings. This function is mainly only used for US24 
+ * When user asks to protect from weather so we need to recommend them to use a tunnel
+ * @param {string} buildingId1 - First building identifier
+ * @param {string} buildingId2 - Second building identifier
+ * @returns {boolean} - True if a tunnel connection exists, false otherwise
+ */
+static hasTunnelConnection(buildingId1, buildingId2) {
+  // Normalize building IDs to their canonical forms
+  const normalizedId1 = this.#normalizeBuildingIdForTunnel(buildingId1);
+  const normalizedId2 = this.#normalizeBuildingIdForTunnel(buildingId2);
+  
+  if (!normalizedId1 || !normalizedId2) return false;
+  if (normalizedId1 === normalizedId2) return false; // Same building
+  
+  // Check specifically for Hall-JMSB tunnel connection (in any order)
+  return (
+    (normalizedId1 === 'hall' && normalizedId2 === 'jmsb') || 
+    (normalizedId1 === 'jmsb' && normalizedId2 === 'hall')
+  );
+}
+
+/**
+ * Helper method to normalize building IDs for tunnel connection check
+ * @private
+ * @param {string} buildingId - Building identifier to normalize
+ * @returns {string} - Normalized building ID
+ */
+static #normalizeBuildingIdForTunnel(buildingId) {
+  if (!buildingId) return null;
+  
+  // Convert to lowercase for consistent comparison
+  const lowerBuildingId = buildingId.toLowerCase();
+  
+  // Map of equivalent building IDs to canonical forms
+  const buildingIdMap = {
+    'h': 'hall',
+    'hall': 'hall',
+    'hallbuilding': 'hall',
+    
+    'mb': 'jmsb',
+    'jmsb': 'jmsb',
+    
+    'ev': 'ev',
+    'evbuilding': 'ev',
+    
+    'lb': 'library',
+    'library': 'library',
+    'websterlibrary': 'library',
+    
+    'vl': 'vanierlibrary',
+    'vanierlibrary': 'vanierlibrary',
+    
+    've': 'vanierextension',
+    'vanierextension': 'vanierextension'
+  };
+  
+  return buildingIdMap[lowerBuildingId] || lowerBuildingId;
+}
+
   // Get list of all buildings
   static getBuildings() {
     return Object.values(this.#buildings);

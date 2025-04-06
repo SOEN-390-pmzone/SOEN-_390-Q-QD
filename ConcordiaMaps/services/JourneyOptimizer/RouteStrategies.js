@@ -23,7 +23,7 @@ const RouteStrategies = {
       return distance;
     },
 
-    isPathAllowed(locationA, locationB, avoidOutdoor) {
+    isPathAllowed(locationA, locationB) {
       // Same floor check
       if (locationA.floor !== locationB.floor) {
         console.log("Same floor same building path not allowed")
@@ -96,7 +96,7 @@ const RouteStrategies = {
       return totalDistance;
     },
     
-    isPathAllowed(locationA, locationB, avoidOutdoor) {
+    isPathAllowed(locationA, locationB) {
       // Check if locations are in the same building but different floors
       if (locationA.buildingId !== locationB.buildingId) {
         return false;
@@ -165,15 +165,7 @@ const RouteStrategies = {
       return totalDistance;
     },
     
-    isPathAllowed(locationA, locationB, avoidOutdoor) {
-      // Cannot navigate between buildings if outdoor paths are avoided
-      if (avoidOutdoor) {
-        console.log(
-          "Cannot navigate between buildings when avoiding outdoor paths"
-        );
-        return false;
-      }
-  
+    isPathAllowed(locationA, locationB) {
       // Check that both locations have building IDs
       if (!locationA.buildingId || !locationB.buildingId) {
         console.warn("Missing building ID for indoor location");
@@ -206,12 +198,7 @@ const RouteStrategies = {
       return distance;
     },
   
-    isPathAllowed(locationA, locationB, avoidOutdoor) {
-      // Check if outdoor paths should be avoided
-      if (avoidOutdoor) {
-        console.log("Outdoor paths are being avoided by user preference");
-        return false;
-      }
+    isPathAllowed(locationA, locationB) {
   
       // Validate that both locations have coordinates (properly)
       if (
@@ -292,12 +279,7 @@ const RouteStrategies = {
       return totalDistance;
     },
     
-    isPathAllowed(locationA, locationB, avoidOutdoor) {
-      // Cannot use this path if avoiding outdoor travel
-      if (avoidOutdoor) {
-        console.log("Mixed indoor/outdoor paths are being avoided by user preference");
-        return false;
-      }
+    isPathAllowed(locationA, locationB) {
       
       // Verify one location is indoor and one is outdoor
       const hasIndoor = locationA.type === "indoor" || locationB.type === "indoor";

@@ -7,7 +7,6 @@
  */
 
 import DistanceCalculatorService from "./DistanceCalculatorService";
-import NavigationStepsService from "./NavigationStepsService";
 
 class JourneyOptimizer {
   /**
@@ -242,22 +241,20 @@ class JourneyOptimizer {
 // Export both factory functions for the service
 export default {
   /**
-   * Create a journey optimizer with specified preference
-   * @param {boolean} avoidOutdoor - Whether to avoid outdoor paths
+   * Create a journey optimizer with default settings
    * @returns {Object} Journey optimizer
    */
-  createOptimizer: (avoidOutdoor = false) =>
-    new JourneyOptimizer(new DistanceCalculatorService(avoidOutdoor)),
+  createOptimizer: () =>
+    new JourneyOptimizer(new DistanceCalculatorService()),
 
   /**
-   * Generate optimal journey with specified preference
+   * Generate optimal journey
    * @param {Array} tasks - Tasks/locations to visit
-   * @param {boolean} avoidOutdoor - Whether to avoid outdoor paths
    * @returns {Array} Navigation steps
    */
-  generateOptimalJourney: (tasks, avoidOutdoor = false) => {
+  generateOptimalJourney: (tasks) => {
     const optimizer = new JourneyOptimizer(
-      new DistanceCalculatorService(avoidOutdoor),
+      new DistanceCalculatorService()
     );
     return optimizer.generateOptimalJourney(tasks);
   },

@@ -4,16 +4,15 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  TouchableOpacity,
   Alert,
   SafeAreaView,
 } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
-import { MaterialIcons } from "@expo/vector-icons";
 import Header from "../components/Header";
 import NavBar from "../components/NavBar";
-import NavigationPlanService from "../services/NavigationPlanService";
-
+import LocationCard from "../components/JourneyPlanner/NavigationOrchestrator/LocationCard";
+import NavigationButton from "../components/JourneyPlanner/NavigationOrchestrator/NavigationButton";
+import FloorRegistry from "../services/BuildingDataService";
 /**
  * NavigationOrchestrator screen
  * Displays journey steps as interactive cards and provides navigation between them
@@ -21,9 +20,10 @@ import NavigationPlanService from "../services/NavigationPlanService";
 const NavigationOrchestratorScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
-  const { steps } = route.params || { steps: [] };
+  const { steps, avoidOutdoor } = route.params || { steps: [], avoidOutdoor: false };
   const [selectedStep, setSelectedStep] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  console.log("Navigation preferences - Avoid outdoor paths:", avoidOutdoor);
 
   const showDirections = (fromIndex, toIndex) => {
     const fromStep = steps[fromIndex];
@@ -170,22 +170,22 @@ const NavigationOrchestratorScreen = () => {
       console.log("building:", JSON.stringify(navigationParams.building));
       console.log("room:", navigationParams.room);
       console.log("======================================\n");
-
-      // Now call NavigationPlanService with these parameters
-      NavigationPlanService.createNavigationPlan({
-        ...navigationParams,
-        // Callback handlers
-        setInvalidOriginRoom: () => {
-          Alert.alert("Error", `Invalid origin room: ${fromRoom}`);
-          setIsLoading(false);
-        },
-        setInvalidDestinationRoom: () => {
-          Alert.alert("Error", `Invalid destination room: ${toRoom}`);
-          setIsLoading(false);
-        },
-        setIsLoading,
-        navigation,
-      });
+      //TODO: Complete this call in a future commit. For now it is incomplete
+      // // Now call NavigationPlanService with these parameters
+      // NavigationPlanService.createNavigationPlan({
+      //   ...navigationParams,
+      //   // Callback handlers
+      //   setInvalidOriginRoom: () => {
+      //     Alert.alert("Error", `Invalid origin room: ${fromRoom}`);
+      //     setIsLoading(false);
+      //   },
+      //   setInvalidDestinationRoom: () => {
+      //     Alert.alert("Error", `Invalid destination room: ${toRoom}`);
+      //     setIsLoading(false);
+      //   },
+      //   setIsLoading,
+      //   navigation,
+      // });
     } catch (error) {
       console.error("Error creating navigation plan:", error);
       Alert.alert(
@@ -197,22 +197,9 @@ const NavigationOrchestratorScreen = () => {
     }
   };
 
-  // Rest of your component remains the same
+  // Handle card press to toggle selection
   const handleCardPress = (index) => {
     setSelectedStep(index === selectedStep ? null : index);
-  };
-
-
-  const getLocationDetails = (step) => {
-    if (step.type === "outdoor") {
-      return `${step.description} (${step.latitude.toFixed(6)}, ${step.longitude.toFixed(6)})`;
-    } else {
-      return `${step.description} (Building: ${step.buildingId}, Room: ${step.room}, Floor: ${step.floor})`;
-    }
-  };
-
-  const getStepIcon = (type) => {
-    return type === "outdoor" ? "location-on" : "meeting-room";
   };
 
   return (
@@ -230,56 +217,29 @@ const NavigationOrchestratorScreen = () => {
             <View key={step.id || index}>
               {/* Direction button between locations */}
               {index > 0 && (
-                <TouchableOpacity
-                  style={styles.directionButton}
+                <NavigationButton
+                  fromStep={steps[index - 1]}
+                  toStep={step}
                   onPress={() => showDirections(index - 1, index)}
-                >
-                  <MaterialIcons name="directions" size={24} color="#fff" />
-                  <Text style={styles.directionButtonText}>
-                    Get Directions
-                  </Text>
-                </TouchableOpacity>
+                  hasTunnel={
+                    steps[index - 1].type === "indoor" && 
+                    step.type === "indoor" && 
+                    steps[index - 1].buildingId && 
+                    step.buildingId && 
+                    steps[index - 1].buildingId !== step.buildingId && 
+                    FloorRegistry.hasTunnelConnection(steps[index - 1].buildingId, step.buildingId)
+                  }
+                  avoidOutdoor={avoidOutdoor}
+                />
               )}
 
               {/* Location card */}
-              <TouchableOpacity
-                style={[
-                  styles.card,
-                  selectedStep === index && styles.selectedCard,
-                ]}
+              <LocationCard
+                step={step}
+                index={index}
+                isSelected={selectedStep === index}
                 onPress={() => handleCardPress(index)}
-              >
-                <View style={styles.cardHeader}>
-                  <MaterialIcons
-                    name={getStepIcon(step.type)}
-                    size={24}
-                    color="#912338"
-                  />
-                  <Text style={styles.cardTitle}>
-                    {index + 1}. {step.title}
-                  </Text>
-                </View>
-                <View style={styles.cardContent}>
-                  <Text style={styles.cardDescription}>
-                    {getLocationDetails(step)}
-                  </Text>
-                </View>
-                {selectedStep === index && (
-                  <View style={styles.cardActions}>
-                    <TouchableOpacity
-                      style={styles.actionButton}
-                      onPress={() =>
-                        Alert.alert(
-                          "Location Details",
-                          `More details about ${step.title} will be available in future versions.`
-                        )
-                      }
-                    >
-                      <Text style={styles.actionButtonText}>View Details</Text>
-                    </TouchableOpacity>
-                  </View>
-                )}
-              </TouchableOpacity>
+              />
             </View>
           ))}
         </ScrollView>
@@ -310,76 +270,6 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-  },
-  card: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 16,
-    marginVertical: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  selectedCard: {
-    borderColor: "#912338",
-    borderWidth: 2,
-  },
-  cardHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    marginLeft: 8,
-    color: "#333",
-  },
-  cardContent: {
-    marginLeft: 32,
-  },
-  cardDescription: {
-    fontSize: 14,
-    color: "#666",
-    marginBottom: 8,
-  },
-  cardActions: {
-    marginTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: "#eee",
-    paddingTop: 12,
-    marginLeft: 32,
-  },
-  actionButton: {
-    backgroundColor: "#912338",
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-    alignSelf: "flex-start",
-  },
-  actionButtonText: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "500",
-  },
-  directionButton: {
-    flexDirection: "row",
-    backgroundColor: "#4285F4",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-    alignSelf: "center",
-    marginVertical: 8,
-  },
-  directionButtonText: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "500",
-    marginLeft: 8,
   },
 });
 
