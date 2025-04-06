@@ -22,6 +22,10 @@ const styles = StyleSheet.create({
     color: "#555",
     marginBottom: 24,
   },
+  activeTabText: {
+    color: "#FFFFFF",
+    fontWeight: "bold",
+  },
   inputTypeContainer: {
     flexDirection: "row",
     marginBottom: 16,

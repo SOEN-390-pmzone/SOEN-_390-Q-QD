@@ -11,7 +11,14 @@ const InputTypeSwitcher = ({ inputMode, setInputMode }) => {
         onPress={() => setInputMode("address")}
         testID="address-tab"
       >
-        <Text style={styles.tabText}>Address</Text>
+        <Text
+          style={[
+            styles.tabText,
+            inputMode === "address" && styles.activeTabText,
+          ]}
+        >
+          Address
+        </Text>
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -19,7 +26,14 @@ const InputTypeSwitcher = ({ inputMode, setInputMode }) => {
         onPress={() => setInputMode("building")}
         testID="building-tab"
       >
-        <Text style={styles.tabText}>Building & Room</Text>
+        <Text
+          style={[
+            styles.tabText,
+            inputMode === "building" && styles.activeTabText,
+          ]}
+        >
+          Building & Room
+        </Text>
       </TouchableOpacity>
     </View>
   );
