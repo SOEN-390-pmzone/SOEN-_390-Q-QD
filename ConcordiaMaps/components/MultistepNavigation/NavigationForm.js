@@ -57,6 +57,8 @@ const NavigationForm = ({
   handleBuildingSelect,
   handleDestinationSelection,
   handleStartNavigation,
+  avoidStairs,
+  setAvoidStairs,
 }) => {
   return (
     <KeyboardAvoidingView
@@ -71,6 +73,28 @@ const NavigationForm = ({
         {/* Title section */}
         <View style={styles.header}>
           <Text style={styles.title}>Plan Your Route</Text>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              marginVertical: 10,
+            }}
+          >
+            <Text style={{ fontSize: 16, marginRight: 10 }}>Avoid Stairs:</Text>
+            <TouchableOpacity
+              style={{
+                padding: 10,
+                backgroundColor: avoidStairs ? "green" : "gray",
+                borderRadius: 5,
+              }}
+              onPress={() => setAvoidStairs((prev) => !prev)} // <-- Add this
+            >
+              <Text style={{ color: "white" }}>
+                {avoidStairs ? "ON" : "OFF"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
           <Text style={styles.subtitle}>
             Enter your starting point and destination
           </Text>
@@ -560,6 +584,8 @@ NavigationForm.propTypes = {
   handleBuildingSelect: PropTypes.func.isRequired,
   handleDestinationSelection: PropTypes.func.isRequired,
   handleStartNavigation: PropTypes.func.isRequired,
+  avoidStairs: PropTypes.bool.isRequired,
+  setAvoidStairs: PropTypes.func.isRequired,
 };
 
 export default NavigationForm;

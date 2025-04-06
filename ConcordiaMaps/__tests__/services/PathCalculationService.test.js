@@ -355,7 +355,9 @@ describe("PathCalculationService", () => {
           endFloor,
           buildingName,
         );
-      }).toThrow("Cannot navigate between floors 1 and 2");
+      }).toThrow(
+        "No accessible transport method (e.g., elevator) found between floors 1 and 2. Try enabling stairs.",
+      );
     });
 
     test("should throw error when start floor path cannot be found", () => {

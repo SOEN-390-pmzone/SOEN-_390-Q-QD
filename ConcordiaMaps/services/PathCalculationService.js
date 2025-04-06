@@ -2,6 +2,12 @@
  * Service for calculating navigation paths between rooms
  */
 import { findShortestPath } from "../components/IndoorNavigation/PathFinder";
+import { adjustGraphForAccessibility } from "../services/AccessibilityGraphUtils";
+
+// temporary: accesibility preferences (update later with option to toggle it)
+const userAccessibilityPreferences = {
+  avoidStairs: false,
+};
 
 /**
  * Find available transportation method between floors
@@ -16,7 +22,11 @@ export const findTransportMethod = (startFloorGraph, endFloorGraph) => {
   const transportMethods = ["escalator", "elevator", "stairs"];
 
   for (const method of transportMethods) {
-    if (startNodes.has(method) && endNodes.has(method)) {
+    if (
+      startNodes.has(method) &&
+      endNodes.has(method) &&
+      (!userAccessibilityPreferences.avoidStairs || method !== "stairs")
+    ) {
       return method;
     }
   }
@@ -40,8 +50,13 @@ export const handleSameFloorNavigation = (
   startFloor,
   buildingName,
 ) => {
-  const directPath = findShortestPath(
+  const adjustedGraph = adjustGraphForAccessibility(
     startFloorGraph,
+    userAccessibilityPreferences,
+  );
+
+  const directPath = findShortestPath(
+    adjustedGraph,
     selectedStartRoom,
     selectedEndRoom,
   );
@@ -90,21 +105,33 @@ export const handleInterFloorNavigation = (
   endFloor,
   buildingName,
 ) => {
-  const transportMethod = findTransportMethod(startFloorGraph, endFloorGraph);
+  const adjustedStartGraph = adjustGraphForAccessibility(
+    startFloorGraph,
+    userAccessibilityPreferences,
+  );
+  const adjustedEndGraph = adjustGraphForAccessibility(
+    endFloorGraph,
+    userAccessibilityPreferences,
+  );
+
+  const transportMethod = findTransportMethod(
+    adjustedStartGraph,
+    adjustedEndGraph,
+  );
 
   if (!transportMethod) {
     throw new Error(
-      `Cannot navigate between floors ${startFloor} and ${endFloor}`,
+      `No accessible transport method (e.g., elevator) found between floors ${startFloor} and ${endFloor}. Try enabling stairs.`,
     );
   }
 
   const startFloorTransportPath = findShortestPath(
-    startFloorGraph,
+    adjustedStartGraph,
     selectedStartRoom,
     transportMethod,
   );
   const endFloorTransportPath = findShortestPath(
-    endFloorGraph,
+    adjustedEndGraph,
     transportMethod,
     selectedEndRoom,
   );
