@@ -23,10 +23,27 @@ const rooms = {
       y: "621",
     },
   },
+  "entrance-east": {
+    x: "106",
+    y: "613",
+    nearestPoint: {
+      x: "125",
+      y: "613",
+    },
+  },
+  "Main lobby": {
+    x: "125",
+    y: "613",
+    nearestPoint: {
+      x: "125",
+      y: "613",
+    },
+  },
 };
 const graph = {
   191: {
     elevator: 0.5,
+    "Main lobby": 0.1
   },
   stairs: {
     elevator: 1,
@@ -35,6 +52,13 @@ const graph = {
     191: 0.5,
     stairs: 1,
   },
+  "entrance-east": {
+    "Main lobby": 0.1
+  },
+  "Main lobby": {
+    "entrance-east": 0.1,
+    191: 0.2
+  }
 };
 
 export { rooms, graph };
