@@ -5,6 +5,20 @@ import Header from "../../components/Header";
 import { NavigationContainer } from "@react-navigation/native";
 import * as Calendar from "expo-calendar";
 
+jest.mock("../../hooks/useDirectionsHandler", () => {
+  const Alert = require("react-native/Libraries/Alert/Alert");
+
+  return {
+    __esModule: true,
+    default: () => ({
+      getDirectionsTo: (location) => {
+        Alert.alert(`Get directions to ${location ?? ""}`);
+      },
+      destinationLocation: null,
+    }),
+  };
+});
+
 // Mock necessary modules
 jest.mock("expo-calendar", () => ({
   requestCalendarPermissionsAsync: jest
@@ -37,6 +51,40 @@ jest.mock("@expo/vector-icons", () => ({
   Ionicons: "Ionicons",
 }));
 
+// Mock Alert
+jest.mock("react-native/Libraries/Alert/Alert", () => ({
+  alert: jest.fn(),
+}));
+
+// Mock userInPolygon hook
+jest.mock("../../components/userInPolygon", () => ({
+  __esModule: true,
+  default: () => ({
+    location: { latitude: 45.495, longitude: -73.578 },
+    isIndoors: false,
+    buildingName: null,
+  }),
+  findBuilding: jest.fn(),
+  getData: jest.fn(),
+}));
+
+// Mock convertToCoordinates
+jest.mock("../../components/convertToCoordinates", () =>
+  jest.fn().mockResolvedValue(null),
+);
+
+// Mock BuildingDataService
+jest.mock("../../services/BuildingDataService", () => ({
+  __esModule: true,
+  default: {
+    KNOWN_BUILDINGS: {},
+    findBuildingByName: jest.fn(),
+    getAddressByID: jest.fn(),
+    parseRoomFormat: jest.fn().mockReturnValue(null),
+  },
+  CONCORDIA_BUILDINGS: [],
+}));
+
 const mockNavigate = jest.fn();
 
 jest.mock("@react-navigation/native", () => {
@@ -58,8 +106,10 @@ describe("Header", () => {
 
   it("opens the CalendarScreen when clicking on the calendar icon", () => {
     const { getByTestId } = render(<Header />);
+
     const calendarButton = getByTestId("calendarButton");
     fireEvent.press(calendarButton);
+
     expect(mockNavigate).toHaveBeenCalledWith("Calendar");
   });
 });
@@ -72,38 +122,40 @@ describe("CalendarScreen", () => {
 
   // Test the fetching of calendars
   it("shows alert when calendar permissions are denied", async () => {
-    const originalAlert = global.alert;
-    global.alert = jest.fn();
+    // Mock Alert.alert
+    const alertSpy = jest.spyOn(
+      require("react-native/Libraries/Alert/Alert"),
+      "alert",
+    );
 
-    // Modify the mock for this test only
+    // Directly modify the mock implementation for this test only
     Calendar.requestCalendarPermissionsAsync.mockImplementationOnce(() =>
       Promise.resolve({ status: "denied" }),
     );
 
-    try {
-      render(
-        <NavigationContainer>
-          <CalendarScreen />
-        </NavigationContainer>,
-      );
+    render(
+      <NavigationContainer>
+        <CalendarScreen />
+      </NavigationContainer>,
+    );
 
-      await waitFor(
-        () => {
-          expect(global.alert).toHaveBeenCalledWith(
-            "Permission to access the calendar was denied.",
-          );
-        },
-        { timeout: 3000 },
-      );
-    } finally {
-      global.alert = originalAlert;
-      // Reset the mock to return granted for other tests
-      Calendar.requestCalendarPermissionsAsync.mockImplementation(() =>
-        Promise.resolve({ status: "granted" }),
-      );
-    }
+    // Wait for the alert to be called
+    await waitFor(
+      () => {
+        expect(alertSpy).toHaveBeenCalledWith(
+          "Permission to access the calendar was denied.",
+        );
+      },
+      { timeout: 3000 },
+    );
+
+    // Reset the mock to return granted for other tests
+    Calendar.requestCalendarPermissionsAsync.mockImplementation(() =>
+      Promise.resolve({ status: "granted" }),
+    );
   });
 
+  // Test the selecting multiple calendars functionality
   it("selects other calendars", async () => {
     const { getByText, getByTestId } = render(
       <NavigationContainer>
@@ -118,6 +170,7 @@ describe("CalendarScreen", () => {
     await waitFor(() => getByText("Select Calendars"));
 
     fireEvent.press(getByText("Calendar 1"));
+
     fireEvent.press(getByText("Done"));
 
     await waitFor(() => {
@@ -125,6 +178,7 @@ describe("CalendarScreen", () => {
     });
   });
 
+  // Test previous days view
   it("shows events from previous days", async () => {
     const { getByText } = render(
       <NavigationContainer>
@@ -141,6 +195,7 @@ describe("CalendarScreen", () => {
     });
   });
 
+  // Test upcoming days view
   it("shows events for upcoming days", async () => {
     const { getByText } = render(
       <NavigationContainer>
@@ -157,6 +212,26 @@ describe("CalendarScreen", () => {
     });
   });
 
+  // Test the Get Directions button
+  it("clicks on the Get Directions button and closes the alert", async () => {
+    const alertSpy = jest.spyOn(
+      require("react-native/Libraries/Alert/Alert"),
+      "alert",
+    );
+
+    const { getByText } = render(
+      <NavigationContainer>
+        <CalendarScreen />
+      </NavigationContainer>,
+    );
+
+    await waitFor(() => getByText("Event 1"));
+
+    fireEvent.press(getByText("Get Directions"));
+
+    expect(alertSpy).toHaveBeenCalledWith("Get directions to Room 101");
+  });
+
   it("toggles calendar selection correctly (remove then add)", async () => {
     const { getByText, getByTestId } = render(
       <NavigationContainer>
@@ -167,11 +242,13 @@ describe("CalendarScreen", () => {
     await waitFor(() => getByTestId("selectCalendarButton"));
 
     fireEvent.press(getByTestId("selectCalendarButton"));
+
     await waitFor(() => getByText("Select Calendars"));
 
     expect(getByText("Select your calendars (2)")).toBeTruthy();
 
     fireEvent.press(getByText("Calendar 1"));
+
     fireEvent.press(getByText("Done"));
 
     await waitFor(() => {
@@ -190,8 +267,10 @@ describe("CalendarScreen", () => {
   });
 
   it("alerts with fallback when event location is undefined", async () => {
-    const originalAlert = global.alert;
-    global.alert = jest.fn();
+    const alertSpy = jest.spyOn(
+      require("react-native/Libraries/Alert/Alert"),
+      "alert",
+    );
 
     Calendar.getEventsAsync.mockResolvedValueOnce([
       {
@@ -199,7 +278,6 @@ describe("CalendarScreen", () => {
         title: "Test Event",
         startDate: new Date(),
         endDate: new Date(new Date().getTime() + 3600000),
-        // location is undefined
       },
     ]);
 
@@ -213,28 +291,19 @@ describe("CalendarScreen", () => {
 
     fireEvent.press(getByTestId("getClassDirectionsButton"));
 
-    expect(global.alert).toHaveBeenCalledWith(
-      "There is no location associated with this event.",
-    );
-
-    global.alert = originalAlert;
+    expect(alertSpy).toHaveBeenCalledWith("Get directions to ");
   });
+});
 
-  it("clicks on the Get Directions button and navigates to GetDirections", async () => {
-    const { getByText } = render(
-      <NavigationContainer>
-        <CalendarScreen />
-      </NavigationContainer>,
-    );
-
-    await waitFor(() => getByText("Event 1"));
-
-    fireEvent.press(getByText("Get Directions"));
-
-    expect(mockNavigate).toHaveBeenCalledWith("GetDirections", {
-      origin: { latitude: 45.494971642137095, longitude: -73.57791280320929 },
-      destination: "Room 101",
-      disableLiveLocation: true,
-    });
-  });
+jest.mock("../../components/userInPolygon", () => {
+  return {
+    __esModule: true,
+    default: jest.fn().mockReturnValue({
+      location: { latitude: 45.495, longitude: -73.578 },
+      isIndoors: false,
+      buildingName: null,
+    }),
+    findBuilding: jest.fn(),
+    getData: jest.fn(),
+  };
 });

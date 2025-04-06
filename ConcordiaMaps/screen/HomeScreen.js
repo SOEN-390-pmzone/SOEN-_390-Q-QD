@@ -7,12 +7,12 @@ import TemporaryModal from "../components/temporaryModal";
 import { LocationContext } from "../contexts/LocationContext";
 import Footer from "../components/Footer";
 import styles from "../styles";
-import { Building } from "../components/MapMarkers";
+import { Building } from "../constants/Building";
 import { ModalContext } from "../App";
 import BuildingColoring from "../components/buildingColoring";
 import Legend from "../components/Legend";
 import ShuttleStop from "../components/ShuttleStop";
-import FloatingSearchBar from "../components/FloatingSearchBar";
+import FloatingSearchBar from "../components/OutdoorNavigation/FloatingSearchBar";
 import LiveBusTracker from "../components/LiveBusTracker";
 import {
   saveToAsyncStorage,
@@ -27,7 +27,7 @@ import { PointsOfInterest } from "../constants/OutdoorPtsOfDirections"; // Impor
 // Marker image assets for Restaurant and Cafe
 const customMarkerImage = require("../assets/PinLogo.png");
 
-function HomeScreen({ asyncKey = "Campus" }) {
+function HomeScreen({ asyncKey = "Campus", navigation }) {
   const loyolaPostalCode = process.env.EXPO_PUBLIC_LOYOLA_POSTAL_CODE;
   const sgwPostalCode = process.env.EXPO_PUBLIC_SGW_POSTAL_CODE;
 
@@ -134,8 +134,8 @@ function HomeScreen({ asyncKey = "Campus" }) {
     toggleModal();
   };
 
-  const handleOPIMarkerPress = (poi) => {
-    setSelectedOPI(poi);
+  const handleOPIMarkerPress = (pointOfInterest) => {
+    setSelectedOPI(pointOfInterest);
     setOpiPopupVisible(true);
   };
 
@@ -207,16 +207,16 @@ function HomeScreen({ asyncKey = "Campus" }) {
                 />
               </Marker>
             ))}
-            {PointsOfInterest.map((poi) => (
+            {PointsOfInterest.map((pointOfInterest) => (
               <Marker
-                key={poi.name}
-                coordinate={poi.coordinate}
-                title={poi.name}
-                description={poi.address}
-                onPress={() => handleOPIMarkerPress(poi)}
+                key={pointOfInterest.name}
+                coordinate={pointOfInterest.coordinate}
+                title={pointOfInterest.name}
+                description={pointOfInterest.address}
+                onPress={() => handleOPIMarkerPress(pointOfInterest)}
               >
                 <Image
-                  source={poi.markerImage}
+                  source={pointOfInterest.markerImage}
                   style={styles.customMarkerImage}
                 />
               </Marker>
@@ -279,6 +279,7 @@ function HomeScreen({ asyncKey = "Campus" }) {
         isVisible={opiPopupVisible}
         data={selectedOPI || { name: "", address: "" }}
         onClose={() => setOpiPopupVisible(false)}
+        navigation={navigation}
       />
     </View>
   );
@@ -286,6 +287,7 @@ function HomeScreen({ asyncKey = "Campus" }) {
 
 HomeScreen.propTypes = {
   asyncKey: PropTypes.string,
+  navigation: PropTypes.object,
 };
 
 export default HomeScreen;

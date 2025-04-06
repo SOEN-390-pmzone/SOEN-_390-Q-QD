@@ -83,7 +83,7 @@
 
             // Convert to SVG coordinate system
             const svgPoint = point.matrixTransform(
-              svgElement.getScreenCTM().inverse(),
+              svgElement.getScreenCTM().inverse()
             );
 
             // Round values for cleaner display
@@ -139,7 +139,7 @@
         document.getElementById("jsonOutput").value = JSON.stringify(
           roomData,
           null,
-          4,
+          4
         );
       }
     </script>

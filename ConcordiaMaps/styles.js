@@ -1,6 +1,24 @@
-import { Platform, StyleSheet } from "react-native";
+import { StyleSheet } from "react-native";
 
 const styles = StyleSheet.create({
+  markerImage: {
+    width: 40,
+    height: 40,
+  },
+  calloutContainer: {
+    width: 160,
+    height: 50,
+    padding: 5,
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    borderRadius: 8,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  calloutText: {
+    fontSize: 14,
+    color: "#333",
+    textAlign: "center",
+  },
   container: {
     flex: 1,
     backgroundColor: "#912338",
@@ -57,7 +75,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderBottomLeftRadius: 10,
     borderBottomRightRadius: 10,
-    zIndex: 2,
+    zIndex: 20,
     position: "absolute",
     top: 60,
     left: 20,
@@ -369,8 +387,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   buttonNext: {
-    bottom: Platform.OS === "ios" ? 525 : 650,
-    left: "75%",
+    bottom: 650,
+    left: "68%",
     transform: [{ translateX: -80 }],
     backgroundColor: "#912338",
     borderRadius: 20,
@@ -410,13 +428,13 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   timeCircle: {
-    width: 60, // Circle size
+    width: 60,
     height: 60,
-    borderRadius: 30, // Makes it a perfect circle
-    backgroundColor: "#912338", // Adjust color to match your theme
+    borderRadius: 30,
+    backgroundColor: "#912338",
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 10, // Space between circle and event details
+    marginRight: 10,
   },
   timeText: {
     fontSize: 16,
@@ -424,7 +442,7 @@ const styles = StyleSheet.create({
     color: "#FFF",
   },
   eventDetails: {
-    flex: 1, // Allow details to take the remaining space
+    flex: 1,
   },
 });
 

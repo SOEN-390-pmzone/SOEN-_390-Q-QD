@@ -279,7 +279,7 @@
           }
 
           const nodeName = prompt(
-            "Enter node name (e.g., H903, elevator, etc.):",
+            "Enter node name (e.g., H903, elevator, etc.):"
           );
           if (!nodeName) return;
 
@@ -295,7 +295,7 @@
 
             // Clear placeholder if exists
             const placeholder = document.querySelector(
-              ".node-item-placeholder",
+              ".node-item-placeholder"
             );
             if (placeholder) placeholder.remove();
 
@@ -420,7 +420,7 @@
           .getElementById("distanceSelect")
           .addEventListener("change", function () {
             const customDistanceContainer = document.getElementById(
-              "customDistanceContainer",
+              "customDistanceContainer"
             );
             if (this.value === "custom") {
               customDistanceContainer.style.display = "block";
@@ -438,7 +438,7 @@
           const distanceSelect = document.getElementById("distanceSelect");
           if (distanceSelect.value === "custom") {
             distance = parseFloat(
-              document.getElementById("customDistanceInput").value,
+              document.getElementById("customDistanceInput").value
             );
             if (isNaN(distance) || distance <= 0) {
               alert("Please enter a valid positive number for distance");
@@ -493,7 +493,7 @@
         document.getElementById("graphOutput").value = JSON.stringify(
           output,
           null,
-          4,
+          4
         );
       }
 

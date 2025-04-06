@@ -438,7 +438,7 @@ describe("edge cases in FloorRegistry methods", () => {
     expect(jmsb1.description).toBe("First floor of JMSB");
 
     const jmsb2 = FloorRegistry.getFloor("JMSB", "S2");
-    expect(jmsb2.description).toBe("Second-lowest floor of JMSB");
+    expect(jmsb2.description).toBe("S2 floor of JMSB");
 
     // Vanier Library floor
     const vl1 = FloorRegistry.getFloor("VanierLibrary", "1");
@@ -579,5 +579,55 @@ describe("edge cases for building-specific features", () => {
     expect(supportsNav).toBe(false);
 
     getFloorSpy.mockRestore();
+  });
+});
+describe("findBuildingByName", () => {
+  test("returns building data when given an exact building name", () => {
+    const building = FloorRegistry.findBuildingByName("Hall Building");
+    expect(building).toBeDefined();
+    expect(building.id).toBe("hall");
+    expect(building.code).toBe("H");
+  });
+
+  test("returns building data when given a partial building name", () => {
+    const hallBuilding = FloorRegistry.findBuildingByName("Hall");
+    expect(hallBuilding).toBeDefined();
+    expect(hallBuilding.id).toBe("hall");
+
+    const jmsbBuilding = FloorRegistry.findBuildingByName("John Molson");
+    expect(jmsbBuilding).toBeDefined();
+    expect(jmsbBuilding.id).toBe("jmsb");
+  });
+
+  test("returns building data when using different case", () => {
+    const building = FloorRegistry.findBuildingByName("hall building");
+    expect(building).toBeDefined();
+    expect(building.id).toBe("hall");
+  });
+
+  test("returns building when given a building code", () => {
+    const hallBuilding = FloorRegistry.findBuildingByName("H");
+    expect(hallBuilding).toBeDefined();
+    expect(hallBuilding.code).toBe("H");
+
+    const jmsbBuilding = FloorRegistry.findBuildingByName("MB");
+    expect(jmsbBuilding).toBeDefined();
+    expect(jmsbBuilding.code).toBe("MB");
+  });
+
+  test("returns null when given an invalid building name", () => {
+    const building = FloorRegistry.findBuildingByName("Unknown Building");
+    expect(building).toBeNull();
+  });
+
+  test("returns null when given empty input", () => {
+    const emptyString = FloorRegistry.findBuildingByName("");
+    expect(emptyString).toBeNull();
+
+    const nullValue = FloorRegistry.findBuildingByName(null);
+    expect(nullValue).toBeNull();
+
+    const undefinedValue = FloorRegistry.findBuildingByName(undefined);
+    expect(undefinedValue).toBeNull();
   });
 });

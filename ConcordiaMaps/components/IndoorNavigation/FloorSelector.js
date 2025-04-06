@@ -18,7 +18,7 @@ const FloorSelector = () => {
   const windowHeight = Dimensions.get("window").height;
 
   // Get buildingType from route params, default to HallBuilding if not specified
-  const buildingType = route.params?.buildingType || "HallBuilding";
+  const buildingType = route.params?.buildingType;
   // Get building data from FloorRegistry
   const building = FloorRegistry.getBuilding(buildingType);
 
