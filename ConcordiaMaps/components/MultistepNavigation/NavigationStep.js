@@ -110,6 +110,48 @@ const NavigationStep = ({
       ? step.endAddress.split(",")[0]
       : "destination";
 
+    // Helper function to render directions content based on availability
+    const renderDirectionsContent = () => {
+      if (outdoorDirections.length > 0) {
+        return (
+          <ScrollView
+            style={styles.directionsList}
+            showsVerticalScrollIndicator={true}
+            nestedScrollEnabled={true}
+          >
+            {outdoorDirections.map((direction, index) => {
+              // Generate a unique key combining relevant data
+              const directionKey = `${direction.distance || ""}-${
+                direction.formatted_text || direction.html_instructions
+              }-${index}`;
+
+              return (
+                <View key={directionKey} style={styles.directionItem}>
+                  <Text style={styles.directionNumber}>{index + 1}</Text>
+                  <View style={styles.directionContent}>
+                    <Text style={styles.directionText}>
+                      {direction.formatted_text ||
+                        parseHtmlInstructions(direction.html_instructions)}
+                    </Text>
+                    {direction.distance && (
+                      <Text style={styles.distanceText}>
+                        {direction.distance}
+                      </Text>
+                    )}
+                  </View>
+                </View>
+              );
+            })}
+          </ScrollView>
+        );
+      } else {
+        return (
+          <Text style={styles.noDirectionsText}>
+            Walk from {originBuildingName} to {destBuildingName}
+          </Text>
+        );
+      }
+    };
     return (
       <View style={styles.stepContentContainer}>
         {/* Step progress indicator */}
@@ -152,40 +194,8 @@ const NavigationStep = ({
               <ActivityIndicator size="small" color="#912338" />
               <Text style={styles.loadingText}>Getting directions...</Text>
             </View>
-          ) : outdoorDirections.length > 0 ? (
-            <ScrollView
-              style={styles.directionsList}
-              showsVerticalScrollIndicator={true}
-              nestedScrollEnabled={true}
-            >
-              {outdoorDirections.map((direction, index) => {
-                // Generate a unique key combining relevant data
-                const directionKey = `${direction.distance || ""}-${
-                  direction.formatted_text || direction.html_instructions
-                }-${index}`;
-
-                return (
-                  <View key={directionKey} style={styles.directionItem}>
-                    <Text style={styles.directionNumber}>{index + 1}</Text>
-                    <View style={styles.directionContent}>
-                      <Text style={styles.directionText}>
-                        {direction.formatted_text ||
-                          parseHtmlInstructions(direction.html_instructions)}
-                      </Text>
-                      {direction.distance && (
-                        <Text style={styles.distanceText}>
-                          {direction.distance}
-                        </Text>
-                      )}
-                    </View>
-                  </View>
-                );
-              })}
-            </ScrollView>
           ) : (
-            <Text style={styles.noDirectionsText}>
-              Walk from {originBuildingName} to {destBuildingName}
-            </Text>
+            renderDirectionsContent()
           )}
         </View>
       </View>
