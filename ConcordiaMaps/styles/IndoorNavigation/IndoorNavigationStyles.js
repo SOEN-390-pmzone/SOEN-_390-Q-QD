@@ -8,7 +8,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: "bold",
-    marginVertical: 16,
+    marginVertical: 12,
     textAlign: "center",
     color: "#912338",
     paddingHorizontal: 16,
@@ -16,8 +16,9 @@ const styles = StyleSheet.create({
   selectorsContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 16,
+    marginBottom: 12,
     paddingHorizontal: 16,
+    marginTop: 8,
   },
   selectorWrapper: {
     flex: 1,
@@ -26,10 +27,10 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: "bold",
-    marginBottom: 8,
+    marginBottom: 6,
   },
   selector: {
-    height: 120,
+    height: 100, // Reduced height to make room for POI filters
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 4,
@@ -66,7 +67,7 @@ const styles = StyleSheet.create({
   resultTitle: {
     fontSize: 16,
     fontWeight: "bold",
-    marginBottom: 8,
+    marginBottom: 6,
   },
   resultContainer: {
     flex: 1,
@@ -74,10 +75,10 @@ const styles = StyleSheet.create({
     borderColor: "#ccc",
     borderRadius: 4,
     padding: 16,
-    maxHeight: 200,
+    maxHeight: 100, // Reduced for POI UI
   },
   resultContentContainer: {
-    paddingBottom: 16, // Add padding to the bottom of the content
+    paddingBottom: 8,
   },
   pathContainer: {
     paddingHorizontal: 16,
@@ -86,7 +87,7 @@ const styles = StyleSheet.create({
     marginVertical: 4,
   },
   stepText: {
-    fontSize: 16,
+    fontSize: 14,
   },
   arrow: {
     textAlign: "center",
@@ -98,7 +99,7 @@ const styles = StyleSheet.create({
     color: "#666",
   },
   webViewContainer: {
-    height: 300,
+    flex: 2, // Give it more space
     marginVertical: 10,
     marginHorizontal: 16,
     borderWidth: 1,
@@ -108,6 +109,108 @@ const styles = StyleSheet.create({
   },
   webView: {
     flex: 1,
+  },
+
+  // New styles for POI features
+  poiCategoriesContainer: {
+    paddingHorizontal: 16,
+    marginBottom: 8,
+  },
+  poiCategoriesTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 6,
+    color: "#333",
+  },
+  poiCategoriesScroll: {
+    flexGrow: 0,
+  },
+  poiCategoriesContent: {
+    paddingVertical: 4,
+    paddingRight: 16,
+  },
+  poiCategoryItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginRight: 12,
+    backgroundColor: "#f5f5f5",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
+  },
+  poiCategoryText: {
+    fontSize: 14,
+    marginRight: 6,
+  },
+  poiLegendContainer: {
+    marginTop: 8,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    paddingHorizontal: 16,
+  },
+  poiLegendItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    margin: 4,
+  },
+  poiLegendColor: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginRight: 4,
+  },
+  poiLegendText: {
+    fontSize: 12,
+  },
+  poiInfoModalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  poiInfoModalContent: {
+    width: "80%",
+    backgroundColor: "white",
+    borderRadius: 8,
+    padding: 16,
+    elevation: 5,
+  },
+  poiInfoModalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 12,
+  },
+  poiInfoModalText: {
+    fontSize: 14,
+    marginBottom: 8,
+  },
+  poiInfoModalButton: {
+    backgroundColor: "#912338",
+    padding: 10,
+    borderRadius: 4,
+    alignItems: "center",
+    marginTop: 16,
+  },
+  poiInfoModalButtonText: {
+    color: "white",
+    fontSize: 14,
+    fontWeight: "bold",
+  },
+  poiToggleButton: {
+    backgroundColor: "#444",
+    padding: 8,
+    borderRadius: 4,
+    alignItems: "center",
+    marginVertical: 8,
+    marginHorizontal: 16,
+  },
+  poiToggleButtonText: {
+    color: "white",
+    fontSize: 14,
+    fontWeight: "bold",
   },
 });
 
