@@ -72,6 +72,37 @@ const LocationInput = ({
   </>
 );
 
+// Helper function to format room input based on building ID
+const formatRoomInput = (buildingId, text) => {
+  // MB building handling
+  if (buildingId === "MB") {
+    if (/^\d+\.\d+$/.test(text)) return `MB-${text}`;
+    if (/^\d+-\d+$/.test(text)) return `MB-${text}`;
+    return text.startsWith("MB-") ? text : `MB-${text}`;
+  }
+
+  // Special buildings handling (VE, VL, EV)
+  if (["VE", "VL", "EV"].includes(buildingId)) {
+    const specialRooms = [
+      "stairs",
+      "elevator",
+      "toilet",
+      "escalator",
+      "water_fountain",
+    ];
+
+    if (specialRooms.includes(text.toLowerCase())) {
+      return text.toLowerCase();
+    }
+
+    if (/^\d+$/.test(text)) return `${buildingId}-${text}`;
+
+    return text.includes(`${buildingId}-`) ? text : `${buildingId}-${text}`;
+  }
+
+  // Default handling for other buildings
+  return text.includes(`${buildingId}-`) ? text : `${buildingId}-${text}`;
+};
 // Extract Building Input component
 const BuildingInput = ({
   value,
@@ -106,49 +137,7 @@ const BuildingInput = ({
           placeholder={FloorRegistry.getRoomPlaceholder(selectedBuilding.id)}
           value={room}
           onChangeText={(text) => {
-            let formattedRoom;
-
-            if (selectedBuilding.id === "MB") {
-              // MB special handling
-              let match = /^\d+\.\d+$/.exec(text);
-              if (match) {
-                formattedRoom = `MB-${text}`;
-              } else if (/^\d+-\d+$/.test(text)) {
-                formattedRoom = `MB-${text}`;
-              } else if (!text.startsWith("MB-")) {
-                formattedRoom = `MB-${text}`;
-              } else {
-                formattedRoom = text;
-              }
-            } else if (["VE", "VL", "EV"].includes(selectedBuilding.id)) {
-              // Special buildings
-              const specialRooms = [
-                "stairs",
-                "elevator",
-                "toilet",
-                "escalator",
-                "water_fountain",
-              ];
-
-              if (specialRooms.includes(text.toLowerCase())) {
-                formattedRoom = text.toLowerCase();
-              } else if (/^\d+$/.exec(text)) {
-                formattedRoom = `${selectedBuilding.id}-${text}`;
-              } else if (
-                !text.includes(`${selectedBuilding.id}-`) &&
-                !specialRooms.includes(text.toLowerCase())
-              ) {
-                formattedRoom = `${selectedBuilding.id}-${text}`;
-              } else {
-                formattedRoom = text;
-              }
-            } else {
-              // Default handling
-              formattedRoom = !text.includes(`${selectedBuilding.id}-`)
-                ? `${selectedBuilding.id}-${text}`
-                : text;
-            }
-
+            const formattedRoom = formatRoomInput(selectedBuilding.id, text);
             setRoom(formattedRoom);
 
             const isValid = FloorRegistry.isValidRoom(
