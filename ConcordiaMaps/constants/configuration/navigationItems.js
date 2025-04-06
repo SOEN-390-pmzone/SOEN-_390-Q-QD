@@ -44,11 +44,6 @@ export const navigationItems = [
     actionType: "alert",
   },
   {
-    id: "planner",
-    label: "Smart Planner",
-    actionType: "alert",
-  },
-  {
     id: "journey-planner",
     label: "Journey Planner",
     actionType: "navigate",
