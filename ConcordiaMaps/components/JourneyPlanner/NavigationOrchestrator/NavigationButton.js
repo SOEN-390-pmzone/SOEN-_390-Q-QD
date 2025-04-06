@@ -9,19 +9,26 @@ const NavigationButton = ({
   hasTunnel = false,
   avoidOutdoor = false,
 }) => {
+  // Only show subway icon when both conditions are true
+  const showTunnelIcon = hasTunnel && avoidOutdoor;
+
   return (
     <TouchableOpacity
-      style={[styles.directionButton, hasTunnel && styles.tunnelButton, style]}
+      style={[
+        styles.directionButton,
+        showTunnelIcon && styles.tunnelButton,
+        style,
+      ]}
       onPress={onPress}
-      testID={hasTunnel ? "tunnelButton" : "directionButton"}
+      testID={showTunnelIcon ? "tunnelButton" : "directionButton"}
     >
       <MaterialIcons
-        name={hasTunnel ? "subway" : "directions"}
+        name={showTunnelIcon ? "subway" : "directions"}
         size={24}
         color="#fff"
       />
       <Text style={styles.directionButtonText}>
-        {hasTunnel
+        {showTunnelIcon
           ? "Use Tunnel"
           : avoidOutdoor
             ? "Indoor Path"
