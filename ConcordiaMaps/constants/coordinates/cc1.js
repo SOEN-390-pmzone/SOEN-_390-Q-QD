@@ -1,19 +1,27 @@
 const rooms = {
   // User-provided coordinates
-  124: {
-    x: "1050",
-    y: "800",
+  men_washroom: {
+    x: "1060",
+    y: "822",
     nearestPoint: {
-      x: "1049",
-      y: "1128",
+      x: "1038",
+      y: "1114",
     },
   },
-  "124-1": {
-    x: "980",
-    y: "800",
+  women_washroom: {
+    x: "5500",
+    y: "748",
     nearestPoint: {
-      x: "800",
-      y: "990",
+      x: "5462",
+      y: "1103",
+    },
+  },
+  water_fountain: {
+    x: "5358",
+    y: "1084",
+    nearestPoint: {
+      x: "5358",
+      y: "1084",
     },
   },
   checkpoint: {
@@ -169,30 +177,6 @@ const rooms = {
       y: "1128",
     },
   },
-  104: {
-    x: "5468",
-    y: "950",
-    nearestPoint: {
-      x: "5468",
-      y: "940",
-    },
-  },
-  "104-2": {
-    x: "5468",
-    y: "1000",
-    nearestPoint: {
-      x: "5468",
-      y: "1128",
-    },
-  },
-  102: {
-    x: "5555",
-    y: "1000",
-    nearestPoint: {
-      x: "5555",
-      y: "1017",
-    },
-  },
   170: {
     x: "5924",
     y: "1020",
@@ -230,27 +214,9 @@ const rooms = {
 // Graph representing connections between rooms and checkpoints with distances
 const graph = {
   // Main checkpoint connections
-  checkpoint: {
-    "124-1": 1,
-  },
-
-  checkpoint2: {
-    "190-2": 0.8,
-    "190-4": 0.8,
-    170: 1.2,
-  },
-
-  // First section - rooms near checkpoint
-  "124-1": {
-    checkpoint: 1,
-    124: 0.3,
-  },
-  124: {
-    "124-1": 0.8,
-  },
 
   122: {
-    124: 1.2,
+    men_washroom: 1.2,
     120: 0.5,
   },
   120: {
@@ -342,31 +308,24 @@ const graph = {
   106: {
     elevator: 0.5,
     101: 0.5,
-    104: 1.5,
+    women_washroom: 1.5,
   },
   101: {
     109: 1.8,
     107: 1.5,
     106: 0.5,
-    "104-2": 1,
+    water_fountain: 1,
   },
-  104: {
-    102: 0.3,
-    "104-2": 0.5,
+  women_fountain: {
+    water_fountain: 0.5,
   },
-  "104-2": {
-    104: 0.5,
+  water_fountain: {
     101: 1,
-    102: 0.2,
     170: 1,
-  },
-  102: {
-    "104-2": 0.2,
-    104: 0.3,
   },
 
   170: {
-    "104-2": 1,
+    water_fountain: 1,
 
     checkpoint2: 1.2,
   },
