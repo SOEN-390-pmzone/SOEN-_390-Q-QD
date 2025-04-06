@@ -9,12 +9,6 @@ describe("JourneyOptimizer - Robust NN Algorithm Tests", () => {
     mockDistanceCalculator.isPathAllowed.mockReturnValue(true);
   };
 
-  const disallowSpecificNodes = (nodeIds) => {
-    mockDistanceCalculator.isPathAllowed.mockImplementation((loc1, loc2) => {
-      return !nodeIds.includes(loc2.id);
-    });
-  };
-
   const useEuclideanDistance = () => {
     mockDistanceCalculator.calculateDistance.mockImplementation(
       (loc1, loc2) => {
