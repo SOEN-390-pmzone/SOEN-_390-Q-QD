@@ -118,7 +118,10 @@ const JourneyPlannerScreen = () => {
           setAvoidOutdoor={setAvoidOutdoor}
         />
 
-        <GenerateButton disabled={isGenerateDisabled()} onPress={generateJourney} />
+        <GenerateButton
+          disabled={isGenerateDisabled()}
+          onPress={generateJourney}
+        />
       </ScrollView>
     </View>
   );

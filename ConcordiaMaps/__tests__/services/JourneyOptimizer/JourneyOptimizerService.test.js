@@ -20,9 +20,9 @@ describe("JourneyOptimizer - Robust NN Algorithm Tests", () => {
       (loc1, loc2) => {
         return Math.sqrt(
           Math.pow(loc1.latitude - loc2.latitude, 2) +
-            Math.pow(loc1.longitude - loc2.longitude, 2)
+            Math.pow(loc1.longitude - loc2.longitude, 2),
         );
-      }
+      },
     );
   };
 
@@ -33,7 +33,7 @@ describe("JourneyOptimizer - Robust NN Algorithm Tests", () => {
           Math.abs(loc1.latitude - loc2.latitude) +
           Math.abs(loc1.longitude - loc2.longitude)
         );
-      }
+      },
     );
   };
 
@@ -62,10 +62,10 @@ describe("JourneyOptimizer - Robust NN Algorithm Tests", () => {
       { id: "C", latitude: 2, longitude: 0 },
       { id: "D", latitude: 3, longitude: 0 },
     ];
-    
+
     // Use the extracted helper function
     useManhattanDistance();
-    
+
     const result = journeyOptimizer.findOptimalPath(locations);
     const expectedResult = locations; // NN follows the order
     expect(result).toEqual(expectedResult);
