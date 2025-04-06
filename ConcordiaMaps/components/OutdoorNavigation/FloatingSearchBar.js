@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   TextInput,
-  FlatList,
   Text,
   TouchableOpacity,
   ActivityIndicator,
@@ -19,6 +18,7 @@ const FloatingSearchBar = ({
   value,
   onChangeText,
   onFocus,
+  maxSuggestions = 4, // Default to 4, but can be overridden
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [predictions, setPredictions] = useState([]);
@@ -86,7 +86,8 @@ const FloatingSearchBar = ({
       if (error) {
         console.error("Error searching places:", error);
       } else {
-        setPredictions(placePredictions);
+        // Use the maxSuggestions prop to limit predictions
+        setPredictions(placePredictions.slice(0, maxSuggestions));
       }
     } catch (error) {
       console.error("Error in searchPlaces:", error);
@@ -163,14 +164,13 @@ const FloatingSearchBar = ({
           </TouchableOpacity>
         )}
       </View>
+
+      {/* Replace FlatList with direct mapping in a ScrollView */}
       {predictions.length > 0 && (
-        <FlatList
-          data={predictions}
-          keyExtractor={(item) => item.place_id}
-          keyboardShouldPersistTaps="handled"
-          style={[styles.list, { marginTop: 5 }]}
-          renderItem={({ item }) => (
+        <View style={[styles.list, { marginTop: 5 }]}>
+          {predictions.map((item) => (
             <TouchableOpacity
+              key={item.place_id}
               onPress={() => handleSelection(item.place_id, item.description)}
               style={styles.item}
             >
@@ -182,8 +182,8 @@ const FloatingSearchBar = ({
               />
               <Text>{item.description}</Text>
             </TouchableOpacity>
-          )}
-        />
+          ))}
+        </View>
       )}
     </View>
   );
@@ -195,6 +195,7 @@ FloatingSearchBar.propTypes = {
   value: PropTypes.string,
   onChangeText: PropTypes.func,
   onFocus: PropTypes.func,
+  maxSuggestions: PropTypes.number,
 };
 
 export default FloatingSearchBar;

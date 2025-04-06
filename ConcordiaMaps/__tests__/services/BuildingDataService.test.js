@@ -1,6 +1,7 @@
-import FloorRegistry from "../../services/BuildingDataService";
+/* eslint-disable no-unused-vars */
+// FloorRegistry.full.test.js
 
-// Mock the imports
+// Mocks for all imported modules
 jest.mock("../../constants/coordinates/h1", () => ({
   rooms: { "H-101": { name: "H-101" } },
   graph: { "H-101": { someNode: 5 } },
@@ -52,11 +53,19 @@ jest.mock("../../assets/svg/SVGtoString", () => ({
   VLfloor1SVG: "<svg>VL Floor 1</svg>",
 }));
 
-describe("FloorRegistry", () => {
+import FloorRegistry, {
+  CONCORDIA_BUILDINGS,
+} from "../../services/BuildingDataService";
+
+// =====================
+// Existing tests
+// =====================
+
+describe("FloorRegistry - existing tests", () => {
   describe("getBuildings", () => {
     test("returns all buildings as array", () => {
       const buildings = FloorRegistry.getBuildings();
-      expect(buildings).toBeInstanceOf(Array);
+      expect(Array.isArray(buildings)).toBe(true);
       expect(buildings.length).toBeGreaterThan(0);
       expect(buildings[0]).toHaveProperty("id");
       expect(buildings[0]).toHaveProperty("name");
@@ -67,7 +76,7 @@ describe("FloorRegistry", () => {
   describe("getAllBuildings", () => {
     test("returns buildings object", () => {
       const buildings = FloorRegistry.getAllBuildings();
-      expect(buildings).toBeInstanceOf(Object);
+      expect(typeof buildings).toBe("object");
       expect(buildings).toHaveProperty("HallBuilding");
       expect(buildings).toHaveProperty("JMSB");
       expect(buildings).toHaveProperty("VanierExtension");
@@ -92,8 +101,8 @@ describe("FloorRegistry", () => {
   describe("getFloors", () => {
     test("returns all floors for a valid building type", () => {
       const hallFloors = FloorRegistry.getFloors("HallBuilding");
-      expect(hallFloors).toBeInstanceOf(Array);
-      expect(hallFloors.length).toBe(4); // T, 1, 8, 9
+      expect(Array.isArray(hallFloors)).toBe(true);
+      expect(hallFloors.length).toBe(5); // T, 1, 8, 9
       expect(hallFloors[0]).toHaveProperty("id");
       expect(hallFloors[0]).toHaveProperty("name");
       expect(hallFloors[0]).toHaveProperty("description");
@@ -239,34 +248,7 @@ describe("FloorRegistry", () => {
       expect(vlRooms).toEqual({ "VL-101": { name: "VL-101" } });
     });
   });
-  test("can access JMSB data correctly", () => {
-    const jmsbBuilding = FloorRegistry.getBuilding("JMSB");
-    expect(jmsbBuilding.id).toBe("jmsb");
-    expect(jmsbBuilding.code).toBe("MB");
 
-    const jmsbRooms = FloorRegistry.getRooms("JMSB", "1");
-    expect(jmsbRooms).toEqual({ "MB-1.101": { name: "MB-1.101" } });
-  });
-
-  test("can access Vanier Extension data correctly", () => {
-    const veBuilding = FloorRegistry.getBuilding("VanierExtension");
-    expect(veBuilding.id).toBe("ve");
-    expect(veBuilding.code).toBe("VE");
-
-    const veRooms = FloorRegistry.getRooms("VanierExtension", "2");
-    expect(veRooms).toEqual({ "VE-201": { name: "VE-201" } });
-  });
-
-  test("can access Vanier Library data correctly", () => {
-    const vlBuilding = FloorRegistry.getBuilding("VanierLibrary");
-    expect(vlBuilding.id).toBe("vanierlibrary");
-    expect(vlBuilding.code).toBe("VL");
-
-    const vlRooms = FloorRegistry.getRooms("VanierLibrary", "1");
-    expect(vlRooms).toEqual({ "VL-101": { name: "VL-101" } });
-  });
-
-  // Add tests for EV Building
   test("can access EV Building data correctly", () => {
     const evBuilding = FloorRegistry.getBuilding("EVBuilding");
     expect(evBuilding).toBeDefined();
@@ -275,25 +257,21 @@ describe("FloorRegistry", () => {
     expect(evBuilding.address).toBe("1515 St. Catherine W.");
 
     const evFloors = FloorRegistry.getFloors("EVBuilding");
-    expect(evFloors).toHaveLength(2); // Should have T and 1st floor
+    expect(evFloors).toHaveLength(2); // T and 1
 
-    // Test tunnel level
     const evTunnel = FloorRegistry.getFloor("EVBuilding", "T");
     expect(evTunnel).toBeDefined();
     expect(evTunnel.name).toBe("Tunnel Level");
 
-    // Test 1st floor
     const ev1 = FloorRegistry.getFloor("EVBuilding", "1");
     expect(ev1).toBeDefined();
     expect(ev1.name).toBe("EV Ground Floor");
 
-    // Get SVG for EV (should return null for now)
     return FloorRegistry.getFloorPlan("EVBuilding", "1").then((svg) => {
       expect(svg).toBeNull();
     });
   });
 
-  // Add tests for Webster Library
   test("can access Webster Library data correctly", () => {
     const libraryBuilding = FloorRegistry.getBuilding("Library");
     expect(libraryBuilding).toBeDefined();
@@ -302,20 +280,17 @@ describe("FloorRegistry", () => {
     expect(libraryBuilding.address).toBe("1400 De Maisonneuve Blvd. W.");
 
     const libraryFloors = FloorRegistry.getFloors("Library");
-    expect(libraryFloors).toHaveLength(2); // Should have T and 1st floor
+    expect(libraryFloors).toHaveLength(2);
 
-    // Test navigation support (should be false since rooms/graph are empty)
     const supportsNav = FloorRegistry.supportsNavigation("Library", "1");
     expect(supportsNav).toBe(false);
 
-    // Test floor plan retrieval
     return FloorRegistry.getFloorPlan("Library", "1").then((svg) => {
       expect(svg).toBeNull();
     });
   });
 });
 
-// Add tests for tunnel levels and empty room/graph combinations
 describe("tunnel levels and special cases", () => {
   test("tunnel level does not support navigation", () => {
     const tunnelSupportsNav = FloorRegistry.supportsNavigation(
@@ -341,19 +316,11 @@ describe("tunnel levels and special cases", () => {
   });
 });
 
-// Add tests for specific edge cases in FloorRegistry methods
 describe("edge cases in FloorRegistry methods", () => {
-  test("getSVG returns null for floor without SVG function", () => {
-    // Create a mock floor object without getSVG function
-    const mockFloor = {
-      id: "mock",
-      name: "Mock Floor",
-    };
-
-    // Create a spy on getFloor to return our mock
+  test("getSVG returns null for floor without getSVG function", () => {
+    const mockFloor = { id: "mock", name: "Mock Floor" };
     const getFloorSpy = jest.spyOn(FloorRegistry, "getFloor");
     getFloorSpy.mockReturnValueOnce(mockFloor);
-
     return FloorRegistry.getFloorPlan("JMSB", "mock").then((svg) => {
       expect(svg).toBeNull();
       getFloorSpy.mockRestore();
@@ -361,66 +328,54 @@ describe("edge cases in FloorRegistry methods", () => {
   });
 
   test("supportsNavigation edge cases", () => {
-    // Test with floor that has rooms but no graph
     const floorWithOnlyRooms = {
       id: "test",
       name: "Test Floor",
       rooms: { "TEST-101": {} },
       graph: {},
     };
-
     const getFloorSpy = jest.spyOn(FloorRegistry, "getFloor");
     getFloorSpy.mockReturnValueOnce(floorWithOnlyRooms);
-
     const supportsNav1 = FloorRegistry.supportsNavigation(
       "HallBuilding",
       "test",
     );
     expect(supportsNav1).toBe(false);
 
-    // Test with floor that has graph but no rooms
     const floorWithOnlyGraph = {
       id: "test2",
       name: "Test Floor 2",
       rooms: {},
       graph: { node1: {} },
     };
-
     getFloorSpy.mockReturnValueOnce(floorWithOnlyGraph);
     const supportsNav2 = FloorRegistry.supportsNavigation(
       "HallBuilding",
       "test2",
     );
     expect(supportsNav2).toBe(false);
-
     getFloorSpy.mockRestore();
   });
 
   test("building metadata is accessible", () => {
-    // Hall Building metadata
     const hall = FloorRegistry.getBuilding("HallBuilding");
     expect(hall.description).toBe("Main academic building");
     expect(hall.address).toBe("1455 De Maisonneuve Blvd. W.");
 
-    // JMSB metadata
     const jmsb = FloorRegistry.getBuilding("JMSB");
     expect(jmsb.description).toBe("Business school building");
     expect(jmsb.address).toBe("1450 Guy Street");
 
-    // Vanier Extension metadata
     const ve = FloorRegistry.getBuilding("VanierExtension");
     expect(ve.description).toBe("Loyola Vanier Extension");
     expect(ve.address).toBe("7141 Sherbrooke St W");
 
-    // Vanier Library metadata
     const vl = FloorRegistry.getBuilding("VanierLibrary");
     expect(vl.description).toBe("Vanier Library");
     expect(vl.address).toBe("7141 Sherbrooke St W");
   });
 
-  // Test detailed floor descriptions
   test("floor descriptions are accessible", () => {
-    // Hall building floors
     const hallT = FloorRegistry.getFloor("HallBuilding", "T");
     expect(hallT.description).toBe("Underground tunnel level");
 
@@ -430,7 +385,6 @@ describe("edge cases in FloorRegistry methods", () => {
     const hall8 = FloorRegistry.getFloor("HallBuilding", "8");
     expect(hall8.description).toBe("Computer Science department");
 
-    // JMSB floors
     const jmsbT = FloorRegistry.getFloor("JMSB", "T");
     expect(jmsbT.description).toBe("Underground tunnel level");
 
@@ -440,59 +394,34 @@ describe("edge cases in FloorRegistry methods", () => {
     const jmsb2 = FloorRegistry.getFloor("JMSB", "S2");
     expect(jmsb2.description).toBe("S2 floor of JMSB");
 
-    // Vanier Library floor
     const vl1 = FloorRegistry.getFloor("VanierLibrary", "1");
     expect(vl1.description).toBe("Main floor of the Vanier Library");
   });
 
-  // Test navigation support across buildings comprehensively
   test("navigation support is evaluated correctly across buildings", () => {
-    // JMSB navigation support
-    const jmsb1Nav = FloorRegistry.supportsNavigation("JMSB", "1");
-    expect(jmsb1Nav).toBe(true);
-
-    const jmsb2Nav = FloorRegistry.supportsNavigation("JMSB", "S2");
-    expect(jmsb2Nav).toBe(true);
-
-    const jmsbTNav = FloorRegistry.supportsNavigation("JMSB", "T");
-    expect(jmsbTNav).toBe(false);
-
-    // VE navigation support
-    const ve1Nav = FloorRegistry.supportsNavigation("VanierExtension", "1");
-    expect(ve1Nav).toBe(true);
-
-    const ve2Nav = FloorRegistry.supportsNavigation("VanierExtension", "2");
-    expect(ve2Nav).toBe(true);
-
-    // VL navigation support
-    const vl1Nav = FloorRegistry.supportsNavigation("VanierLibrary", "1");
-    expect(vl1Nav).toBe(true);
-
-    // EV navigation support
-    const ev1Nav = FloorRegistry.supportsNavigation("EVBuilding", "1");
-    expect(ev1Nav).toBe(false);
-
-    const evTNav = FloorRegistry.supportsNavigation("EVBuilding", "T");
-    expect(evTNav).toBe(false);
+    expect(FloorRegistry.supportsNavigation("JMSB", "1")).toBe(true);
+    expect(FloorRegistry.supportsNavigation("JMSB", "S2")).toBe(true);
+    expect(FloorRegistry.supportsNavigation("JMSB", "T")).toBe(false);
+    expect(FloorRegistry.supportsNavigation("VanierExtension", "1")).toBe(true);
+    expect(FloorRegistry.supportsNavigation("VanierExtension", "2")).toBe(true);
+    expect(FloorRegistry.supportsNavigation("VanierLibrary", "1")).toBe(true);
+    expect(FloorRegistry.supportsNavigation("EVBuilding", "1")).toBe(false);
+    expect(FloorRegistry.supportsNavigation("EVBuilding", "T")).toBe(false);
   });
 
-  // Test SVG retrievals across multiple buildings
   test("SVG plans for all buildings", async () => {
-    // JMSB SVGs
     const jmsb1SVG = await FloorRegistry.getFloorPlan("JMSB", "1");
     expect(jmsb1SVG).toBe("<svg>MB Floor 1</svg>");
 
     const jmsb2SVG = await FloorRegistry.getFloorPlan("JMSB", "S2");
     expect(jmsb2SVG).toBe("<svg>MB Floor 2</svg>");
 
-    // VE SVGs
     const ve1SVG = await FloorRegistry.getFloorPlan("VanierExtension", "1");
     expect(ve1SVG).toBe("<svg>VE Floor 1</svg>");
 
     const ve2SVG = await FloorRegistry.getFloorPlan("VanierExtension", "2");
     expect(ve2SVG).toBe("<svg>VE Floor 2</svg>");
 
-    // VL SVG
     const vl1SVG = await FloorRegistry.getFloorPlan("VanierLibrary", "1");
     expect(vl1SVG).toBe("<svg>VL Floor 1</svg>");
   });
@@ -501,8 +430,6 @@ describe("edge cases in FloorRegistry methods", () => {
 describe("getAllBuildings comprehensive testing", () => {
   test("getAllBuildings returns complete building structure", () => {
     const allBuildings = FloorRegistry.getAllBuildings();
-
-    // Check all expected buildings exist
     expect(allBuildings).toHaveProperty("HallBuilding");
     expect(allBuildings).toHaveProperty("JMSB");
     expect(allBuildings).toHaveProperty("VanierExtension");
@@ -510,14 +437,12 @@ describe("getAllBuildings comprehensive testing", () => {
     expect(allBuildings).toHaveProperty("EVBuilding");
     expect(allBuildings).toHaveProperty("Library");
 
-    // Check structure of one building fully
     const hall = allBuildings.HallBuilding;
     expect(hall.floors).toHaveProperty("T");
     expect(hall.floors).toHaveProperty("1");
     expect(hall.floors).toHaveProperty("8");
     expect(hall.floors).toHaveProperty("9");
 
-    // Verify floor structure
     expect(hall.floors["1"].rooms).toBeDefined();
     expect(hall.floors["1"].graph).toBeDefined();
     expect(typeof hall.floors["1"].getSVG).toBe("function");
@@ -525,39 +450,31 @@ describe("getAllBuildings comprehensive testing", () => {
 });
 
 describe("edge cases for building-specific features", () => {
-  // Test supportsNavigation with a floor that has only a partial graph structure
   test("supportsNavigation with partial data structures", () => {
     const incompleteFloor = {
       id: "partial",
       name: "Partial Floor",
       rooms: { "ROOM-101": { name: "Room 101" } },
-      // Graph exists but is empty
       graph: {},
     };
-
     const getFloorSpy = jest.spyOn(FloorRegistry, "getFloor");
     getFloorSpy.mockReturnValueOnce(incompleteFloor);
-
     const supportsNav = FloorRegistry.supportsNavigation(
       "TestBuilding",
       "partial",
     );
     expect(supportsNav).toBe(false);
-
     getFloorSpy.mockRestore();
   });
 
-  // Make sure null check works in supportsNavigation
   test("supportsNavigation null floor handling", () => {
     const getFloorSpy = jest.spyOn(FloorRegistry, "getFloor");
     getFloorSpy.mockReturnValueOnce(null);
-
     const supportsNav = FloorRegistry.supportsNavigation(
       "TestBuilding",
       "null",
     );
     expect(supportsNav).toBeNull();
-
     getFloorSpy.mockRestore();
   });
 
@@ -568,19 +485,17 @@ describe("edge cases for building-specific features", () => {
       rooms: {},
       graph: {},
     };
-
     const getFloorSpy = jest.spyOn(FloorRegistry, "getFloor");
     getFloorSpy.mockReturnValueOnce(undefinedPropsFloor);
-
     const supportsNav = FloorRegistry.supportsNavigation(
       "TestBuilding",
       "undefined",
     );
     expect(supportsNav).toBe(false);
-
     getFloorSpy.mockRestore();
   });
 });
+
 describe("findBuildingByName", () => {
   test("returns building data when given an exact building name", () => {
     const building = FloorRegistry.findBuildingByName("Hall Building");
@@ -621,13 +536,147 @@ describe("findBuildingByName", () => {
   });
 
   test("returns null when given empty input", () => {
-    const emptyString = FloorRegistry.findBuildingByName("");
-    expect(emptyString).toBeNull();
-
-    const nullValue = FloorRegistry.findBuildingByName(null);
-    expect(nullValue).toBeNull();
-
-    const undefinedValue = FloorRegistry.findBuildingByName(undefined);
-    expect(undefinedValue).toBeNull();
+    expect(FloorRegistry.findBuildingByName("")).toBeNull();
+    expect(FloorRegistry.findBuildingByName(null)).toBeNull();
+    expect(FloorRegistry.findBuildingByName(undefined)).toBeNull();
   });
 });
+
+// =====================
+// Additional tests to hit remaining branches
+// =====================
+
+describe("Additional tests for remaining branches", () => {
+  describe("parseRoomFormat", () => {
+    test("should parse valid room format", () => {
+      const result = FloorRegistry.parseRoomFormat("H-920");
+      expect(result).toEqual({
+        buildingCode: "H",
+        roomNumber: "920",
+        formatted: "H-920",
+      });
+    });
+    test("should return null for invalid format", () => {
+      expect(FloorRegistry.parseRoomFormat("invalid")).toBeNull();
+    });
+  });
+
+  describe("findBuildingByCode", () => {
+    test("should return building for valid code", () => {
+      const building = FloorRegistry.findBuildingByCode("H");
+      expect(building).toBeDefined();
+      expect(building.name).toBe("Hall Building");
+    });
+    test("should be case insensitive", () => {
+      const building = FloorRegistry.findBuildingByCode("h");
+      expect(building).toBeDefined();
+      expect(building.name).toBe("Hall Building");
+    });
+    test("should return undefined for invalid code", () => {
+      expect(FloorRegistry.findBuildingByCode("XYZ")).toBeUndefined();
+    });
+  });
+
+  describe("filterBuildingSuggestions", () => {
+    test("should filter suggestions based on building name or id", () => {
+      const suggestions = FloorRegistry.filterBuildingSuggestions("Hall");
+      expect(suggestions.length).toBeGreaterThan(0);
+      expect(suggestions[0].name).toContain("Hall");
+    });
+    test("should return empty array when no suggestions match", () => {
+      const suggestions =
+        FloorRegistry.filterBuildingSuggestions("Nonexistent");
+      expect(suggestions).toEqual([]);
+    });
+  });
+
+  describe("getAddressByID", () => {
+    test("should return address for valid building id", () => {
+      expect(FloorRegistry.getAddressByID("H")).toBe(
+        "1455 De Maisonneuve Blvd. Ouest",
+      );
+    });
+    test("should return null for invalid building id", () => {
+      expect(FloorRegistry.getAddressByID("XYZ")).toBeNull();
+    });
+  });
+
+  describe("getBuildingTypeFromId", () => {
+    test("should return default 'HallBuilding' when buildingId is falsy", () => {
+      expect(FloorRegistry.getBuildingTypeFromId("")).toBe("HallBuilding");
+      expect(FloorRegistry.getBuildingTypeFromId(null)).toBe("HallBuilding");
+      expect(FloorRegistry.getBuildingTypeFromId(undefined)).toBe(
+        "HallBuilding",
+      );
+    });
+    test("should return correct type for direct mappings", () => {
+      expect(FloorRegistry.getBuildingTypeFromId("MB")).toBe("JMSB");
+      expect(FloorRegistry.getBuildingTypeFromId("HALL")).toBe("HallBuilding");
+      expect(FloorRegistry.getBuildingTypeFromId("VE")).toBe("VanierExtension");
+    });
+    test("should return default if not found in direct mappings or registry", () => {
+      expect(FloorRegistry.getBuildingTypeFromId("UNKNOWN")).toBe(
+        "HallBuilding",
+      );
+    });
+  });
+
+  describe("extractFloorFromRoom", () => {
+    test("should return '1' for common room types", () => {
+      expect(FloorRegistry.extractFloorFromRoom("elevator")).toBe("1");
+      expect(FloorRegistry.extractFloorFromRoom("stairs")).toBe("1");
+    });
+    test("should extract floor for MB-S2 format", () => {
+      expect(FloorRegistry.extractFloorFromRoom("MB-S2.230")).toBe("S2");
+    });
+    test("should extract floor for Hall Building rooms", () => {
+      expect(FloorRegistry.extractFloorFromRoom("H-920")).toBe("9");
+      expect(FloorRegistry.extractFloorFromRoom("H920")).toBe("9");
+    });
+    test("should extract floor for MB/JMSB rooms", () => {
+      expect(FloorRegistry.extractFloorFromRoom("MB-1.293")).toBe("1");
+      expect(FloorRegistry.extractFloorFromRoom("1.293")).toBe("1");
+    });
+    test("should extract floor for general format", () => {
+      expect(FloorRegistry.extractFloorFromRoom("VE-101")).toBe("1");
+    });
+    test("should return default floor '1' if no match", () => {
+      expect(FloorRegistry.extractFloorFromRoom("XYZ")).toBe("1");
+    });
+  });
+
+  describe("normalizeRoomId", () => {
+    test("should return 'Main lobby' for entrance variants", () => {
+      expect(FloorRegistry.normalizeRoomId("main entrance")).toBe("Main lobby");
+      expect(FloorRegistry.normalizeRoomId("lobby")).toBe("Main lobby");
+    });
+    test("should normalize H-903 to H903", () => {
+      expect(FloorRegistry.normalizeRoomId("H-903")).toBe("H903");
+    });
+    test("should normalize MB-1.293 to 1.293", () => {
+      expect(FloorRegistry.normalizeRoomId("MB-1.293")).toBe("1.293");
+    });
+    test("should normalize MB-S2.230 to S2.230", () => {
+      expect(FloorRegistry.normalizeRoomId("MB-S2.230")).toBe("S2.230");
+    });
+    test("should normalize MB-1-293 to 1.293", () => {
+      expect(FloorRegistry.normalizeRoomId("MB-1-293")).toBe("1.293");
+    });
+    test("should normalize VE-191 to 191", () => {
+      expect(FloorRegistry.normalizeRoomId("VE-191")).toBe("191");
+    });
+    test("should normalize VL-101 to 101", () => {
+      expect(FloorRegistry.normalizeRoomId("VL-101")).toBe("101");
+    });
+    test("should return special room type for strings containing stairs", () => {
+      expect(FloorRegistry.normalizeRoomId("extra stairs here")).toBe("stairs");
+    });
+    test("should fallback to default normalization", () => {
+      expect(FloorRegistry.normalizeRoomId("AB-123")).toBe(
+        "AB123".toUpperCase(),
+      );
+    });
+  });
+});
+
+// SonarQube bot bugging

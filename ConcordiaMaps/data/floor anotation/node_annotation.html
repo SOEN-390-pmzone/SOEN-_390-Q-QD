@@ -139,15 +139,12 @@
         <object
           id="svgObject"
           type="image/svg+xml"
-          data="MB-2.svg"
+          data="VL-2.svg"
           width="100%"
         >
           <p>
-            <<<<<<< HEAD Your browser does not support SVGs. You can view the
-            floor plan
-            <a href="MB-2.svg">here</a>. ======= SVGs not supported. This image
-            displays the MB-2 floor plan for node annotation and navigation
-            mapping. >>>>>>> US-15.3-Outdoor-nNavigation-Strategy
+            Your browser does not support SVGs. You can view the floor plan
+            <a href="VL-2.svg">here</a>.
           </p>
         </object>
       </div>
@@ -282,7 +279,7 @@
           }
 
           const nodeName = prompt(
-            "Enter node name (e.g., H903, elevator, etc.):",
+            "Enter node name (e.g., H903, elevator, etc.):"
           );
           if (!nodeName) return;
 
@@ -298,7 +295,7 @@
 
             // Clear placeholder if exists
             const placeholder = document.querySelector(
-              ".node-item-placeholder",
+              ".node-item-placeholder"
             );
             if (placeholder) placeholder.remove();
 
@@ -423,7 +420,7 @@
           .getElementById("distanceSelect")
           .addEventListener("change", function () {
             const customDistanceContainer = document.getElementById(
-              "customDistanceContainer",
+              "customDistanceContainer"
             );
             if (this.value === "custom") {
               customDistanceContainer.style.display = "block";
@@ -441,7 +438,7 @@
           const distanceSelect = document.getElementById("distanceSelect");
           if (distanceSelect.value === "custom") {
             distance = parseFloat(
-              document.getElementById("customDistanceInput").value,
+              document.getElementById("customDistanceInput").value
             );
             if (isNaN(distance) || distance <= 0) {
               alert("Please enter a valid positive number for distance");
@@ -496,7 +493,7 @@
         document.getElementById("graphOutput").value = JSON.stringify(
           output,
           null,
-          4,
+          4
         );
       }
 

@@ -5,4 +5,10 @@ module.exports = {
   transformIgnorePatterns: [
     "node_modules/(?!(jest-)?react-native|@react-native|react-native-webview)",
   ],
+  testMatch: ['**/__tests__/**/*.test.js'],
+  moduleFileExtensions: ['js', 'jsx', 'json'],
+  transform: {
+    '^.+\\.[jt]sx?$': 'babel-jest',
+  },
+  moduleFileExtensions: ['js', 'jsx', 'json', 'ts', 'tsx']
 };
