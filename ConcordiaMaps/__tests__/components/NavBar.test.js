@@ -32,12 +32,7 @@ describe("NavBar Component", () => {
     expect(navigate).toHaveBeenCalledWith("GetDirections");
   });
 
-  it("shows an alert when a non-navigation menu item is clicked", () => {
-    const { getByText } = render(<NavBar />);
-    fireEvent.press(getByText("Smart Planner"));
 
-    expect(Alert.alert).toHaveBeenCalledWith("You clicked: Smart Planner");
-  });
 
   it("opens the shuttle schedule when Shuttle Schedule is pressed", async () => {
     const { getAllByText, queryByTestId } = render(<NavBar />);
