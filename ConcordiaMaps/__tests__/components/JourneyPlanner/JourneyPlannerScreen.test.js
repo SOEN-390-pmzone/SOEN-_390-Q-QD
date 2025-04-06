@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import React from "react";
 import { render, act } from "@testing-library/react-native"; // Import act
 import JourneyPlannerScreen from "../../../components/JourneyPlanner/JourneyPlannerScreen";

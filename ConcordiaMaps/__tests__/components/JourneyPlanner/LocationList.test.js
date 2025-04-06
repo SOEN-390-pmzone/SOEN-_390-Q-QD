@@ -1,3 +1,5 @@
+/* eslint-disable jest/no-conditional-expect */
+/* eslint-disable react/prop-types */
 import React from "react";
 import { render, fireEvent } from "@testing-library/react-native";
 import LocationsList from "../../../components/JourneyPlanner/LocationsList";

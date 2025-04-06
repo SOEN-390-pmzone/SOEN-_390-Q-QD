@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   TextInput,
-  FlatList,
   Text,
   TouchableOpacity,
   ActivityIndicator,
@@ -19,9 +18,7 @@ const FloatingSearchBar = ({
   value,
   onChangeText,
   onFocus,
-  nestedScrollEnabled = true,
 }) => {
-  const GOOGLE_MAPS_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
   const [searchQuery, setSearchQuery] = useState("");
   const [predictions, setPredictions] = useState([]);
   const [loading, setLoading] = useState(false);
